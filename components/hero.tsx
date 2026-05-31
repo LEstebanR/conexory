@@ -166,7 +166,7 @@ export default function Hero() {
             {/* CTA */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <Button size="xl" className="font-bold text-base shadow-lg shadow-brand-400/25 h-14 px-8" asChild>
-                <a href="#empezar">
+                <a href="/register">
                   Empezar gratis <ArrowRight className="w-5 h-5" />
                 </a>
               </Button>

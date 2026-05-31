@@ -1,18 +1,19 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ArrowRight, CheckCircle2 } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 export default function SignupCTA() {
   const [email, setEmail] = useState("")
-  const [submitted, setSubmitted] = useState(false)
+  const router = useRouter()
 
   function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     if (!email) return
-    setSubmitted(true)
+    router.push(`/register?email=${encodeURIComponent(email)}`)
   }
 
   return (
@@ -43,35 +44,26 @@ export default function SignupCTA() {
           compártela en menos de 60 segundos.
         </p>
 
-        {!submitted ? (
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+        >
+          <Input
+            type="email"
+            placeholder="tu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="flex-1 h-14 text-base bg-white border-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-white/50 focus:border-white"
+          />
+          <Button
+            type="submit"
+            size="xl"
+            className="h-14 bg-slate-950 text-white hover:bg-slate-900 border-0 font-bold shadow-lg shadow-slate-950/20 shrink-0"
           >
-            <Input
-              type="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="flex-1 h-14 text-base bg-white border-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-white/50 focus:border-white"
-            />
-            <Button
-              type="submit"
-              size="xl"
-              className="h-14 bg-slate-950 text-white hover:bg-slate-900 border-0 font-bold shadow-lg shadow-slate-950/20 shrink-0"
-            >
-              Crear cuenta <ArrowRight className="w-5 h-5" />
-            </Button>
-          </form>
-        ) : (
-          <div className="flex items-center justify-center gap-3 bg-white/20 rounded-2xl px-8 py-5 max-w-sm mx-auto">
-            <CheckCircle2 className="w-6 h-6 text-white flex-shrink-0" />
-            <p className="text-white font-bold text-lg">
-              ¡Listo! Bienvenido a MiAgente 🏠
-            </p>
-          </div>
-        )}
+            Crear cuenta <ArrowRight className="w-5 h-5" />
+          </Button>
+        </form>
 
         <p className="text-white/40 text-sm mt-5">
           Sin tarjeta de crédito · Cancela cuando quieras · Hecho en Colombia 🇨🇴

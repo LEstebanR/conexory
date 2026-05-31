@@ -40,11 +40,11 @@ export default function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-slate-600 font-semibold">
-              Iniciar sesión
+            <Button variant="ghost" size="sm" className="text-slate-600 font-semibold" asChild>
+              <Link href="/login">Iniciar sesión</Link>
             </Button>
             <Button size="sm" className="font-bold shadow-sm shadow-brand-400/20" asChild>
-              <a href="#empezar">Empezar gratis →</a>
+              <Link href="/register">Empezar gratis →</Link>
             </Button>
           </div>
 
@@ -76,9 +76,9 @@ export default function Navbar() {
             ))}
             <div className="pt-3">
               <Button size="sm" className="w-full font-bold" asChild>
-                <a href="#empezar" onClick={() => setIsOpen(false)}>
+                <Link href="/register" onClick={() => setIsOpen(false)}>
                   Empezar gratis →
-                </a>
+                </Link>
               </Button>
             </div>
           </div>
