@@ -1,10 +1,10 @@
 import Navbar from "@/components/navbar"
 import Hero from "@/components/hero"
 import Stats from "@/components/stats"
-import Features from "@/components/features"
 import HowItWorks from "@/components/how-it-works"
-import PricingPreview from "@/components/pricing-preview"
-import WaitlistCTA from "@/components/waitlist-cta"
+import Features from "@/components/features"
+import PropertyPreview from "@/components/property-preview"
+import SignupCTA from "@/components/signup-cta"
 import Footer from "@/components/footer"
 
 export default function Home() {
@@ -13,10 +13,10 @@ export default function Home() {
       <Navbar />
       <Hero />
       <Stats />
-      <Features />
       <HowItWorks />
-      <PricingPreview />
-      <WaitlistCTA />
+      <Features />
+      <PropertyPreview />
+      <SignupCTA />
       <Footer />
     </main>
   )

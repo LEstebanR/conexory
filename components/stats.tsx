@@ -1,21 +1,21 @@
 const stats = [
-  { value: "< 2 min", label: "Para publicar una propiedad" },
-  { value: "3 portales", label: "Publicación simultánea" },
-  { value: "60% menos", label: "Que Wasi o Properati" },
-  { value: "Mobile-first", label: "Diseñado para el celular" },
+  { value: "60 seg", label: "Para crear una propiedad" },
+  { value: "1 link", label: "Para compartir con el mundo" },
+  { value: "0", label: "Portales donde registrarse" },
+  { value: "100%", label: "Desde tu celular" },
 ]
 
 export default function Stats() {
   return (
-    <section className="py-14 bg-slate-900">
+    <section className="py-14 bg-slate-950">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p className="text-3xl sm:text-4xl font-bold text-brand-400 leading-none mb-2">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:divide-x lg:divide-slate-800">
+          {stats.map((stat, i) => (
+            <div key={stat.label} className={`text-center ${i > 0 ? "lg:pl-8" : ""}`}>
+              <p className="text-4xl sm:text-5xl font-black text-brand-400 tracking-tighter leading-none mb-2">
                 {stat.value}
               </p>
-              <p className="text-sm text-slate-400">{stat.label}</p>
+              <p className="text-sm text-slate-500 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>

@@ -17,22 +17,21 @@ export default function Navbar() {
             <div className="w-8 h-8 rounded-xl bg-brand-400 flex items-center justify-center shadow-sm">
               <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-lg font-bold text-slate-900 tracking-tight">
+            <span className="text-lg font-black text-slate-950 tracking-tight">
               MiAgente
             </span>
           </Link>
 
-          {/* Desktop nav links */}
+          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-7">
             {[
               { label: "Funciones", href: "#features" },
               { label: "Cómo funciona", href: "#how-it-works" },
-              { label: "Precios", href: "#pricing" },
             ].map((link) => (
               <a
                 key={link.label}
                 href={link.href}
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
               >
                 {link.label}
               </a>
@@ -41,25 +40,21 @@ export default function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-slate-600">
+            <Button variant="ghost" size="sm" className="text-slate-600 font-semibold">
               Iniciar sesión
             </Button>
-            <Button size="sm" asChild>
-              <a href="#waitlist">Únete al waitlist</a>
+            <Button size="sm" className="font-bold shadow-sm shadow-brand-400/20" asChild>
+              <a href="#empezar">Empezar gratis →</a>
             </Button>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile toggle */}
           <button
             className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
-            {isOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
+            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
@@ -69,21 +64,20 @@ export default function Navbar() {
             {[
               { label: "Funciones", href: "#features" },
               { label: "Cómo funciona", href: "#how-it-works" },
-              { label: "Precios", href: "#pricing" },
             ].map((link) => (
               <a
                 key={link.label}
                 href={link.href}
-                className="block px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                className="block px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 {link.label}
               </a>
             ))}
             <div className="pt-3">
-              <Button size="sm" className="w-full" asChild>
-                <a href="#waitlist" onClick={() => setIsOpen(false)}>
-                  Únete al waitlist →
+              <Button size="sm" className="w-full font-bold" asChild>
+                <a href="#empezar" onClick={() => setIsOpen(false)}>
+                  Empezar gratis →
                 </a>
               </Button>
             </div>

@@ -1,122 +1,132 @@
-import { Badge } from "@/components/ui/badge"
-import {
-  Zap,
-  Users,
-  Globe,
-  MessageCircle,
-  Smartphone,
-  DollarSign,
-} from "lucide-react"
+import { Camera, Link2, MessageCircle, LayoutGrid, RefreshCw, Smartphone } from "lucide-react"
 
 const features = [
   {
-    icon: Zap,
-    title: "Publicación Multi-Portal",
+    icon: Camera,
+    title: "Formulario ultrarrápido",
     description:
-      "Un click y tu propiedad aparece en Vivanuncios, Fincaraíz y tu web propia. Sin copiar ni pegar.",
-    tag: "Más rápido",
+      "Solo fotos, precio y descripción. Sin campos innecesarios. En 60 segundos tienes tu propiedad lista.",
+    tag: "< 60 seg",
     iconColor: "text-amber-500",
     iconBg: "bg-amber-50",
-    tagColor: "bg-amber-50 text-amber-700",
-  },
-  {
-    icon: Users,
-    title: "Gestión de Leads Kanban",
-    description:
-      "Organiza tus clientes potenciales: Interesados → Negociación → Cerrado. Nunca pierdas un lead.",
-    tag: "Más organizado",
-    iconColor: "text-blue-500",
-    iconBg: "bg-blue-50",
-    tagColor: "bg-blue-50 text-blue-700",
-  },
-  {
-    icon: Globe,
-    title: "Tu Página Web Propia",
-    description:
-      "Una web profesional con tu nombre en minutos. Tus propiedades se sincronizan en tiempo real.",
-    tag: "Incluida gratis",
-    iconColor: "text-violet-500",
-    iconBg: "bg-violet-50",
-    tagColor: "bg-violet-50 text-violet-700",
+    border: "border-amber-100",
+    tagBg: "bg-amber-50 text-amber-700",
+    big: true,
   },
   {
     icon: MessageCircle,
-    title: "WhatsApp Integrado",
+    title: "WhatsApp en 1 tap",
     description:
-      "Contacta leads directamente por WhatsApp desde la plataforma. Sin saltar entre aplicaciones.",
-    tag: "Sin fricción",
-    iconColor: "text-green-500",
+      "Botón directo integrado. Un tap y tu propiedad llega al interesado con fotos, precio y tu contacto. Sin copiar nada.",
+    tag: "Lo más usado",
+    iconColor: "text-[#25D366]",
     iconBg: "bg-green-50",
-    tagColor: "bg-green-50 text-green-700",
+    border: "border-green-100",
+    tagBg: "bg-green-50 text-green-700",
+    big: true,
+  },
+  {
+    icon: Link2,
+    title: "Link único por propiedad",
+    description:
+      "Cada propiedad tiene su propia URL. Compártela por Instagram, email o donde quieras.",
+    tag: "Tu URL propia",
+    iconColor: "text-blue-500",
+    iconBg: "bg-blue-50",
+    border: "border-blue-100",
+    tagBg: "bg-blue-50 text-blue-700",
+    big: false,
+  },
+  {
+    icon: LayoutGrid,
+    title: "Tu galería de propiedades",
+    description:
+      "Todas tus propiedades en una sola página con tu nombre y foto de perfil. Luce profesional.",
+    tag: "Incluida",
+    iconColor: "text-violet-500",
+    iconBg: "bg-violet-50",
+    border: "border-violet-100",
+    tagBg: "bg-violet-50 text-violet-700",
+    big: false,
+  },
+  {
+    icon: RefreshCw,
+    title: "Actualización instantánea",
+    description:
+      "Cambia el precio o las fotos y el link refleja los cambios al instante. Sin re-publicar.",
+    tag: "Tiempo real",
+    iconColor: "text-brand-500",
+    iconBg: "bg-brand-50",
+    border: "border-brand-100",
+    tagBg: "bg-brand-50 text-brand-700",
+    big: false,
   },
   {
     icon: Smartphone,
-    title: "Mobile-First",
+    title: "100% desde el celular",
     description:
-      "Diseñado para el celular. Sube fotos, edita propiedades y revisa leads desde donde estés.",
-    tag: "60% en móvil",
-    iconColor: "text-brand-500",
-    iconBg: "bg-brand-50",
-    tagColor: "bg-brand-50 text-brand-700",
-  },
-  {
-    icon: DollarSign,
-    title: "Precios en COP",
-    description:
-      "Desde $49.900 COP/mes. Sin cobros en dólares. Sin sorpresas en tu factura. Sin cláusulas raras.",
-    tag: "Accesible",
+      "Diseñado para trabajar desde donde estás. Sube fotos directo desde la cámara, sin desktop.",
+    tag: "Mobile-first",
     iconColor: "text-rose-500",
     iconBg: "bg-rose-50",
-    tagColor: "bg-rose-50 text-rose-700",
+    border: "border-rose-100",
+    tagBg: "bg-rose-50 text-rose-700",
+    big: false,
   },
 ]
 
 export default function Features() {
+  const bigFeatures = features.filter((f) => f.big)
+  const smallFeatures = features.filter((f) => !f.big)
+
   return (
-    <section id="features" className="py-24 bg-white">
+    <section id="features" className="py-24 bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <Badge className="mb-4">Funciones</Badge>
-          <h2 className="text-4xl sm:text-[42px] font-bold text-slate-900 mb-5 leading-tight tracking-tight">
+        <div className="mb-16">
+          <p className="text-brand-400 font-bold text-sm uppercase tracking-[0.2em] mb-4">
+            Funciones
+          </p>
+          <h2 className="text-5xl sm:text-6xl font-black text-slate-950 tracking-tighter leading-none">
             Todo lo que necesitas.
             <br />
-            <span className="text-brand-400">Nada más.</span>
+            <span className="text-slate-400">Nada que no uses.</span>
           </h2>
-          <p className="text-lg text-slate-600">
-            Construido específicamente para el mercado colombiano. Sin funciones
-            que nunca vas a usar.
-          </p>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map((feature) => (
+        {/* Big feature cards (top row) */}
+        <div className="grid md:grid-cols-2 gap-5 mb-5">
+          {bigFeatures.map((feature) => (
             <div
               key={feature.title}
-              className="group p-7 rounded-2xl border border-slate-100 bg-white hover:shadow-lg hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-300"
+              className={`p-8 rounded-3xl border-2 ${feature.border} bg-white hover:shadow-md transition-all duration-300`}
             >
-              <div
-                className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl ${feature.iconBg} mb-5`}
-              >
-                <feature.icon
-                  className={`w-5.5 h-5.5 ${feature.iconColor}`}
-                  strokeWidth={2}
-                />
+              <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${feature.iconBg} mb-6`}>
+                <feature.icon className={`w-7 h-7 ${feature.iconColor}`} strokeWidth={1.75} />
               </div>
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <h3 className="text-base font-bold text-slate-900">
-                  {feature.title}
-                </h3>
-                <span
-                  className={`text-[10px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap flex-shrink-0 ${feature.tagColor}`}
-                >
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <h3 className="text-xl font-black text-slate-950 tracking-tight">{feature.title}</h3>
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap flex-shrink-0 ${feature.tagBg}`}>
                   {feature.tag}
                 </span>
               </div>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                {feature.description}
-              </p>
+              <p className="text-slate-500 leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Small feature cards (bottom row) */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {smallFeatures.map((feature) => (
+            <div
+              key={feature.title}
+              className={`p-6 rounded-3xl border ${feature.border} bg-white hover:shadow-md transition-all duration-300`}
+            >
+              <div className={`inline-flex items-center justify-center w-11 h-11 rounded-xl ${feature.iconBg} mb-4`}>
+                <feature.icon className={`w-5 h-5 ${feature.iconColor}`} strokeWidth={2} />
+              </div>
+              <h3 className="text-sm font-black text-slate-950 tracking-tight mb-2">{feature.title}</h3>
+              <p className="text-slate-500 text-xs leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>
