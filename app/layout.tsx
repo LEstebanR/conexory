@@ -9,15 +9,15 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "MiAgente — CRM Inmobiliario para Colombia",
+  title: "MiAgente — Comparte tus propiedades en segundos",
   description:
-    "El CRM inmobiliario más simple para agentes colombianos. Publica en Vivanuncios y Fincaraíz con un click, gestiona tus leads y ten tu propia web profesional.",
+    "La forma más rápida de publicar y compartir propiedades en Colombia. Crea tu ficha en 60 segundos y compártela por WhatsApp con un link único.",
   keywords:
-    "CRM inmobiliario, agentes inmobiliarios Colombia, Vivanuncios, Fincaraíz, gestión propiedades",
+    "compartir propiedades Colombia, publicar propiedades WhatsApp, agentes inmobiliarios, ficha de propiedad, link propiedad",
   openGraph: {
-    title: "MiAgente — Vende y arrienda más. Sin complicaciones.",
+    title: "MiAgente — Crea. Comparte. Vende.",
     description:
-      "El CRM inmobiliario diseñado para agentes colombianos. Publica en múltiples portales con un click.",
+      "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para agentes colombianos.",
     type: "website",
   },
 }

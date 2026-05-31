@@ -27,8 +27,8 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
-              El CRM inmobiliario más simple del mercado colombiano. Construido
-              por agentes, para agentes.
+              La forma más rápida de crear y compartir propiedades en Colombia.
+              Construido por agentes, para agentes.
             </p>
             <div className="flex gap-3">
               {socials.map(({ icon: Icon, label }) => (
