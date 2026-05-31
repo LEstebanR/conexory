@@ -1,0 +1,313 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import Link from "next/link"
+import {
+  ArrowLeft,
+  Home,
+  Building2,
+  Briefcase,
+  ShoppingBag,
+  Trees,
+  Warehouse,
+  Loader2,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import { createProperty } from "./actions"
+import ImageUpload from "./image-upload"
+
+const PROPERTY_TYPES = [
+  { id: "apartment", label: "Apartamento", icon: Building2 },
+  { id: "house", label: "Casa", icon: Home },
+  { id: "office", label: "Oficina", icon: Briefcase },
+  { id: "commercial", label: "Local", icon: ShoppingBag },
+  { id: "lot", label: "Lote", icon: Trees },
+  { id: "warehouse", label: "Bodega", icon: Warehouse },
+]
+
+function formatCOP(digits: string): string {
+  if (!digits) return ""
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+}
+
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
+      <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">{title}</h2>
+      {children}
+    </div>
+  )
+}
+
+function FieldLabel({ children, optional }: { children: React.ReactNode; optional?: boolean }) {
+  return (
+    <label className="block text-sm font-semibold text-slate-700">
+      {children}
+      {optional && <span className="ml-1.5 text-xs font-normal text-slate-400">Opcional</span>}
+    </label>
+  )
+}
+
+export default function NewPropertyPage() {
+  const [type, setType] = useState("")
+  const [title, setTitle] = useState("")
+  const [price, setPrice] = useState("") // dígitos puros sin puntos
+  const [city, setCity] = useState("")
+  const [neighborhood, setNeighborhood] = useState("")
+  const [area, setArea] = useState("")
+  const [bedrooms, setBedrooms] = useState("")
+  const [bathrooms, setBathrooms] = useState("")
+  const [parking, setParking] = useState("")
+  const [description, setDescription] = useState("")
+  const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState("")
+  const [isPending, startTransition] = useTransition()
+
+  function handleSubmit(e: { preventDefault(): void }) {
+    e.preventDefault()
+    setError("")
+
+    if (!type) {
+      setError("Selecciona el tipo de propiedad.")
+      return
+    }
+
+    startTransition(async () => {
+      try {
+        await createProperty({
+          title,
+          type,
+          price,
+          city,
+          neighborhood,
+          area,
+          bedrooms,
+          bathrooms,
+          parking,
+          description,
+          images: imageUrls,
+        })
+      } catch {
+        setError("Ocurrió un error al crear la propiedad. Intenta de nuevo.")
+      }
+    })
+  }
+
+  return (
+    <div className="flex-1 p-6 lg:p-8 max-w-3xl w-full mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <Link
+          href="/dashboard"
+          className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors flex-shrink-0"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-black text-slate-950 tracking-tight">Nueva propiedad</h1>
+          <p className="text-sm text-slate-500">Completa los datos y obtén tu link para compartir</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Tipo de propiedad */}
+        <SectionCard title="Tipo de propiedad">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            {PROPERTY_TYPES.map((pt) => {
+              const Icon = pt.icon
+              const isSelected = type === pt.id
+              return (
+                <button
+                  key={pt.id}
+                  type="button"
+                  onClick={() => setType(pt.id)}
+                  className={cn(
+                    "flex flex-col items-center gap-2 py-4 rounded-xl text-xs font-medium transition-all border-2",
+                    isSelected
+                      ? "bg-brand-50 text-brand-700 border-brand-300"
+                      : "bg-white text-slate-500 border-slate-100 hover:border-slate-200 hover:bg-slate-50"
+                  )}
+                >
+                  <Icon
+                    className={cn("w-5 h-5", isSelected ? "text-brand-500" : "text-slate-400")}
+                    strokeWidth={isSelected ? 2.25 : 1.75}
+                  />
+                  {pt.label}
+                </button>
+              )
+            })}
+          </div>
+        </SectionCard>
+
+        {/* Fotos */}
+        <SectionCard title="Fotos">
+          <ImageUpload
+            onUrlsChange={setImageUrls}
+            onUploadingChange={setIsUploading}
+          />
+        </SectionCard>
+
+        {/* Información básica */}
+        <SectionCard title="Información básica">
+          <div className="space-y-1.5">
+            <FieldLabel>Título del anuncio</FieldLabel>
+            <Input
+              placeholder="Ej: Apartamento moderno con vista al parque"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="h-11"
+              required
+              maxLength={120}
+            />
+            <p className="text-xs text-slate-400 text-right">{title.length}/120</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <FieldLabel>Precio</FieldLabel>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400 select-none">
+                $
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="2.800.000"
+                value={formatCOP(price)}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "")
+                  setPrice(digits)
+                }}
+                className="w-full h-11 pl-7 pr-16 rounded-xl border border-slate-200 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-colors"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <FieldLabel>Ciudad</FieldLabel>
+              <Input
+                placeholder="Bogotá"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="h-11"
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel optional>Barrio / Zona</FieldLabel>
+              <Input
+                placeholder="Chapinero"
+                value={neighborhood}
+                onChange={(e) => setNeighborhood(e.target.value)}
+                className="h-11"
+              />
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* Detalles */}
+        <SectionCard title="Detalles">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="space-y-1.5">
+              <FieldLabel optional>Área (m²)</FieldLabel>
+              <Input
+                placeholder="65"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                className="h-11"
+                type="number"
+                min="0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel optional>Habitaciones</FieldLabel>
+              <Input
+                placeholder="2"
+                value={bedrooms}
+                onChange={(e) => setBedrooms(e.target.value)}
+                className="h-11"
+                type="number"
+                min="0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel optional>Baños</FieldLabel>
+              <Input
+                placeholder="1"
+                value={bathrooms}
+                onChange={(e) => setBathrooms(e.target.value)}
+                className="h-11"
+                type="number"
+                min="0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel optional>Parqueaderos</FieldLabel>
+              <Input
+                placeholder="1"
+                value={parking}
+                onChange={(e) => setParking(e.target.value)}
+                className="h-11"
+                type="number"
+                min="0"
+              />
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* Descripción */}
+        <SectionCard title="Descripción">
+          <div className="space-y-1.5">
+            <FieldLabel optional>Descripción libre</FieldLabel>
+            <textarea
+              placeholder="Describe la propiedad: características, acabados, ubicación, puntos de interés cercanos..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={5}
+              maxLength={1000}
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-colors"
+            />
+            <p className="text-xs text-slate-400 text-right">{description.length}/1000</p>
+          </div>
+        </SectionCard>
+
+        {/* Error */}
+        {error && (
+          <p className="text-sm text-red-500 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            {error}
+          </p>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-3 pb-8">
+          <Button type="button" variant="outline" className="flex-1" asChild>
+            <Link href="/dashboard">Cancelar</Link>
+          </Button>
+          <Button
+            type="submit"
+            disabled={isPending || isUploading}
+            className="flex-1 font-bold shadow-sm shadow-brand-400/20"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Publicando...
+              </>
+            ) : isUploading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Subiendo fotos...
+              </>
+            ) : (
+              "Publicar propiedad"
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+}

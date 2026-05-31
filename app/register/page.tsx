@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Building2, Eye, EyeOff, ArrowRight, Camera, LinkIcon, Send, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -110,6 +111,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState("")
+  const router = useRouter()
 
   const passwordsMatch = confirmPassword === "" || password === confirmPassword
 
@@ -124,14 +126,14 @@ export default function RegisterPage() {
       name,
       email,
       password,
-      callbackURL: "/dashboard",
     })
 
     if (authError) {
       setError(AUTH_ERRORS[authError.code ?? ""] ?? "Algo salió mal. Intenta de nuevo.")
       setLoading(false)
+    } else {
+      router.push("/dashboard")
     }
-    // Si no hay error, Better Auth redirige automáticamente al callbackURL
   }
 
   async function handleGoogle() {

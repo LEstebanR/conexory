@@ -20,6 +20,13 @@ export const auth = betterAuth({
     },
   },
 
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+    },
+  },
+
   session: {
     expiresIn: 60 * 60 * 24 * 7,   // 7 días
     updateAge: 60 * 60 * 24,        // renueva si la sesión tiene > 1 día

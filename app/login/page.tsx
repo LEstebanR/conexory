@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Building2, Eye, EyeOff, ArrowRight, MessageCircle, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,7 +36,7 @@ function MiniPropertyCard() {
           <p className="text-xs font-bold text-white leading-tight">Apartamento moderno</p>
         </div>
         <div className="absolute top-2 right-2 bg-brand-400 text-white text-[8px] font-bold px-2 py-0.5 rounded-full">
-          En arriendo
+          En venta
         </div>
       </div>
       <div className="p-3 space-y-2.5">
@@ -125,6 +126,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState("")
+  const router = useRouter()
 
   async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
@@ -134,14 +136,14 @@ export default function LoginPage() {
     const { error: authError } = await signIn.email({
       email,
       password,
-      callbackURL: "/dashboard",
     })
 
     if (authError) {
       setError(AUTH_ERRORS[authError.code ?? ""] ?? "Email o contraseña incorrectos.")
       setLoading(false)
+    } else {
+      router.push("/dashboard")
     }
-    // Si no hay error, Better Auth redirige automáticamente al callbackURL
   }
 
   async function handleGoogle() {

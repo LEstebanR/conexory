@@ -7,7 +7,6 @@ import {
   Building2,
   LayoutGrid,
   Plus,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -74,14 +73,6 @@ const navItems = [
   },
 ]
 
-const secondaryItems = [
-  {
-    icon: Settings,
-    label: "Configuración",
-    href: "/dashboard/settings",
-    soon: true,
-  },
-]
 
 function NavLink({
   href,
@@ -138,8 +129,14 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
   const router = useRouter()
 
   async function handleSignOut() {
-    await signOut()
-    router.push("/")
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/")
+          router.refresh()
+        },
+      },
+    })
   }
 
   return (
@@ -174,12 +171,6 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
         {navItems.map((item) => (
           <NavLink key={item.href} {...item} onClick={onClose} />
         ))}
-
-        <div className="pt-3 mt-3 border-t border-slate-100 space-y-1">
-          {secondaryItems.map((item) => (
-            <NavLink key={item.href} {...item} onClick={onClose} />
-          ))}
-        </div>
       </div>
 
       {/* User */}
