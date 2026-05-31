@@ -124,7 +124,7 @@ export default function RegisterPage() {
       name,
       email,
       password,
-      callbackURL: "/",
+      callbackURL: "/dashboard",
     })
 
     if (authError) {
@@ -139,7 +139,7 @@ export default function RegisterPage() {
     setError("")
     await signIn.social({
       provider: "google",
-      callbackURL: "/",
+      callbackURL: "/dashboard",
     })
   }
 

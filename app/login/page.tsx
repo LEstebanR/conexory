@@ -134,7 +134,7 @@ export default function LoginPage() {
     const { error: authError } = await signIn.email({
       email,
       password,
-      callbackURL: "/",
+      callbackURL: "/dashboard",
     })
 
     if (authError) {
@@ -149,7 +149,7 @@ export default function LoginPage() {
     setError("")
     await signIn.social({
       provider: "google",
-      callbackURL: "/",
+      callbackURL: "/dashboard",
     })
     // La redirección la maneja Better Auth
   }
