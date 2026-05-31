@@ -150,11 +150,11 @@ export default function Hero() {
             {/* Headline */}
             <div>
               <h1 className="font-black tracking-tighter leading-none text-slate-950">
-                <span className="block text-6xl sm:text-7xl lg:text-8xl">Crea.</span>
+                <span className="block text-6xl sm:text-7xl lg:text-8xl">Crea</span>
                 <span className="block text-6xl sm:text-7xl lg:text-8xl text-brand-400">
-                  Comparte.
+                  Comparte
                 </span>
-                <span className="block text-6xl sm:text-7xl lg:text-8xl">Vende.</span>
+                <span className="block text-6xl sm:text-7xl lg:text-8xl">Vende</span>
               </h1>
             </div>
 

@@ -1,21 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function SignupCTA() {
-  const [email, setEmail] = useState("")
-  const router = useRouter()
-
-  function handleSubmit(e: { preventDefault(): void }) {
-    e.preventDefault()
-    if (!email) return
-    router.push(`/register?email=${encodeURIComponent(email)}`)
-  }
-
   return (
     <section id="empezar" className="relative overflow-hidden bg-brand-400">
       {/* Dot pattern */}
@@ -32,7 +21,6 @@ export default function SignupCTA() {
       <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-brand-500/40 blur-3xl pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-28 text-center">
-        {/* Headline */}
         <h2 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white tracking-tighter leading-none mb-6">
           Empieza hoy.
           <br />
@@ -44,28 +32,17 @@ export default function SignupCTA() {
           compártela en menos de 60 segundos.
         </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+        <Button
+          size="xl"
+          className="h-14 bg-slate-950 text-white hover:bg-slate-900 border-0 font-bold shadow-lg shadow-slate-950/20 px-10"
+          asChild
         >
-          <Input
-            type="email"
-            placeholder="tu@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="flex-1 h-14 text-base bg-white border-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-white/50 focus:border-white"
-          />
-          <Button
-            type="submit"
-            size="xl"
-            className="h-14 bg-slate-950 text-white hover:bg-slate-900 border-0 font-bold shadow-lg shadow-slate-950/20 shrink-0"
-          >
-            Crear cuenta <ArrowRight className="w-5 h-5" />
-          </Button>
-        </form>
+          <Link href="/register">
+            Crear cuenta gratis <ArrowRight className="w-5 h-5" />
+          </Link>
+        </Button>
 
-        <p className="text-white/40 text-sm mt-5">
+        <p className="text-white/40 text-sm mt-6">
           Sin tarjeta de crédito · Cancela cuando quieras · Hecho en Colombia 🇨🇴
         </p>
       </div>
