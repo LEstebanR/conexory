@@ -1,38 +1,30 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-// Rutas que un usuario autenticado no debería ver
-const AUTH_ONLY_ROUTES = ["/login", "/register"]
-// Rutas públicas raíz que redirigen al dashboard si hay sesión
-const REDIRECT_IF_AUTHED = ["/", ...AUTH_ONLY_ROUTES]
+const REDIRECT_IF_AUTHED = new Set(["/", "/login", "/register"])
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  try {
+    const { pathname } = request.nextUrl
+    const session = request.cookies.get("better-auth.session_token")
+    const isLoggedIn = !!session?.value
 
-  // Better Auth guarda el token en esta cookie
-  const session = request.cookies.get("better-auth.session_token")
-  const isLoggedIn = !!session?.value
+    if (isLoggedIn && REDIRECT_IF_AUTHED.has(pathname)) {
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    }
 
-  // Usuario autenticado intentando acceder a home o páginas de auth → dashboard
-  if (isLoggedIn && REDIRECT_IF_AUTHED.includes(pathname)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url))
-  }
-
-  // Usuario no autenticado intentando acceder al dashboard → login
-  if (!isLoggedIn && pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/login", request.url))
+    if (!isLoggedIn && pathname.startsWith("/dashboard")) {
+      return NextResponse.redirect(new URL("/login", request.url))
+    }
+  } catch {
+    // No bloquear peticiones si el middleware falla
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Aplica a todas las rutas excepto:
-     * - archivos estáticos de Next.js
-     * - rutas de la API de auth (Better Auth las maneja sola)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  // Excluye _next (estáticos, imagen, data chunks), api (Better Auth + upload)
+  // y archivos con extensión (favicon, imágenes, fuentes, etc.)
+  matcher: ["/((?!_next|api|.*\\..*).*)"],
 }
