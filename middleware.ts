@@ -24,7 +24,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Excluye _next (estáticos, imagen, data chunks), api (Better Auth + upload)
-  // y archivos con extensión (favicon, imágenes, fuentes, etc.)
-  matcher: ["/((?!_next|api|.*\\..*).*)"],
+  // Solo corre en las rutas que necesitan lógica de auth.
+  // Las demás (/_next, /api, /p/*, /terms, /privacy…) no lo necesitan.
+  matcher: ["/", "/login", "/register", "/dashboard/:path*"],
 }
