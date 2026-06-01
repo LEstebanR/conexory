@@ -178,9 +178,10 @@ export default async function DashboardPage() {
     orderBy: [{ published: "desc" }, { createdAt: "desc" }],
   })
 
-  const activeCount = properties.filter((p) => p.published).length
+  type P = (typeof properties)[number]
+  const activeCount = properties.filter((p: P) => p.published).length
   const count = properties.length
-  const totalShares = properties.reduce((sum, p) => sum + p.shares, 0)
+  const totalShares = properties.reduce((sum: number, p: P) => sum + p.shares, 0)
 
   const statCards = [
     { label: "Propiedades activas", value: activeCount, icon: Building2, color: "text-brand-500", bg: "bg-brand-50" },
@@ -271,7 +272,7 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {properties.map((p) => (
+          {properties.map((p: P) => (
             <PropertyCard key={p.id} property={p} />
           ))}
         </div>
