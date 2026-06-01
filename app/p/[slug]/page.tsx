@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Building2, MapPin, BedDouble, Bath, Square, Car } from "lucide-react"
+import { Building2, MapPin, BedDouble, Bath, Square, Car, EyeOff } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import PropertyCarousel from "@/components/property-carousel"
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -57,7 +58,41 @@ export default async function PublicPropertyPage({
     where: { slug },
   })
 
-  if (!property || !property.published) notFound()
+  if (!property) notFound()
+
+  if (!property.published) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <header className="bg-white border-b border-slate-100 px-4 sm:px-6 h-14 flex items-center">
+          <Link href="/" className="flex items-center gap-2 w-fit">
+            <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center shadow-sm">
+              <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+            </div>
+            <span className="text-sm font-black text-slate-950 tracking-tight">MiAgente</span>
+          </Link>
+        </header>
+
+        <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center mb-6">
+            <EyeOff className="w-9 h-9 text-slate-400" strokeWidth={1.5} />
+          </div>
+          <h1 className="text-xl font-black text-slate-950 tracking-tight mb-2">
+            Propiedad no disponible
+          </h1>
+          <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+            Esta propiedad fue desactivada temporalmente por el agente. Es posible que ya no esté disponible.
+          </p>
+        </main>
+
+        <footer className="border-t border-slate-100 bg-white py-5 px-4 text-center">
+          <p className="text-xs text-slate-400">
+            Publicado con{" "}
+            <Link href="/" className="text-brand-500 font-semibold hover:underline">MiAgente</Link>
+          </p>
+        </footer>
+      </div>
+    )
+  }
 
   const typeLabel = TYPE_LABELS[property.type] ?? property.type
   const price = formatCOP(Number(property.price))
@@ -82,27 +117,9 @@ export default async function PublicPropertyPage({
       </header>
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 py-8 space-y-4">
-        {/* Imágenes */}
+        {/* Carrusel de imágenes */}
         {property.images.length > 0 && (
-          <div className="rounded-2xl overflow-hidden space-y-1 -mx-4 sm:mx-0">
-            <img
-              src={property.images[0]}
-              alt={property.title}
-              className="w-full aspect-video object-cover"
-            />
-            {property.images.length > 1 && (
-              <div className="flex gap-1 overflow-x-auto pb-0.5">
-                {property.images.slice(1).map((url, i) => (
-                  <img
-                    key={i}
-                    src={url}
-                    alt=""
-                    className="h-20 w-20 flex-shrink-0 object-cover rounded-lg"
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          <PropertyCarousel images={property.images} title={property.title} />
         )}
 
         {/* Badge */}

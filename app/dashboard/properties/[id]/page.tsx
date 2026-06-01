@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
-import { ArrowLeft, BedDouble, Bath, Square, Car, MapPin } from "lucide-react"
+import { ArrowLeft, BedDouble, Bath, Square, Car, MapPin, EyeOff } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import SharePanel from "./share-panel"
+import PropertyCarousel from "@/components/property-carousel"
+import PropertyActions from "./property-actions"
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -61,17 +63,34 @@ export default async function PropertyDetailPage({
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <div>
-          <h1 className="text-xl font-black text-slate-950 tracking-tight">Propiedad publicada</h1>
-          <p className="text-sm text-slate-500">Comparte el link con tus clientes</p>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-black text-slate-950 tracking-tight">
+            {property.published ? "Propiedad publicada" : "Propiedad desactivada"}
+          </h1>
+          <p className="text-sm text-slate-500 truncate">{property.title}</p>
         </div>
+        <PropertyActions propertyId={property.id} initialPublished={property.published} />
       </div>
 
-      <div className="space-y-4">
-        {/* Share panel — client component for copy + WhatsApp */}
-        <SharePanel url={publicUrl} title={property.title} />
+      {/* Banner de desactivada */}
+      {!property.published && (
+        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4">
+          <EyeOff className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          <p className="text-sm text-amber-700 font-medium">
+            El link público no está disponible mientras la propiedad esté desactivada.
+          </p>
+        </div>
+      )}
 
-        {/* Property summary */}
+      <div className="space-y-4">
+        <SharePanel url={publicUrl} title={property.title} propertyId={property.id} />
+
+        {/* Carrusel */}
+        {property.images.length > 0 && (
+          <PropertyCarousel images={property.images} title={property.title} />
+        )}
+
+        {/* Resumen */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
@@ -88,9 +107,7 @@ export default async function PropertyDetailPage({
                 </div>
               )}
             </div>
-            <div className="flex-shrink-0 text-right">
-              <p className="text-2xl font-black text-slate-950 tracking-tighter">{price}</p>
-            </div>
+            <p className="text-2xl font-black text-slate-950 tracking-tighter flex-shrink-0">{price}</p>
           </div>
 
           {hasDetails && (
@@ -122,25 +139,6 @@ export default async function PropertyDetailPage({
             </div>
           )}
         </div>
-
-        {/* Imágenes */}
-        {property.images.length > 0 && (
-          <div className="bg-white rounded-2xl border border-slate-100 p-4 space-y-3">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Fotos ({property.images.length})</p>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-              {property.images.map((url: string, i: number) => (
-                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-slate-100">
-                  <img src={url} alt="" className="w-full h-full object-cover" />
-                  {i === 0 && (
-                    <div className="absolute bottom-1.5 left-1.5 text-[9px] font-bold bg-black/50 text-white px-1.5 py-0.5 rounded-full">
-                      Portada
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {property.description && (
           <div className="bg-white rounded-2xl border border-slate-100 p-6">

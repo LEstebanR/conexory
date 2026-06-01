@@ -1,6 +1,5 @@
 "use server"
 
-import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -31,7 +30,7 @@ export async function createProperty(data: {
   images: string[]
 }) {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) redirect("/login")
+  if (!session) throw new Error("No autenticado")
 
   const slug = await generateUniqueSlug()
 
@@ -53,5 +52,5 @@ export async function createProperty(data: {
     },
   })
 
-  redirect(`/dashboard/properties/${property.id}`)
+  return { id: property.id }
 }

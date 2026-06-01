@@ -2,14 +2,27 @@
 
 import { useState } from "react"
 import { Copy, Check, MessageCircle, ExternalLink } from "lucide-react"
+import { incrementShares } from "./actions"
 
-export default function SharePanel({ url, title }: { url: string; title: string }) {
+export default function SharePanel({
+  url,
+  title,
+  propertyId,
+}: {
+  url: string
+  title: string
+  propertyId: string
+}) {
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  function handleWhatsApp() {
+    incrementShares(propertyId).catch(() => {})
   }
 
   const waText = encodeURIComponent(`¡Mira esta propiedad! 🏠\n\n${title}\n\n${url}`)
@@ -26,7 +39,6 @@ export default function SharePanel({ url, title }: { url: string; title: string 
         </p>
       </div>
 
-      {/* URL display */}
       <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
         <span className="flex-1 text-sm text-white font-mono truncate min-w-0">{url}</span>
         <button
@@ -47,12 +59,12 @@ export default function SharePanel({ url, title }: { url: string; title: string 
         </button>
       </div>
 
-      {/* Action buttons */}
       <div className="flex gap-2">
         <a
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleWhatsApp}
           className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-bold transition-colors"
         >
           <MessageCircle className="w-4 h-4" />

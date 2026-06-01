@@ -16,8 +16,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import { createProperty } from "./actions"
 import ImageUpload from "@/components/image-upload"
+import { updateProperty } from "./actions"
 
 const PROPERTY_TYPES = [
   { id: "apartment", label: "Apartamento", icon: Building2 },
@@ -51,18 +51,33 @@ function FieldLabel({ children, optional }: { children: React.ReactNode; optiona
   )
 }
 
-export default function NewPropertyPage() {
-  const [type, setType] = useState("")
-  const [title, setTitle] = useState("")
-  const [price, setPrice] = useState("") // dígitos puros sin puntos
-  const [city, setCity] = useState("")
-  const [neighborhood, setNeighborhood] = useState("")
-  const [area, setArea] = useState("")
-  const [bedrooms, setBedrooms] = useState("")
-  const [bathrooms, setBathrooms] = useState("")
-  const [parking, setParking] = useState("")
-  const [description, setDescription] = useState("")
-  const [imageUrls, setImageUrls] = useState<string[]>([])
+export type InitialData = {
+  id: string
+  title: string
+  type: string
+  price: string
+  city: string
+  neighborhood: string
+  area: string
+  bedrooms: string
+  bathrooms: string
+  parking: string
+  description: string
+  images: string[]
+}
+
+export default function EditForm({ initial }: { initial: InitialData }) {
+  const [type, setType] = useState(initial.type)
+  const [title, setTitle] = useState(initial.title)
+  const [price, setPrice] = useState(initial.price)
+  const [city, setCity] = useState(initial.city)
+  const [neighborhood, setNeighborhood] = useState(initial.neighborhood)
+  const [area, setArea] = useState(initial.area)
+  const [bedrooms, setBedrooms] = useState(initial.bedrooms)
+  const [bathrooms, setBathrooms] = useState(initial.bathrooms)
+  const [parking, setParking] = useState(initial.parking)
+  const [description, setDescription] = useState(initial.description)
+  const [imageUrls, setImageUrls] = useState<string[]>(initial.images)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState("")
   const [isPending, startTransition] = useTransition()
@@ -71,52 +86,38 @@ export default function NewPropertyPage() {
   function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     setError("")
-
-    if (!type) {
-      setError("Selecciona el tipo de propiedad.")
-      return
-    }
+    if (!type) { setError("Selecciona el tipo de propiedad."); return }
 
     startTransition(async () => {
       try {
-        const { id } = await createProperty({
-          title,
-          type,
-          price,
-          city,
-          neighborhood,
-          area,
-          bedrooms,
-          bathrooms,
-          parking,
-          description,
+        await updateProperty(initial.id, {
+          title, type, price, city, neighborhood,
+          area, bedrooms, bathrooms, parking, description,
           images: imageUrls,
         })
-        router.push(`/dashboard/properties/${id}`)
+        router.push(`/dashboard/properties/${initial.id}`)
       } catch {
-        setError("Ocurrió un error al crear la propiedad. Intenta de nuevo.")
+        setError("Ocurrió un error al guardar los cambios. Intenta de nuevo.")
       }
     })
   }
 
   return (
     <div className="flex-1 p-6 lg:p-8 max-w-3xl w-full mx-auto">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <Link
-          href="/dashboard"
+          href={`/dashboard/properties/${initial.id}`}
           className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-slate-950 tracking-tight">Nueva propiedad</h1>
-          <p className="text-sm text-slate-500">Completa los datos y obtén tu link para compartir</p>
+          <h1 className="text-2xl font-black text-slate-950 tracking-tight">Editar propiedad</h1>
+          <p className="text-sm text-slate-500">Los cambios se reflejan en el link público al instante</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Tipo de propiedad */}
         <SectionCard title="Tipo de propiedad">
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
             {PROPERTY_TYPES.map((pt) => {
@@ -145,15 +146,14 @@ export default function NewPropertyPage() {
           </div>
         </SectionCard>
 
-        {/* Fotos */}
         <SectionCard title="Fotos">
           <ImageUpload
             onUrlsChange={setImageUrls}
             onUploadingChange={setIsUploading}
+            initialUrls={initial.images}
           />
         </SectionCard>
 
-        {/* Información básica */}
         <SectionCard title="Información básica">
           <div className="space-y-1.5">
             <FieldLabel>Título del anuncio</FieldLabel>
@@ -171,19 +171,14 @@ export default function NewPropertyPage() {
           <div className="space-y-1.5">
             <FieldLabel>Precio</FieldLabel>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400 select-none">
-                $
-              </span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400 select-none">$</span>
               <input
                 type="text"
                 inputMode="numeric"
                 placeholder="2.800.000"
                 value={formatCOP(price)}
-                onChange={(e) => {
-                  const digits = e.target.value.replace(/\D/g, "")
-                  setPrice(digits)
-                }}
-                className="w-full h-11 pl-7 pr-16 rounded-xl border border-slate-200 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-colors"
+                onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))}
+                className="w-full h-11 pl-7 rounded-xl border border-slate-200 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-colors"
                 required
               />
             </div>
@@ -192,82 +187,41 @@ export default function NewPropertyPage() {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <FieldLabel>Ciudad</FieldLabel>
-              <Input
-                placeholder="Bogotá"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="h-11"
-                required
-              />
+              <Input placeholder="Bogotá" value={city} onChange={(e) => setCity(e.target.value)} className="h-11" required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Barrio / Zona</FieldLabel>
-              <Input
-                placeholder="Chapinero"
-                value={neighborhood}
-                onChange={(e) => setNeighborhood(e.target.value)}
-                className="h-11"
-              />
+              <Input placeholder="Chapinero" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="h-11" />
             </div>
           </div>
         </SectionCard>
 
-        {/* Detalles */}
         <SectionCard title="Detalles">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="space-y-1.5">
               <FieldLabel optional>Área (m²)</FieldLabel>
-              <Input
-                placeholder="65"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                className="h-11"
-                type="number"
-                min="0"
-              />
+              <Input placeholder="65" value={area} onChange={(e) => setArea(e.target.value)} className="h-11" type="number" min="0" />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Habitaciones</FieldLabel>
-              <Input
-                placeholder="2"
-                value={bedrooms}
-                onChange={(e) => setBedrooms(e.target.value)}
-                className="h-11"
-                type="number"
-                min="0"
-              />
+              <Input placeholder="2" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} className="h-11" type="number" min="0" />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Baños</FieldLabel>
-              <Input
-                placeholder="1"
-                value={bathrooms}
-                onChange={(e) => setBathrooms(e.target.value)}
-                className="h-11"
-                type="number"
-                min="0"
-              />
+              <Input placeholder="1" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} className="h-11" type="number" min="0" />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Parqueaderos</FieldLabel>
-              <Input
-                placeholder="1"
-                value={parking}
-                onChange={(e) => setParking(e.target.value)}
-                className="h-11"
-                type="number"
-                min="0"
-              />
+              <Input placeholder="1" value={parking} onChange={(e) => setParking(e.target.value)} className="h-11" type="number" min="0" />
             </div>
           </div>
         </SectionCard>
 
-        {/* Descripción */}
         <SectionCard title="Descripción">
           <div className="space-y-1.5">
             <FieldLabel optional>Descripción libre</FieldLabel>
             <textarea
-              placeholder="Describe la propiedad: características, acabados, ubicación, puntos de interés cercanos..."
+              placeholder="Describe la propiedad: características, acabados, ubicación..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
@@ -278,35 +232,23 @@ export default function NewPropertyPage() {
           </div>
         </SectionCard>
 
-        {/* Error */}
         {error && (
           <p className="text-sm text-red-500 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-3">
             {error}
           </p>
         )}
 
-        {/* Actions */}
         <div className="flex gap-3 pb-8">
           <Button type="button" variant="outline" className="flex-1" asChild>
-            <Link href="/dashboard">Cancelar</Link>
+            <Link href={`/dashboard/properties/${initial.id}`}>Cancelar</Link>
           </Button>
-          <Button
-            type="submit"
-            disabled={isPending || isUploading}
-            className="flex-1 font-bold shadow-sm shadow-brand-400/20"
-          >
+          <Button type="submit" disabled={isPending || isUploading} className="flex-1 font-bold shadow-sm shadow-brand-400/20">
             {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Publicando...
-              </>
+              <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
             ) : isUploading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Subiendo fotos...
-              </>
+              <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo fotos...</>
             ) : (
-              "Publicar propiedad"
+              "Guardar cambios"
             )}
           </Button>
         </div>
