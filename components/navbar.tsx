@@ -74,7 +74,12 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
-            <div className="pt-3">
+            <div className="pt-3 flex flex-col gap-2">
+              <Button variant="ghost" size="sm" className="w-full font-semibold text-slate-600" asChild>
+                <Link href="/login" onClick={() => setIsOpen(false)}>
+                  Iniciar sesión
+                </Link>
+              </Button>
               <Button size="sm" className="w-full font-bold" asChild>
                 <Link href="/register" onClick={() => setIsOpen(false)}>
                   Empezar gratis →
