@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Pencil, Eye, EyeOff, Loader2 } from "lucide-react"
+import { Pencil, Eye, EyeOff, Loader2, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { togglePublished } from "./actions"
+import { togglePublished, deleteProperty } from "./actions"
 
 export default function PropertyActions({
   propertyId,
@@ -16,6 +16,7 @@ export default function PropertyActions({
 }) {
   const [published, setPublished] = useState(initialPublished)
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const router = useRouter()
 
   async function handleToggle() {
@@ -26,6 +27,18 @@ export default function PropertyActions({
       router.refresh()
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm("¿Eliminar esta propiedad? Se borrarán también todas sus fotos. Esta acción no se puede deshacer.")) return
+    setDeleting(true)
+    try {
+      await deleteProperty(propertyId)
+      router.push("/dashboard")
+    } catch {
+      setDeleting(false)
+      alert("Error al eliminar la propiedad. Intenta de nuevo.")
     }
   }
 
@@ -41,7 +54,7 @@ export default function PropertyActions({
 
       <button
         onClick={handleToggle}
-        disabled={loading}
+        disabled={loading || deleting}
         className={cn(
           "flex items-center gap-1.5 px-3 h-9 rounded-xl text-sm font-bold border transition-colors disabled:opacity-60",
           published
@@ -57,6 +70,19 @@ export default function PropertyActions({
           <Eye className="w-3.5 h-3.5" />
         )}
         {published ? "Desactivar" : "Activar"}
+      </button>
+
+      <button
+        onClick={handleDelete}
+        disabled={loading || deleting}
+        className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-red-50 text-red-600 border border-red-200 text-sm font-bold hover:bg-red-100 transition-colors disabled:opacity-60"
+      >
+        {deleting ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : (
+          <Trash2 className="w-3.5 h-3.5" />
+        )}
+        Eliminar
       </button>
     </div>
   )

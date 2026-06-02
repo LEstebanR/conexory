@@ -3,6 +3,7 @@
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { del } from "@vercel/blob"
 
 export async function togglePublished(propertyId: string, published: boolean) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -18,5 +19,24 @@ export async function incrementShares(propertyId: string) {
   await prisma.property.update({
     where: { id: propertyId },
     data: { shares: { increment: 1 } },
+  })
+}
+
+export async function deleteProperty(propertyId: string) {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) throw new Error("No autenticado")
+
+  const property = await prisma.property.findUnique({
+    where: { id: propertyId, userId: session.user.id },
+    select: { images: true },
+  })
+  if (!property) throw new Error("Propiedad no encontrada")
+
+  if (property.images.length > 0) {
+    await del(property.images)
+  }
+
+  await prisma.property.delete({
+    where: { id: propertyId, userId: session.user.id },
   })
 }

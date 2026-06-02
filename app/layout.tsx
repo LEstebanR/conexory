@@ -8,18 +8,50 @@ const inter = Inter({
   display: "swap",
 })
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://inmobiliaria-link-app.vercel.app"
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://inmobiliaria-link-app.vercel.app"),
-  title: "MiAgente — Comparte tus propiedades en segundos",
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: "MiAgente — Comparte tus propiedades por WhatsApp en segundos",
+    template: "%s — MiAgente",
+  },
   description:
-    "La forma más rápida de publicar y compartir propiedades en Colombia. Crea tu ficha en 60 segundos y compártela por WhatsApp con un link único.",
-  keywords:
-    "compartir propiedades Colombia, publicar propiedades WhatsApp, agentes inmobiliarios, ficha de propiedad, link propiedad",
+    "La herramienta más rápida para agentes inmobiliarios en Colombia. Publica tu propiedad en 60 segundos y compártela por WhatsApp con un link único y profesional.",
+  keywords: [
+    "agente inmobiliario Colombia",
+    "compartir propiedades WhatsApp",
+    "publicar propiedades online",
+    "ficha de propiedad digital",
+    "link propiedad inmobiliaria",
+    "CRM inmobiliario Colombia",
+    "vender propiedades WhatsApp",
+    "inmobiliaria digital Colombia",
+  ],
+  authors: [{ name: "MiAgente" }],
+  creator: "MiAgente",
+  publisher: "MiAgente",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   openGraph: {
     title: "MiAgente — Crea. Comparte. Vende.",
     description:
-      "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para agentes colombianos.",
+      "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para agentes inmobiliarios colombianos.",
     type: "website",
+    locale: "es_CO",
+    siteName: "MiAgente",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MiAgente — Comparte propiedades por WhatsApp",
+    description:
+      "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para agentes colombianos.",
+  },
+  alternates: {
+    canonical: APP_URL,
   },
 }
 
