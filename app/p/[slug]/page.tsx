@@ -120,16 +120,6 @@ export default async function PublicPropertyPage({
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-100 px-4 sm:px-6 h-14 flex items-center">
-        <Link href="/" className="flex items-center gap-2 w-fit">
-          <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center shadow-sm">
-            <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-          </div>
-          <span className="text-sm font-black text-slate-950 tracking-tight">MiAgente</span>
-        </Link>
-      </header>
-
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 py-8 space-y-4">
         {/* Carrusel de imágenes */}
         {property.images.length > 0 && (
