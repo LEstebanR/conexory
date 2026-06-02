@@ -53,6 +53,8 @@ export async function generateMetadata({
     title: `${type} en venta${location ? ` en ${location}` : ""} — MiAgente`,
     description,
     openGraph: {
+      type: "website",
+      url: `/p/${slug}`,
       title: `${type} en venta`,
       description,
       siteName: "MiAgente",

@@ -9,6 +9,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://inmobiliaria-link-app.vercel.app"),
   title: "MiAgente — Comparte tus propiedades en segundos",
   description:
     "La forma más rápida de publicar y compartir propiedades en Colombia. Crea tu ficha en 60 segundos y compártela por WhatsApp con un link único.",
