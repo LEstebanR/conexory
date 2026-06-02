@@ -83,7 +83,17 @@ export default async function PropertyDetailPage({
       )}
 
       <div className="space-y-4">
-        <SharePanel url={publicUrl} title={property.title} propertyId={property.id} />
+        <SharePanel
+          url={publicUrl}
+          propertyId={property.id}
+          type={typeLabel}
+          price={price}
+          location={location || undefined}
+          area={property.area}
+          bedrooms={property.bedrooms}
+          bathrooms={property.bathrooms}
+          parking={property.parking}
+        />
 
         {/* Carrusel */}
         {property.images.length > 0 && (

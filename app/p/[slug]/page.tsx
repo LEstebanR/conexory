@@ -29,20 +29,34 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const property = await prisma.property.findUnique({ where: { slug } })
+  const property = await prisma.property.findUnique({
+    where: { slug },
+    include: { user: { select: { name: true } } },
+  })
   if (!property) return { title: "Propiedad no encontrada — MiAgente" }
 
   const type = TYPE_LABELS[property.type] ?? property.type
   const price = formatCOP(Number(property.price))
   const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
 
+  const description = [
+    `Te ofrezco ${type}${location ? ` en ${location}` : ""}:`,
+    `• Precio: ${price}`,
+    property.area != null ? `• ${property.area} m²` : null,
+    property.bedrooms != null ? `• ${property.bedrooms} Habitaciones` : null,
+    property.bathrooms != null ? `• ${property.bathrooms} Baños` : null,
+    property.parking != null ? `• ${property.parking} Parqueaderos` : null,
+    `Ofrece: ${property.user.name}`,
+  ].filter(Boolean).join("\n")
+
   return {
-    title: `${property.title} — MiAgente`,
-    description: `${type} en venta${location ? ` en ${location}` : ""}. Precio: ${price}.`,
+    title: `${type} en venta${location ? ` en ${location}` : ""} — MiAgente`,
+    description,
     openGraph: {
-      title: property.title,
-      description: `${type} · ${price}${location ? ` · ${location}` : ""}`,
+      title: `${type} en venta`,
+      description,
       siteName: "MiAgente",
+      images: property.images[0] ? [{ url: property.images[0] }] : undefined,
     },
   }
 }

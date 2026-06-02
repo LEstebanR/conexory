@@ -6,12 +6,24 @@ import { incrementShares } from "./actions"
 
 export default function SharePanel({
   url,
-  title,
   propertyId,
+  type,
+  price,
+  location,
+  area,
+  bedrooms,
+  bathrooms,
+  parking,
 }: {
   url: string
-  title: string
   propertyId: string
+  type: string
+  price: string
+  location?: string
+  area?: number | null
+  bedrooms?: number | null
+  bathrooms?: number | null
+  parking?: number | null
 }) {
   const [copied, setCopied] = useState(false)
 
@@ -25,7 +37,17 @@ export default function SharePanel({
     incrementShares(propertyId).catch(() => {})
   }
 
-  const waText = encodeURIComponent(`¡Mira esta propiedad! 🏠\n\n${title}\n\n${url}`)
+  const details = [
+    `• Precio: ${price}`,
+    area != null ? `• ${area} m²` : null,
+    bedrooms != null ? `• ${bedrooms} Habitaciones` : null,
+    bathrooms != null ? `• ${bathrooms} Baños` : null,
+    parking != null ? `• ${parking} Parqueaderos` : null,
+  ].filter(Boolean).join("\n")
+
+  const waText = encodeURIComponent(
+    `Mira este ${type}${location ? ` en ${location}` : ""}:\n${details}\n\n${url}`
+  )
   const waUrl = `https://wa.me/?text=${waText}`
 
   return (

@@ -54,81 +54,86 @@ function PropertyCard({ property }: { property: Property }) {
 
   return (
     <div className={cn(
-      "rounded-2xl border p-5 flex flex-col gap-4 transition-colors",
+      "rounded-2xl border flex flex-col transition-colors",
       inactive
         ? "bg-slate-50 border-slate-200"
-        : "bg-white border-slate-100 hover:border-slate-200"
+        : "bg-white border-slate-100 hover:border-slate-200 hover:shadow-sm"
     )}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className={cn(
-              "inline-flex items-center text-[10px] font-bold px-2 py-1 rounded-full",
-              inactive
-                ? "bg-slate-100 text-slate-400"
-                : "bg-brand-50 text-brand-700"
-            )}>
-              {typeLabel} · En venta
-            </span>
-            {inactive && (
-              <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-600 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200">
-                <EyeOff className="w-2.5 h-2.5" />
-                Inactiva
+      <Link
+        href={`/dashboard/properties/${property.id}`}
+        className="p-5 flex flex-col gap-4"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className={cn(
+                "inline-flex items-center text-[10px] font-bold px-2 py-1 rounded-full",
+                inactive
+                  ? "bg-slate-100 text-slate-400"
+                  : "bg-brand-50 text-brand-700"
+              )}>
+                {typeLabel} · En venta
               </span>
+              {inactive && (
+                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-600 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200">
+                  <EyeOff className="w-2.5 h-2.5" />
+                  Inactiva
+                </span>
+              )}
+            </div>
+            <h3 className={cn(
+              "font-black tracking-tight leading-tight truncate",
+              inactive ? "text-slate-500" : "text-slate-950"
+            )}>
+              {property.title}
+            </h3>
+            {location && (
+              <div className="flex items-center gap-1 text-slate-400 text-xs mt-1">
+                <MapPin className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate">{location}</span>
+              </div>
             )}
           </div>
-          <h3 className={cn(
-            "font-black tracking-tight leading-tight truncate",
-            inactive ? "text-slate-500" : "text-slate-950"
+          <p className={cn(
+            "text-lg font-black tracking-tighter flex-shrink-0",
+            inactive ? "text-slate-400" : "text-slate-950"
           )}>
-            {property.title}
-          </h3>
-          {location && (
-            <div className="flex items-center gap-1 text-slate-400 text-xs mt-1">
-              <MapPin className="w-3 h-3 flex-shrink-0" />
-              <span className="truncate">{location}</span>
-            </div>
-          )}
+            {price}
+          </p>
         </div>
-        <p className={cn(
-          "text-lg font-black tracking-tighter flex-shrink-0",
-          inactive ? "text-slate-400" : "text-slate-950"
-        )}>
-          {price}
-        </p>
-      </div>
 
-      {(property.area != null || property.bedrooms != null || property.bathrooms != null) && (
-        <div className="flex items-center gap-4">
-          {property.area != null && (
-            <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
-              <Square className="w-3.5 h-3.5" strokeWidth={1.75} />
-              {property.area} m²
-            </div>
-          )}
-          {property.bedrooms != null && (
-            <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
-              <BedDouble className="w-3.5 h-3.5" strokeWidth={1.75} />
-              {property.bedrooms} hab.
-            </div>
-          )}
-          {property.bathrooms != null && (
-            <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
-              <Bath className="w-3.5 h-3.5" strokeWidth={1.75} />
-              {property.bathrooms} baños
-            </div>
-          )}
-        </div>
-      )}
+        {(property.area != null || property.bedrooms != null || property.bathrooms != null) && (
+          <div className="flex items-center gap-4">
+            {property.area != null && (
+              <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+                <Square className="w-3.5 h-3.5" strokeWidth={1.75} />
+                {property.area} m²
+              </div>
+            )}
+            {property.bedrooms != null && (
+              <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+                <BedDouble className="w-3.5 h-3.5" strokeWidth={1.75} />
+                {property.bedrooms} hab.
+              </div>
+            )}
+            {property.bathrooms != null && (
+              <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+                <Bath className="w-3.5 h-3.5" strokeWidth={1.75} />
+                {property.bathrooms} baños
+              </div>
+            )}
+          </div>
+        )}
 
-      {property.shares > 0 && (
-        <div className="flex items-center gap-1 text-xs text-slate-400 font-medium -mt-1">
-          <Share2 className="w-3 h-3" />
-          {property.shares} {property.shares === 1 ? "vez compartida" : "veces compartida"}
-        </div>
-      )}
+        {property.shares > 0 && (
+          <div className="flex items-center gap-1 text-xs text-slate-400 font-medium -mt-1">
+            <Share2 className="w-3 h-3" />
+            {property.shares} {property.shares === 1 ? "vez compartida" : "veces compartida"}
+          </div>
+        )}
+      </Link>
 
-      <div className="flex gap-2 pt-1 border-t border-slate-100">
+      <div className="flex gap-2 px-5 pb-5 border-t border-slate-100 pt-4">
         <Link
           href={`/dashboard/properties/${property.id}`}
           className={cn(
