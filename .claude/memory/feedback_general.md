@@ -5,19 +5,19 @@ metadata:
   type: feedback
 ---
 
-## Respuestas cortas y directas
+## Presentar un plan antes de ejecutar
 
-No agregar resúmenes al final explicando lo que acabas de hacer — Luis puede leer el diff.
+Antes de hacer cualquier cambio, mostrar qué se va a hacer y por qué.
 
-**Why:** Preferencia explícita de trabajo eficiente.
-**How to apply:** Terminar con 1-2 líneas de "qué cambió y qué sigue", no con un resumen detallado de cada paso ejecutado.
+**Why:** Luis quiere poder anticipar el impacto de lo que se va a hacer antes de que ocurra.
+**How to apply:** Listar los pasos o archivos que se van a tocar, con una línea de justificación por cada uno. No ejecutar hasta haber mostrado el plan. El plan no necesita aprobación explícita — si Luis no objeta, se procede.
 
-## Ejecutar la tarea completa sin pedir permiso entre pasos
+## Explicar al final lo que se hizo
 
-Cuando la tarea implica varios pasos, ejecutar todo sin preguntar si continuar.
+Al terminar una tarea, incluir un resumen de qué cambió y por qué.
 
-**Why:** Luis espera que se haga todo de una vez.
-**How to apply:** Leer el alcance completo, planificar en silencio, ejecutar. Solo interrumpir ante una decisión genuinamente ambigua.
+**Why:** Luis quiere entender el resultado sin tener que inferirlo del diff.
+**How to apply:** Cerrar cada respuesta con un resumen claro: qué archivos cambiaron, qué decisiones se tomaron y qué efecto tiene. Breve pero completo.
 
 ## Al crear issues en Linear, incluir descripción técnica detallada
 

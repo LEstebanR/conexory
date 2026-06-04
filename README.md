@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MiAgente
 
-## Getting Started
+SaaS para agentes inmobiliarios en Colombia. Crea fichas de propiedades, obtén un link único por propiedad y compártelas por WhatsApp con preview enriquecida — en menos de 60 segundos.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + React 19 + TypeScript
+- **Tailwind CSS 4** con tokens `brand-*`
+- **better-auth** — email/contraseña + Google OAuth
+- **Prisma 5** + **Neon** (PostgreSQL serverless)
+- **Vercel Blob** — almacenamiento de imágenes
+- **Bun** como package manager y runtime
+
+## Requisitos previos
+
+- [Bun](https://bun.sh) >= 1.0
+- Una base de datos en [Neon](https://neon.tech) (o PostgreSQL local)
+- Credenciales de Google OAuth ([Google Cloud Console](https://console.cloud.google.com))
+
+## Configuración local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+# 1. Instalar dependencias
+bun install
+
+# 2. Variables de entorno
+cp .env.example .env
+# Completar los valores en .env (ver sección abajo)
+
+# 3. Generar cliente de Prisma y correr migraciones
+bunx prisma migrate dev
+
+# 4. Iniciar servidor de desarrollo
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables de entorno
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Descripción |
+|---|---|
+| `DATABASE_URL` | Conexión pooled a Neon (para queries en runtime) |
+| `DIRECT_URL` | Conexión directa a Neon (para migraciones) |
+| `BETTER_AUTH_SECRET` | Secret para firmar sesiones — generar con `openssl rand -hex 32` |
+| `BETTER_AUTH_URL` | URL base de la app (ej: `http://localhost:3000`) |
+| `NEXT_PUBLIC_APP_URL` | Igual que `BETTER_AUTH_URL` |
+| `GOOGLE_CLIENT_ID` | OAuth de Google |
+| `GOOGLE_CLIENT_SECRET` | OAuth de Google |
+| `BLOB_READ_WRITE_TOKEN` | Token de Vercel Blob para subida de imágenes |
 
-## Learn More
+Para Google OAuth, agregar como URI de redirección autorizada:
+```
+http://localhost:3000/api/auth/callback/google
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Comandos
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+bun dev                    # Servidor de desarrollo
+bun build                  # Build de producción (incluye prisma generate)
+bun typecheck              # Verificación de tipos TypeScript
+bun lint                   # ESLint
+bunx prisma migrate dev    # Nueva migración
+bunx prisma studio         # GUI de la base de datos
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Estructura principal
 
-## Deploy on Vercel
+```
+app/
+  page.tsx              # Landing pública
+  dashboard/            # Panel del agente (autenticado)
+  p/[slug]/             # Vista pública de propiedad (sin login)
+  api/
+    auth/[...all]/      # Handler de better-auth
+    upload/             # Subida de imágenes a Vercel Blob
+components/
+  ui/                   # Componentes atómicos (Button, Input, Badge)
+lib/
+  auth.ts               # Config de better-auth (servidor)
+  prisma.ts             # Singleton de PrismaClient
+content/blog/           # Posts en Markdown
+prisma/schema.prisma    # Esquema de base de datos
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Convenciones de desarrollo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ver [`AGENTS.md`](./AGENTS.md) para convenciones de código, patrones y reglas del proyecto.
+
+### Ramas y PRs
+
+Las ramas siguen el formato `{type}/LES-{número}-{descripción}`:
+
+```
+feat/LES-149-plan-pro-subscriptions
+fix/LES-158-image-compression
+```
+
+Tipos válidos: `feat`, `fix`, `refactor`, `chore`, `docs`. El formato se valida automáticamente en CI.
