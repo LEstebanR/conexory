@@ -105,32 +105,18 @@ Si no hay nada relevante que guardar, dilo directamente: "Sesión sin aprendizaj
     retrospective.md          ← esta skill
   memory/
     MEMORY.md                 ← índice de todos los archivos
-    user_profile.md           ← quién es Luis, proyectos, forma de trabajar
     feedback_general.md       ← correcciones y preferencias de comportamiento
     project_miagente.md       ← estado del proyecto, stack, decisiones
-    reference_linear.md       ← Linear: IDs, milestones, cómo consultar issues
+    reference_linear.md       ← Linear: IDs, cómo consultar issues
 ```
 
 ### `MEMORY.md` — índice
 ```markdown
 # Memory Index
 
-- [User Profile](user_profile.md) — quién es Luis, su expertise, cómo trabaja
 - [Feedback general](feedback_general.md) — correcciones y preferencias de comportamiento
 - [Proyecto MiAgente](project_miagente.md) — estado del proyecto, stack, decisiones
-- [Linear — miAgente](reference_linear.md) — workspace, IDs, milestones
-```
-
-### `user_profile.md`
-```markdown
----
-name: user-profile
-description: Perfil de Luis Esteban Ramírez — expertise, forma de trabajar, preferencias de colaboración
-metadata:
-  type: user
----
-
-[contenido]
+- [Linear — miAgente](reference_linear.md) — workspace, IDs, cómo consultar issues
 ```
 
 ### `feedback_general.md`
