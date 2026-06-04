@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Building2, ArrowLeft, CheckCircle2, Circle, Loader2 } from "lucide-react"
+import { Building2, ArrowLeft, Circle, Loader2 } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Roadmap — MiAgente",
@@ -9,40 +9,10 @@ export const metadata: Metadata = {
 
 const items = [
   {
-    status: "done",
-    label: "Lanzado",
-    title: "Publicación de propiedades",
-    desc: "Crea fichas con fotos, precio, ubicación y características en menos de 60 segundos.",
-  },
-  {
-    status: "done",
-    label: "Lanzado",
-    title: "Link único por propiedad",
-    desc: "Cada propiedad tiene su URL pública para compartir con clientes sin que necesiten cuenta.",
-  },
-  {
-    status: "done",
-    label: "Lanzado",
-    title: "Compartir por WhatsApp",
-    desc: "Mensaje pre-armado con todos los detalles de la propiedad listo para enviar.",
-  },
-  {
-    status: "done",
-    label: "Lanzado",
-    title: "Preview rica en WhatsApp",
-    desc: "Imagen, título y detalles de la propiedad en el preview del link compartido.",
-  },
-  {
     status: "progress",
     label: "En progreso",
     title: "Plan Pro",
-    desc: "Propiedades ilimitadas, más fotos, estadísticas avanzadas y dominio personalizado.",
-  },
-  {
-    status: "progress",
-    label: "En progreso",
-    title: "Estadísticas de visitas",
-    desc: "Ve cuántas personas abrieron el link de cada propiedad y desde qué dispositivos.",
+    desc: "Propiedades ilimitadas, más fotos y soporte prioritario.",
   },
   {
     status: "planned",
@@ -56,28 +26,9 @@ const items = [
     title: "Galería pública del agente",
     desc: "Una página con todas tus propiedades activas para compartir con nuevos clientes.",
   },
-  {
-    status: "planned",
-    label: "Planeado",
-    title: "Dominio personalizado",
-    desc: "Usa tu propio dominio (ej: propiedades.tuagencia.com) en lugar del de MiAgente.",
-  },
-  {
-    status: "planned",
-    label: "Planeado",
-    title: "App móvil",
-    desc: "Gestiona tus propiedades desde tu celular con la app nativa de MiAgente.",
-  },
 ]
 
 const statusConfig = {
-  done: {
-    icon: CheckCircle2,
-    color: "text-brand-500",
-    bg: "bg-brand-50",
-    border: "border-brand-100",
-    badge: "bg-brand-100 text-brand-700",
-  },
   progress: {
     icon: Loader2,
     color: "text-blue-500",

@@ -1,0 +1,29 @@
+name: Validate branch name
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name format
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          PATTERN="^(feat|fix|refactor|chore|docs)\/LES-[0-9]+-[a-z0-9-]+$"
+
+          if [[ "$BRANCH" =~ $PATTERN ]]; then
+            echo "✅ Branch name is valid: $BRANCH"
+          else
+            echo "❌ Invalid branch name: $BRANCH"
+            echo ""
+            echo "Expected format: {type}/LES-{number}-{short-description}"
+            echo "Examples:"
+            echo "  feat/LES-149-plan-pro-subscriptions"
+            echo "  fix/LES-155-zod-validation-actions"
+            echo "  chore/LES-156-custom-404-page"
+            echo ""
+            echo "Valid types: feat, fix, refactor, chore, docs"
+            exit 1
+          fi
