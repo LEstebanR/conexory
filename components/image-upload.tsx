@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { ImagePlus, X, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -38,8 +38,10 @@ export default function ImageUpload({
 
   const onUrlsChangeRef = useRef(onUrlsChange)
   const onUploadingChangeRef = useRef(onUploadingChange)
-  onUrlsChangeRef.current = onUrlsChange
-  onUploadingChangeRef.current = onUploadingChange
+  useLayoutEffect(() => {
+    onUrlsChangeRef.current = onUrlsChange
+    onUploadingChangeRef.current = onUploadingChange
+  })
 
   useEffect(() => {
     onUrlsChangeRef.current(items.filter((i) => i.url).map((i) => i.url!))
