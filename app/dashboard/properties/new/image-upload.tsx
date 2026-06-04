@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { ImagePlus, X, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -26,11 +26,12 @@ export default function ImageUpload({
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Refs para tener siempre la versión más reciente de los callbacks del padre
   const onUrlsChangeRef = useRef(onUrlsChange)
   const onUploadingChangeRef = useRef(onUploadingChange)
-  onUrlsChangeRef.current = onUrlsChange
-  onUploadingChangeRef.current = onUploadingChange
+  useLayoutEffect(() => {
+    onUrlsChangeRef.current = onUrlsChange
+    onUploadingChangeRef.current = onUploadingChange
+  })
 
   // Sincroniza con el padre después de que el estado local se actualice
   useEffect(() => {

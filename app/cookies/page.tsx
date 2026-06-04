@@ -146,7 +146,7 @@ export default function CookiesPage() {
       <LegalSection id="cambios" number={5} title="Cambios a esta política">
         <LegalP>
           Podemos actualizar esta política cuando añadamos nuevas funcionalidades
-          o cambiemos los servicios que usamos. La fecha de "última actualización"
+          o cambiemos los servicios que usamos. La fecha de &ldquo;última actualización&rdquo;
           en la parte superior siempre refleja la versión vigente.
         </LegalP>
       </LegalSection>
