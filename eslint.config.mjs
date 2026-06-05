@@ -13,6 +13,12 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      "@next/next/no-img-element": "error",
+      "@typescript-eslint/no-unused-expressions": "error",
+    },
+  },
 ]);
 
 export default eslintConfig;
