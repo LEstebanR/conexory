@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react"
+import Image from "next/image"
 import { ImagePlus, X, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -145,7 +146,7 @@ export default function ImageUpload({
               key={item.id}
               className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 group"
             >
-              <img src={item.preview} alt="" className="w-full h-full object-cover" />
+              <Image fill unoptimized src={item.preview} alt="" className="object-cover" />
 
               {item.uploading && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
