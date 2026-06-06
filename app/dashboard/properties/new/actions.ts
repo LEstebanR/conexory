@@ -3,6 +3,7 @@
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 
 async function generateUniqueSlug(): Promise<string> {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -16,41 +17,37 @@ async function generateUniqueSlug(): Promise<string> {
   throw new Error("No se pudo generar un slug único")
 }
 
-export async function createProperty(data: {
-  title: string
-  type: string
-  price: string
-  city: string
-  neighborhood: string
-  area: string
-  bedrooms: string
-  bathrooms: string
-  parking: string
-  description: string
-  images: string[]
-}) {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) throw new Error("No autenticado")
+type CreateResult = { success: true; id: string } | { success: false; error: string }
 
-  const slug = await generateUniqueSlug()
+export async function createProperty(data: PropertyInput): Promise<CreateResult> {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (!session) return { success: false, error: "Sesión expirada. Vuelve a iniciar sesión." }
 
-  const property = await prisma.property.create({
-    data: {
-      slug,
-      userId: session.user.id,
-      title: data.title.trim(),
-      type: data.type,
-      price: parseFloat(data.price) || 0,
-      city: data.city.trim(),
-      neighborhood: data.neighborhood.trim() || null,
-      area: data.area ? parseFloat(data.area) : null,
-      bedrooms: data.bedrooms ? parseInt(data.bedrooms) : null,
-      bathrooms: data.bathrooms ? parseInt(data.bathrooms) : null,
-      parking: data.parking ? parseInt(data.parking) : null,
-      description: data.description.trim() || null,
-      images: data.images,
-    },
-  })
+    const parsed = PropertySchema.safeParse(data)
+    if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
 
-  return { id: property.id }
+    const slug = await generateUniqueSlug()
+    const property = await prisma.property.create({
+      data: {
+        slug,
+        userId: session.user.id,
+        title: parsed.data.title,
+        type: parsed.data.type,
+        price: parsed.data.price,
+        city: parsed.data.city,
+        neighborhood: parsed.data.neighborhood,
+        area: parsed.data.area,
+        bedrooms: parsed.data.bedrooms,
+        bathrooms: parsed.data.bathrooms,
+        parking: parsed.data.parking,
+        description: parsed.data.description,
+        images: parsed.data.images,
+      },
+    })
+
+    return { success: true, id: property.id }
+  } catch {
+    return { success: false, error: "Error inesperado al crear la propiedad. Intenta de nuevo." }
+  }
 }

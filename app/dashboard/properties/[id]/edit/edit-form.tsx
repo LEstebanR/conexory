@@ -89,16 +89,16 @@ export default function EditForm({ initial }: { initial: InitialData }) {
     if (!type) { setError("Selecciona el tipo de propiedad."); return }
 
     startTransition(async () => {
-      try {
-        await updateProperty(initial.id, {
-          title, type, price, city, neighborhood,
-          area, bedrooms, bathrooms, parking, description,
-          images: imageUrls,
-        })
-        router.push(`/dashboard/properties/${initial.id}`)
-      } catch {
-        setError("Ocurrió un error al guardar los cambios. Intenta de nuevo.")
+      const result = await updateProperty(initial.id, {
+        title, type, price, city, neighborhood,
+        area, bedrooms, bathrooms, parking, description,
+        images: imageUrls,
+      })
+      if (!result.success) {
+        setError(result.error)
+        return
       }
+      router.push(`/dashboard/properties/${initial.id}`)
     })
   }
 
