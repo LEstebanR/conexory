@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -33,7 +34,7 @@ export default function PropertyCarousel({
   function onTouchEnd(e: React.TouchEvent) {
     if (touchStartX === null) return
     const delta = touchStartX - e.changedTouches[0].clientX
-    if (Math.abs(delta) > 40) delta > 0 ? next() : prev()
+    if (Math.abs(delta) > 40) { if (delta > 0) { next() } else { prev() } }
     setTouchStartX(null)
   }
 
@@ -46,15 +47,17 @@ export default function PropertyCarousel({
         onTouchEnd={onTouchEnd}
       >
         {images.map((url, i) => (
-          <img
+          <Image
             key={url}
+            fill
             src={url}
             alt={i === 0 ? title : ""}
             className={cn(
-              "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
+              "object-cover transition-opacity duration-300",
               i === current ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
             draggable={false}
+            sizes="(max-width: 768px) 100vw, 672px"
           />
         ))}
       </div>
