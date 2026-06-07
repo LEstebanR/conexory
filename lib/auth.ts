@@ -37,7 +37,13 @@ export const auth = betterAuth({
   },
 
   user: {
-    additionalFields: {},
+    additionalFields: {
+      isPremium: {
+        type: "boolean",
+        defaultValue: false,
+        input: false,
+      },
+    },
   },
 })
 
