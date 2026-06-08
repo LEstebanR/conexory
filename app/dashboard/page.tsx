@@ -3,7 +3,7 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
-import { Plus, Building2, LinkIcon, MapPin, BedDouble, Bath, Square, Share2, EyeOff } from "lucide-react"
+import { Plus, Building2, LinkIcon, MapPin, BedDouble, Bath, Square, Share2, EyeOff, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -187,6 +187,7 @@ export default async function DashboardPage() {
   const activeCount = properties.filter((p: P) => p.published).length
   const count = properties.length
   const totalShares = properties.reduce((sum: number, p: P) => sum + p.shares, 0)
+  const atLimit = !session.user.isPremium && activeCount >= 3
 
   const statCards = [
     { label: "Propiedades activas", value: activeCount, icon: Building2, color: "text-brand-500", bg: "bg-brand-50" },
@@ -206,12 +207,21 @@ export default async function DashboardPage() {
             Administra y comparte tus propiedades desde un solo lugar.
           </p>
         </div>
-        <Button size="sm" className="hidden sm:flex font-bold shadow-sm shadow-brand-400/20 flex-shrink-0" asChild>
-          <Link href="/dashboard/properties/new">
-            <Plus className="w-4 h-4" />
-            Nueva propiedad
-          </Link>
-        </Button>
+        {atLimit ? (
+          <Button size="sm" className="hidden sm:flex font-bold flex-shrink-0 bg-amber-400 hover:bg-amber-500 text-white shadow-sm shadow-amber-400/20" asChild>
+            <Link href="/precios">
+              <Zap className="w-4 h-4" />
+              Actualizar a Pro
+            </Link>
+          </Button>
+        ) : (
+          <Button size="sm" className="hidden sm:flex font-bold shadow-sm shadow-brand-400/20 flex-shrink-0" asChild>
+            <Link href="/dashboard/properties/new">
+              <Plus className="w-4 h-4" />
+              Nueva propiedad
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Stats */}
@@ -229,15 +239,44 @@ export default async function DashboardPage() {
         ))}
       </div>
 
+      {/* Plan limit banner */}
+      {atLimit && (
+        <div className="mb-6 flex items-center gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <Zap className="w-5 h-5 text-amber-500" strokeWidth={1.75} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-amber-900">Límite del plan gratuito alcanzado</p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Tienes 3 propiedades activas. Actualiza a Pro para publicar propiedades ilimitadas.
+            </p>
+          </div>
+          <Button size="sm" className="flex-shrink-0 bg-amber-400 hover:bg-amber-500 text-white font-bold shadow-sm shadow-amber-400/20" asChild>
+            <Link href="/precios">
+              Actualizar a Pro
+            </Link>
+          </Button>
+        </div>
+      )}
+
       {/* Properties */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-black text-slate-950 tracking-tight">Mis propiedades</h2>
-        <Button size="sm" variant="ghost" className="text-brand-500 font-bold hover:text-brand-600 hover:bg-brand-50 sm:hidden" asChild>
-          <Link href="/dashboard/properties/new">
-            <Plus className="w-4 h-4" />
-            Nueva
-          </Link>
-        </Button>
+        {atLimit ? (
+          <Button size="sm" variant="ghost" className="text-amber-500 font-bold hover:text-amber-600 hover:bg-amber-50 sm:hidden" asChild>
+            <Link href="/precios">
+              <Zap className="w-4 h-4" />
+              Pro
+            </Link>
+          </Button>
+        ) : (
+          <Button size="sm" variant="ghost" className="text-brand-500 font-bold hover:text-brand-600 hover:bg-brand-50 sm:hidden" asChild>
+            <Link href="/dashboard/properties/new">
+              <Plus className="w-4 h-4" />
+              Nueva
+            </Link>
+          </Button>
+        )}
       </div>
 
       {count === 0 ? (
