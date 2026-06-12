@@ -133,6 +133,13 @@ prisma/schema.prisma                # Esquema de base de datos
 - El precio se guarda como `Decimal` — llamar `.toNumber()` para operaciones JS
 - `onDelete: Cascade` en todas las relaciones de `User`
 
+### Migraciones
+
+La base de datos está bajo control de **Prisma Migrations** (con migración `0_init` baselined). Para cualquier cambio de schema, generar una migración (`bunx prisma migrate dev`) y commitearla — **nunca usar `prisma db push`**, rompería el historial.
+
+- `prisma migrate deploy` corre automáticamente en cada build de Vercel (está en el script `build`), así que las migraciones pendientes se aplican solas en cada deploy.
+- Por eso los entornos *Preview/Development* de Vercel apuntan a una **base de desarrollo** separada (no a producción): así un preview deploy aplica la migración a dev, nunca a prod. Solo *Production* usa la base real. Al tocar `DATABASE_URL`/`DIRECT_URL` en Vercel, respetar ese scoping.
+
 ---
 
 ## Autenticación (better-auth)
@@ -203,7 +210,7 @@ Ver `.env.example` para la lista completa. Las críticas:
 
 ```bash
 bun dev          # Inicia el servidor de desarrollo
-bun build        # prisma generate + next build
+bun build        # prisma generate + prisma migrate deploy + next build
 bun lint         # ESLint
 bunx prisma migrate dev   # Nueva migración
 bunx prisma studio        # GUI de la base de datos
