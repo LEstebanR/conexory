@@ -5,21 +5,25 @@ const optionalString = (maxLength: number) =>
 
 const optionalNonNegativeInt = z
   .string()
-  .transform((v) => (v === "" ? null : parseInt(v, 10)))
-  .refine((n) => n === null || (Number.isInteger(n) && n >= 0), {
+  .refine((v) => v === "" || /^\d+$/.test(v), {
     message: "Debe ser un número entero no negativo",
   })
+  .transform((v) => (v === "" ? null : parseInt(v, 10)))
 
 const optionalPositiveFloat = z
   .string()
+  .refine((v) => v === "" || /^\d+(\.\d+)?$/.test(v), {
+    message: "Debe ser un número positivo",
+  })
   .transform((v) => (v === "" ? null : parseFloat(v)))
-  .refine((n) => n === null || (Number.isFinite(n) && n > 0), {
+  .refine((n) => n === null || n > 0, {
     message: "Debe ser un número positivo",
   })
 
 export const PropertySchema = z.object({
   title: z
     .string()
+    .trim()
     .min(3, "El título debe tener al menos 3 caracteres")
     .max(120, "El título no puede superar 120 caracteres"),
   type: z.enum(["apartment", "house", "office", "commercial", "lot", "warehouse"], {
@@ -29,9 +33,13 @@ export const PropertySchema = z.object({
     .string()
     .regex(/^\d+$/, "El precio debe ser un número entero")
     .transform(Number)
-    .refine((n) => n > 0, { message: "El precio debe ser mayor a 0" }),
+    .refine((n) => n > 0, { message: "El precio debe ser mayor a 0" })
+    .refine((n) => n <= 9_999_999_999_999, {
+      message: "El precio es demasiado alto",
+    }),
   city: z
     .string()
+    .trim()
     .min(2, "La ciudad debe tener al menos 2 caracteres")
     .max(100, "La ciudad no puede superar 100 caracteres"),
   neighborhood: optionalString(100),
