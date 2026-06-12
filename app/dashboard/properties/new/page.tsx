@@ -78,24 +78,24 @@ export default function NewPropertyPage() {
     }
 
     startTransition(async () => {
-      try {
-        const { id } = await createProperty({
-          title,
-          type,
-          price,
-          city,
-          neighborhood,
-          area,
-          bedrooms,
-          bathrooms,
-          parking,
-          description,
-          images: imageUrls,
-        })
-        router.push(`/dashboard/properties/${id}`)
-      } catch {
-        setError("Ocurrió un error al crear la propiedad. Intenta de nuevo.")
+      const result = await createProperty({
+        title,
+        type,
+        price,
+        city,
+        neighborhood,
+        area,
+        bedrooms,
+        bathrooms,
+        parking,
+        description,
+        images: imageUrls,
+      })
+      if (!result.success) {
+        setError(result.error)
+        return
       }
+      router.push(`/dashboard/properties/${result.id}`)
     })
   }
 
