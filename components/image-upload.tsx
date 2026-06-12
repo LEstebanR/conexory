@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import Image from "next/image"
+import imageCompression from "browser-image-compression"
 import { ImagePlus, X, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -14,7 +15,7 @@ type ImageItem = {
 }
 
 const MAX_IMAGES = 10
-const MAX_SIZE_MB = 5
+const MAX_SIZE_MB = 20
 
 export default function ImageUpload({
   onUrlsChange,
@@ -51,8 +52,13 @@ export default function ImageUpload({
 
   async function uploadOne(file: File, itemId: string) {
     try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      })
       const fd = new FormData()
-      fd.append("file", file)
+      fd.append("file", compressed, file.name)
       const res = await fetch("/api/upload", { method: "POST", body: fd })
       if (!res.ok) throw new Error()
       const { url } = await res.json()
