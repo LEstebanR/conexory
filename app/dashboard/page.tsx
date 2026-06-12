@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Plus, Building2, LinkIcon, MapPin, BedDouble, Bath, Square, Share2, EyeOff, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -187,7 +188,16 @@ export default async function DashboardPage() {
   const activeCount = properties.filter((p: P) => p.published).length
   const count = properties.length
   const totalShares = properties.reduce((sum: number, p: P) => sum + p.shares, 0)
-  const atLimit = !session.user.isPremium && activeCount >= 3
+  const isPremium = session.user.isPremium
+  const limit = propertyLimit(isPremium)
+  const atLimit = activeCount >= limit
+  const upgradeHref = isPremium ? "/contacto" : "/precios"
+  const upgradeLabel = isPremium ? "Plan a medida" : "Actualizar a Pro"
+  const upgradeLabelShort = isPremium ? "Plan+" : "Pro"
+  const limitTitle = isPremium ? "Límite del plan Pro alcanzado" : "Límite del plan gratuito alcanzado"
+  const limitMessage = isPremium
+    ? `Tienes ${activeCount} propiedades activas, el máximo de tu plan Pro. Contáctanos para un plan personalizado.`
+    : `Tienes ${activeCount} propiedades activas. Actualiza a Pro para publicar hasta ${PRO_PROPERTY_LIMIT} propiedades.`
 
   const statCards = [
     { label: "Propiedades activas", value: activeCount, icon: Building2, color: "text-brand-500", bg: "bg-brand-50" },
@@ -208,10 +218,10 @@ export default async function DashboardPage() {
           </p>
         </div>
         {atLimit ? (
-          <Button size="sm" className="hidden sm:flex font-bold flex-shrink-0 bg-amber-400 hover:bg-amber-500 text-white shadow-sm shadow-amber-400/20" asChild>
-            <Link href="/precios">
+          <Button size="sm" className="hidden sm:flex font-bold flex-shrink-0 shadow-sm shadow-brand-400/20" asChild>
+            <Link href={upgradeHref}>
               <Zap className="w-4 h-4" />
-              Actualizar a Pro
+              {upgradeLabel}
             </Link>
           </Button>
         ) : (
@@ -241,19 +251,19 @@ export default async function DashboardPage() {
 
       {/* Plan limit banner */}
       {atLimit && (
-        <div className="mb-6 flex items-center gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-            <Zap className="w-5 h-5 text-amber-500" strokeWidth={1.75} />
+        <div className="mb-6 flex items-center gap-4 bg-warning-50 border border-warning-200 rounded-2xl px-5 py-4">
+          <div className="w-10 h-10 rounded-xl bg-warning-100 flex items-center justify-center flex-shrink-0">
+            <Zap className="w-5 h-5 text-warning-500" strokeWidth={1.75} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-amber-900">Límite del plan gratuito alcanzado</p>
-            <p className="text-xs text-amber-700 mt-0.5">
-              Tienes 3 propiedades activas. Actualiza a Pro para publicar propiedades ilimitadas.
+            <p className="text-sm font-bold text-warning-900">{limitTitle}</p>
+            <p className="text-xs text-warning-700 mt-0.5">
+              {limitMessage}
             </p>
           </div>
-          <Button size="sm" className="flex-shrink-0 bg-amber-400 hover:bg-amber-500 text-white font-bold shadow-sm shadow-amber-400/20" asChild>
-            <Link href="/precios">
-              Actualizar a Pro
+          <Button size="sm" className="flex-shrink-0 font-bold shadow-sm shadow-brand-400/20" asChild>
+            <Link href={upgradeHref}>
+              {upgradeLabel}
             </Link>
           </Button>
         </div>
@@ -263,10 +273,10 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-black text-slate-950 tracking-tight">Mis propiedades</h2>
         {atLimit ? (
-          <Button size="sm" variant="ghost" className="text-amber-500 font-bold hover:text-amber-600 hover:bg-amber-50 sm:hidden" asChild>
-            <Link href="/precios">
+          <Button size="sm" variant="ghost" className="text-brand-500 font-bold hover:text-brand-600 hover:bg-brand-50 sm:hidden" asChild>
+            <Link href={upgradeHref}>
               <Zap className="w-4 h-4" />
-              Pro
+              {upgradeLabelShort}
             </Link>
           </Button>
         ) : (

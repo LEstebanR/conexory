@@ -10,18 +10,25 @@ export const metadata: Metadata = {
 const features = {
   gratis: [
     "Hasta 3 propiedades activas",
+    "Hasta 10 fotos por propiedad",
     "Link único por propiedad",
     "Compartir por WhatsApp",
-    "Galería de fotos (hasta 10 por propiedad)",
     "Vista pública para tus clientes",
     "Contador de veces compartida",
   ],
   pro: [
-    "Propiedades ilimitadas",
+    "Hasta 50 propiedades activas",
     "Hasta 20 fotos por propiedad",
     "Estadísticas de visitas por propiedad",
     "Soporte prioritario",
     "Todo lo del plan gratuito",
+  ],
+  personalizado: [
+    "Propiedades ilimitadas",
+    "Fotos ilimitadas por propiedad",
+    "Soporte dedicado",
+    "Integraciones a la medida",
+    "Todo lo del plan Pro",
   ],
 }
 
@@ -62,8 +69,8 @@ export default function PreciosPage() {
         </div>
       </div>
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid sm:grid-cols-2 gap-6 mb-16">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {/* Gratis */}
           <div className="border border-slate-200 rounded-2xl p-8 flex flex-col">
             <div className="mb-6">
@@ -91,7 +98,7 @@ export default function PreciosPage() {
           <div className="border-2 border-brand-400 rounded-2xl p-8 flex flex-col bg-brand-50/20 relative overflow-hidden">
             <div className="absolute top-4 right-4">
               <span className="bg-brand-400 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
-                Próximamente
+                Más popular
               </span>
             </div>
             <div className="mb-6">
@@ -110,12 +117,35 @@ export default function PreciosPage() {
                 </li>
               ))}
             </ul>
-            <button
-              disabled
-              className="w-full flex items-center justify-center h-11 rounded-xl bg-brand-400/50 text-white font-bold text-sm cursor-not-allowed"
+            <Link
+              href="/register"
+              className="w-full flex items-center justify-center h-11 rounded-xl bg-brand-400 text-white font-bold text-sm hover:bg-brand-500 transition-colors"
             >
-              Disponible pronto
-            </button>
+              Comenzar con Pro
+            </Link>
+          </div>
+
+          {/* Personalizado */}
+          <div className="border border-slate-200 rounded-2xl p-8 flex flex-col">
+            <div className="mb-6">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Personalizado</p>
+              <p className="text-4xl font-black text-slate-950 tracking-tighter mb-1">A tu medida</p>
+              <p className="text-sm text-slate-400">Para equipos y agencias</p>
+            </div>
+            <ul className="space-y-3 mb-8 flex-1">
+              {features.personalizado.map((f) => (
+                <li key={f} className="flex items-start gap-2.5 text-sm text-slate-600">
+                  <Check className="w-4 h-4 text-brand-500 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/contacto"
+              className="w-full flex items-center justify-center h-11 rounded-xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-slate-300 hover:bg-slate-50 transition-colors"
+            >
+              Contáctanos
+            </Link>
           </div>
         </div>
 

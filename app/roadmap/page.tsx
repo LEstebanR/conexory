@@ -12,7 +12,7 @@ const items = [
     status: "progress",
     label: "En progreso",
     title: "Plan Pro",
-    desc: "Propiedades ilimitadas, más fotos y soporte prioritario.",
+    desc: "Hasta 50 propiedades, hasta 20 fotos por propiedad y soporte prioritario.",
   },
   {
     status: "planned",
