@@ -7,6 +7,19 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
+  // En previews de Vercel la URL es dinámica: si no hay BETTER_AUTH_URL fijo,
+  // derivamos la base del deploy actual para que el origin check no falle.
+  baseURL:
+    process.env.BETTER_AUTH_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined),
+
+  trustedOrigins: [
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+    ...(process.env.VERCEL_BRANCH_URL
+      ? [`https://${process.env.VERCEL_BRANCH_URL}`]
+      : []),
+  ],
+
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,

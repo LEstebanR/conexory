@@ -14,17 +14,18 @@ type ImageItem = {
   error: boolean
 }
 
-const MAX_IMAGES = 10
 const MAX_SIZE_MB = 20
 
 export default function ImageUpload({
   onUrlsChange,
   onUploadingChange,
   initialUrls = [],
+  maxImages = 10,
 }: {
   onUrlsChange: (urls: string[]) => void
   onUploadingChange: (uploading: boolean) => void
   initialUrls?: string[]
+  maxImages?: number
 }) {
   const [items, setItems] = useState<ImageItem[]>(() =>
     initialUrls.map((url) => ({
@@ -73,7 +74,7 @@ export default function ImageUpload({
   }
 
   function handleFiles(files: File[]) {
-    const remaining = MAX_IMAGES - items.length
+    const remaining = maxImages - items.length
     if (remaining <= 0) return
 
     const valid = files
@@ -102,7 +103,7 @@ export default function ImageUpload({
     })
   }
 
-  const canAdd = items.length < MAX_IMAGES
+  const canAdd = items.length < maxImages
 
   return (
     <div className="space-y-3">
@@ -138,7 +139,7 @@ export default function ImageUpload({
               {items.length === 0 ? "Arrastra las fotos aquí" : "Agregar más fotos"}
             </p>
             <p className="text-xs text-slate-400 mt-0.5">
-              PNG, JPG, WebP · Máx. {MAX_SIZE_MB} MB · Hasta {MAX_IMAGES} fotos
+              PNG, JPG, WebP · Máx. {MAX_SIZE_MB} MB · Hasta {maxImages} fotos
             </p>
           </div>
         </div>

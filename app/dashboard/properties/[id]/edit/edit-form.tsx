@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import ImageUpload from "@/components/image-upload"
+import { photoLimit } from "@/lib/plans"
 import { updateProperty } from "./actions"
 
 const PROPERTY_TYPES = [
@@ -66,7 +67,7 @@ export type InitialData = {
   images: string[]
 }
 
-export default function EditForm({ initial }: { initial: InitialData }) {
+export default function EditForm({ initial, isPremium }: { initial: InitialData; isPremium: boolean }) {
   const [type, setType] = useState(initial.type)
   const [title, setTitle] = useState(initial.title)
   const [price, setPrice] = useState(initial.price)
@@ -151,6 +152,7 @@ export default function EditForm({ initial }: { initial: InitialData }) {
             onUrlsChange={setImageUrls}
             onUploadingChange={setIsUploading}
             initialUrls={initial.images}
+            maxImages={photoLimit(isPremium)}
           />
         </SectionCard>
 

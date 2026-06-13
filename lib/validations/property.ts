@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { PRO_PHOTO_LIMIT } from "@/lib/plans"
 
 const optionalString = (maxLength: number) =>
   z.string().max(maxLength).transform((v) => v.trim() || null)
@@ -48,7 +49,8 @@ export const PropertySchema = z.object({
   bathrooms: optionalNonNegativeInt,
   parking: optionalNonNegativeInt,
   description: optionalString(1000),
-  images: z.array(z.string()).max(10, "Máximo 10 fotos por propiedad"),
+  // Techo absoluto (plan Pro). El límite por plan (10 free / 20 pro) lo aplican las actions.
+  images: z.array(z.string()).max(PRO_PHOTO_LIMIT, `Máximo ${PRO_PHOTO_LIMIT} fotos por propiedad`),
 })
 
 // type field accepts any string — Zod validates the enum server-side
