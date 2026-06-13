@@ -15,6 +15,18 @@
   --color-brand-800: #14653f;
   --color-brand-900: #0a3d25;
   --color-brand-950: #051f12;
+
+  /* Warning / advertencia — estados de límite alcanzado */
+  --color-warning-50:  #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-200: #fde68a;
+  --color-warning-300: #fcd34d;
+  --color-warning-400: #fbbf24;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+  --color-warning-800: #92400e;
+  --color-warning-900: #78350f;
 }
 
 :root {

@@ -122,7 +122,7 @@ export default function PropertyPreview() {
                 {
                   emoji: "📸",
                   title: "Galería de fotos",
-                  desc: "Hasta 10 fotos en alta calidad",
+                  desc: "Varias fotos en alta calidad",
                 },
                 {
                   emoji: "💰",

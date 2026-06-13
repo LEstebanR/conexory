@@ -59,9 +59,11 @@ La vista pública `/p/[slug]` (y cualquier ruta sin login) **no debe exponer `us
 - Tipos de propiedad válidos: `apartment | house | office | commercial | lot | warehouse`. Cualquier otro string es inválido.
 
 ### 8. Planes y límites
-No hay sistema de planes activo: los límites (3 propiedades, 10 fotos por propiedad) aplican a **todos** como constantes del plan free.
-- ❌ Lógica que asuma un plan Pro funcional o checks de suscripción inexistentes.
-- ✅ Límites como constantes, no condicionados a un plan que aún no existe.
+Existe el flag `User.isPremium` (Free vs Pro) expuesto en la sesión. Los límites por plan viven en `lib/plans.ts` y se aplican server-side gateando por `isPremium`. Free: 3 propiedades / 10 fotos. Pro: 50 / 20. "Personalizado" no tiene flag (se gestiona por contacto).
+- ❌ Hardcodear los números de límite (3/50, 10/20) en vez de usar `propertyLimit()` / `photoLimit()` de `lib/plans.ts`.
+- ❌ Prometer en UI un límite que la action no aplica (mismatch copy↔enforcement).
+- ✅ Derivar límites de `lib/plans.ts`; validación Zod con el techo Pro y el límite por plan aplicado en la action.
+- Nota: aún no hay pasarela de pagos, así que nadie es premium todavía — pero el código ya debe respetar el modelo por plan.
 
 ### 9. Imágenes
 - Se suben a Vercel Blob vía `POST /api/upload` y se guardan como array de URLs en `Property.images`.

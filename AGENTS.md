@@ -15,7 +15,7 @@ Cambios clave ya presentes en este proyecto:
 **MiAgente** (`miagente.co`) es un SaaS para agentes inmobiliarios en Colombia. Permite crear fichas de propiedades, obtener un link único por propiedad y compartirlas por WhatsApp con preview enriquecida (OG image). El agente no necesita saber de tecnología — flujo completo en menos de 60 segundos.
 
 **Mercado objetivo:** agentes inmobiliarios independientes en Colombia.  
-**Modelo de negocio:** Freemium — plan gratuito (3 propiedades) + plan Pro ($99.999 COP/mes). **Ambos planes con la pasarela de pagos funcional son parte del MVP.**
+**Modelo de negocio:** Freemium — Free (3 propiedades), Pro ($99.999 COP/mes, 50 propiedades) y Personalizado (por contacto). Detalle de límites por plan en la sección "Planes y límites". **La pasarela de pagos funcional es parte del MVP.**
 
 ---
 
@@ -174,6 +174,7 @@ La base de datos está bajo control de **Prisma Migrations** (con migración `0_
 
 - Colores de marca: `brand-50` hasta `brand-950` (definidos en `globals.css`)
 - Paleta principal del UI: `slate-*` para neutros, `brand-*` para acciones y highlights
+- **CTAs y acciones primarias siempre en `brand-*`** (el `Button` por defecto ya lo es). Los estados de alerta/límite usan el token `warning-*` (escala ámbar definida en `@theme`) para la **superficie/aviso**, no para el botón de acción. No hardcodear `amber-*` ni otros colores fuera de la paleta.
 - **No usar `tailwind.config.js`** — la config en Tailwind 4 va en el CSS vía `@theme`
 - Clases utilitarias de composición: usar `cn()` de `lib/utils.ts` (clsx + tailwind-merge)
 
@@ -181,7 +182,14 @@ La base de datos está bajo control de **Prisma Migrations** (con migración `0_
 
 - Se suben a **Vercel Blob** vía `POST /api/upload`
 - Se guardan como array de URLs en `Property.images`
-- Límite plan gratuito: 10 fotos por propiedad
+- Límite de fotos **por plan**: 10 (Free) / 20 (Pro). Vive en `lib/plans.ts` y se aplica server-side en las actions; el uploader (`components/image-upload.tsx`) recibe `maxImages` por prop.
+
+### Planes y límites
+
+- Tres planes: **Free** (3 propiedades activas, 10 fotos/propiedad), **Pro** (50 propiedades, 20 fotos/propiedad), **Personalizado** (equipos/agencias, por contacto, sin límite).
+- El único flag de plan es `User.isPremium` (boolean), expuesto en la sesión — en server vía `getSession`, en client vía `useSession` (el auth-client usa `inferAdditionalFields` para tiparlo). No hay flag para "Personalizado": se gestiona por contacto.
+- Los límites viven en `lib/plans.ts` (`propertyLimit()` / `photoLimit()`) — **fuente única de verdad**. Nunca hardcodear los números (3/50, 10/20); derivarlos de ahí tanto en UI como en enforcement.
+- Enforcement real en las server actions, gateando por `isPremium`. La validación Zod usa el **techo absoluto** (límite Pro); el límite por plan lo aplica la action.
 
 ### Blog
 

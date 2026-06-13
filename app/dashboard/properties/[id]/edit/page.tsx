@@ -35,5 +35,5 @@ export default async function EditPropertyPage({
     images: property.images,
   }
 
-  return <EditForm initial={initial} />
+  return <EditForm initial={initial} isPremium={session.user.isPremium} />
 }

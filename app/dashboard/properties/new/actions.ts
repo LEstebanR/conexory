@@ -4,6 +4,7 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
+import { propertyLimit, photoLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 
 async function generateUniqueSlug(): Promise<string> {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -26,6 +27,24 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
 
     const parsed = PropertySchema.safeParse(data)
     if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
+
+    const maxPhotos = photoLimit(session.user.isPremium)
+    if (parsed.data.images.length > maxPhotos) {
+      return { success: false, error: `Tu plan permite máximo ${maxPhotos} fotos por propiedad.` }
+    }
+
+    const limit = propertyLimit(session.user.isPremium)
+    const activeCount = await prisma.property.count({
+      where: { userId: session.user.id, published: true },
+    })
+    if (activeCount >= limit) {
+      return {
+        success: false,
+        error: session.user.isPremium
+          ? `Has alcanzado el máximo de ${limit} propiedades activas de tu plan Pro. Contáctanos para un plan personalizado.`
+          : `Has alcanzado el límite de ${limit} propiedades activas del plan gratuito. Actualiza a Pro para publicar hasta ${PRO_PROPERTY_LIMIT} propiedades.`,
+      }
+    }
 
     const slug = await generateUniqueSlug()
     const property = await prisma.property.create({

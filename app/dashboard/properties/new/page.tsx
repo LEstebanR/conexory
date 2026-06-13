@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { createProperty } from "./actions"
 import ImageUpload from "@/components/image-upload"
+import { useSession } from "@/lib/auth-client"
+import { photoLimit } from "@/lib/plans"
 
 const PROPERTY_TYPES = [
   { id: "apartment", label: "Apartamento", icon: Building2 },
@@ -67,6 +69,8 @@ export default function NewPropertyPage() {
   const [error, setError] = useState("")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const { data: session } = useSession()
+  const maxImages = photoLimit(Boolean(session?.user.isPremium))
 
   function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
@@ -150,6 +154,7 @@ export default function NewPropertyPage() {
           <ImageUpload
             onUrlsChange={setImageUrls}
             onUploadingChange={setIsUploading}
+            maxImages={maxImages}
           />
         </SectionCard>
 
