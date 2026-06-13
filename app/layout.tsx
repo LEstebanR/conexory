@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { getAppUrl } from "@/lib/urls"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -8,7 +9,7 @@ const inter = Inter({
   display: "swap",
 })
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://inmobiliaria-link-app.vercel.app"
+const APP_URL = getAppUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
