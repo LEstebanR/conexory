@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ArrowLeft, BedDouble, Bath, Square, Car, MapPin, EyeOff } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { getAppUrl } from "@/lib/urls"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
@@ -42,7 +43,7 @@ export default async function PropertyDetailPage({
 
   if (!property) notFound()
 
-  const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL}/p/${property.slug}`
+  const publicUrl = `${getAppUrl()}/p/${property.slug}`
   const typeLabel = TYPE_LABELS[property.type] ?? property.type
   const price = formatCOP(Number(property.price))
   const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
