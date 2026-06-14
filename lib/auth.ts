@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "@/lib/prisma"
+import { Resend } from "resend"
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -24,6 +25,32 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     minPasswordLength: 8,
+    sendResetPassword: async ({ user, url }) => {
+      const resend = new Resend(process.env.RESEND_API_KEY)
+      await resend.emails.send({
+        from: "MiAgente <noreply@miagente.co>",
+        to: user.email,
+        subject: "Recupera tu contraseña — MiAgente",
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#1e293b">
+            <div style="margin-bottom:24px">
+              <span style="font-size:20px;font-weight:900;letter-spacing:-0.5px">MiAgente</span>
+            </div>
+            <h1 style="font-size:22px;font-weight:800;margin:0 0 12px">Recupera tu contraseña</h1>
+            <p style="font-size:15px;color:#64748b;margin:0 0 24px;line-height:1.6">
+              Recibimos una solicitud para restablecer la contraseña de <strong>${user.email}</strong>.
+              Haz clic en el botón para crear una nueva.
+            </p>
+            <a href="${url}" style="display:inline-block;background:#818cf8;color:#fff;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px;text-decoration:none;margin-bottom:24px">
+              Crear nueva contraseña
+            </a>
+            <p style="font-size:13px;color:#94a3b8;margin:0;line-height:1.6">
+              Este enlace expira en 1 hora. Si no solicitaste este cambio, puedes ignorar este correo.
+            </p>
+          </div>
+        `,
+      })
+    },
   },
 
   socialProviders: {
