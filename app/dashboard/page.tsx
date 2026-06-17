@@ -3,23 +3,10 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
-import {
-  Plus,
-  Building2,
-  LinkIcon,
-  MapPin,
-  BedDouble,
-  Bath,
-  Square,
-  Share2,
-  EyeOff,
-  Zap,
-  DollarSign,
-  FileText,
-} from "lucide-react"
+import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
+import PropertiesList, { type PropertyItem } from "./properties-list"
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -39,139 +26,10 @@ function formatCOP(amount: number): string {
   }).format(amount)
 }
 
-function Greeting({ name }: { name: string }) {
+function greeting(name: string): string {
   const hour = new Date().getHours()
   const saludo = hour < 12 ? "Buenos días" : hour < 18 ? "Buenas tardes" : "Buenas noches"
-  return <span>{saludo}, {name.split(" ")[0]}</span>
-}
-
-type Property = {
-  id: string
-  slug: string
-  title: string
-  type: string
-  published: boolean
-  shares: number
-  price: { toNumber(): number }
-  city: string
-  neighborhood: string | null
-  area: number | null
-  bedrooms: number | null
-  bathrooms: number | null
-}
-
-function PropertyCard({ property }: { property: Property }) {
-  const typeLabel = TYPE_LABELS[property.type] ?? property.type
-  const price = formatCOP(property.price.toNumber())
-  const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
-  const inactive = !property.published
-
-  return (
-    <div className={cn(
-      "rounded-2xl border flex flex-col transition-colors",
-      inactive
-        ? "bg-canvas-softer border-hairline"
-        : "bg-white border-hairline hover:border-ink"
-    )}>
-      <Link
-        href={`/dashboard/properties/${property.id}`}
-        className="p-5 flex flex-col gap-4"
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className={cn(
-                "inline-flex items-center text-[10px] font-bold px-2 py-1 rounded-full",
-                inactive
-                  ? "bg-canvas-soft text-mute"
-                  : "bg-canvas-soft text-ink"
-              )}>
-                {typeLabel} · En venta
-              </span>
-              {inactive && (
-                <span className="inline-flex items-center gap-1 bg-warning-50 text-warning-700 text-[10px] font-bold px-2 py-1 rounded-full border border-warning-200">
-                  <EyeOff className="w-2.5 h-2.5" />
-                  Inactiva
-                </span>
-              )}
-            </div>
-            <h3 className={cn(
-              "font-black tracking-tight leading-tight truncate",
-              inactive ? "text-body" : "text-ink"
-            )}>
-              {property.title}
-            </h3>
-            {location && (
-              <div className="flex items-center gap-1 text-mute text-xs mt-1">
-                <MapPin className="w-3 h-3 flex-shrink-0" />
-                <span className="truncate">{location}</span>
-              </div>
-            )}
-          </div>
-          <p className={cn(
-            "text-lg font-black tracking-tighter flex-shrink-0",
-            inactive ? "text-mute" : "text-ink"
-          )}>
-            {price}
-          </p>
-        </div>
-
-        {(property.area != null || property.bedrooms != null || property.bathrooms != null) && (
-          <div className="flex items-center gap-4">
-            {property.area != null && (
-              <div className="flex items-center gap-1 text-xs text-body font-medium">
-                <Square className="w-3.5 h-3.5" strokeWidth={1.75} />
-                {property.area} m²
-              </div>
-            )}
-            {property.bedrooms != null && (
-              <div className="flex items-center gap-1 text-xs text-body font-medium">
-                <BedDouble className="w-3.5 h-3.5" strokeWidth={1.75} />
-                {property.bedrooms} hab.
-              </div>
-            )}
-            {property.bathrooms != null && (
-              <div className="flex items-center gap-1 text-xs text-body font-medium">
-                <Bath className="w-3.5 h-3.5" strokeWidth={1.75} />
-                {property.bathrooms} baños
-              </div>
-            )}
-          </div>
-        )}
-
-        {property.shares > 0 && (
-          <div className="flex items-center gap-1 text-xs text-body font-medium -mt-1">
-            <Share2 className="w-3 h-3" />
-            {property.shares} {property.shares === 1 ? "vez compartida" : "veces compartida"}
-          </div>
-        )}
-      </Link>
-
-      <div className="flex gap-2 px-5 pb-5 border-t border-hairline pt-4">
-        <Link
-          href={`/dashboard/properties/${property.id}`}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full text-xs font-bold transition-colors",
-            inactive
-              ? "bg-canvas-soft text-mute hover:bg-surface-pressed"
-              : "bg-ink text-white hover:bg-elevated"
-          )}
-        >
-          <Share2 className="w-3.5 h-3.5" />
-          Ver link
-        </Link>
-        <Link
-          href={`/p/${property.slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full bg-canvas-soft text-body text-xs font-bold hover:bg-surface-pressed transition-colors"
-        >
-          <LinkIcon className="w-3.5 h-3.5" />
-          Vista pública
-        </Link>
-      </div>
-    </div>
-  )
+  return `${saludo}, ${name.split(" ")[0]}`
 }
 
 export default async function DashboardPage() {
@@ -193,6 +51,7 @@ export default async function DashboardPage() {
       area: true,
       bedrooms: true,
       bathrooms: true,
+      images: true,
     },
     orderBy: [{ published: "desc" }, { createdAt: "desc" }],
   })
@@ -206,58 +65,59 @@ export default async function DashboardPage() {
   const atLimit = activeCount >= limit
   const upgradeHref = isPremium ? "/contacto" : "/precios"
   const upgradeLabel = isPremium ? "Plan a medida" : "Actualizar a Pro"
-  const upgradeLabelShort = isPremium ? "Plan+" : "Pro"
   const limitTitle = isPremium ? "Límite del plan Pro alcanzado" : "Límite del plan gratuito alcanzado"
   const limitMessage = isPremium
     ? `Tienes ${activeCount} propiedades activas, el máximo de tu plan Pro. Contáctanos para un plan personalizado.`
     : `Tienes ${activeCount} propiedades activas. Actualiza a Pro para publicar hasta ${PRO_PROPERTY_LIMIT} propiedades.`
 
-  const statCards = [
-    { label: "Propiedades activas", value: activeCount, icon: Building2 },
-    { label: "Links generados", value: count, icon: LinkIcon },
-    { label: "Veces compartida", value: totalShares, icon: Share2 },
+  const items: PropertyItem[] = properties.map((p: P) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    typeLabel: TYPE_LABELS[p.type] ?? p.type,
+    published: p.published,
+    shares: p.shares,
+    price: formatCOP(p.price.toNumber()),
+    location: [p.neighborhood, p.city].filter(Boolean).join(", "),
+    area: p.area,
+    bedrooms: p.bedrooms,
+    bathrooms: p.bathrooms,
+    image: p.images[0] ?? null,
+  }))
+
+  const stats = [
+    { label: "Propiedades", value: count },
+    { label: "Activas", value: activeCount },
+    { label: "Veces compartidas", value: totalShares },
   ]
 
   return (
-    <div className="flex-1 p-6 lg:p-8 max-w-6xl w-full mx-auto">
+    <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-8">
+      <div className="flex items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-ink tracking-tight mb-1">
-            <Greeting name={session.user.name} />
+          <p className="text-sm font-medium text-mute mb-1">{greeting(session.user.name)}</p>
+          <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter">
+            Tus propiedades
           </h1>
-          <p className="text-body text-sm">
-            Administra y comparte tus propiedades desde un solo lugar.
-          </p>
         </div>
-        {atLimit ? (
-          <Button size="sm" className="hidden sm:flex flex-shrink-0" asChild>
-            <Link href={upgradeHref}>
-              <Zap className="w-4 h-4" />
-              {upgradeLabel}
-            </Link>
-          </Button>
-        ) : (
-          <Button size="sm" className="hidden sm:flex flex-shrink-0" asChild>
-            <Link href="/dashboard/properties/new">
-              <Plus className="w-4 h-4" />
-              Nueva propiedad
-            </Link>
-          </Button>
-        )}
+        <Button size="sm" className="flex-shrink-0" asChild>
+          <Link href={atLimit ? upgradeHref : "/dashboard/properties/new"}>
+            {atLimit ? <Zap className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            <span className="hidden sm:inline">{atLimit ? upgradeLabel : "Nueva propiedad"}</span>
+            <span className="sm:hidden">{atLimit ? "Pro" : "Nueva"}</span>
+          </Link>
+        </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        {statCards.map((stat) => (
-          <div key={stat.label} className="bg-white rounded-2xl border border-hairline p-5 flex flex-col gap-3">
-            <div className="w-10 h-10 rounded-xl bg-canvas-soft flex items-center justify-center flex-shrink-0">
-              <stat.icon className="w-5 h-5 text-ink" strokeWidth={1.75} />
-            </div>
-            <div>
-              <p className="text-3xl font-black text-ink tracking-tighter leading-none">{stat.value}</p>
-              <p className="text-xs text-mute font-medium mt-1">{stat.label}</p>
-            </div>
+      {/* Stats band */}
+      <div className="rounded-2xl bg-ink grid grid-cols-3 divide-x divide-white/10 mb-6">
+        {stats.map((stat) => (
+          <div key={stat.label} className="px-5 py-6 sm:px-7 sm:py-7">
+            <p className="text-4xl sm:text-5xl font-black text-white tracking-tighter leading-none tabular-nums">
+              {stat.value}
+            </p>
+            <p className="text-xs sm:text-sm text-mute font-medium mt-2">{stat.label}</p>
           </div>
         ))}
       </div>
@@ -270,38 +130,15 @@ export default async function DashboardPage() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-warning-900">{limitTitle}</p>
-            <p className="text-xs text-warning-700 mt-0.5">
-              {limitMessage}
-            </p>
+            <p className="text-xs text-warning-700 mt-0.5">{limitMessage}</p>
           </div>
-          <Button size="sm" className="flex-shrink-0" asChild>
-            <Link href={upgradeHref}>
-              {upgradeLabel}
-            </Link>
+          <Button size="sm" className="flex-shrink-0 hidden sm:flex" asChild>
+            <Link href={upgradeHref}>{upgradeLabel}</Link>
           </Button>
         </div>
       )}
 
       {/* Properties */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-black text-ink tracking-tight">Mis propiedades</h2>
-        {atLimit ? (
-          <Button size="sm" variant="ghost" className="sm:hidden" asChild>
-            <Link href={upgradeHref}>
-              <Zap className="w-4 h-4" />
-              {upgradeLabelShort}
-            </Link>
-          </Button>
-        ) : (
-          <Button size="sm" variant="ghost" className="sm:hidden" asChild>
-            <Link href="/dashboard/properties/new">
-              <Plus className="w-4 h-4" />
-              Nueva
-            </Link>
-          </Button>
-        )}
-      </div>
-
       {count === 0 ? (
         <div className="bg-white rounded-3xl border border-dashed border-hairline-strong flex flex-col items-center justify-center py-20 px-6 text-center">
           <div className="relative mb-6">
@@ -340,11 +177,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {properties.map((p: P) => (
-            <PropertyCard key={p.id} property={p} />
-          ))}
-        </div>
+        <PropertiesList items={items} />
       )}
     </div>
   )
