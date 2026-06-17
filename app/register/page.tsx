@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Building2, Eye, EyeOff, ArrowRight, Camera, LinkIcon, Send, CheckCircle2 } from "lucide-react"
+import { Building2, Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -17,79 +17,6 @@ function GoogleIcon() {
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
     </svg>
-  )
-}
-
-function MiniSteps() {
-  const steps = [
-    { icon: Camera, label: "Sube fotos y escribe el precio" },
-    { icon: LinkIcon, label: "Obtén tu link único" },
-    { icon: Send, label: "Comparte por WhatsApp" },
-  ]
-  return (
-    <div className="space-y-3">
-      {steps.map((step, i) => (
-        <div key={i} className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center flex-shrink-0">
-            <step.icon className="w-4.5 h-4.5 text-white" strokeWidth={2} />
-          </div>
-          <p className="text-sm font-semibold text-white leading-tight">{step.label}</p>
-          <span className="text-xs font-black text-white/40 tabular-nums ml-auto">
-            {String(i + 1).padStart(2, "0")}
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function BrandPanel() {
-  return (
-    <div className="hidden lg:flex lg:w-[420px] xl:w-[460px] flex-col flex-shrink-0 relative bg-ink p-10 xl:p-12 overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: "radial-gradient(circle, white 1.5px, transparent 1.5px)", backgroundSize: "24px 24px" }} />
-      </div>
-
-      <Link href="/" className="relative flex items-center gap-2.5 w-fit">
-        <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center">
-          <Building2 className="w-4.5 h-4.5 text-ink" strokeWidth={2.5} />
-        </div>
-        <span className="text-xl font-bold text-white tracking-tight">Conexory</span>
-      </Link>
-
-      <div className="relative flex-1 flex flex-col justify-center gap-8 py-12">
-        <div>
-          <p className="text-mute font-semibold text-xs uppercase tracking-[0.2em] mb-5">Empieza gratis hoy</p>
-          <h2 className="text-4xl xl:text-5xl font-black text-white tracking-tighter leading-none">
-            Tu primera<br />propiedad,<br />
-            <span className="text-mute">en 60 segundos.</span>
-          </h2>
-        </div>
-        <MiniSteps />
-        <div className="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-          <CheckCircle2 className="w-4 h-4 text-white flex-shrink-0" />
-          <p className="text-sm text-white/80 font-medium">Gratis para empezar · Sin tarjeta de crédito</p>
-        </div>
-      </div>
-
-      <div className="relative">
-        <div className="h-px w-full bg-white/8 mb-6" />
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-2">
-            {["C", "M", "A"].map((l) => (
-              <div key={l} className="w-7 h-7 rounded-full bg-white/15 border-2 border-ink flex items-center justify-center text-white text-[10px] font-bold">
-                {l}
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-mute">
-            <span className="text-white font-bold">+480 agentes</span> ya usan Conexory
-          </p>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -122,11 +49,7 @@ export default function RegisterPage() {
     setLoading(true)
     setError("")
 
-    const { error: authError } = await signUp.email({
-      name,
-      email,
-      password,
-    })
+    const { error: authError } = await signUp.email({ name, email, password })
 
     if (authError) {
       setError(AUTH_ERRORS[authError.code ?? ""] ?? "Algo salió mal. Intenta de nuevo.")
@@ -139,236 +62,230 @@ export default function RegisterPage() {
   async function handleGoogle() {
     setGoogleLoading(true)
     setError("")
-    await signIn.social({
-      provider: "google",
-      callbackURL: "/dashboard",
-    })
+    await signIn.social({ provider: "google", callbackURL: "/dashboard" })
   }
 
   return (
-    <div className="min-h-screen flex">
-      <BrandPanel />
+    <main className="relative min-h-screen bg-white overflow-hidden flex flex-col items-center justify-center px-5 py-12">
+      {/* Background dot grid */}
+      <div className="absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]">
+        <svg className="absolute inset-0 w-full h-full opacity-[0.05]">
+          <defs>
+            <pattern id="register-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="#000000" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#register-dots)" />
+        </svg>
+      </div>
 
-      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto">
-        {/* Mobile logo */}
-        <div className="lg:hidden flex items-center gap-2.5 p-6 border-b border-hairline">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-ink flex items-center justify-center">
-              <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
+      <Link
+        href="/"
+        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-mute hover:text-ink transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span className="hidden sm:inline">Volver al inicio</span>
+      </Link>
+
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
+          <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
+            <Building2 className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
+          </div>
+          <span className="text-xl font-bold text-ink tracking-tight">Conexory</span>
+        </Link>
+
+        {/* Card */}
+        <div className="bg-white border border-hairline rounded-3xl p-7 sm:p-9 shadow-xl shadow-black/5">
+          <div className="text-center mb-7">
+            <h1 className="text-2xl font-black text-ink tracking-tight mb-1.5">Crea tu cuenta</h1>
+            <p className="text-body text-sm">Gratis para empezar · Sin tarjeta de crédito</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogle}
+            disabled={googleLoading}
+            className="w-full flex items-center justify-center gap-3 h-12 rounded-full border border-hairline-strong bg-white text-ink text-sm font-semibold hover:bg-canvas-soft transition-colors mb-5 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {googleLoading ? (
+              <svg className="animate-spin w-4 h-4 text-mute" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+            ) : (
+              <GoogleIcon />
+            )}
+            Continuar con Google
+          </button>
+
+          <div className="relative mb-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-hairline" />
             </div>
-            <span className="text-lg font-black text-ink tracking-tight">Conexory</span>
-          </Link>
-        </div>
+            <div className="relative flex justify-center">
+              <span className="bg-white px-3 text-xs text-mute font-semibold uppercase tracking-wider">
+                o con tu correo
+              </span>
+            </div>
+          </div>
 
-        <div className="flex-1 flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-20 py-12 max-w-lg lg:max-w-none mx-auto w-full">
-          <Link href="/" className="hidden lg:inline-flex items-center gap-1.5 text-sm font-medium text-mute hover:text-ink transition-colors mb-12 w-fit">
-            <ArrowRight className="w-3.5 h-3.5 rotate-180" />
-            Volver al inicio
-          </Link>
-
-          <div className="max-w-sm xl:max-w-md">
-            <div className="mb-8">
-              <h1 className="text-3xl font-black text-ink tracking-tighter mb-2">Crear cuenta</h1>
-              <p className="text-body text-sm">Gratis para empezar · Sin tarjeta de crédito</p>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label htmlFor="name" className="block text-sm font-semibold text-ink">
+                Nombre completo
+              </label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Carlos Rodríguez"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="name"
+                className="h-12"
+              />
             </div>
 
-            {/* Google */}
-            <button
-              type="button"
-              onClick={handleGoogle}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 h-12 rounded-full border border-hairline-strong bg-white text-ink text-sm font-semibold hover:bg-canvas-soft transition-all duration-200 mb-6 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {googleLoading ? (
-                <svg className="animate-spin w-4 h-4 text-mute" fill="none" viewBox="0 0 24 24">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-sm font-semibold text-ink">
+                Correo electrónico
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="h-12"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="block text-sm font-semibold text-ink">
+                Contraseña
+              </label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPass ? "text" : "password"}
+                  placeholder="Mínimo 8 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="h-12 pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+                  aria-label={showPass ? "Ocultar" : "Mostrar"}
+                >
+                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {password.length > 0 && (
+                <div className="flex gap-1 mt-1.5">
+                  {[1, 2, 3, 4].map((level) => (
+                    <div
+                      key={level}
+                      className={cn(
+                        "h-1 flex-1 rounded-full transition-colors duration-300",
+                        password.length >= level * 2
+                          ? level <= 2 ? "bg-warning-400" : "bg-ink"
+                          : "bg-canvas-soft"
+                      )}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="confirm-password" className="block text-sm font-semibold text-ink">
+                Confirmar contraseña
+              </label>
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Repite tu contraseña"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                  className={cn(
+                    "h-12 pr-12",
+                    !passwordsMatch && "border-red-400 focus:ring-red-400 focus:border-red-400"
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+                  aria-label={showConfirm ? "Ocultar" : "Mostrar"}
+                >
+                  {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {!passwordsMatch && (
+                <p className="text-xs text-red-500 font-medium">Las contraseñas no coinciden</p>
+              )}
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative mt-0.5 flex-shrink-0">
+                <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} required className="sr-only" />
+                <div className={cn(
+                  "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200",
+                  terms ? "bg-ink border-ink" : "bg-white border-hairline-strong group-hover:border-ink"
+                )}>
+                  {terms && (
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+              <span className="text-sm text-body leading-relaxed">
+                Acepto los{" "}
+                <Link href="/terms" className="text-ink font-semibold hover:underline">términos de uso</Link>
+                {" "}y la{" "}
+                <Link href="/privacy" className="text-ink font-semibold hover:underline">política de privacidad</Link>
+              </span>
+            </label>
+
+            {error && (
+              <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+                {error}
+              </p>
+            )}
+
+            <Button type="submit" size="lg" disabled={!passwordsMatch || !terms || loading} className="w-full h-12 disabled:opacity-50">
+              {loading ? (
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
               ) : (
-                <GoogleIcon />
+                <>Crear cuenta gratis <ArrowRight className="w-4 h-4" /></>
               )}
-              Continuar con Google
-            </button>
-
-            {/* Divider */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-hairline-strong" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-xs text-mute font-semibold uppercase tracking-wider">
-                  o con tu correo
-                </span>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
-              <div className="space-y-1.5">
-                <label htmlFor="name" className="block text-sm font-semibold text-ink">
-                  Nombre completo
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Carlos Rodríguez"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  autoComplete="name"
-                  className="h-12"
-                />
-              </div>
-
-              {/* Email */}
-              <div className="space-y-1.5">
-                <label htmlFor="email" className="block text-sm font-semibold text-ink">
-                  Correo electrónico
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  className="h-12"
-                />
-              </div>
-
-              {/* Password */}
-              <div className="space-y-1.5">
-                <label htmlFor="password" className="block text-sm font-semibold text-ink">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPass ? "text" : "password"}
-                    placeholder="Mínimo 8 caracteres"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    autoComplete="new-password"
-                    className="h-12 pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-body transition-colors"
-                    aria-label={showPass ? "Ocultar" : "Mostrar"}
-                  >
-                    {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {/* Strength bar */}
-                {password.length > 0 && (
-                  <div className="flex gap-1 mt-1.5">
-                    {[1, 2, 3, 4].map((level) => (
-                      <div
-                        key={level}
-                        className={cn(
-                          "h-1 flex-1 rounded-full transition-colors duration-300",
-                          password.length >= level * 2
-                            ? level <= 2 ? "bg-warning-400" : "bg-ink"
-                            : "bg-canvas-soft"
-                        )}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Confirm password */}
-              <div className="space-y-1.5">
-                <label htmlFor="confirm-password" className="block text-sm font-semibold text-ink">
-                  Confirmar contraseña
-                </label>
-                <div className="relative">
-                  <Input
-                    id="confirm-password"
-                    type={showConfirm ? "text" : "password"}
-                    placeholder="Repite tu contraseña"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                    className={cn(
-                      "h-12 pr-12",
-                      !passwordsMatch && "border-red-400 focus:ring-red-400 focus:border-red-400"
-                    )}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-body transition-colors"
-                    aria-label={showConfirm ? "Ocultar" : "Mostrar"}
-                  >
-                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {!passwordsMatch && (
-                  <p className="text-xs text-red-500 font-medium">Las contraseñas no coinciden</p>
-                )}
-              </div>
-
-              {/* Terms */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <div className="relative mt-0.5 flex-shrink-0">
-                  <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} required className="sr-only" />
-                  <div className={cn(
-                    "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200",
-                    terms ? "bg-ink border-ink" : "bg-white border-hairline-strong group-hover:border-ink"
-                  )}>
-                    {terms && (
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                <span className="text-sm text-body leading-relaxed">
-                  Acepto los{" "}
-                  <Link href="/terms" className="text-ink font-semibold hover:underline">términos de uso</Link>
-                  {" "}y la{" "}
-                  <Link href="/privacy" className="text-ink font-semibold hover:underline">política de privacidad</Link>
-                </span>
-              </label>
-
-              {error && (
-                <p className="text-sm text-red-500 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
-                  {error}
-                </p>
-              )}
-
-              <Button
-                type="submit"
-                size="lg"
-                disabled={!passwordsMatch || !terms || loading}
-                className="w-full h-12 font-bold shadow-sm  mt-2 disabled:opacity-50"
-              >
-                {loading ? (
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                ) : (
-                  <>Crear cuenta gratis <ArrowRight className="w-4 h-4" /></>
-                )}
-              </Button>
-            </form>
-
-            <p className="text-center text-sm text-body mt-8">
-              ¿Ya tienes cuenta?{" "}
-              <Link href="/login" className="font-bold text-ink hover:opacity-70 transition-opacity">
-                Iniciar sesión
-              </Link>
-            </p>
-          </div>
+            </Button>
+          </form>
         </div>
+
+        <p className="text-center text-sm text-body mt-6">
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/login" className="font-bold text-ink hover:opacity-70 transition-opacity">
+            Iniciar sesión
+          </Link>
+        </p>
       </div>
-    </div>
+    </main>
   )
 }
