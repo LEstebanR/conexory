@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
-  Building2,
   LayoutGrid,
   Plus,
   LogOut,
@@ -145,7 +145,7 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
       <div className="flex items-center justify-between px-4 h-16 border-b border-hairline flex-shrink-0">
         <Link href="/dashboard" onClick={onClose} className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center">
-            <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
+            <Image src="/mark-white.png" alt="Conexory" width={20} height={20} className="w-5 h-5" />
           </div>
           <span className="text-base font-bold text-ink tracking-tight">Conexory</span>
         </Link>
@@ -184,7 +184,7 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
         </div>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium cursor-pointer"
         >
           <LogOut className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
           Cerrar sesión
@@ -216,7 +216,7 @@ export default function Sidebar({ user }: { user: User }) {
 
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center">
-            <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+            <Image src="/mark-white.png" alt="Conexory" width={18} height={18} className="w-4.5 h-4.5" />
           </div>
           <span className="text-base font-bold text-ink tracking-tight">Conexory</span>
         </div>

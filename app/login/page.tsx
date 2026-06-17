@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useActionState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Building2, Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react"
+import Image from "next/image"
+import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { signIn } from "@/lib/auth-client"
+import { loginAction } from "./actions"
 
 function GoogleIcon() {
   return (
@@ -19,39 +20,13 @@ function GoogleIcon() {
   )
 }
 
-const AUTH_ERRORS: Record<string, string> = {
-  INVALID_EMAIL_OR_PASSWORD: "Email o contraseña incorrectos.",
-  EMAIL_NOT_VERIFIED: "Verifica tu email antes de continuar.",
-  TOO_MANY_REQUESTS: "Demasiados intentos. Espera unos minutos.",
-}
-
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [showPass, setShowPass] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
-
-  async function handleSubmit(e: { preventDefault(): void }) {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-
-    const { error: authError } = await signIn.email({ email, password })
-
-    if (authError) {
-      setError(AUTH_ERRORS[authError.code ?? ""] ?? "Email o contraseña incorrectos.")
-      setLoading(false)
-    } else {
-      router.push("/dashboard")
-    }
-  }
+  const [state, formAction, isPending] = useActionState(loginAction, {})
 
   async function handleGoogle() {
     setGoogleLoading(true)
-    setError("")
     await signIn.social({ provider: "google", callbackURL: "/dashboard" })
   }
 
@@ -81,7 +56,7 @@ export default function LoginPage() {
         {/* Logo */}
         <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
           <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
-            <Building2 className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
+            <Image src="/mark-white.png" alt="Conexory" width={22} height={22} className="w-5.5 h-5.5" />
           </div>
           <span className="text-xl font-bold text-ink tracking-tight">Conexory</span>
         </Link>
@@ -123,17 +98,16 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div className="space-y-1.5">
               <label htmlFor="email" className="block text-sm font-semibold text-ink">
                 Correo electrónico
               </label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="tu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
                 className="h-12"
@@ -152,10 +126,9 @@ export default function LoginPage() {
               <div className="relative">
                 <Input
                   id="password"
+                  name="password"
                   type={showPass ? "text" : "password"}
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
                   className="h-12 pr-12"
@@ -171,14 +144,14 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {error && (
+            {state.error && (
               <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
-                {error}
+                {state.error}
               </p>
             )}
 
-            <Button type="submit" size="lg" disabled={loading} className="w-full h-12 disabled:opacity-60">
-              {loading ? (
+            <Button type="submit" size="lg" disabled={isPending} className="w-full h-12 disabled:opacity-60">
+              {isPending ? (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />

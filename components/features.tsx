@@ -65,10 +65,12 @@ function FormMock() {
 function ShareMock() {
   return (
     <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 p-6 space-y-4">
-      <div className="flex items-center gap-2 rounded-full border border-hairline-strong px-4 py-3">
-        <Link2 className="w-4 h-4 text-body flex-shrink-0" />
-        <span className="text-sm text-ink truncate flex-1">conexory.com/p/casa-laureles</span>
-        <span className="flex items-center gap-1 bg-canvas-soft rounded-full px-2.5 py-1 text-xs font-semibold text-ink flex-shrink-0">
+      <div className="flex flex-col gap-2.5 rounded-2xl border border-hairline-strong px-4 py-3 sm:flex-row sm:items-center sm:gap-2 sm:rounded-full">
+        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
+          <Link2 className="w-4 h-4 text-body flex-shrink-0" />
+          <span className="text-sm text-ink truncate">conexory.com/p/casa-laureles</span>
+        </div>
+        <span className="flex items-center justify-center gap-1 bg-canvas-soft rounded-full px-3 py-1.5 text-xs font-semibold text-ink flex-shrink-0">
           <Copy className="w-3 h-3" /> Copiar
         </span>
       </div>

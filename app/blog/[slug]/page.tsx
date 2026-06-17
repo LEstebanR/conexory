@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { Building2, ArrowLeft, Clock, Tag } from "lucide-react"
+import Image from "next/image"
+import { ArrowLeft, Clock, Tag } from "lucide-react"
 import { getAllPosts, getPost } from "@/lib/blog"
 import { marked } from "marked"
 
@@ -54,7 +55,7 @@ export default async function BlogPostPage({
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center">
-              <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+              <Image src="/mark-white.png" alt="Conexory" width={18} height={18} className="w-4.5 h-4.5" />
             </div>
             <span className="text-base font-black text-ink tracking-tight">Conexory</span>
           </Link>

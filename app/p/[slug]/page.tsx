@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Building2, MapPin, BedDouble, Bath, Square, Car, EyeOff } from "lucide-react"
+import Image from "next/image"
+import { MapPin, BedDouble, Bath, Square, Car, EyeOff } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import PropertyCarousel from "@/components/property-carousel"
 
@@ -82,7 +83,7 @@ export default async function PublicPropertyPage({
         <header className="bg-white border-b border-hairline px-4 sm:px-6 h-14 flex items-center">
           <Link href="/" className="flex items-center gap-2 w-fit">
             <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center shadow-sm">
-              <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+              <Image src="/mark-white.png" alt="Conexory" width={18} height={18} className="w-4.5 h-4.5" />
             </div>
             <span className="text-sm font-black text-ink tracking-tight">Conexory</span>
           </Link>

@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useActionState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Building2, Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react"
+import Image from "next/image"
+import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import { signIn, signUp } from "@/lib/auth-client"
+import { signIn } from "@/lib/auth-client"
+import { registerAction } from "./actions"
 
 function GoogleIcon() {
   return (
@@ -20,48 +21,19 @@ function GoogleIcon() {
   )
 }
 
-const AUTH_ERRORS: Record<string, string> = {
-  EMAIL_ALREADY_EXISTS: "Ya existe una cuenta con este email. ¿Quieres iniciar sesión?",
-  WEAK_PASSWORD: "La contraseña es muy débil. Usa al menos 8 caracteres.",
-  TOO_MANY_REQUESTS: "Demasiados intentos. Espera unos minutos.",
-  INVALID_EMAIL: "El correo electrónico no es válido.",
-}
-
 export default function RegisterPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [terms, setTerms] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
+  const [state, formAction, isPending] = useActionState(registerAction, {})
 
   const passwordsMatch = confirmPassword === "" || password === confirmPassword
 
-  async function handleSubmit(e: { preventDefault(): void }) {
-    e.preventDefault()
-    if (!passwordsMatch || !terms) return
-
-    setLoading(true)
-    setError("")
-
-    const { error: authError } = await signUp.email({ name, email, password })
-
-    if (authError) {
-      setError(AUTH_ERRORS[authError.code ?? ""] ?? "Algo salió mal. Intenta de nuevo.")
-      setLoading(false)
-    } else {
-      router.push("/dashboard")
-    }
-  }
-
   async function handleGoogle() {
     setGoogleLoading(true)
-    setError("")
     await signIn.social({ provider: "google", callbackURL: "/dashboard" })
   }
 
@@ -91,7 +63,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
           <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
-            <Building2 className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
+            <Image src="/mark-white.png" alt="Conexory" width={22} height={22} className="w-5.5 h-5.5" />
           </div>
           <span className="text-xl font-bold text-ink tracking-tight">Conexory</span>
         </Link>
@@ -131,17 +103,16 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div className="space-y-1.5">
               <label htmlFor="name" className="block text-sm font-semibold text-ink">
                 Nombre completo
               </label>
               <Input
                 id="name"
+                name="name"
                 type="text"
                 placeholder="Carlos Rodríguez"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
                 required
                 autoComplete="name"
                 className="h-12"
@@ -154,10 +125,9 @@ export default function RegisterPage() {
               </label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="tu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
                 className="h-12"
@@ -171,6 +141,7 @@ export default function RegisterPage() {
               <div className="relative">
                 <Input
                   id="password"
+                  name="password"
                   type={showPass ? "text" : "password"}
                   placeholder="Mínimo 8 caracteres"
                   value={password}
@@ -213,6 +184,7 @@ export default function RegisterPage() {
               <div className="relative">
                 <Input
                   id="confirm-password"
+                  name="confirmPassword"
                   type={showConfirm ? "text" : "password"}
                   placeholder="Repite tu contraseña"
                   value={confirmPassword}
@@ -240,7 +212,7 @@ export default function RegisterPage() {
 
             <label className="flex items-start gap-3 cursor-pointer group">
               <div className="relative mt-0.5 flex-shrink-0">
-                <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} required className="sr-only" />
+                <input type="checkbox" name="terms" checked={terms} onChange={(e) => setTerms(e.target.checked)} required className="sr-only" />
                 <div className={cn(
                   "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200",
                   terms ? "bg-ink border-ink" : "bg-white border-hairline-strong group-hover:border-ink"
@@ -260,14 +232,14 @@ export default function RegisterPage() {
               </span>
             </label>
 
-            {error && (
+            {state.error && (
               <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
-                {error}
+                {state.error}
               </p>
             )}
 
-            <Button type="submit" size="lg" disabled={!passwordsMatch || !terms || loading} className="w-full h-12 disabled:opacity-50">
-              {loading ? (
+            <Button type="submit" size="lg" disabled={!passwordsMatch || !terms || isPending} className="w-full h-12 disabled:opacity-50">
+              {isPending ? (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />

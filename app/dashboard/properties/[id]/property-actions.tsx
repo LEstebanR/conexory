@@ -49,7 +49,7 @@ export default function PropertyActions({
         className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-white border border-hairline-strong text-body text-sm font-bold hover:bg-canvas-softer transition-colors"
       >
         <Pencil className="w-3.5 h-3.5" />
-        Editar
+        <span className="hidden sm:inline">Editar</span>
       </Link>
 
       <button
@@ -69,7 +69,7 @@ export default function PropertyActions({
         ) : (
           <Eye className="w-3.5 h-3.5" />
         )}
-        {published ? "Desactivar" : "Activar"}
+        <span className="hidden sm:inline">{published ? "Desactivar" : "Activar"}</span>
       </button>
 
       <button
@@ -82,7 +82,7 @@ export default function PropertyActions({
         ) : (
           <Trash2 className="w-3.5 h-3.5" />
         )}
-        Eliminar
+        <span className="hidden sm:inline">Eliminar</span>
       </button>
     </div>
   )

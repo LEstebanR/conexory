@@ -118,7 +118,7 @@ export default async function PropertyDetailPage({
                 </div>
               )}
             </div>
-            <p className="text-2xl font-black text-ink tracking-tighter flex-shrink-0">{price}</p>
+            <p className="text-xl sm:text-2xl font-black text-ink tracking-tighter flex-shrink-0">{price}</p>
           </div>
 
           {hasDetails && (

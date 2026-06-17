@@ -111,13 +111,13 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats band */}
-      <div className="rounded-2xl bg-ink grid grid-cols-3 divide-x divide-white/10 mb-6">
+      <div className="rounded-2xl bg-elevated grid grid-cols-3 divide-x divide-white/10 mb-6">
         {stats.map((stat) => (
-          <div key={stat.label} className="px-4 py-6 sm:px-7 sm:py-7">
+          <div key={stat.label} className="min-w-0 px-3 py-6 sm:px-7 sm:py-7">
             <span className="inline-flex w-8 h-8 rounded-lg bg-white/10 items-center justify-center mb-4">
               <stat.icon className="w-4 h-4 text-white" strokeWidth={2} />
             </span>
-            <p className="text-4xl sm:text-5xl font-black text-white tracking-tighter leading-none tabular-nums">
+            <p className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none tabular-nums">
               {stat.value}
             </p>
             <p className="text-xs sm:text-sm text-mute font-medium mt-2">{stat.label}</p>

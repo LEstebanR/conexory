@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { Building2, Mail } from "lucide-react"
+import Image from "next/image"
+import { Mail } from "lucide-react"
 
 const links = {
   Producto: [
@@ -25,7 +26,13 @@ export default function Footer() {
           <div className="md:col-span-2 space-y-5">
             <Link href="/" className="flex items-center gap-2.5 w-fit">
               <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-                <Building2 className="w-4 h-4 text-ink" strokeWidth={2.5} />
+                <Image
+                  src="/mark-black.png"
+                  alt="Conexory"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
                 Conexory
