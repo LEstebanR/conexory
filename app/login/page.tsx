@@ -75,7 +75,7 @@ function BrandPanel() {
         <div className="w-9 h-9 rounded-xl bg-brand-400 flex items-center justify-center shadow-lg shadow-brand-400/30">
           <Building2 className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
         </div>
-        <span className="text-xl font-black text-white tracking-tight">MiAgente</span>
+        <span className="text-xl font-black text-white tracking-tight">Conexory</span>
       </Link>
 
       <div className="relative flex-1 flex flex-col justify-center gap-8 py-12">
@@ -105,7 +105,7 @@ function BrandPanel() {
             ))}
           </div>
           <p className="text-sm text-slate-400">
-            <span className="text-white font-bold">+480 agentes</span> ya usan MiAgente
+            <span className="text-white font-bold">+480 agentes</span> ya usan Conexory
           </p>
         </div>
       </div>
@@ -167,7 +167,7 @@ export default function LoginPage() {
             <div className="w-8 h-8 rounded-xl bg-brand-400 flex items-center justify-center">
               <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-lg font-black text-slate-950 tracking-tight">MiAgente</span>
+            <span className="text-lg font-black text-slate-950 tracking-tight">Conexory</span>
           </Link>
         </div>
 
@@ -182,7 +182,7 @@ export default function LoginPage() {
               <h1 className="text-3xl font-black text-slate-950 tracking-tighter mb-2">
                 Iniciar sesión
               </h1>
-              <p className="text-slate-500 text-sm">Ingresa a tu cuenta de MiAgente</p>
+              <p className="text-slate-500 text-sm">Ingresa a tu cuenta de Conexory</p>
             </div>
 
             {/* Google */}

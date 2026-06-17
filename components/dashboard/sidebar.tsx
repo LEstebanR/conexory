@@ -147,7 +147,7 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
           <div className="w-8 h-8 rounded-xl bg-brand-400 flex items-center justify-center shadow-sm">
             <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-base font-black text-slate-950 tracking-tight">MiAgente</span>
+          <span className="text-base font-black text-slate-950 tracking-tight">Conexory</span>
         </Link>
         {onClose && (
           <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden">
@@ -218,7 +218,7 @@ export default function Sidebar({ user }: { user: User }) {
           <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center">
             <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-base font-black text-slate-950 tracking-tight">MiAgente</span>
+          <span className="text-base font-black text-slate-950 tracking-tight">Conexory</span>
         </div>
 
         <div className="ml-auto">

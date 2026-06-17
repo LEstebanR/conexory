@@ -5,10 +5,11 @@ import LegalLayout, {
   LegalList,
   LegalHighlight,
 } from "@/components/legal-layout"
+import { BRAND_EMAILS } from "@/lib/brand"
 
 export const metadata: Metadata = {
-  title: "Política de Cookies — MiAgente",
-  description: "Cómo usamos cookies y tecnologías similares en MiAgente.",
+  title: "Política de Cookies — Conexory",
+  description: "Cómo usamos cookies y tecnologías similares en Conexory.",
 }
 
 const sections = [
@@ -24,12 +25,12 @@ export default function CookiesPage() {
   return (
     <LegalLayout
       title="Política de Cookies"
-      description="Información sobre cómo MiAgente utiliza cookies y tecnologías similares para operar la plataforma y mejorar tu experiencia."
+      description="Información sobre cómo Conexory utiliza cookies y tecnologías similares para operar la plataforma y mejorar tu experiencia."
       lastUpdated="31 de mayo de 2026"
       sections={sections}
     >
       <LegalHighlight>
-        MiAgente solo usa las cookies estrictamente necesarias para que la
+        Conexory solo usa las cookies estrictamente necesarias para que la
         plataforma funcione. No usamos cookies de publicidad ni rastreo de
         terceros sin tu consentimiento.
       </LegalHighlight>
@@ -98,7 +99,7 @@ export default function CookiesPage() {
 
       <LegalSection id="terceros" number={3} title="Cookies de terceros">
         <LegalP>
-          MiAgente utiliza los siguientes servicios de terceros que pueden
+          Conexory utiliza los siguientes servicios de terceros que pueden
           establecer sus propias cookies:
         </LegalP>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3 text-sm">
@@ -153,16 +154,16 @@ export default function CookiesPage() {
 
       <LegalSection id="contacto" number={6} title="Contacto">
         <LegalP>
-          Si tienes preguntas sobre el uso de cookies en MiAgente, escríbenos:
+          Si tienes preguntas sobre el uso de cookies en Conexory, escríbenos:
         </LegalP>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-2 text-sm">
           <p>
             <span className="font-semibold text-slate-800">Correo:</span>{" "}
             <a
-              href="mailto:privacidad@miagente.co"
+              href={`mailto:${BRAND_EMAILS.privacidad}`}
               className="text-brand-500 hover:underline"
             >
-              privacidad@miagente.co
+              {BRAND_EMAILS.privacidad}
             </a>
           </p>
           <p>

@@ -31,7 +31,7 @@ export default function LegalLayout({
               <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
             <span className="text-base font-black text-slate-950 tracking-tight">
-              MiAgente
+              Conexory
             </span>
           </Link>
           <Link
@@ -101,7 +101,7 @@ export default function LegalLayout({
       <footer className="border-t border-slate-100 py-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-slate-400">
-            © 2026 MiAgente · Hecho en Colombia 🇨🇴
+            © 2026 Conexory · Hecho en Colombia 🇨🇴
           </p>
           <div className="flex items-center gap-6">
             <Link

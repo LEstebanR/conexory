@@ -17,7 +17,7 @@ La foto es lo primero que ve el cliente. Si está oscura, borrosa o muestra el b
 
 Nada genera más frustración en un cliente que llegar a una visita y descubrir que el precio real es diferente al del link que le compartieron. Esto rompe la confianza de inmediato.
 
-**La solución:** Actualiza el precio cada vez que cambie. Si estás usando MiAgente, editar la ficha toma menos de un minuto. Nunca dejes circular un link con información vieja.
+**La solución:** Actualiza el precio cada vez que cambie. Si estás usando Conexory, editar la ficha toma menos de un minuto. Nunca dejes circular un link con información vieja.
 
 ## 3. Descripción vacía o genérica
 

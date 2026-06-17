@@ -18,7 +18,7 @@ const steps = [
     title: "Obtén tu link único",
     description:
       "Cada propiedad tiene su propia URL lista para compartir. Luce profesional, carga rápido y se ve perfecto en WhatsApp.",
-    detail: "miagente.co/p/tu-propiedad",
+    detail: "conexory.com/p/tu-propiedad",
     color: "text-slate-800",
     bg: "bg-slate-50",
     border: "border-slate-200",

@@ -51,7 +51,7 @@ Esta disciplina mantiene el portafolio "vivo" y libera energía para propiedades
 
 Una buena herramienta de gestión debería permitirte ver de un vistazo qué propiedades están activas, cuáles llevan más tiempo sin movimiento y cuántas veces se ha compartido cada link. Esta información te ayuda a tomar decisiones basadas en datos, no en intuición.
 
-Con MiAgente puedes ver cuántas veces fue compartida cada propiedad, lo que es un indicador directo de cuánto interés hay en el mercado.
+Con Conexory puedes ver cuántas veces fue compartida cada propiedad, lo que es un indicador directo de cuánto interés hay en el mercado.
 
 ---
 

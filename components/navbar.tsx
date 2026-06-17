@@ -18,7 +18,7 @@ export default function Navbar() {
               <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
             <span className="text-lg font-black text-slate-950 tracking-tight">
-              MiAgente
+              Conexory
             </span>
           </Link>
 

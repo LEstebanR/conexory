@@ -14,8 +14,8 @@ const APP_URL = getAppUrl()
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "MiAgente — Comparte tus propiedades por WhatsApp en segundos",
-    template: "%s — MiAgente",
+    default: "Conexory — Comparte tus propiedades por WhatsApp en segundos",
+    template: "%s — Conexory",
   },
   description:
     "La herramienta más rápida para agentes inmobiliarios en Colombia. Publica tu propiedad en 60 segundos y compártela por WhatsApp con un link único y profesional.",
@@ -29,25 +29,25 @@ export const metadata: Metadata = {
     "vender propiedades WhatsApp",
     "inmobiliaria digital Colombia",
   ],
-  authors: [{ name: "MiAgente" }],
-  creator: "MiAgente",
-  publisher: "MiAgente",
+  authors: [{ name: "Conexory" }],
+  creator: "Conexory",
+  publisher: "Conexory",
   robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true },
   },
   openGraph: {
-    title: "MiAgente — Crea. Comparte. Vende.",
+    title: "Conexory — Crea. Comparte. Vende.",
     description:
       "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para agentes inmobiliarios colombianos.",
     type: "website",
     locale: "es_CO",
-    siteName: "MiAgente",
+    siteName: "Conexory",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MiAgente — Comparte propiedades por WhatsApp",
+    title: "Conexory — Comparte propiedades por WhatsApp",
     description:
       "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para agentes colombianos.",
   },
