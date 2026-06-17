@@ -16,8 +16,8 @@ export default function SignupCTA() {
         }}
       />
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-28 text-center">
-        <h2 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white tracking-tighter leading-none mb-6">
+      <div className="relative max-w-4xl mx-auto px-5 sm:px-6 lg:px-8 py-28 text-center">
+        <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tighter leading-none mb-6">
           Empieza hoy.
           <br />
           <span className="text-mute">Es gratis.</span>
