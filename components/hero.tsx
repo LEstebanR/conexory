@@ -1,11 +1,19 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { MessageCircle, ArrowRight, MapPin, BedDouble, Bath, Maximize2, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Image from "next/image";
+import {
+  MessageCircle,
+  ArrowRight,
+  MapPin,
+  BedDouble,
+  Bath,
+  Maximize2,
+  Check,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=70"
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=70";
 
 function BrowserMock() {
   return (
@@ -54,7 +62,9 @@ function BrowserMock() {
               Casa con jardín privado
             </h3>
             <div>
-              <p className="text-2xl font-black text-ink tracking-tighter leading-none">$580.000.000</p>
+              <p className="text-2xl font-black text-ink tracking-tighter leading-none">
+                $580.000.000
+              </p>
               <p className="text-xs text-mute font-medium mt-0.5">COP</p>
             </div>
             <div className="flex items-center gap-4 py-3 border-t border-b border-hairline">
@@ -63,7 +73,10 @@ function BrowserMock() {
                 { icon: Bath, label: "2" },
                 { icon: Maximize2, label: "120m²" },
               ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-1 text-sm text-ink font-semibold">
+                <div
+                  key={label}
+                  className="flex items-center gap-1 text-sm text-ink font-semibold"
+                >
                   <Icon className="w-4 h-4 text-body" strokeWidth={1.75} />
                   {label}
                 </div>
@@ -71,14 +84,19 @@ function BrowserMock() {
             </div>
             <div className="w-full flex items-center justify-center gap-2 bg-ink rounded-full py-3">
               <MessageCircle className="w-4 h-4 text-white" />
-              <span className="text-sm font-semibold text-white">Contactar por WhatsApp</span>
+              <span className="text-sm font-semibold text-white">
+                Contactar por WhatsApp
+              </span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Floating: link copied */}
-      <div className="hidden sm:flex absolute -top-5 -left-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up" style={{ animationDelay: "500ms" }}>
+      <div
+        className="hidden sm:flex absolute -top-5 -left-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
+        style={{ animationDelay: "500ms" }}
+      >
         <div className="w-5 h-5 rounded-full bg-ink flex items-center justify-center">
           <Check className="w-3 h-3 text-white" strokeWidth={3} />
         </div>
@@ -86,12 +104,15 @@ function BrowserMock() {
       </div>
 
       {/* Floating: interested */}
-      <div className="hidden sm:flex absolute -bottom-5 -right-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up" style={{ animationDelay: "650ms" }}>
+      <div
+        className="hidden sm:flex absolute -bottom-5 -right-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
+        style={{ animationDelay: "650ms" }}
+      >
         <MessageCircle className="w-4 h-4 text-ink" />
         <span className="text-xs font-bold text-ink">+3 interesados hoy</span>
       </div>
     </div>
-  )
+  );
 }
 
 export default function Hero() {
@@ -101,7 +122,14 @@ export default function Hero() {
       <div className="absolute inset-0 -z-10 overflow-hidden [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]">
         <svg className="absolute inset-0 w-full h-full opacity-[0.05]">
           <defs>
-            <pattern id="hero-dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+            <pattern
+              id="hero-dots"
+              x="0"
+              y="0"
+              width="22"
+              height="22"
+              patternUnits="userSpaceOnUse"
+            >
               <circle cx="1" cy="1" r="1" fill="#000000" />
             </pattern>
           </defs>
@@ -117,7 +145,7 @@ export default function Hero() {
         >
           <span className="w-1.5 h-1.5 rounded-full bg-ink flex-shrink-0 animate-pulse" />
           <span className="text-xs sm:text-sm font-medium text-ink truncate">
-            +480 agentes ya usan Conexory
+            +100 agentes ya usan Conexory
           </span>
         </div>
 
@@ -166,11 +194,19 @@ export default function Hero() {
               Empezar gratis <ArrowRight className="w-5 h-5" />
             </a>
           </Button>
-          <Button size="xl" variant="secondary" className="h-14 px-8 w-full sm:w-auto" asChild>
+          <Button
+            size="xl"
+            variant="secondary"
+            className="h-14 px-8 w-full sm:w-auto"
+            asChild
+          >
             <a href="#how-it-works">Ver cómo funciona</a>
           </Button>
         </div>
-        <p className="text-sm text-mute mt-6 animate-fade-up" style={{ animationDelay: "300ms" }}>
+        <p
+          className="text-sm text-mute mt-6 animate-fade-up"
+          style={{ animationDelay: "300ms" }}
+        >
           Gratis para siempre · Sin tarjeta de crédito · 100% desde el celular
         </p>
       </div>
@@ -183,5 +219,5 @@ export default function Hero() {
         <BrowserMock />
       </div>
     </section>
-  )
+  );
 }
