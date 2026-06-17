@@ -197,6 +197,17 @@ La base de datos está bajo control de **Prisma Migrations** (con migración `0_
 - Funciones de lectura en `lib/blog.ts`
 - Renderizado con `marked` (HTML desde Markdown)
 
+### Comentarios
+
+- **Evitar comentarios.** Preferir código autoexplicativo (nombres claros, funciones pequeñas). Comentar solo lo que el código no puede expresar: el *porqué* de una decisión no evidente, no el *qué*.
+- Los comentarios de código van **en inglés**, aunque el UI y los strings de cara al usuario sean en español.
+
+### URLs y dominio
+
+- La URL pública canónica se resuelve con `getAppUrl()` (`lib/urls.ts`): `APP_URL` → `VERCEL_PROJECT_PRODUCTION_URL` → `VERCEL_URL` → `localhost`. Usarla para todo link absoluto (link público `/p/[slug]`, `metadataBase`/OG, sitemap, robots). **Nunca hardcodear la URL ni leer `NEXT_PUBLIC_APP_URL`.**
+- **Auth es distinto:** el `baseURL`/origin check de better-auth necesita el **host del deploy actual**, no el canónico — en cliente `window.location.origin`, en server se deriva de `VERCEL_URL` (+ `trustedOrigins` para que los previews pasen el origin check). No usar `getAppUrl()` para auth.
+- Las env vars de URL pueden venir **vacías** (`""`) en algunos scopes de Vercel; al derivar, tratar `""` como ausente (usar `||`, no `??`).
+
 ---
 
 ## Variables de entorno
@@ -208,9 +219,11 @@ Ver `.env.example` para la lista completa. Las críticas:
 | `DATABASE_URL` | Conexión pooled a Neon (para Prisma en edge/serverless) |
 | `DIRECT_URL` | Conexión directa a Neon (para migraciones) |
 | `BETTER_AUTH_SECRET` | Firma de sesiones |
-| `BETTER_AUTH_URL` | URL base de la app |
+| `BETTER_AUTH_URL` | Opcional — base de auth; si falta, se deriva del request / `VERCEL_URL` |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth Google |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob (el SDK la lee solo) |
+
+> La URL pública de la app **no** se configura por env var: se deriva en runtime con `getAppUrl()` desde las variables que Vercel inyecta (`VERCEL_PROJECT_PRODUCTION_URL` / `VERCEL_URL`). `APP_URL` solo se usa como override para un dominio propio.
 
 ---
 
@@ -274,3 +287,5 @@ fix(LES-155): validate property input with Zod in server actions
 - No olvidar `await` en `headers()`, `cookies()` y `params`/`searchParams` (son Promises en Next.js 16)
 - No hardcodear `"En venta"` — las propiedades pueden ser en arriendo o en venta/arriendo
 - No exponer `userId` en rutas públicas — la vista pública `/p/[slug]` no debe filtrar datos del agente
+- No leer `NEXT_PUBLIC_APP_URL` ni hardcodear la URL de la app — usar `getAppUrl()` de `lib/urls.ts`
+- No escribir comentarios salvo que aclaren algo no evidente; cuando sean necesarios, en inglés
