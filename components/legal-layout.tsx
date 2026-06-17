@@ -47,7 +47,7 @@ export default function LegalLayout({
       {/* Hero */}
       <div className="bg-ink py-14 sm:py-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-ink font-bold text-xs uppercase tracking-[0.2em] mb-4">
+          <p className="text-mute font-bold text-xs uppercase tracking-[0.2em] mb-4">
             Legal
           </p>
           <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tighter leading-none mb-4">
@@ -56,8 +56,8 @@ export default function LegalLayout({
           <p className="text-mute text-base max-w-xl leading-relaxed mb-6">
             {description}
           </p>
-          <div className="inline-flex items-center gap-2 bg-white/6 border border-white/10 rounded-full px-4 py-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-ink" />
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
             <span className="text-xs text-mute">
               Última actualización:{" "}
               <span className="text-white font-semibold">{lastUpdated}</span>

@@ -1,161 +1,178 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Building2, ArrowLeft, Check } from "lucide-react"
+import { Check } from "lucide-react"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+import Reveal from "@/components/reveal"
+import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
   title: "Precios — Conexory",
   description: "Planes y precios de Conexory para agentes inmobiliarios en Colombia.",
 }
 
-const features = {
-  gratis: [
-    "Hasta 3 propiedades activas",
-    "Hasta 10 fotos por propiedad",
-    "Link único por propiedad",
-    "Compartir por WhatsApp",
-    "Vista pública para tus clientes",
-    "Contador de veces compartida",
-  ],
-  pro: [
-    "Hasta 50 propiedades activas",
-    "Hasta 20 fotos por propiedad",
-    "Estadísticas de visitas por propiedad",
-    "Soporte prioritario",
-    "Todo lo del plan gratuito",
-  ],
-  personalizado: [
-    "Propiedades ilimitadas",
-    "Fotos ilimitadas por propiedad",
-    "Soporte dedicado",
-    "Integraciones a la medida",
-    "Todo lo del plan Pro",
-  ],
-}
+const plans = [
+  {
+    name: "Gratuito",
+    price: "$0",
+    cadence: "Para siempre",
+    cta: "Empezar gratis",
+    href: "/register",
+    dark: false,
+    featured: false,
+    features: [
+      "Hasta 3 propiedades activas",
+      "Hasta 10 fotos por propiedad",
+      "Link único por propiedad",
+      "Compartir por WhatsApp",
+      "Vista pública para tus clientes",
+      "Contador de veces compartida",
+    ],
+  },
+  {
+    name: "Pro",
+    price: "$99.999",
+    priceSuffix: "/mes",
+    cadence: "COP · facturación mensual",
+    cta: "Comenzar con Pro",
+    href: "/register",
+    dark: true,
+    featured: true,
+    features: [
+      "Hasta 50 propiedades activas",
+      "Hasta 20 fotos por propiedad",
+      "Estadísticas de visitas por propiedad",
+      "Soporte prioritario",
+      "Todo lo del plan gratuito",
+    ],
+  },
+  {
+    name: "Personalizado",
+    price: "A tu medida",
+    cadence: "Para equipos y agencias",
+    cta: "Contáctanos",
+    href: "/contacto",
+    dark: false,
+    featured: false,
+    features: [
+      "Propiedades ilimitadas",
+      "Fotos ilimitadas por propiedad",
+      "Soporte dedicado",
+      "Integraciones a la medida",
+      "Todo lo del plan Pro",
+    ],
+  },
+]
 
 export default function PreciosPage() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-hairline">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center">
-              <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-            </div>
-            <span className="text-base font-black text-ink tracking-tight">
-              Conexory
-            </span>
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-sm font-medium text-body hover:text-ink transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Volver al inicio
-          </Link>
-        </div>
-      </header>
+    <main className="min-h-screen bg-white overflow-x-hidden">
+      <Navbar />
 
-      <div className="bg-ink py-14 sm:py-20">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-mute font-bold text-xs uppercase tracking-[0.2em] mb-4">
+      {/* Hero */}
+      <section className="relative pt-32 pb-12 lg:pt-40 lg:pb-16 text-center overflow-hidden">
+        <div className="absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]">
+          <svg className="absolute inset-0 w-full h-full opacity-[0.05]">
+            <defs>
+              <pattern id="precios-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="1" fill="#000000" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#precios-dots)" />
+          </svg>
+        </div>
+        <div className="max-w-3xl mx-auto px-5 sm:px-6 lg:px-8">
+          <p className="text-body font-semibold text-sm uppercase tracking-[0.2em] mb-5 animate-fade-up">
             Precios
           </p>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">
-            Empieza gratis. Crece sin límites.
+          <h1
+            className="text-4xl sm:text-6xl font-black text-ink tracking-tighter leading-[1.05] animate-fade-up text-balance"
+            style={{ animationDelay: "80ms" }}
+          >
+            Empieza gratis.
+            <br />
+            <span className="text-mute">Crece sin límites.</span>
           </h1>
-          <p className="text-mute text-base leading-relaxed">
+          <p
+            className="text-lg text-body leading-relaxed mt-6 max-w-xl mx-auto animate-fade-up"
+            style={{ animationDelay: "160ms" }}
+          >
             Sin tarjeta de crédito. Sin compromisos. Cancela cuando quieras.
           </p>
         </div>
-      </div>
+      </section>
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          {/* Gratis */}
-          <div className="border border-hairline-strong rounded-2xl p-8 flex flex-col">
-            <div className="mb-6">
-              <p className="text-xs font-bold text-mute uppercase tracking-widest mb-2">Gratuito</p>
-              <p className="text-4xl font-black text-ink tracking-tighter mb-1">$0</p>
-              <p className="text-sm text-mute">Para siempre</p>
-            </div>
-            <ul className="space-y-3 mb-8 flex-1">
-              {features.gratis.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm text-body">
-                  <Check className="w-4 h-4 text-ink flex-shrink-0 mt-0.5" strokeWidth={2.5} />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/register"
-              className="w-full flex items-center justify-center h-11 rounded-xl border-2 border-hairline-strong text-ink font-bold text-sm hover:border-ink hover:bg-canvas-softer transition-colors"
-            >
-              Empezar gratis
-            </Link>
-          </div>
+      {/* Plans */}
+      <section className="max-w-6xl mx-auto w-full px-5 sm:px-6 lg:px-8 pb-12">
+        <div className="grid lg:grid-cols-3 gap-6 items-start">
+          {plans.map((plan, i) => (
+            <Reveal key={plan.name} delay={i * 100}>
+              <div
+                className={`relative h-full rounded-3xl p-8 flex flex-col ${
+                  plan.dark
+                    ? "bg-ink text-white lg:scale-[1.03] shadow-2xl shadow-black/20"
+                    : "bg-white border border-hairline-strong"
+                }`}
+              >
+                {plan.featured && (
+                  <span className="absolute top-6 right-6 bg-white text-ink text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
+                    Más popular
+                  </span>
+                )}
+                <div className="mb-8">
+                  <p
+                    className={`text-xs font-bold uppercase tracking-widest mb-3 ${
+                      plan.dark ? "text-mute" : "text-mute"
+                    }`}
+                  >
+                    {plan.name}
+                  </p>
+                  <p className={`text-5xl font-black tracking-tighter ${plan.dark ? "text-white" : "text-ink"}`}>
+                    {plan.price}
+                    {plan.priceSuffix && (
+                      <span className="text-xl font-semibold text-mute">{plan.priceSuffix}</span>
+                    )}
+                  </p>
+                  <p className="text-sm text-mute mt-2">{plan.cadence}</p>
+                </div>
 
-          {/* Pro */}
-          <div className="border-2 border-ink rounded-2xl p-8 flex flex-col bg-canvas-soft/20 relative overflow-hidden">
-            <div className="absolute top-4 right-4">
-              <span className="bg-ink text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
-                Más popular
-              </span>
-            </div>
-            <div className="mb-6">
-              <p className="text-xs font-bold text-ink uppercase tracking-widest mb-2">Pro</p>
-              <p className="text-4xl font-black text-ink tracking-tighter mb-1">
-                $99.999
-                <span className="text-lg font-semibold text-mute">/mes</span>
-              </p>
-              <p className="text-sm text-mute">COP · facturación mensual</p>
-            </div>
-            <ul className="space-y-3 mb-8 flex-1">
-              {features.pro.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm text-body">
-                  <Check className="w-4 h-4 text-ink flex-shrink-0 mt-0.5" strokeWidth={2.5} />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/register"
-              className="w-full flex items-center justify-center h-11 rounded-xl bg-ink text-white font-bold text-sm hover:bg-elevated transition-colors"
-            >
-              Comenzar con Pro
-            </Link>
-          </div>
+                <ul className="space-y-3.5 mb-8 flex-1">
+                  {plan.features.map((f) => (
+                    <li
+                      key={f}
+                      className={`flex items-start gap-2.5 text-sm ${plan.dark ? "text-white/80" : "text-body"}`}
+                    >
+                      <span
+                        className={`mt-0.5 flex h-4 w-4 items-center justify-center rounded-full flex-shrink-0 ${
+                          plan.dark ? "bg-white" : "bg-ink"
+                        }`}
+                      >
+                        <Check className={`w-2.5 h-2.5 ${plan.dark ? "text-ink" : "text-white"}`} strokeWidth={3.5} />
+                      </span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
 
-          {/* Personalizado */}
-          <div className="border border-hairline-strong rounded-2xl p-8 flex flex-col">
-            <div className="mb-6">
-              <p className="text-xs font-bold text-mute uppercase tracking-widest mb-2">Personalizado</p>
-              <p className="text-4xl font-black text-ink tracking-tighter mb-1">A tu medida</p>
-              <p className="text-sm text-mute">Para equipos y agencias</p>
-            </div>
-            <ul className="space-y-3 mb-8 flex-1">
-              {features.personalizado.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm text-body">
-                  <Check className="w-4 h-4 text-ink flex-shrink-0 mt-0.5" strokeWidth={2.5} />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/contacto"
-              className="w-full flex items-center justify-center h-11 rounded-xl border-2 border-hairline-strong text-ink font-bold text-sm hover:border-ink hover:bg-canvas-softer transition-colors"
-            >
-              Contáctanos
-            </Link>
-          </div>
+                <Button
+                  variant={plan.dark ? "secondary" : plan.featured ? "default" : "outline"}
+                  size="lg"
+                  className="w-full"
+                  asChild
+                >
+                  <Link href={plan.href}>{plan.cta}</Link>
+                </Button>
+              </div>
+            </Reveal>
+          ))}
         </div>
 
-      </main>
-
-      <footer className="border-t border-hairline py-8 text-center">
-        <p className="text-xs text-mute">
-          © 2026 Conexory · Hecho en Colombia
+        <p className="text-center text-sm text-mute mt-10">
+          Todos los planes incluyen link público, preview de WhatsApp y soporte en español.
         </p>
-      </footer>
-    </div>
+      </section>
+
+      <Footer />
+    </main>
   )
 }
