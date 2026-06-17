@@ -1,6 +1,6 @@
 # /db
 
-Maneja la base de datos de MiAgente: crear migraciones de Prisma, revisar estado/drift, inspeccionar datos y administrar los branches de Neon. La BD está bajo control de **Prisma Migrations** (baselined con `0_init`).
+Maneja la base de datos de Conexory: crear migraciones de Prisma, revisar estado/drift, inspeccionar datos y administrar los branches de Neon. La BD está bajo control de **Prisma Migrations** (baselined con `0_init`).
 
 **Regla número uno:** nunca corras una migración, `reset` o `db push` contra **producción** desde local. Verifica siempre a qué base estás conectado antes de escribir.
 
@@ -68,7 +68,7 @@ bunx prisma migrate diff \
 
 ## Administrar branches de Neon
 
-Proyecto Neon: `inmobiliaria` (`late-shape-55166232`). `neonctl` se autentica por OAuth en el navegador (no hay `NEON_API_KEY`); si pide auth, deja que abra el navegador.
+Proyecto Neon: `conexory` (`late-shape-55166232`). `neonctl` se autentica por OAuth en el navegador (no hay `NEON_API_KEY`); si pide auth, deja que abra el navegador.
 
 ```bash
 # Listar branches (production = primary, development = dev persistente)

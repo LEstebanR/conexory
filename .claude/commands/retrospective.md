@@ -10,7 +10,7 @@ Lee estos archivos antes de hacer cualquier cambio:
 
 ```
 .claude/memory/MEMORY.md
-.claude/memory/project_miagente.md
+.claude/memory/project_conexory.md
 .claude/memory/reference_linear.md
 .claude/memory/user_profile.md
 .claude/memory/feedback_general.md
@@ -56,7 +56,7 @@ Para cada hallazgo, determina el archivo correcto:
 |---|---|
 | Preferencia o corrección de comportamiento | `.claude/memory/feedback_general.md` |
 | Perfil, expertise, contexto del usuario | `.claude/memory/user_profile.md` |
-| Estado del proyecto, decisiones, prioridades | `.claude/memory/project_miagente.md` |
+| Estado del proyecto, decisiones, prioridades | `.claude/memory/project_conexory.md` |
 | Referencias a sistemas externos (Linear, Vercel, etc.) | `.claude/memory/reference_linear.md` |
 | Nueva convención de código o arquitectura establecida | `AGENTS.md` |
 
@@ -106,7 +106,7 @@ Si no hay nada relevante que guardar, dilo directamente: "Sesión sin aprendizaj
   memory/
     MEMORY.md                 ← índice de todos los archivos
     feedback_general.md       ← correcciones y preferencias de comportamiento
-    project_miagente.md       ← estado del proyecto, stack, decisiones
+    project_conexory.md       ← estado del proyecto, stack, decisiones
     reference_linear.md       ← Linear: IDs, cómo consultar issues
 ```
 
@@ -115,8 +115,8 @@ Si no hay nada relevante que guardar, dilo directamente: "Sesión sin aprendizaj
 # Memory Index
 
 - [Feedback general](feedback_general.md) — correcciones y preferencias de comportamiento
-- [Proyecto MiAgente](project_miagente.md) — estado del proyecto, stack, decisiones
-- [Linear — miAgente](reference_linear.md) — workspace, IDs, cómo consultar issues
+- [Proyecto Conexory](project_conexory.md) — estado del proyecto, stack, decisiones
+- [Linear — Conexory](reference_linear.md) — workspace, IDs, cómo consultar issues
 ```
 
 ### `feedback_general.md`
@@ -131,11 +131,11 @@ metadata:
 [contenido]
 ```
 
-### `project_miagente.md`
+### `project_conexory.md`
 ```markdown
 ---
-name: project-miagente
-description: Estado del proyecto MiAgente — stack, decisiones, prioridades actuales
+name: project-conexory
+description: Estado del proyecto Conexory — stack, decisiones, prioridades actuales
 metadata:
   type: project
 ---
@@ -146,7 +146,7 @@ metadata:
 ### `reference_linear.md`
 ```markdown
 ---
-name: reference-linear-miagente
+name: reference-linear-conexory
 description: Linear workspace de Luis — IDs de proyecto, equipo, milestones
 metadata:
   type: reference

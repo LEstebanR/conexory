@@ -1,6 +1,6 @@
-# /review-miagente
+# /review-conexory
 
-Code-review **específico de MiAgente**: revisa el diff contra los invariantes y gotchas propios de este proyecto. No reemplaza a `/code-review` (que caza bugs de correctness genéricos) — esto verifica las reglas que solo aplican aquí. Lo ideal es correr ambos.
+Code-review **específico de Conexory**: revisa el diff contra los invariantes y gotchas propios de este proyecto. No reemplaza a `/code-review` (que caza bugs de correctness genéricos) — esto verifica las reglas que solo aplican aquí. Lo ideal es correr ambos.
 
 No apliques cambios; reporta hallazgos. Cada uno con `archivo:línea`, qué regla del proyecto viola y el impacto concreto.
 

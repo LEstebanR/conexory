@@ -1,4 +1,4 @@
-# MiAgente
+# Conexory
 
 SaaS para agentes inmobiliarios en Colombia. Crea fichas de propiedades, obtén un link único por propiedad y compártelas por WhatsApp con preview enriquecida — en menos de 60 segundos.
 
