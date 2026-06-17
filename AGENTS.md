@@ -170,11 +170,16 @@ La base de datos está bajo control de **Prisma Migrations** (con migración `0_
 - El formulario de nueva/edición de propiedad es Client Component por la complejidad del estado local
 - Componentes de UI atómicos en `components/ui/` — preferir extender estos antes de crear nuevos
 
-### Estilos (Tailwind CSS 4)
+### Estilos (Tailwind CSS 4) — design system monocromo (Uber)
 
-- Colores de marca: `brand-50` hasta `brand-950` (definidos en `globals.css`)
-- Paleta principal del UI: `slate-*` para neutros, `brand-*` para acciones y highlights
-- **CTAs y acciones primarias siempre en `brand-*`** (el `Button` por defecto ya lo es). Los estados de alerta/límite usan el token `warning-*` (escala ámbar definida en `@theme`) para la **superficie/aviso**, no para el botón de acción. No hardcodear `amber-*` ni otros colores fuera de la paleta.
+El sistema es **monocromo blanco/negro/grises**, inspirado en Uber (ver `DESIGN.md` en la raíz). **No hay segundo color de acento**: el negro es el único color de conversión.
+
+- **Tokens semánticos** (definidos en `globals.css` vía `@theme`): `ink` (#000, texto y CTAs), `body` (#5e5e5e, texto secundario), `mute` (#afafaf, placeholders/fine print), `canvas` (#fff), `canvas-soft` (#efefef, chips/superficies suaves), `canvas-softer` (#f3f3f3), `surface-pressed`, `hairline`/`hairline-strong` (bordes), `elevated` (#282828, hover sobre negro). Úsalos como `bg-ink`, `text-body`, `border-hairline`, etc.
+- **`brand-50…950` es ahora una rampa neutra de grises** anclada en negro (`brand-950` = #000). Existe para que el código legado degrade a grises; en código nuevo prefiere los tokens semánticos.
+- **CTAs y acciones primarias siempre en negro** (`bg-ink`; el `Button` `default` ya lo es). Forma firma: **píldora** (`rounded-full`) en todo elemento interactivo. Tarjetas en `rounded-2xl`.
+- **No introducir colores de acento** (verde, azul, etc.). El verde de WhatsApp (`#25D366`) solo se permite en contexto de producto real (botón de contacto en la app/vista pública), **nunca en la landing/marketing** — ahí los botones de WhatsApp van en negro.
+- Estados de alerta/límite usan el token `warning-*` (escala ámbar en `@theme`) para la **superficie/aviso**, no para el botón. No hardcodear `amber-*`, `blue-*`, `violet-*` ni colores fuera de la paleta.
+- **Animaciones de marketing**: `animate-fade-up`/`animate-fade-in` (entrada) y `animate-marquee`; el componente `components/reveal.tsx` aplica fade-up al entrar en viewport (respeta `prefers-reduced-motion`).
 - **No usar `tailwind.config.js`** — la config en Tailwind 4 va en el CSS vía `@theme`
 - Clases utilitarias de composición: usar `cn()` de `lib/utils.ts` (clsx + tailwind-merge)
 

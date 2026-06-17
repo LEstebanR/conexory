@@ -1,3 +1,4 @@
+import Image from "next/image"
 import {
   Camera,
   Link2,
@@ -9,12 +10,34 @@ import {
 } from "lucide-react"
 import Reveal from "@/components/reveal"
 
+const img = (id: string) =>
+  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=500&q=70`
+
+const PHOTOS = {
+  laureles: img("1600596542815-ffad4c1539a9"),
+  poblado: img("1545324418-cc1a3fa10c00"),
+  campestre: img("1570129477492-45c003edd2be"),
+  loft: img("1502672260266-1c1ef2d93688"),
+  penthouse: img("1493809842364-78817add7ffb"),
+}
+
+const gallery = [
+  { src: PHOTOS.poblado, title: "Apartamento El Poblado", price: "$420.000.000" },
+  { src: PHOTOS.campestre, title: "Casa campestre", price: "$750.000.000" },
+  { src: PHOTOS.loft, title: "Loft en Chapinero", price: "$310.000.000" },
+  { src: PHOTOS.penthouse, title: "Penthouse con vista", price: "$1.200.000.000" },
+]
+
 function FormMock() {
   return (
     <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 p-6 space-y-4">
       <div className="grid grid-cols-3 gap-2">
-        <div className="aspect-square rounded-xl bg-gradient-to-br from-brand-100 to-brand-300" />
-        <div className="aspect-square rounded-xl bg-gradient-to-br from-brand-200 to-brand-400" />
+        <div className="relative aspect-square rounded-xl overflow-hidden">
+          <Image src={PHOTOS.laureles} alt="Foto de propiedad" fill sizes="120px" className="object-cover" />
+        </div>
+        <div className="relative aspect-square rounded-xl overflow-hidden">
+          <Image src={PHOTOS.poblado} alt="Foto de propiedad" fill sizes="120px" className="object-cover" />
+        </div>
         <div className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong flex items-center justify-center">
           <ImagePlus className="w-5 h-5 text-mute" />
         </div>
@@ -53,8 +76,10 @@ function ShareMock() {
         <MessageCircle className="w-4 h-4" />
         Enviar por WhatsApp
       </div>
-      <div className="rounded-xl bg-canvas-softer p-4 flex items-center gap-3">
-        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-200 to-brand-400 flex-shrink-0" />
+      <div className="rounded-xl bg-canvas-softer p-3 flex items-center gap-3">
+        <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+          <Image src={PHOTOS.laureles} alt="Preview de la propiedad" fill sizes="56px" className="object-cover" />
+        </div>
         <div className="min-w-0">
           <p className="text-sm font-bold text-ink truncate">Casa con jardín privado</p>
           <p className="text-xs text-body truncate">$580.000.000 · Laureles, Medellín</p>
@@ -73,17 +98,19 @@ function GalleryMock() {
           CR
         </div>
         <div>
-          <div className="h-2.5 w-24 rounded-full bg-ink/80 mb-1.5" />
-          <div className="h-2 w-16 rounded-full bg-canvas-soft" />
+          <p className="text-sm font-bold text-ink leading-tight">Carolina Restrepo</p>
+          <p className="text-xs text-body">4 propiedades activas</p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="rounded-xl border border-hairline overflow-hidden">
-            <div className={`h-16 bg-gradient-to-br ${i % 2 ? "from-brand-200 to-brand-400" : "from-brand-100 to-brand-300"}`} />
-            <div className="p-2 space-y-1.5">
-              <div className="h-2 w-3/4 rounded-full bg-canvas-soft" />
-              <div className="h-2 w-1/2 rounded-full bg-canvas-softer" />
+        {gallery.map((p) => (
+          <div key={p.title} className="rounded-xl border border-hairline overflow-hidden">
+            <div className="relative h-20">
+              <Image src={p.src} alt={p.title} fill sizes="160px" className="object-cover" />
+            </div>
+            <div className="p-2">
+              <p className="text-[11px] font-bold text-ink truncate">{p.title}</p>
+              <p className="text-[11px] text-body">{p.price}</p>
             </div>
           </div>
         ))}
@@ -125,7 +152,7 @@ const blocks = [
 export default function Features() {
   return (
     <section id="features" className="py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
         {/* Header */}
         <Reveal className="max-w-2xl mb-20">
           <p className="text-body font-semibold text-sm uppercase tracking-[0.2em] mb-4">

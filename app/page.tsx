@@ -15,7 +15,7 @@ export default async function Home() {
   if (session) redirect("/dashboard")
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white overflow-x-hidden">
       <Navbar />
       <Hero />
       <Marquee />

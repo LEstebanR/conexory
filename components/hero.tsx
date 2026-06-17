@@ -1,7 +1,11 @@
 "use client"
 
+import Image from "next/image"
 import { MessageCircle, ArrowRight, MapPin, BedDouble, Bath, Maximize2, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
+
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=70"
 
 function BrowserMock() {
   return (
@@ -21,20 +25,20 @@ function BrowserMock() {
               <span className="truncate">conexory.com/p/casa-laureles</span>
             </div>
           </div>
-          <div className="w-12" />
+          <div className="hidden sm:block w-12" />
         </div>
 
         {/* Public property page mock */}
         <div className="grid sm:grid-cols-2">
           {/* Photo */}
-          <div className="relative h-48 sm:h-full min-h-[220px] bg-gradient-to-br from-brand-100 via-brand-200 to-brand-400 overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center opacity-20">
-              <div className="grid grid-cols-4 gap-1.5 w-44">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <div key={i} className={`bg-white rounded-sm ${i < 4 ? "h-14" : i < 8 ? "h-10" : "h-7"}`} />
-                ))}
-              </div>
-            </div>
+          <div className="relative h-52 sm:h-auto min-h-[220px]">
+            <Image
+              src={HERO_IMAGE}
+              alt="Casa con jardín privado en Laureles, Medellín"
+              fill
+              sizes="(max-width: 640px) 100vw, 384px"
+              className="object-cover"
+            />
             <div className="absolute top-3 left-3 bg-ink text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
               En venta
             </div>
@@ -92,7 +96,7 @@ function BrowserMock() {
 
 export default function Hero() {
   return (
-    <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-white">
+    <section className="relative pt-32 pb-24 lg:pt-44 lg:pb-32 overflow-hidden bg-white">
       {/* Background dot grid fading out */}
       <div className="absolute inset-0 -z-10 overflow-hidden [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]">
         <svg className="absolute inset-0 w-full h-full opacity-[0.05]">
@@ -105,35 +109,35 @@ export default function Hero() {
         </svg>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="max-w-4xl mx-auto px-5 sm:px-6 lg:px-8 text-center">
         {/* Badge */}
         <div
-          className="inline-flex items-center gap-2 bg-canvas-soft rounded-full pl-1.5 pr-3.5 py-1.5 mb-8 animate-fade-up"
+          className="inline-flex max-w-full items-center gap-2 bg-canvas-soft rounded-full pl-1.5 pr-3.5 py-1.5 mb-10 animate-fade-up"
           style={{ animationDelay: "0ms" }}
         >
-          <span className="flex items-center gap-1 bg-ink text-white text-[11px] font-bold rounded-full px-2 py-0.5">
+          <span className="flex items-center bg-ink text-white text-[11px] font-bold rounded-full px-2 py-0.5 flex-shrink-0">
             Nuevo
           </span>
-          <span className="text-sm font-medium text-ink">+480 agentes ya comparten con Conexory</span>
+          <span className="text-xs sm:text-sm font-medium text-ink truncate">
+            +480 agentes ya usan Conexory
+          </span>
         </div>
 
         {/* Headline */}
         <h1
-          className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95] text-ink animate-fade-up"
+          className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tighter leading-[1.05] text-ink animate-fade-up text-balance"
           style={{ animationDelay: "80ms" }}
         >
-          Comparte propiedades
-          <br />
-          por WhatsApp en{" "}
+          Comparte propiedades por WhatsApp en{" "}
           <span className="relative whitespace-nowrap">
             segundos
-            <span className="absolute left-0 -bottom-1 w-full h-1.5 bg-ink rounded-full" />
+            <span className="absolute left-0 -bottom-0.5 sm:-bottom-1 w-full h-1 sm:h-1.5 bg-ink rounded-full" />
           </span>
           .
         </h1>
 
         <p
-          className="text-lg sm:text-xl text-body leading-relaxed max-w-2xl mx-auto mt-7 animate-fade-up"
+          className="text-lg sm:text-xl text-body leading-relaxed max-w-2xl mx-auto mt-8 animate-fade-up text-balance"
           style={{ animationDelay: "160ms" }}
         >
           Sube las fotos, escribe el precio y obtén un link único para cada
@@ -143,7 +147,7 @@ export default function Hero() {
 
         {/* CTA */}
         <div
-          className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10 animate-fade-up"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-11 animate-fade-up"
           style={{ animationDelay: "240ms" }}
         >
           <Button size="xl" className="h-14 px-8 w-full sm:w-auto" asChild>
@@ -152,19 +156,17 @@ export default function Hero() {
             </a>
           </Button>
           <Button size="xl" variant="secondary" className="h-14 px-8 w-full sm:w-auto" asChild>
-            <a href="#how-it-works">
-              Ver cómo funciona
-            </a>
+            <a href="#how-it-works">Ver cómo funciona</a>
           </Button>
         </div>
-        <p className="text-sm text-mute mt-5 animate-fade-up" style={{ animationDelay: "300ms" }}>
+        <p className="text-sm text-mute mt-6 animate-fade-up" style={{ animationDelay: "300ms" }}>
           Gratis para siempre · Sin tarjeta de crédito · 100% desde el celular
         </p>
       </div>
 
       {/* Product mock */}
       <div
-        className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 lg:mt-20 animate-fade-up"
+        className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 mt-20 lg:mt-28 animate-fade-up"
         style={{ animationDelay: "360ms" }}
       >
         <BrowserMock />
