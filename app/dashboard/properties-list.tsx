@@ -43,13 +43,14 @@ function Row({ item }: { item: PropertyItem }) {
   return (
     <Link
       href={`/dashboard/properties/${item.id}`}
-      className="group flex items-center gap-4 p-3 rounded-2xl border border-transparent hover:border-hairline hover:bg-canvas-softer transition-colors"
+      className="group flex items-center gap-4 p-3 sm:p-4 rounded-2xl border border-hairline bg-white hover:border-ink hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5 transition-all duration-200"
     >
       <Thumbnail item={item} />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-1">
-          <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-canvas-soft text-ink">
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-canvas-soft text-ink">
+            <span className={cn("w-1.5 h-1.5 rounded-full", inactive ? "bg-mute" : "bg-ink")} />
             {item.typeLabel}
           </span>
           {inactive && (
@@ -93,12 +94,13 @@ function Row({ item }: { item: PropertyItem }) {
       </div>
 
       <div className="text-right flex-shrink-0">
-        <p className={cn("font-black tracking-tighter", inactive ? "text-mute" : "text-ink")}>
+        <p className={cn("text-lg sm:text-xl font-black tracking-tighter leading-none", inactive ? "text-mute" : "text-ink")}>
           {item.price}
         </p>
+        <p className="text-[10px] text-mute font-medium mt-1">COP</p>
       </div>
 
-      <ChevronRight className="w-4 h-4 text-mute group-hover:text-ink transition-colors flex-shrink-0" />
+      <ChevronRight className="w-4 h-4 text-mute group-hover:text-ink group-hover:translate-x-0.5 transition-all flex-shrink-0" />
     </Link>
   )
 }
@@ -149,7 +151,7 @@ export default function PropertiesList({ items }: { items: PropertyItem[] }) {
           No tienes propiedades en esta vista.
         </p>
       ) : (
-        <div className="space-y-1">
+        <div className="space-y-2.5">
           {filtered.map((item) => (
             <Row key={item.id} item={item} />
           ))}

@@ -3,7 +3,7 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
-import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon } from "lucide-react"
+import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon, Eye, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import PropertiesList, { type PropertyItem } from "./properties-list"
@@ -86,9 +86,9 @@ export default async function DashboardPage() {
   }))
 
   const stats = [
-    { label: "Propiedades", value: count },
-    { label: "Activas", value: activeCount },
-    { label: "Veces compartidas", value: totalShares },
+    { label: "Propiedades", value: count, icon: Building2 },
+    { label: "Activas", value: activeCount, icon: Eye },
+    { label: "Veces compartidas", value: totalShares, icon: Share2 },
   ]
 
   return (
@@ -113,7 +113,10 @@ export default async function DashboardPage() {
       {/* Stats band */}
       <div className="rounded-2xl bg-ink grid grid-cols-3 divide-x divide-white/10 mb-6">
         {stats.map((stat) => (
-          <div key={stat.label} className="px-5 py-6 sm:px-7 sm:py-7">
+          <div key={stat.label} className="px-4 py-6 sm:px-7 sm:py-7">
+            <span className="inline-flex w-8 h-8 rounded-lg bg-white/10 items-center justify-center mb-4">
+              <stat.icon className="w-4 h-4 text-white" strokeWidth={2} />
+            </span>
             <p className="text-4xl sm:text-5xl font-black text-white tracking-tighter leading-none tabular-nums">
               {stat.value}
             </p>

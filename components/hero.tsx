@@ -112,12 +112,10 @@ export default function Hero() {
       <div className="max-w-4xl mx-auto px-5 sm:px-6 lg:px-8 text-center">
         {/* Badge */}
         <div
-          className="inline-flex max-w-full items-center gap-2 bg-canvas-soft rounded-full pl-1.5 pr-3.5 py-1.5 mb-10 animate-fade-up"
+          className="inline-flex max-w-full items-center gap-2 bg-canvas-soft rounded-full px-4 py-1.5 mb-10 animate-fade-up"
           style={{ animationDelay: "0ms" }}
         >
-          <span className="flex items-center bg-ink text-white text-[11px] font-bold rounded-full px-2 py-0.5 flex-shrink-0">
-            Nuevo
-          </span>
+          <span className="w-1.5 h-1.5 rounded-full bg-ink flex-shrink-0 animate-pulse" />
           <span className="text-xs sm:text-sm font-medium text-ink truncate">
             +480 agentes ya usan Conexory
           </span>
@@ -131,9 +129,22 @@ export default function Hero() {
           Comparte propiedades por WhatsApp en{" "}
           <span className="relative whitespace-nowrap">
             segundos
-            <span className="absolute left-0 -bottom-0.5 sm:-bottom-1 w-full h-1 sm:h-1.5 bg-ink rounded-full" />
+            <svg
+              aria-hidden="true"
+              className="absolute -bottom-2 sm:-bottom-3 left-0 w-full text-ink"
+              height="14"
+              viewBox="0 0 200 14"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M3 8.5C44 3.2 92 2.4 132 4.1c25 1 47 2.6 65 5.3"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </svg>
           </span>
-          .
         </h1>
 
         <p
