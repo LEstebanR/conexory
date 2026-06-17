@@ -9,7 +9,7 @@ export default function NotFound() {
           <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center shadow-sm">
             <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-sm font-black text-slate-950 tracking-tight">MiAgente</span>
+          <span className="text-sm font-black text-slate-950 tracking-tight">Conexory</span>
         </Link>
       </header>
 
@@ -35,7 +35,7 @@ export default function NotFound() {
       <footer className="border-t border-slate-100 bg-white py-5 px-4 text-center">
         <p className="text-xs text-slate-400">
           <Link href="/" className="text-brand-500 font-semibold hover:underline">
-            MiAgente
+            Conexory
           </Link>
         </p>
       </footer>

@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "crm-inmobiliarias",
+      "name": "conexory",
       "dependencies": {
         "@neondatabase/serverless": "1.1.0",
         "@prisma/client": "5",

@@ -1,6 +1,6 @@
 # /create-pr
 
-Crea un Pull Request completo para el proyecto MiAgente: commitea los cambios siguiendo las convenciones, corre **localmente** lo mismo que valida CI (para no romper el PR), pushea y abre el PR con una descripción ya redactada.
+Crea un Pull Request completo para el proyecto Conexory: commitea los cambios siguiendo las convenciones, corre **localmente** lo mismo que valida CI (para no romper el PR), pushea y abre el PR con una descripción ya redactada.
 
 No mergees nada. Tu trabajo termina cuando el PR está abierto y reportas su URL.
 
@@ -92,7 +92,7 @@ En este entorno el remoto es SSH pero **no hay llaves SSH cargadas**, así que `
 
 ```bash
 git -c credential.helper='!gh auth git-credential' push \
-  https://github.com/LEstebanR/inmobiliaria.git HEAD:$(git branch --show-current)
+  https://github.com/LEstebanR/conexory.git HEAD:$(git branch --show-current)
 ```
 
 Si el push se rechaza porque la rama remota divergió, haz `fetch` con el mismo helper y rebasa antes de reintentar.

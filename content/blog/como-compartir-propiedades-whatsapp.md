@@ -44,7 +44,7 @@ Directo, sin relleno. El cliente ve en tres segundos si le interesa o no.
 
 Después de enviar el link, espera entre 4 y 6 horas antes de hacer seguimiento. Un mensaje como "¿Pudiste ver la propiedad? ¿Tienes alguna pregunta?" funciona mucho mejor que volver a enviar el PDF o mandar más fotos.
 
-Con MiAgente puedes ver cuántas veces fue compartido tu link, lo que te da una señal clara de cuándo hay interés real.
+Con Conexory puedes ver cuántas veces fue compartido tu link, lo que te da una señal clara de cuándo hay interés real.
 
 ## En resumen
 

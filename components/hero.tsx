@@ -24,7 +24,7 @@ function PhoneMockup() {
               <div className="w-7 h-7 rounded-xl bg-brand-400 flex items-center justify-center">
                 <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
               </div>
-              <span className="text-xs font-bold text-slate-800 tracking-tight">MiAgente</span>
+              <span className="text-xs font-bold text-slate-800 tracking-tight">Conexory</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
@@ -99,7 +99,7 @@ function PhoneMockup() {
         <CheckCircle2 className="w-4 h-4 text-brand-500 flex-shrink-0" />
         <div>
           <p className="text-[10px] font-bold text-slate-800">Link copiado ✓</p>
-          <p className="text-[9px] text-slate-400">miagente.co/p/casa-laureles</p>
+          <p className="text-[9px] text-slate-400">conexory.com/p/casa-laureles</p>
         </div>
       </div>
 

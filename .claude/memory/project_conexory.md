@@ -1,11 +1,11 @@
 ---
-name: project-miagente
-description: Contexto del proyecto MiAgente — qué es, stack y estado funcional actual
+name: project-conexory
+description: Contexto del proyecto Conexory — qué es, stack y estado funcional actual
 metadata:
   type: project
 ---
 
-MiAgente es un SaaS para agentes inmobiliarios en Colombia. Freemium con tres planes:
+Conexory es un SaaS para agentes inmobiliarios en Colombia. Freemium con tres planes:
 - **Free:** 3 propiedades activas, 10 fotos por propiedad.
 - **Pro ($99.999 COP/mes):** 50 propiedades, 20 fotos por propiedad.
 - **Personalizado:** equipos/agencias, sin límite, por contacto (`/contacto`).

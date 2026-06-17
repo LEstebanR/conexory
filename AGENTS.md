@@ -1,4 +1,4 @@
-# MiAgente — Guía para agentes de IA
+# Conexory — Guía para agentes de IA
 
 ## Advertencia crítica: Next.js 16
 
@@ -12,7 +12,7 @@ Cambios clave ya presentes en este proyecto:
 
 ## Qué es este proyecto
 
-**MiAgente** (`miagente.co`) es un SaaS para agentes inmobiliarios en Colombia. Permite crear fichas de propiedades, obtener un link único por propiedad y compartirlas por WhatsApp con preview enriquecida (OG image). El agente no necesita saber de tecnología — flujo completo en menos de 60 segundos.
+**Conexory** (`conexory.com`) es un SaaS para agentes inmobiliarios en Colombia. Permite crear fichas de propiedades, obtener un link único por propiedad y compartirlas por WhatsApp con preview enriquecida (OG image). El agente no necesita saber de tecnología — flujo completo en menos de 60 segundos.
 
 **Mercado objetivo:** agentes inmobiliarios independientes en Colombia.  
 **Modelo de negocio:** Freemium — Free (3 propiedades), Pro ($99.999 COP/mes, 50 propiedades) y Personalizado (por contacto). Detalle de límites por plan en la sección "Planes y límites". **La pasarela de pagos funcional es parte del MVP.**

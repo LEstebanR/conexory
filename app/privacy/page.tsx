@@ -6,11 +6,12 @@ import LegalLayout, {
   LegalSubtitle,
   LegalHighlight,
 } from "@/components/legal-layout"
+import { BRAND_EMAILS } from "@/lib/brand"
 
 export const metadata: Metadata = {
-  title: "Política de Privacidad — MiAgente",
+  title: "Política de Privacidad — Conexory",
   description:
-    "Política de tratamiento de datos personales de MiAgente, en cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013.",
+    "Política de tratamiento de datos personales de Conexory, en cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013.",
 }
 
 const sections = [
@@ -38,7 +39,7 @@ export default function PrivacyPage() {
       sections={sections}
     >
       <LegalHighlight>
-        En MiAgente creemos que tus datos son tuyos. Solo recopilamos lo
+        En Conexory creemos que tus datos son tuyos. Solo recopilamos lo
         estrictamente necesario para operar el servicio, nunca los vendemos a
         terceros, y te damos control total sobre ellos.
       </LegalHighlight>
@@ -52,7 +53,7 @@ export default function PrivacyPage() {
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-2 text-sm">
           <p>
             <span className="font-semibold text-slate-800">Razón social:</span>{" "}
-            MiAgente SAS
+            Conexory SAS
           </p>
           <p>
             <span className="font-semibold text-slate-800">NIT:</span> En
@@ -67,10 +68,10 @@ export default function PrivacyPage() {
               Correo para datos personales:
             </span>{" "}
             <a
-              href="mailto:privacidad@miagente.co"
+              href={`mailto:${BRAND_EMAILS.privacidad}`}
               className="text-brand-500 hover:underline"
             >
-              privacidad@miagente.co
+              {BRAND_EMAILS.privacidad}
             </a>
           </p>
         </div>
@@ -111,7 +112,7 @@ export default function PrivacyPage() {
         </LegalP>
         <LegalList
           items={[
-            "Crear y gestionar tu cuenta de usuario en MiAgente.",
+            "Crear y gestionar tu cuenta de usuario en Conexory.",
             "Operar el servicio: almacenar y mostrar tus propiedades.",
             "Generar los links únicos de cada propiedad para que los compartas.",
             "Enviarte notificaciones del servicio, como confirmaciones de registro o alertas de seguridad.",
@@ -160,10 +161,10 @@ export default function PrivacyPage() {
         <LegalP>
           Para ejercer cualquiera de estos derechos, escríbenos a{" "}
           <a
-            href="mailto:privacidad@miagente.co"
+            href={`mailto:${BRAND_EMAILS.privacidad}`}
             className="text-brand-500 font-semibold hover:underline"
           >
-            privacidad@miagente.co
+            {BRAND_EMAILS.privacidad}
           </a>
           . Responderemos en un plazo máximo de diez (10) días hábiles, según lo
           establece la Ley 1581 de 2012.
@@ -206,7 +207,7 @@ export default function PrivacyPage() {
           items={[
             "Comunicaciones cifradas mediante HTTPS/TLS.",
             "Contraseñas almacenadas con hash seguro (bcrypt o similar).",
-            "Control de acceso basado en roles dentro del equipo de MiAgente.",
+            "Control de acceso basado en roles dentro del equipo de Conexory.",
             "Auditorías periódicas de seguridad.",
             "Copias de seguridad cifradas de la base de datos.",
           ]}
@@ -240,7 +241,7 @@ export default function PrivacyPage() {
       <LegalSection id="retencion" number={9} title="Retención de datos">
         <LegalP>
           Conservamos tus datos personales mientras tengas una cuenta activa en
-          MiAgente. Una vez elimines tu cuenta:
+          Conexory. Una vez elimines tu cuenta:
         </LegalP>
         <LegalList
           items={[
@@ -277,12 +278,12 @@ export default function PrivacyPage() {
         </LegalP>
         <LegalP>
           Si eres padre, madre o tutor y crees que tu hijo ha creado una cuenta
-          en MiAgente, contáctanos en{" "}
+          en Conexory, contáctanos en{" "}
           <a
-            href="mailto:privacidad@miagente.co"
+            href={`mailto:${BRAND_EMAILS.privacidad}`}
             className="text-brand-500 font-semibold hover:underline"
           >
-            privacidad@miagente.co
+            {BRAND_EMAILS.privacidad}
           </a>{" "}
           para proceder a la eliminación inmediata de sus datos.
         </LegalP>
@@ -313,15 +314,15 @@ export default function PrivacyPage() {
             <span className="font-semibold text-slate-800">
               Área de protección de datos:
             </span>{" "}
-            MiAgente SAS
+            Conexory SAS
           </p>
           <p>
             <span className="font-semibold text-slate-800">Correo:</span>{" "}
             <a
-              href="mailto:privacidad@miagente.co"
+              href={`mailto:${BRAND_EMAILS.privacidad}`}
               className="text-brand-500 hover:underline"
             >
-              privacidad@miagente.co
+              {BRAND_EMAILS.privacidad}
             </a>
           </p>
           <p>

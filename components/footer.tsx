@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Building2, Mail } from "lucide-react"
+import { BRAND_EMAILS } from "@/lib/brand"
 
 const links = {
   Producto: [
@@ -28,7 +29,7 @@ export default function Footer() {
                 <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
-                MiAgente
+                Conexory
               </span>
             </Link>
             <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
@@ -36,7 +37,7 @@ export default function Footer() {
               Construido por agentes, para agentes.
             </p>
             <a
-              href="mailto:hola@miagente.co"
+              href={`mailto:${BRAND_EMAILS.hola}`}
               aria-label="Email"
               className="w-9 h-9 rounded-xl bg-slate-800/80 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
             >
@@ -67,7 +68,7 @@ export default function Footer() {
 
         <div className="border-t border-slate-800/60 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-slate-600">
-            © 2026 MiAgente · Hecho con 🇨🇴 en Colombia
+            © 2026 Conexory · Hecho con 🇨🇴 en Colombia
           </p>
           <p className="text-xs text-slate-700">
             En proceso de registro · Bogotá D.C.
