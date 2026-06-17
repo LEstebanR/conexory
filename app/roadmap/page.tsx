@@ -3,8 +3,8 @@ import Link from "next/link"
 import { Building2, ArrowLeft, Circle, Loader2 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Roadmap — MiAgente",
-  description: "Lo que viene en MiAgente. Nuestro plan de funcionalidades.",
+  title: "Roadmap — Conexory",
+  description: "Lo que viene en Conexory. Nuestro plan de funcionalidades.",
 }
 
 const items = [
@@ -31,17 +31,17 @@ const items = [
 const statusConfig = {
   progress: {
     icon: Loader2,
-    color: "text-blue-500",
-    bg: "bg-blue-50",
-    border: "border-blue-100",
-    badge: "bg-blue-100 text-blue-700",
+    color: "text-ink",
+    bg: "bg-canvas-soft",
+    border: "border-hairline",
+    badge: "bg-ink text-white",
   },
   planned: {
     icon: Circle,
-    color: "text-slate-400",
-    bg: "bg-slate-50",
-    border: "border-slate-100",
-    badge: "bg-slate-100 text-slate-500",
+    color: "text-mute",
+    bg: "bg-canvas-softer",
+    border: "border-hairline",
+    badge: "bg-canvas-soft text-body",
   },
 }
 
@@ -55,7 +55,7 @@ export default function RoadmapPage() {
               <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
             <span className="text-base font-black text-slate-950 tracking-tight">
-              MiAgente
+              Conexory
             </span>
           </Link>
           <Link
@@ -74,7 +74,7 @@ export default function RoadmapPage() {
             Roadmap
           </p>
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">
-            Lo que viene en MiAgente
+            Lo que viene en Conexory
           </h1>
           <p className="text-slate-400 text-base leading-relaxed">
             Construido para agentes colombianos. Cada función nace de feedback real.
@@ -113,7 +113,7 @@ export default function RoadmapPage() {
             Las funciones de este roadmap vienen de agentes como tú. Cuéntanos qué necesitas.
           </p>
           <a
-            href="mailto:hola@miagente.co?subject=Sugerencia para MiAgente"
+            href="mailto:hola@conexory.com?subject=Sugerencia para Conexory"
             className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-slate-950 text-white text-sm font-bold hover:bg-slate-800 transition-colors"
           >
             Enviar sugerencia
@@ -123,7 +123,7 @@ export default function RoadmapPage() {
 
       <footer className="border-t border-slate-100 py-8 text-center">
         <p className="text-xs text-slate-400">
-          © 2026 MiAgente · Hecho con 🇨🇴 en Colombia
+          © 2026 Conexory · Hecho con 🇨🇴 en Colombia
         </p>
       </footer>
     </div>

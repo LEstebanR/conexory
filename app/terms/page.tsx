@@ -8,14 +8,14 @@ import LegalLayout, {
 } from "@/components/legal-layout"
 
 export const metadata: Metadata = {
-  title: "Términos de Uso — MiAgente",
+  title: "Términos de Uso — Conexory",
   description:
-    "Términos y condiciones de uso de la plataforma MiAgente para agentes inmobiliarios en Colombia.",
+    "Términos y condiciones de uso de la plataforma Conexory para agentes inmobiliarios en Colombia.",
 }
 
 const sections = [
   { id: "aceptacion", title: "Aceptación de los términos" },
-  { id: "servicio", title: "El servicio MiAgente" },
+  { id: "servicio", title: "El servicio Conexory" },
   { id: "cuenta", title: "Registro y cuenta" },
   { id: "uso-aceptable", title: "Uso aceptable" },
   { id: "contenido", title: "Tu contenido" },
@@ -33,20 +33,20 @@ export default function TermsPage() {
   return (
     <LegalLayout
       title="Términos de Uso"
-      description="Estos términos rigen el uso de la plataforma MiAgente. Léelos con atención antes de crear tu cuenta."
+      description="Estos términos rigen el uso de la plataforma Conexory. Léelos con atención antes de crear tu cuenta."
       lastUpdated="31 de mayo de 2026"
       sections={sections}
     >
       <LegalSection id="aceptacion" number={1} title="Aceptación de los términos">
         <LegalP>
-          Al acceder o utilizar la plataforma MiAgente (en adelante, &ldquo;el
+          Al acceder o utilizar la plataforma Conexory (en adelante, &ldquo;el
           Servicio&rdquo;), aceptas quedar vinculado por estos Términos de Uso
           y por nuestra Política de Privacidad. Si no estás de acuerdo con
           alguna de estas condiciones, no debes utilizar el Servicio.
         </LegalP>
         <LegalP>
           Estos términos constituyen un acuerdo legal entre tú (el
-          &ldquo;Usuario&rdquo;) y MiAgente SAS, sociedad constituida bajo las
+          &ldquo;Usuario&rdquo;) y Conexory SAS, sociedad constituida bajo las
           leyes de la República de Colombia, con domicilio en Bogotá D.C.
         </LegalP>
         <LegalHighlight>
@@ -56,9 +56,9 @@ export default function TermsPage() {
         </LegalHighlight>
       </LegalSection>
 
-      <LegalSection id="servicio" number={2} title="El servicio MiAgente">
+      <LegalSection id="servicio" number={2} title="El servicio Conexory">
         <LegalP>
-          MiAgente es una plataforma SaaS (Software como Servicio) que permite
+          Conexory es una plataforma SaaS (Software como Servicio) que permite
           a agentes inmobiliarios crear fichas de propiedades y compartirlas
           mediante un link único. El Servicio incluye, entre otras
           funcionalidades:
@@ -73,7 +73,7 @@ export default function TermsPage() {
           ]}
         />
         <LegalP>
-          MiAgente es una herramienta de difusión y gestión. No actuamos como
+          Conexory es una herramienta de difusión y gestión. No actuamos como
           intermediario inmobiliario, no participamos en las negociaciones entre
           agentes y compradores o arrendatarios, y no somos responsables del
           resultado de ninguna transacción inmobiliaria.
@@ -92,10 +92,10 @@ export default function TermsPage() {
           Eres el único responsable de mantener la confidencialidad de tus
           credenciales de acceso. Debes notificarnos inmediatamente a{" "}
           <a
-            href="mailto:soporte@miagente.co"
+            href="mailto:soporte@conexory.com"
             className="text-brand-500 font-semibold hover:underline"
           >
-            soporte@miagente.co
+            soporte@conexory.com
           </a>{" "}
           si detectas acceso no autorizado a tu cuenta.
         </LegalP>
@@ -109,7 +109,7 @@ export default function TermsPage() {
 
       <LegalSection id="uso-aceptable" number={4} title="Uso aceptable">
         <LegalP>
-          Al usar MiAgente te comprometes a no realizar ninguna de las
+          Al usar Conexory te comprometes a no realizar ninguna de las
           siguientes acciones:
         </LegalP>
         <LegalList
@@ -117,14 +117,14 @@ export default function TermsPage() {
             "Publicar propiedades ficticias, con precios engañosos o información falsa.",
             "Usar el Servicio para actividades ilegales, incluyendo lavado de activos.",
             "Subir contenido que infrinja derechos de autor, marcas registradas o privacidad de terceros.",
-            "Intentar acceder a cuentas de otros usuarios o a los sistemas internos de MiAgente.",
+            "Intentar acceder a cuentas de otros usuarios o a los sistemas internos de Conexory.",
             "Usar bots, scrapers o herramientas automatizadas para extraer contenido de la plataforma.",
             "Revender, sublicenciar o transferir el acceso al Servicio a terceros.",
             "Publicar contenido ofensivo, discriminatorio o que viole las leyes colombianas.",
           ]}
         />
         <LegalP>
-          MiAgente se reserva el derecho de suspender o eliminar cuentas que
+          Conexory se reserva el derecho de suspender o eliminar cuentas que
           incumplan estas condiciones sin previo aviso y sin obligación de
           reembolso.
         </LegalP>
@@ -133,9 +133,9 @@ export default function TermsPage() {
       <LegalSection id="contenido" number={5} title="Tu contenido">
         <LegalSubtitle>Propiedad del contenido</LegalSubtitle>
         <LegalP>
-          Todo el contenido que publicas en MiAgente (fotos, descripciones,
+          Todo el contenido que publicas en Conexory (fotos, descripciones,
           precios, datos de contacto) es de tu propiedad o tienes los derechos
-          necesarios para usarlo. MiAgente no reclama propiedad sobre tu
+          necesarios para usarlo. Conexory no reclama propiedad sobre tu
           contenido.
         </LegalP>
         <LegalSubtitle>Licencia que nos otorgas</LegalSubtitle>
@@ -152,7 +152,7 @@ export default function TermsPage() {
           propiedad es veraz y no induce a error a los interesados.
         </LegalP>
         <LegalHighlight>
-          MiAgente puede eliminar contenido que, a su criterio, viole estos
+          Conexory puede eliminar contenido que, a su criterio, viole estos
           términos, las leyes colombianas o los derechos de terceros, sin que
           ello genere responsabilidad alguna de nuestra parte.
         </LegalHighlight>
@@ -160,14 +160,14 @@ export default function TermsPage() {
 
       <LegalSection id="propiedad-intelectual" number={6} title="Propiedad intelectual">
         <LegalP>
-          La plataforma MiAgente, incluyendo su diseño, código fuente, marca,
+          La plataforma Conexory, incluyendo su diseño, código fuente, marca,
           logotipo, interfaces y funcionalidades, es propiedad exclusiva de
-          MiAgente SAS y está protegida por las leyes de propiedad intelectual
+          Conexory SAS y está protegida por las leyes de propiedad intelectual
           de Colombia y tratados internacionales.
         </LegalP>
         <LegalP>
           Nada en estos términos te otorga derecho a usar la marca, el nombre
-          comercial o cualquier otro signo distintivo de MiAgente sin nuestra
+          comercial o cualquier otro signo distintivo de Conexory sin nuestra
           autorización expresa y por escrito.
         </LegalP>
       </LegalSection>
@@ -175,7 +175,7 @@ export default function TermsPage() {
       <LegalSection id="planes-pagos" number={7} title="Planes y pagos">
         <LegalSubtitle>Plan gratuito</LegalSubtitle>
         <LegalP>
-          MiAgente ofrece un plan gratuito con funcionalidades limitadas. No se
+          Conexory ofrece un plan gratuito con funcionalidades limitadas. No se
           requiere tarjeta de crédito para registrarse ni para usar el plan
           gratuito.
         </LegalP>
@@ -204,7 +204,7 @@ export default function TermsPage() {
           control.
         </LegalP>
         <LegalP>
-          MiAgente no será responsable por pérdidas o daños derivados de
+          Conexory no será responsable por pérdidas o daños derivados de
           interrupciones del servicio, pérdida de datos o fallos técnicos, en la
           medida en que lo permita la ley aplicable.
         </LegalP>
@@ -212,7 +212,7 @@ export default function TermsPage() {
 
       <LegalSection id="responsabilidad" number={9} title="Limitación de responsabilidad">
         <LegalP>
-          En la máxima medida permitida por la ley colombiana, MiAgente no será
+          En la máxima medida permitida por la ley colombiana, Conexory no será
           responsable por:
         </LegalP>
         <LegalList
@@ -226,7 +226,7 @@ export default function TermsPage() {
         />
         <LegalP>
           Nuestra responsabilidad total frente a ti, por cualquier causa, no
-          superará el valor que hayas pagado a MiAgente en los tres (3) meses
+          superará el valor que hayas pagado a Conexory en los tres (3) meses
           anteriores al evento que originó el reclamo.
         </LegalP>
       </LegalSection>
@@ -239,7 +239,7 @@ export default function TermsPage() {
           datos y contenido serán borrados de nuestros servidores en un plazo de
           30 días, salvo obligación legal de conservarlos.
         </LegalP>
-        <LegalSubtitle>Por parte de MiAgente</LegalSubtitle>
+        <LegalSubtitle>Por parte de Conexory</LegalSubtitle>
         <LegalP>
           Podemos suspender o terminar tu acceso al Servicio si incumples estos
           términos, si detectamos actividad fraudulenta o si dejamos de operar
@@ -284,15 +284,15 @@ export default function TermsPage() {
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-2 text-sm">
           <p>
             <span className="font-semibold text-slate-800">Empresa:</span>{" "}
-            MiAgente SAS
+            Conexory SAS
           </p>
           <p>
             <span className="font-semibold text-slate-800">Correo:</span>{" "}
             <a
-              href="mailto:legal@miagente.co"
+              href="mailto:legal@conexory.com"
               className="text-brand-500 hover:underline"
             >
-              legal@miagente.co
+              legal@conexory.com
             </a>
           </p>
           <p>

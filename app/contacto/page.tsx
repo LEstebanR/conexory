@@ -3,8 +3,8 @@ import Link from "next/link"
 import { Building2, ArrowLeft, Mail, MessageCircle, MapPin } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Contacto — MiAgente",
-  description: "Ponte en contacto con el equipo de MiAgente.",
+  title: "Contacto — Conexory",
+  description: "Ponte en contacto con el equipo de Conexory.",
 }
 
 export default function ContactoPage() {
@@ -17,7 +17,7 @@ export default function ContactoPage() {
               <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
             <span className="text-base font-black text-slate-950 tracking-tight">
-              MiAgente
+              Conexory
             </span>
           </Link>
           <Link
@@ -48,26 +48,26 @@ export default function ContactoPage() {
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid sm:grid-cols-3 gap-6 mb-16">
           <a
-            href="mailto:hola@miagente.co"
-            className="group flex flex-col items-center text-center p-6 rounded-2xl border border-slate-100 hover:border-brand-200 hover:bg-brand-50/30 transition-colors"
+            href="mailto:hola@conexory.com"
+            className="group flex flex-col items-center text-center p-6 rounded-2xl border border-hairline hover:border-ink transition-colors"
           >
-            <div className="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center mb-4 group-hover:bg-brand-100 transition-colors">
-              <Mail className="w-5 h-5 text-brand-500" />
+            <div className="w-12 h-12 rounded-2xl bg-canvas-soft flex items-center justify-center mb-4 group-hover:bg-surface-pressed transition-colors">
+              <Mail className="w-5 h-5 text-ink" />
             </div>
-            <p className="font-bold text-slate-900 mb-1">Email general</p>
-            <p className="text-sm text-brand-500 font-medium">hola@miagente.co</p>
+            <p className="font-bold text-ink mb-1">Email general</p>
+            <p className="text-sm text-ink font-medium">hola@conexory.com</p>
             <p className="text-xs text-slate-400 mt-2">Para cualquier consulta</p>
           </a>
 
           <a
-            href="mailto:soporte@miagente.co"
-            className="group flex flex-col items-center text-center p-6 rounded-2xl border border-slate-100 hover:border-brand-200 hover:bg-brand-50/30 transition-colors"
+            href="mailto:soporte@conexory.com"
+            className="group flex flex-col items-center text-center p-6 rounded-2xl border border-hairline hover:border-ink transition-colors"
           >
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
-              <MessageCircle className="w-5 h-5 text-blue-500" />
+            <div className="w-12 h-12 rounded-2xl bg-canvas-soft flex items-center justify-center mb-4 group-hover:bg-surface-pressed transition-colors">
+              <MessageCircle className="w-5 h-5 text-ink" />
             </div>
-            <p className="font-bold text-slate-900 mb-1">Soporte técnico</p>
-            <p className="text-sm text-blue-500 font-medium">soporte@miagente.co</p>
+            <p className="font-bold text-ink mb-1">Soporte técnico</p>
+            <p className="text-sm text-ink font-medium">soporte@conexory.com</p>
             <p className="text-xs text-slate-400 mt-2">Problemas con la plataforma</p>
           </a>
 
@@ -91,16 +91,16 @@ export default function ContactoPage() {
           <div className="space-y-5">
             {[
               {
-                q: "¿Es gratis MiAgente?",
+                q: "¿Es gratis Conexory?",
                 a: "Sí, puedes empezar gratis con todas las funciones básicas. En el futuro habrá planes Pro con funcionalidades adicionales.",
               },
               {
                 q: "¿Necesito instalar algo?",
-                a: "No. MiAgente funciona completamente desde el navegador, en cualquier dispositivo.",
+                a: "No. Conexory funciona completamente desde el navegador, en cualquier dispositivo.",
               },
               {
                 q: "¿Cómo elimino mi cuenta?",
-                a: "Escríbenos a soporte@miagente.co y procesamos la eliminación en menos de 24 horas.",
+                a: "Escríbenos a soporte@conexory.com y procesamos la eliminación en menos de 24 horas.",
               },
               {
                 q: "¿Dónde se almacenan mis datos?",
@@ -118,7 +118,7 @@ export default function ContactoPage() {
 
       <footer className="border-t border-slate-100 py-8 text-center">
         <p className="text-xs text-slate-400">
-          © 2026 MiAgente · Hecho con 🇨🇴 en Colombia
+          © 2026 Conexory · Hecho con 🇨🇴 en Colombia
         </p>
       </footer>
     </div>

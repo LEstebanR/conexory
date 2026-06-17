@@ -3,8 +3,8 @@ import Link from "next/link"
 import { Building2, ArrowLeft, Check } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Precios — MiAgente",
-  description: "Planes y precios de MiAgente para agentes inmobiliarios en Colombia.",
+  title: "Precios — Conexory",
+  description: "Planes y precios de Conexory para agentes inmobiliarios en Colombia.",
 }
 
 const features = {
@@ -42,7 +42,7 @@ export default function PreciosPage() {
               <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
             <span className="text-base font-black text-slate-950 tracking-tight">
-              MiAgente
+              Conexory
             </span>
           </Link>
           <Link
@@ -153,7 +153,7 @@ export default function PreciosPage() {
 
       <footer className="border-t border-slate-100 py-8 text-center">
         <p className="text-xs text-slate-400">
-          © 2026 MiAgente · Hecho con 🇨🇴 en Colombia
+          © 2026 Conexory · Hecho con 🇨🇴 en Colombia
         </p>
       </footer>
     </div>

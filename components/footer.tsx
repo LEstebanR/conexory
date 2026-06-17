@@ -18,27 +18,27 @@ const links = {
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 border-t border-slate-800/40">
+    <footer className="bg-ink">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div className="md:col-span-2 space-y-5">
             <Link href="/" className="flex items-center gap-2.5 w-fit">
-              <div className="w-8 h-8 rounded-xl bg-brand-400 flex items-center justify-center">
-                <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
+              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+                <Building2 className="w-4 h-4 text-ink" strokeWidth={2.5} />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
-                MiAgente
+                Conexory
               </span>
             </Link>
-            <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+            <p className="text-mute text-sm leading-relaxed max-w-xs">
               La forma más rápida de crear y compartir propiedades en Colombia.
               Construido por agentes, para agentes.
             </p>
             <a
-              href="mailto:hola@miagente.co"
+              href="mailto:hola@conexory.com"
               aria-label="Email"
-              className="w-9 h-9 rounded-xl bg-slate-800/80 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+              className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-mute hover:text-white hover:bg-white/10 transition-colors"
             >
               <Mail className="w-4 h-4" />
             </a>
@@ -54,7 +54,7 @@ export default function Footer() {
                   <li key={item.label}>
                     <Link
                       href={item.href}
-                      className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
+                      className="text-sm text-mute hover:text-white transition-colors"
                     >
                       {item.label}
                     </Link>
@@ -65,11 +65,11 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="border-t border-slate-800/60 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-600">
-            © 2026 MiAgente · Hecho con 🇨🇴 en Colombia
+        <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-mute">
+            © 2026 Conexory · Hecho con 🇨🇴 en Colombia
           </p>
-          <p className="text-xs text-slate-700">
+          <p className="text-xs text-white/30">
             En proceso de registro · Bogotá D.C.
           </p>
         </div>

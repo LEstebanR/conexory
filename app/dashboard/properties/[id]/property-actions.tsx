@@ -58,8 +58,8 @@ export default function PropertyActions({
         className={cn(
           "flex items-center gap-1.5 px-3 h-9 rounded-xl text-sm font-bold border transition-colors disabled:opacity-60",
           published
-            ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
-            : "bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100"
+            ? "bg-warning-50 text-warning-700 border-warning-200 hover:bg-warning-100"
+            : "bg-canvas-soft text-ink border-hairline hover:bg-surface-pressed"
         )}
       >
         {loading ? (

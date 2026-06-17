@@ -76,7 +76,7 @@ function PropertyCard({ property }: { property: Property }) {
                 {typeLabel} · En venta
               </span>
               {inactive && (
-                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-600 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200">
+                <span className="inline-flex items-center gap-1 bg-warning-50 text-warning-700 text-[10px] font-bold px-2 py-1 rounded-full border border-warning-200">
                   <EyeOff className="w-2.5 h-2.5" />
                   Inactiva
                 </span>
@@ -200,9 +200,9 @@ export default async function DashboardPage() {
     : `Tienes ${activeCount} propiedades activas. Actualiza a Pro para publicar hasta ${PRO_PROPERTY_LIMIT} propiedades.`
 
   const statCards = [
-    { label: "Propiedades activas", value: activeCount, icon: Building2, color: "text-brand-500", bg: "bg-brand-50" },
-    { label: "Links generados", value: count, icon: LinkIcon, color: "text-blue-500", bg: "bg-blue-50" },
-    { label: "Veces compartida", value: totalShares, icon: Share2, color: "text-violet-500", bg: "bg-violet-50" },
+    { label: "Propiedades activas", value: activeCount, icon: Building2, color: "text-ink", bg: "bg-canvas-soft" },
+    { label: "Links generados", value: count, icon: LinkIcon, color: "text-ink", bg: "bg-canvas-soft" },
+    { label: "Veces compartida", value: totalShares, icon: Share2, color: "text-ink", bg: "bg-canvas-soft" },
   ]
 
   return (

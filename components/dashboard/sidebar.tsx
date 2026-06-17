@@ -30,12 +30,12 @@ function UserAvatar({ name, image, size = 32 }: { name: string; image: string | 
     .slice(0, 2)
 
   const colors = [
-    "bg-amber-400",
-    "bg-blue-500",
-    "bg-violet-500",
-    "bg-rose-400",
-    "bg-teal-500",
-    "bg-brand-400",
+    "bg-ink",
+    "bg-brand-700",
+    "bg-brand-600",
+    "bg-brand-800",
+    "bg-brand-900",
+    "bg-elevated",
   ]
   const color = colors[name.charCodeAt(0) % colors.length]
   const px = `${size}px`
@@ -144,10 +144,10 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
       {/* Logo */}
       <div className="flex items-center justify-between px-4 h-16 border-b border-slate-100 flex-shrink-0">
         <Link href="/dashboard" onClick={onClose} className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-brand-400 flex items-center justify-center shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center">
             <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-base font-black text-slate-950 tracking-tight">MiAgente</span>
+          <span className="text-base font-bold text-ink tracking-tight">Conexory</span>
         </Link>
         {onClose && (
           <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden">
@@ -162,7 +162,7 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
         <Link
           href="/dashboard/properties/new"
           onClick={onClose}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-brand-400 text-white hover:bg-brand-500 transition-colors mb-3 shadow-sm shadow-brand-400/20"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-ink text-white hover:bg-elevated transition-colors mb-3"
         >
           <Plus className="w-4.5 h-4.5 flex-shrink-0" strokeWidth={2.5} />
           <span className="text-sm font-bold">Nueva propiedad</span>
@@ -215,10 +215,10 @@ export default function Sidebar({ user }: { user: User }) {
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center">
             <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-base font-black text-slate-950 tracking-tight">MiAgente</span>
+          <span className="text-base font-bold text-ink tracking-tight">Conexory</span>
         </div>
 
         <div className="ml-auto">

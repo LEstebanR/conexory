@@ -4,7 +4,7 @@ import { Building2, ArrowLeft, Clock, Tag } from "lucide-react"
 import { getAllPosts } from "@/lib/blog"
 
 export const metadata: Metadata = {
-  title: "Blog — MiAgente",
+  title: "Blog — Conexory",
   description: "Consejos, guías y estrategias para agentes inmobiliarios en Colombia. Aprende a compartir propiedades por WhatsApp, mejorar tus fichas y cerrar más negocios.",
 }
 
@@ -27,7 +27,7 @@ export default function BlogPage() {
             <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center">
               <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-base font-black text-slate-950 tracking-tight">MiAgente</span>
+            <span className="text-base font-black text-slate-950 tracking-tight">Conexory</span>
           </Link>
           <Link href="/" className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -86,7 +86,7 @@ export default function BlogPage() {
       </main>
 
       <footer className="border-t border-slate-100 py-8 text-center">
-        <p className="text-xs text-slate-400">© 2026 MiAgente · Hecho con 🇨🇴 en Colombia</p>
+        <p className="text-xs text-slate-400">© 2026 Conexory · Hecho con 🇨🇴 en Colombia</p>
       </footer>
     </div>
   )

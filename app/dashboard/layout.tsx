@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth"
 import Sidebar from "@/components/dashboard/sidebar"
 
 export const metadata: Metadata = {
-  title: "Dashboard — MiAgente",
+  title: "Dashboard — Conexory",
 }
 
 export default async function DashboardLayout({

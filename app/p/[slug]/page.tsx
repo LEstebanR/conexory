@@ -33,7 +33,7 @@ export async function generateMetadata({
     where: { slug },
     include: { user: { select: { name: true } } },
   })
-  if (!property) return { title: "Propiedad no encontrada — MiAgente" }
+  if (!property) return { title: "Propiedad no encontrada — Conexory" }
 
   const type = TYPE_LABELS[property.type] ?? property.type
   const price = formatCOP(Number(property.price))
@@ -50,14 +50,14 @@ export async function generateMetadata({
   ].filter(Boolean).join("\n")
 
   return {
-    title: `${type} en venta${location ? ` en ${location}` : ""} — MiAgente`,
+    title: `${type} en venta${location ? ` en ${location}` : ""} — Conexory`,
     description,
     openGraph: {
       type: "website",
       url: `/p/${slug}`,
       title: `${type} en venta`,
       description,
-      siteName: "MiAgente",
+      siteName: "Conexory",
       images: property.images[0] ? [{ url: property.images[0] }] : undefined,
     },
   }
@@ -84,7 +84,7 @@ export default async function PublicPropertyPage({
             <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center shadow-sm">
               <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-sm font-black text-slate-950 tracking-tight">MiAgente</span>
+            <span className="text-sm font-black text-slate-950 tracking-tight">Conexory</span>
           </Link>
         </header>
 
@@ -103,7 +103,7 @@ export default async function PublicPropertyPage({
         <footer className="border-t border-slate-100 bg-white py-5 px-4 text-center">
           <p className="text-xs text-slate-400">
             Publicado con{" "}
-            <Link href="/" className="text-brand-500 font-semibold hover:underline">MiAgente</Link>
+            <Link href="/" className="text-brand-500 font-semibold hover:underline">Conexory</Link>
           </p>
         </footer>
       </div>
@@ -207,7 +207,7 @@ export default async function PublicPropertyPage({
         <p className="text-xs text-slate-400">
           Publicado con{" "}
           <Link href="/" className="text-brand-500 font-semibold hover:underline">
-            MiAgente
+            Conexory
           </Link>
         </p>
       </footer>

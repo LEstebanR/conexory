@@ -75,9 +75,9 @@ export default async function PropertyDetailPage({
 
       {/* Banner de desactivada */}
       {!property.published && (
-        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4">
-          <EyeOff className="w-4 h-4 text-amber-600 flex-shrink-0" />
-          <p className="text-sm text-amber-700 font-medium">
+        <div className="flex items-center gap-3 bg-warning-50 border border-warning-200 rounded-2xl px-4 py-3 mb-4">
+          <EyeOff className="w-4 h-4 text-warning-600 flex-shrink-0" />
+          <p className="text-sm text-warning-700 font-medium">
             El link público no está disponible mientras la propiedad esté desactivada.
           </p>
         </div>

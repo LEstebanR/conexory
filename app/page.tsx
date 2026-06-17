@@ -3,10 +3,10 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import Navbar from "@/components/navbar"
 import Hero from "@/components/hero"
-import Stats from "@/components/stats"
-import HowItWorks from "@/components/how-it-works"
+import Marquee from "@/components/marquee"
 import Features from "@/components/features"
-import PropertyPreview from "@/components/property-preview"
+import HowItWorks from "@/components/how-it-works"
+import Stats from "@/components/stats"
 import SignupCTA from "@/components/signup-cta"
 import Footer from "@/components/footer"
 
@@ -18,10 +18,10 @@ export default async function Home() {
     <main className="min-h-screen bg-white">
       <Navbar />
       <Hero />
-      <Stats />
-      <HowItWorks />
+      <Marquee />
       <Features />
-      <PropertyPreview />
+      <HowItWorks />
+      <Stats />
       <SignupCTA />
       <Footer />
     </main>
