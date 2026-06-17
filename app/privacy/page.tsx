@@ -49,26 +49,26 @@ export default function PrivacyPage() {
         <LegalP>
           El responsable del tratamiento de tus datos personales es:
         </LegalP>
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-2 text-sm">
+        <div className="bg-canvas-softer border border-hairline-strong rounded-xl p-5 space-y-2 text-sm">
           <p>
-            <span className="font-semibold text-slate-800">Razón social:</span>{" "}
+            <span className="font-semibold text-ink">Razón social:</span>{" "}
             Conexory SAS
           </p>
           <p>
-            <span className="font-semibold text-slate-800">NIT:</span> En
+            <span className="font-semibold text-ink">NIT:</span> En
             proceso de registro
           </p>
           <p>
-            <span className="font-semibold text-slate-800">Domicilio:</span>{" "}
+            <span className="font-semibold text-ink">Domicilio:</span>{" "}
             Bogotá D.C., Colombia
           </p>
           <p>
-            <span className="font-semibold text-slate-800">
+            <span className="font-semibold text-ink">
               Correo para datos personales:
             </span>{" "}
             <a
               href="mailto:privacidad@conexory.com"
-              className="text-brand-500 hover:underline"
+              className="text-ink hover:underline"
             >
               privacidad@conexory.com
             </a>
@@ -161,7 +161,7 @@ export default function PrivacyPage() {
           Para ejercer cualquiera de estos derechos, escríbenos a{" "}
           <a
             href="mailto:privacidad@conexory.com"
-            className="text-brand-500 font-semibold hover:underline"
+            className="text-ink font-semibold hover:underline"
           >
             privacidad@conexory.com
           </a>
@@ -172,7 +172,7 @@ export default function PrivacyPage() {
 
       <LegalSection id="compartir" number={6} title="Compartir información">
         <LegalP>
-          <strong className="text-slate-800">No vendemos tus datos personales.</strong>{" "}
+          <strong className="text-ink">No vendemos tus datos personales.</strong>{" "}
           Solo los compartimos en los siguientes casos limitados:
         </LegalP>
         <LegalSubtitle>Proveedores de servicios tecnológicos</LegalSubtitle>
@@ -280,7 +280,7 @@ export default function PrivacyPage() {
           en Conexory, contáctanos en{" "}
           <a
             href="mailto:privacidad@conexory.com"
-            className="text-brand-500 font-semibold hover:underline"
+            className="text-ink font-semibold hover:underline"
           >
             privacidad@conexory.com
           </a>{" "}
@@ -308,28 +308,28 @@ export default function PrivacyPage() {
           Para ejercer tus derechos de Habeas Data, presentar reclamaciones o
           resolver dudas sobre esta política, contáctanos:
         </LegalP>
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-2 text-sm">
+        <div className="bg-canvas-softer border border-hairline-strong rounded-xl p-5 space-y-2 text-sm">
           <p>
-            <span className="font-semibold text-slate-800">
+            <span className="font-semibold text-ink">
               Área de protección de datos:
             </span>{" "}
             Conexory SAS
           </p>
           <p>
-            <span className="font-semibold text-slate-800">Correo:</span>{" "}
+            <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
               href="mailto:privacidad@conexory.com"
-              className="text-brand-500 hover:underline"
+              className="text-ink hover:underline"
             >
               privacidad@conexory.com
             </a>
           </p>
           <p>
-            <span className="font-semibold text-slate-800">Ciudad:</span>{" "}
+            <span className="font-semibold text-ink">Ciudad:</span>{" "}
             Bogotá D.C., Colombia
           </p>
           <p>
-            <span className="font-semibold text-slate-800">
+            <span className="font-semibold text-ink">
               Tiempo de respuesta:
             </span>{" "}
             10 días hábiles (Ley 1581/2012)
@@ -337,7 +337,7 @@ export default function PrivacyPage() {
         </div>
         <LegalP>
           También puedes presentar una queja ante la{" "}
-          <strong className="text-slate-800">
+          <strong className="text-ink">
             Superintendencia de Industria y Comercio (SIC)
           </strong>
           , la autoridad de protección de datos en Colombia, a través de{" "}
@@ -345,7 +345,7 @@ export default function PrivacyPage() {
             href="https://www.sic.gov.co"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-brand-500 font-semibold hover:underline"
+            className="text-ink font-semibold hover:underline"
           >
             www.sic.gov.co
           </a>

@@ -10,19 +10,19 @@ export const metadata: Metadata = {
 export default function ContactoPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-slate-100">
+      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-hairline">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center">
               <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-base font-black text-slate-950 tracking-tight">
+            <span className="text-base font-black text-ink tracking-tight">
               Conexory
             </span>
           </Link>
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium text-body hover:text-ink transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Volver al inicio
@@ -30,15 +30,15 @@ export default function ContactoPage() {
         </div>
       </header>
 
-      <div className="bg-slate-950 py-14 sm:py-20">
+      <div className="bg-ink py-14 sm:py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-brand-400 font-bold text-xs uppercase tracking-[0.2em] mb-4">
+          <p className="text-mute font-bold text-xs uppercase tracking-[0.2em] mb-4">
             Contáctanos
           </p>
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">
             Estamos aquí para ayudarte
           </h1>
-          <p className="text-slate-400 text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-mute text-base leading-relaxed max-w-xl mx-auto">
             ¿Tienes preguntas, sugerencias o necesitas soporte? Escríbenos y
             te respondemos en menos de 24 horas.
           </p>
@@ -56,7 +56,7 @@ export default function ContactoPage() {
             </div>
             <p className="font-bold text-ink mb-1">Email general</p>
             <p className="text-sm text-ink font-medium">hola@conexory.com</p>
-            <p className="text-xs text-slate-400 mt-2">Para cualquier consulta</p>
+            <p className="text-xs text-mute mt-2">Para cualquier consulta</p>
           </a>
 
           <a
@@ -68,24 +68,24 @@ export default function ContactoPage() {
             </div>
             <p className="font-bold text-ink mb-1">Soporte técnico</p>
             <p className="text-sm text-ink font-medium">soporte@conexory.com</p>
-            <p className="text-xs text-slate-400 mt-2">Problemas con la plataforma</p>
+            <p className="text-xs text-mute mt-2">Problemas con la plataforma</p>
           </a>
 
-          <div className="flex flex-col items-center text-center p-6 rounded-2xl border border-slate-100">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-              <MapPin className="w-5 h-5 text-slate-500" />
+          <div className="flex flex-col items-center text-center p-6 rounded-2xl border border-hairline">
+            <div className="w-12 h-12 rounded-2xl bg-canvas-soft flex items-center justify-center mb-4">
+              <MapPin className="w-5 h-5 text-body" />
             </div>
-            <p className="font-bold text-slate-900 mb-1">Ubicación</p>
-            <p className="text-sm text-slate-600 font-medium">Bogotá D.C.</p>
-            <p className="text-xs text-slate-400 mt-2">Colombia 🇨🇴</p>
+            <p className="font-bold text-ink mb-1">Ubicación</p>
+            <p className="text-sm text-body font-medium">Bogotá D.C.</p>
+            <p className="text-xs text-mute mt-2">Colombia</p>
           </div>
         </div>
 
-        <div className="bg-slate-50 rounded-2xl border border-slate-100 p-8">
-          <h2 className="text-lg font-black text-slate-950 tracking-tight mb-2">
+        <div className="bg-canvas-softer rounded-2xl border border-hairline p-8">
+          <h2 className="text-lg font-black text-ink tracking-tight mb-2">
             Preguntas frecuentes
           </h2>
-          <p className="text-sm text-slate-500 mb-6">
+          <p className="text-sm text-body mb-6">
             Antes de escribirnos, revisa si tu pregunta ya tiene respuesta aquí.
           </p>
           <div className="space-y-5">
@@ -107,18 +107,18 @@ export default function ContactoPage() {
                 a: "En servidores en Estados Unidos (Vercel y Neon), con los más altos estándares de seguridad. Más detalles en nuestra Política de Privacidad.",
               },
             ].map(({ q, a }) => (
-              <div key={q} className="border-b border-slate-200 pb-5 last:border-0 last:pb-0">
-                <p className="font-semibold text-slate-900 mb-1 text-sm">{q}</p>
-                <p className="text-sm text-slate-500">{a}</p>
+              <div key={q} className="border-b border-hairline-strong pb-5 last:border-0 last:pb-0">
+                <p className="font-semibold text-ink mb-1 text-sm">{q}</p>
+                <p className="text-sm text-body">{a}</p>
               </div>
             ))}
           </div>
         </div>
       </main>
 
-      <footer className="border-t border-slate-100 py-8 text-center">
-        <p className="text-xs text-slate-400">
-          © 2026 Conexory · Hecho con 🇨🇴 en Colombia
+      <footer className="border-t border-hairline py-8 text-center">
+        <p className="text-xs text-mute">
+          © 2026 Conexory · Hecho en Colombia
         </p>
       </footer>
     </div>

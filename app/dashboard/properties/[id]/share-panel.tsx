@@ -51,12 +51,12 @@ export default function SharePanel({
   const waUrl = `https://wa.me/?text=${waText}`
 
   return (
-    <div className="bg-slate-950 rounded-2xl p-6 space-y-4">
+    <div className="bg-ink rounded-2xl p-6 space-y-4">
       <div>
-        <p className="text-xs font-bold text-brand-400 uppercase tracking-widest mb-1.5">
+        <p className="text-xs font-bold text-ink uppercase tracking-widest mb-1.5">
           Link público
         </p>
-        <p className="text-sm text-slate-400 leading-relaxed">
+        <p className="text-sm text-mute leading-relaxed">
           Comparte este link con tus clientes. Funciona en cualquier dispositivo, sin que necesiten crear cuenta.
         </p>
       </div>
@@ -69,8 +69,8 @@ export default function SharePanel({
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-brand-400" />
-              <span className="text-brand-400">Copiado</span>
+              <Check className="w-3.5 h-3.5 text-ink" />
+              <span className="text-ink">Copiado</span>
             </>
           ) : (
             <>

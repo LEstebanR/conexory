@@ -40,7 +40,7 @@ export default function SignupCTA() {
         </Button>
 
         <p className="text-mute text-sm mt-6">
-          Sin tarjeta de crédito · Cancela cuando quieras · Hecho en Colombia 🇨🇴
+          Sin tarjeta de crédito · Cancela cuando quieras · Hecho en Colombia
         </p>
       </div>
     </section>

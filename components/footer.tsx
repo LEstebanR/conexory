@@ -67,7 +67,7 @@ export default function Footer() {
 
         <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-mute">
-            © 2026 Conexory · Hecho con 🇨🇴 en Colombia
+            © 2026 Conexory · Hecho en Colombia
           </p>
           <p className="text-xs text-white/30">
             En proceso de registro · Bogotá D.C.

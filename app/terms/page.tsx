@@ -93,7 +93,7 @@ export default function TermsPage() {
           credenciales de acceso. Debes notificarnos inmediatamente a{" "}
           <a
             href="mailto:soporte@conexory.com"
-            className="text-brand-500 font-semibold hover:underline"
+            className="text-ink font-semibold hover:underline"
           >
             soporte@conexory.com
           </a>{" "}
@@ -281,22 +281,22 @@ export default function TermsPage() {
           Si tienes preguntas sobre estos términos o necesitas ejercer algún
           derecho reconocido en este documento, puedes contactarnos en:
         </LegalP>
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-2 text-sm">
+        <div className="bg-canvas-softer border border-hairline-strong rounded-xl p-5 space-y-2 text-sm">
           <p>
-            <span className="font-semibold text-slate-800">Empresa:</span>{" "}
+            <span className="font-semibold text-ink">Empresa:</span>{" "}
             Conexory SAS
           </p>
           <p>
-            <span className="font-semibold text-slate-800">Correo:</span>{" "}
+            <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
               href="mailto:legal@conexory.com"
-              className="text-brand-500 hover:underline"
+              className="text-ink hover:underline"
             >
               legal@conexory.com
             </a>
           </p>
           <p>
-            <span className="font-semibold text-slate-800">Ciudad:</span>{" "}
+            <span className="font-semibold text-ink">Ciudad:</span>{" "}
             Bogotá D.C., Colombia
           </p>
         </div>

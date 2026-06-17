@@ -46,7 +46,7 @@ export default function PropertyActions({
     <div className="flex items-center gap-2 flex-shrink-0">
       <Link
         href={`/dashboard/properties/${propertyId}/edit`}
-        className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors"
+        className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-white border border-hairline-strong text-body text-sm font-bold hover:bg-canvas-softer transition-colors"
       >
         <Pencil className="w-3.5 h-3.5" />
         Editar

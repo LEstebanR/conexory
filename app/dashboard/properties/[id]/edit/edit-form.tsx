@@ -36,8 +36,8 @@ function formatCOP(digits: string): string {
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
-      <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">{title}</h2>
+    <div className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
+      <h2 className="text-sm font-bold text-ink uppercase tracking-wide">{title}</h2>
       {children}
     </div>
   )
@@ -45,9 +45,9 @@ function SectionCard({ title, children }: { title: string; children: React.React
 
 function FieldLabel({ children, optional }: { children: React.ReactNode; optional?: boolean }) {
   return (
-    <label className="block text-sm font-semibold text-slate-700">
+    <label className="block text-sm font-semibold text-ink">
       {children}
-      {optional && <span className="ml-1.5 text-xs font-normal text-slate-400">Opcional</span>}
+      {optional && <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>}
     </label>
   )
 }
@@ -108,13 +108,13 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
       <div className="flex items-center gap-3 mb-8">
         <Link
           href={`/dashboard/properties/${initial.id}`}
-          className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors flex-shrink-0"
+          className="p-2 rounded-xl text-mute hover:bg-canvas-soft hover:text-ink transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-slate-950 tracking-tight">Editar propiedad</h1>
-          <p className="text-sm text-slate-500">Los cambios se reflejan en el link público al instante</p>
+          <h1 className="text-2xl font-black text-ink tracking-tight">Editar propiedad</h1>
+          <p className="text-sm text-body">Los cambios se reflejan en el link público al instante</p>
         </div>
       </div>
 
@@ -132,12 +132,12 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
                   className={cn(
                     "flex flex-col items-center gap-2 py-4 rounded-xl text-xs font-medium transition-all border-2",
                     isSelected
-                      ? "bg-brand-50 text-brand-700 border-brand-300"
-                      : "bg-white text-slate-500 border-slate-100 hover:border-slate-200 hover:bg-slate-50"
+                      ? "bg-canvas-soft text-ink border-ink"
+                      : "bg-white text-body border-hairline hover:border-hairline-strong hover:bg-canvas-softer"
                   )}
                 >
                   <Icon
-                    className={cn("w-5 h-5", isSelected ? "text-brand-500" : "text-slate-400")}
+                    className={cn("w-5 h-5", isSelected ? "text-ink" : "text-mute")}
                     strokeWidth={isSelected ? 2.25 : 1.75}
                   />
                   {pt.label}
@@ -167,20 +167,20 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               required
               maxLength={120}
             />
-            <p className="text-xs text-slate-400 text-right">{title.length}/120</p>
+            <p className="text-xs text-mute text-right">{title.length}/120</p>
           </div>
 
           <div className="space-y-1.5">
             <FieldLabel>Precio</FieldLabel>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400 select-none">$</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-mute select-none">$</span>
               <input
                 type="text"
                 inputMode="numeric"
                 placeholder="2.800.000"
                 value={formatCOP(price)}
                 onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))}
-                className="w-full h-11 pl-7 rounded-xl border border-slate-200 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-colors"
+                className="w-full h-11 pl-7 rounded-xl border border-hairline-strong text-sm font-medium text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
                 required
               />
             </div>
@@ -228,9 +228,9 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
               maxLength={1000}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-colors"
+              className="w-full rounded-xl border border-hairline-strong px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
             />
-            <p className="text-xs text-slate-400 text-right">{description.length}/1000</p>
+            <p className="text-xs text-mute text-right">{description.length}/1000</p>
           </div>
         </SectionCard>
 
@@ -244,7 +244,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           <Button type="button" variant="outline" className="flex-1" asChild>
             <Link href={`/dashboard/properties/${initial.id}`}>Cancelar</Link>
           </Button>
-          <Button type="submit" disabled={isPending || isUploading} className="flex-1 font-bold shadow-sm shadow-brand-400/20">
+          <Button type="submit" disabled={isPending || isUploading} className="flex-1 font-bold shadow-sm ">
             {isPending ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
             ) : isUploading ? (
