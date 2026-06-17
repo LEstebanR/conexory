@@ -6,28 +6,29 @@ import { type ButtonHTMLAttributes, forwardRef } from "react"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60 cursor-pointer select-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60 cursor-pointer select-none rounded-full",
   {
     variants: {
       variant: {
         default:
-          "bg-brand-400 text-white hover:bg-brand-500 shadow-sm hover:shadow-md active:scale-[0.98] rounded-xl",
+          "bg-ink text-white hover:bg-elevated active:scale-[0.98]",
         secondary:
-          "border-2 border-brand-400 text-brand-600 hover:bg-brand-50 active:scale-[0.98] rounded-xl",
+          "bg-white text-ink border border-hairline-strong hover:bg-canvas-soft active:scale-[0.98]",
+        subtle:
+          "bg-canvas-soft text-ink hover:bg-surface-pressed active:scale-[0.98]",
         outline:
-          "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 rounded-xl",
-        ghost:
-          "text-slate-600 hover:bg-slate-100 hover:text-slate-900 rounded-xl",
-        link: "text-brand-500 hover:underline p-0 h-auto rounded-none",
+          "border border-hairline-strong bg-white text-ink hover:bg-canvas-soft",
+        ghost: "text-body hover:bg-canvas-soft hover:text-ink",
+        link: "text-ink underline underline-offset-4 hover:opacity-70 p-0 h-auto rounded-none",
         destructive:
-          "bg-red-500 text-white hover:bg-red-600 shadow-sm rounded-xl",
+          "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]",
       },
       size: {
         default: "h-11 px-6 py-2.5 text-sm",
         sm: "h-9 px-4 py-2 text-xs",
         lg: "h-12 px-8 py-3 text-base",
         xl: "h-14 px-10 py-4 text-base",
-        icon: "h-10 w-10 rounded-xl",
+        icon: "h-10 w-10",
       },
     },
     defaultVariants: {
