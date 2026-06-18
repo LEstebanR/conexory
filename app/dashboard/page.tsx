@@ -17,11 +17,17 @@ const TYPE_LABELS: Record<string, string> = {
   warehouse: "Bodega",
 }
 
-function formatCOP(amount: number): string {
+function formatCompactCOP(amount: number): string {
+  if (amount >= 1_000_000) {
+    const millions = amount / 1_000_000
+    const value = Number.isInteger(millions)
+      ? millions.toLocaleString("es-CO")
+      : millions.toLocaleString("es-CO", { maximumFractionDigits: 1 })
+    return `$${value} M`
+  }
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
     currency: "COP",
-    minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount)
 }
@@ -77,7 +83,7 @@ export default async function DashboardPage() {
     typeLabel: TYPE_LABELS[p.type] ?? p.type,
     published: p.published,
     shares: p.shares,
-    price: formatCOP(p.price.toNumber()),
+    price: formatCompactCOP(p.price.toNumber()),
     location: [p.neighborhood, p.city].filter(Boolean).join(", "),
     area: p.area,
     bedrooms: p.bedrooms,

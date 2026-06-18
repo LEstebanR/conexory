@@ -48,17 +48,22 @@ function Row({ item }: { item: PropertyItem }) {
       <Thumbnail item={item} />
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-1">
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-canvas-soft text-ink">
-            <span className={cn("w-1.5 h-1.5 rounded-full", inactive ? "bg-mute" : "bg-ink")} />
-            {item.typeLabel}
-          </span>
-          {inactive && (
-            <span className="inline-flex items-center gap-1 bg-warning-50 text-warning-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-warning-200">
-              <EyeOff className="w-2.5 h-2.5" />
-              Inactiva
+        <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-canvas-soft text-ink">
+              <span className={cn("w-1.5 h-1.5 rounded-full", inactive ? "bg-mute" : "bg-ink")} />
+              {item.typeLabel}
             </span>
-          )}
+            {inactive && (
+              <span className="inline-flex items-center gap-1 bg-warning-50 text-warning-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-warning-200">
+                <EyeOff className="w-2.5 h-2.5" />
+                Inactiva
+              </span>
+            )}
+          </div>
+          <p className={cn("ml-auto flex-shrink-0 text-base sm:text-lg font-black tracking-tighter leading-none", inactive ? "text-mute" : "text-ink")}>
+            {item.price}
+          </p>
         </div>
         <h3 className={cn("font-bold tracking-tight truncate", inactive ? "text-body" : "text-ink")}>
           {item.title}
@@ -91,13 +96,6 @@ function Row({ item }: { item: PropertyItem }) {
             </span>
           )}
         </div>
-      </div>
-
-      <div className="text-right flex-shrink-0">
-        <p className={cn("text-lg sm:text-xl font-black tracking-tighter leading-none", inactive ? "text-mute" : "text-ink")}>
-          {item.price}
-        </p>
-        <p className="text-[10px] text-mute font-medium mt-1">COP</p>
       </div>
 
       <ChevronRight className="w-4 h-4 text-mute group-hover:text-ink group-hover:translate-x-0.5 transition-all flex-shrink-0" />

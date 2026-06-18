@@ -103,9 +103,9 @@ export default async function PropertyDetailPage({
 
         {/* Resumen */}
         <div className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <span className="inline-flex items-center bg-canvas-soft text-ink text-xs font-bold px-2.5 py-1 rounded-full mb-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="min-w-0 sm:flex-1">
+              <span className="inline-flex items-center bg-canvas-soft text-ink text-xs font-bold px-2.5 py-1 rounded-full mb-3 whitespace-nowrap">
                 {typeLabel} · En venta
               </span>
               <h2 className="text-xl font-black text-ink tracking-tight leading-tight mb-1">

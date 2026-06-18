@@ -122,7 +122,7 @@ export default function NewPropertyPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Tipo de propiedad */}
         <SectionCard title="Tipo de propiedad">
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {PROPERTY_TYPES.map((pt) => {
               const Icon = pt.icon
               const isSelected = type === pt.id
