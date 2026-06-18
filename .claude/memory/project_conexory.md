@@ -20,6 +20,8 @@ Conexory es un SaaS para agentes inmobiliarios en Colombia. Freemium con tres pl
 
 **Pendiente para completar el MVP:** pasarela de pagos (Wompi o Stripe) y suscripciones. Hasta integrarla, **nadie es premium** (no hay forma de asignar `isPremium`), pero el enforcement por plan ya está en su lugar.
 
+**Precios (mercado colombiano):** los valores inmobiliarios se manejan en millones/miles de millones de COP y ocupan mucho espacio. Convención: en UI de espacio reducido (cards/listas) usar formato compacto en millones (`$580 M`, `$1.250 M` — helper `formatCompactCOP` en `app/dashboard/page.tsx`); en detalle del dashboard y vista pública `/p/[slug]` mostrar el **valor exacto completo** (un comprador necesita el precio real).
+
 **No se va a hacer:** estadísticas de visitas, dominio personalizado, app móvil.
 
 **Auth:** Google + email/contraseña es suficiente para el mercado colombiano. No se agregarán más providers OAuth.

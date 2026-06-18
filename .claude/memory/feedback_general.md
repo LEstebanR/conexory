@@ -26,6 +26,13 @@ Los issues deben tener contexto suficiente para implementarlos sin buscar más i
 **Why:** Luis quiere poder arrancar a trabajar desde Linear directamente.
 **How to apply:** Cada issue debe tener al menos: contexto, alcance con bullets específicos, y consideraciones técnicas.
 
+## Los estilos a nivel de componente van en el componente, no en CSS global
+
+Si un estilo aplica a un elemento o componente concreto (p. ej. `cursor-pointer` en un botón), va en la definición de ese componente/clase, no como regla base en `globals.css`.
+
+**Why:** Luis rechazó explícitamente meter una regla `button { cursor: pointer }` en `globals.css` — "ese estilo debe ir en la definición del componente".
+**How to apply:** Resolver inconsistencias de estilo en el componente afectado (o en el componente UI base reutilizable, como `components/ui/button.tsx`), no con reglas globales/`@layer base`. Reservar `globals.css` para tokens y resets reales, no para parchear comportamiento de componentes.
+
 ## Los archivos de Claude son solo para desarrollo
 
 No incluir en AGENTS.md, CLAUDE.md ni en los archivos de memoria: milestones, plazos, fechas target, estado de issues ni referencias a IDs de Linear (LES-xxx). Eso lo maneja Luis directamente en Linear.
