@@ -153,6 +153,8 @@ La base de datos está bajo control de **Prisma Migrations** (con migración `0_
   ```
 - **Proteger rutas:** redirigir a `/login` si no hay sesión, a `/dashboard` si ya la hay
 - `emailVerified` existe en el schema pero **no se valida actualmente**
+- **Email/password va por Server Actions**, no por llamadas client-side: `app/login/actions.ts` y `app/register/actions.ts` llaman `auth.api.signInEmail`/`signUpEmail`, validan con Zod y mapean `APIError` (`better-auth/api`). Los forms usan `useActionState` + `<form action>` para que el envío funcione por progressive enhancement (Enter envía sin depender de la hidratación). **Google OAuth sí es client-side** (`signIn.social`, flujo de redirect).
+- **`nextCookies()` es el último plugin en `lib/auth.ts`** — es lo que permite que las Server Actions escriban la cookie de sesión vía `next/headers`. No reordenarlo ni quitarlo.
 
 ---
 
