@@ -14,6 +14,7 @@ import {
 import { prisma } from "@/lib/prisma"
 import PublicGallery from "@/components/public-gallery"
 import PublicShareButton from "@/components/public-share-button"
+import AgentAvatar from "@/components/agent-avatar"
 import Reveal from "@/components/reveal"
 
 const TYPE_LABELS: Record<string, string> = {
@@ -32,15 +33,6 @@ function formatCOP(amount: number): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount)
-}
-
-function initials(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("")
 }
 
 export async function generateMetadata({
@@ -273,21 +265,10 @@ export default async function PublicPropertyPage({
         {/* Agent */}
         <Reveal delay={200}>
           <div className="flex items-center gap-3 bg-canvas-softer rounded-2xl p-4">
-            {property.user.image ? (
-              <Image
-                src={property.user.image}
-                alt={property.user.name}
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-ink flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-black text-white">
-                  {initials(property.user.name)}
-                </span>
-              </div>
-            )}
+            <AgentAvatar
+              name={property.user.name}
+              image={property.user.image}
+            />
             <div className="min-w-0">
               <p className="text-xs text-mute font-semibold uppercase tracking-wide">
                 Ofrecido por
