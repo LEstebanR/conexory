@@ -39,7 +39,7 @@ export default function PropertyCarousel({
   }
 
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-slate-200 select-none">
+    <div className="relative rounded-2xl overflow-hidden bg-canvas-soft select-none">
       {/* Image stack */}
       <div
         className="relative aspect-[4/3] sm:aspect-video"

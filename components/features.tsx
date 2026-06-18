@@ -1,134 +1,210 @@
-import { Camera, Link2, MessageCircle, LayoutGrid, RefreshCw, Smartphone } from "lucide-react"
+import Image from "next/image"
+import {
+  Camera,
+  Link2,
+  LayoutGrid,
+  Check,
+  ImagePlus,
+  MessageCircle,
+  Copy,
+} from "lucide-react"
+import Reveal from "@/components/reveal"
 
-const features = [
+const img = (id: string) =>
+  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=500&q=70`
+
+const PHOTOS = {
+  laureles: img("1600596542815-ffad4c1539a9"),
+  poblado: img("1545324418-cc1a3fa10c00"),
+  campestre: img("1570129477492-45c003edd2be"),
+  loft: img("1502672260266-1c1ef2d93688"),
+  penthouse: img("1493809842364-78817add7ffb"),
+}
+
+const gallery = [
+  { src: PHOTOS.poblado, title: "Apartamento El Poblado", price: "$420.000.000" },
+  { src: PHOTOS.campestre, title: "Casa campestre", price: "$750.000.000" },
+  { src: PHOTOS.loft, title: "Loft en Chapinero", price: "$310.000.000" },
+  { src: PHOTOS.penthouse, title: "Penthouse con vista", price: "$1.200.000.000" },
+]
+
+function FormMock() {
+  return (
+    <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 p-6 space-y-4">
+      <div className="grid grid-cols-3 gap-2">
+        <div className="relative aspect-square rounded-xl overflow-hidden">
+          <Image src={PHOTOS.laureles} alt="Foto de propiedad" fill sizes="120px" className="object-cover" />
+        </div>
+        <div className="relative aspect-square rounded-xl overflow-hidden">
+          <Image src={PHOTOS.poblado} alt="Foto de propiedad" fill sizes="120px" className="object-cover" />
+        </div>
+        <div className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong flex items-center justify-center">
+          <ImagePlus className="w-5 h-5 text-mute" />
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <div className="h-2.5 w-16 rounded-full bg-canvas-soft" />
+        <div className="h-11 rounded-lg border border-hairline-strong flex items-center px-3 text-sm font-bold text-ink">
+          $580.000.000
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <div className="h-2.5 w-20 rounded-full bg-canvas-soft" />
+        <div className="h-16 rounded-lg border border-hairline-strong p-3 space-y-1.5">
+          <div className="h-2 w-full rounded-full bg-canvas-soft" />
+          <div className="h-2 w-4/5 rounded-full bg-canvas-soft" />
+        </div>
+      </div>
+      <div className="h-11 rounded-full bg-ink flex items-center justify-center text-sm font-semibold text-white">
+        Publicar propiedad
+      </div>
+    </div>
+  )
+}
+
+function ShareMock() {
+  return (
+    <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 p-6 space-y-4">
+      <div className="flex flex-col gap-2.5 rounded-2xl border border-hairline-strong px-4 py-3 sm:flex-row sm:items-center sm:gap-2 sm:rounded-full">
+        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
+          <Link2 className="w-4 h-4 text-body flex-shrink-0" />
+          <span className="text-sm text-ink truncate">conexory.com/p/casa-laureles</span>
+        </div>
+        <span className="flex items-center justify-center gap-1 bg-canvas-soft rounded-full px-3 py-1.5 text-xs font-semibold text-ink flex-shrink-0">
+          <Copy className="w-3 h-3" /> Copiar
+        </span>
+      </div>
+      <div className="h-11 rounded-full bg-ink flex items-center justify-center gap-2 text-sm font-semibold text-white">
+        <MessageCircle className="w-4 h-4" />
+        Enviar por WhatsApp
+      </div>
+      <div className="rounded-xl bg-canvas-softer p-3 flex items-center gap-3">
+        <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+          <Image src={PHOTOS.laureles} alt="Preview de la propiedad" fill sizes="56px" className="object-cover" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-ink truncate">Casa con jardín privado</p>
+          <p className="text-xs text-body truncate">$580.000.000 · Laureles, Medellín</p>
+          <p className="text-[10px] text-mute mt-0.5">conexory.com</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function GalleryMock() {
+  return (
+    <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-full bg-ink flex items-center justify-center text-white text-sm font-bold">
+          CR
+        </div>
+        <div>
+          <p className="text-sm font-bold text-ink leading-tight">Carolina Restrepo</p>
+          <p className="text-xs text-body">4 propiedades activas</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {gallery.map((p) => (
+          <div key={p.title} className="rounded-xl border border-hairline overflow-hidden">
+            <div className="relative h-20">
+              <Image src={p.src} alt={p.title} fill sizes="160px" className="object-cover" />
+            </div>
+            <div className="p-2">
+              <p className="text-[11px] font-bold text-ink truncate">{p.title}</p>
+              <p className="text-[11px] text-body">{p.price}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const blocks = [
   {
+    eyebrow: "Crea en 60 segundos",
     icon: Camera,
-    title: "Formulario ultrarrápido",
+    title: "Un formulario, nada más.",
     description:
-      "Solo fotos, precio y descripción. Sin campos innecesarios. En 60 segundos tienes tu propiedad lista.",
-    tag: "< 60 seg",
-    iconColor: "text-amber-500",
-    iconBg: "bg-amber-50",
-    border: "border-amber-100",
-    tagBg: "bg-amber-50 text-amber-700",
-    big: true,
+      "Solo fotos, precio y una breve descripción. Sin campos innecesarios ni formularios eternos. Sube las fotos directo desde la cámara de tu celular y publica al instante.",
+    points: ["Sin campos innecesarios", "Funciona 100% desde el celular", "Edita y actualiza cuando quieras"],
+    mock: <FormMock />,
   },
   {
-    icon: MessageCircle,
-    title: "WhatsApp en 1 tap",
-    description:
-      "Botón directo integrado. Un tap y tu propiedad llega al interesado con fotos, precio y tu contacto. Sin copiar nada.",
-    tag: "Lo más usado",
-    iconColor: "text-[#25D366]",
-    iconBg: "bg-green-50",
-    border: "border-green-100",
-    tagBg: "bg-green-50 text-green-700",
-    big: true,
-  },
-  {
+    eyebrow: "Comparte donde sea",
     icon: Link2,
-    title: "Link único por propiedad",
+    title: "Un link, una preview perfecta.",
     description:
-      "Cada propiedad tiene su propia URL. Compártela por Instagram, email o donde quieras.",
-    tag: "Tu URL propia",
-    iconColor: "text-blue-500",
-    iconBg: "bg-blue-50",
-    border: "border-blue-100",
-    tagBg: "bg-blue-50 text-blue-700",
-    big: false,
+      "Cada propiedad tiene su URL única. Compártela por WhatsApp, Instagram o email y se ve siempre profesional, con foto, precio y detalles en la preview.",
+    points: ["Preview enriquecida en WhatsApp", "Link único por propiedad", "Cambios reflejados al instante"],
+    mock: <ShareMock />,
   },
   {
+    eyebrow: "Luce profesional",
     icon: LayoutGrid,
-    title: "Tu galería de propiedades",
+    title: "Tu portafolio en una página.",
     description:
-      "Todas tus propiedades en una sola página con tu nombre y foto de perfil. Luce profesional.",
-    tag: "Incluida",
-    iconColor: "text-violet-500",
-    iconBg: "bg-violet-50",
-    border: "border-violet-100",
-    tagBg: "bg-violet-50 text-violet-700",
-    big: false,
-  },
-  {
-    icon: RefreshCw,
-    title: "Actualización instantánea",
-    description:
-      "Cambia el precio o las fotos y el link refleja los cambios al instante. Sin re-publicar.",
-    tag: "Tiempo real",
-    iconColor: "text-brand-500",
-    iconBg: "bg-brand-50",
-    border: "border-brand-100",
-    tagBg: "bg-brand-50 text-brand-700",
-    big: false,
-  },
-  {
-    icon: Smartphone,
-    title: "100% desde el celular",
-    description:
-      "Diseñado para trabajar desde donde estás. Sube fotos directo desde la cámara, sin desktop.",
-    tag: "Mobile-first",
-    iconColor: "text-rose-500",
-    iconBg: "bg-rose-50",
-    border: "border-rose-100",
-    tagBg: "bg-rose-50 text-rose-700",
-    big: false,
+      "Todas tus propiedades activas en un solo lugar, con tu nombre y tu foto. Una galería que comparte tu marca personal y genera confianza con cada cliente.",
+    points: ["Tu marca personal", "Todas tus propiedades activas", "Una sola URL para compartir"],
+    mock: <GalleryMock />,
   },
 ]
 
 export default function Features() {
-  const bigFeatures = features.filter((f) => f.big)
-  const smallFeatures = features.filter((f) => !f.big)
-
   return (
-    <section id="features" className="py-24 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="features" className="py-24 bg-white">
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-16">
-          <p className="text-brand-400 font-bold text-sm uppercase tracking-[0.2em] mb-4">
+        <Reveal className="max-w-2xl mb-20">
+          <p className="text-body font-semibold text-sm uppercase tracking-[0.2em] mb-4">
             Funciones
           </p>
-          <h2 className="text-5xl sm:text-6xl font-black text-slate-950 tracking-tighter leading-none">
+          <h2 className="text-4xl sm:text-5xl font-black text-ink tracking-tighter leading-none">
             Todo lo que necesitas.
             <br />
-            <span className="text-slate-400">Nada que no uses.</span>
+            <span className="text-mute">Nada que no uses.</span>
           </h2>
-        </div>
+        </Reveal>
 
-        {/* Big feature cards (top row) */}
-        <div className="grid md:grid-cols-2 gap-5 mb-5">
-          {bigFeatures.map((feature) => (
-            <div
-              key={feature.title}
-              className={`p-8 rounded-3xl border-2 ${feature.border} bg-white hover:shadow-md transition-all duration-300`}
-            >
-              <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${feature.iconBg} mb-6`}>
-                <feature.icon className={`w-7 h-7 ${feature.iconColor}`} strokeWidth={1.75} />
-              </div>
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <h3 className="text-xl font-black text-slate-950 tracking-tight">{feature.title}</h3>
-                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap flex-shrink-0 ${feature.tagBg}`}>
-                  {feature.tag}
-                </span>
-              </div>
-              <p className="text-slate-500 leading-relaxed">{feature.description}</p>
-            </div>
-          ))}
-        </div>
+        <div className="space-y-24">
+          {blocks.map((block, i) => {
+            const reversed = i % 2 === 1
+            return (
+              <Reveal key={block.title}>
+                <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                  {/* Copy */}
+                  <div className={reversed ? "lg:order-2" : ""}>
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-ink mb-6">
+                      <block.icon className="w-6 h-6 text-white" strokeWidth={1.75} />
+                    </div>
+                    <p className="text-body font-semibold text-xs uppercase tracking-[0.2em] mb-3">
+                      {block.eyebrow}
+                    </p>
+                    <h3 className="text-3xl sm:text-4xl font-black text-ink tracking-tight leading-tight mb-4">
+                      {block.title}
+                    </h3>
+                    <p className="text-body leading-relaxed mb-6 max-w-md">
+                      {block.description}
+                    </p>
+                    <ul className="space-y-3">
+                      {block.points.map((point) => (
+                        <li key={point} className="flex items-center gap-3 text-sm font-medium text-ink">
+                          <span className="w-5 h-5 rounded-full bg-ink flex items-center justify-center flex-shrink-0">
+                            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                          </span>
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-        {/* Small feature cards (bottom row) */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {smallFeatures.map((feature) => (
-            <div
-              key={feature.title}
-              className={`p-6 rounded-3xl border ${feature.border} bg-white hover:shadow-md transition-all duration-300`}
-            >
-              <div className={`inline-flex items-center justify-center w-11 h-11 rounded-xl ${feature.iconBg} mb-4`}>
-                <feature.icon className={`w-5 h-5 ${feature.iconColor}`} strokeWidth={2} />
-              </div>
-              <h3 className="text-sm font-black text-slate-950 tracking-tight mb-2">{feature.title}</h3>
-              <p className="text-slate-500 text-xs leading-relaxed">{feature.description}</p>
-            </div>
-          ))}
+                  {/* Mock */}
+                  <div className={reversed ? "lg:order-1" : ""}>{block.mock}</div>
+                </div>
+              </Reveal>
+            )
+          })}
         </div>
       </div>
     </section>

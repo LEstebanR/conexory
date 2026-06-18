@@ -51,12 +51,12 @@ export default function SharePanel({
   const waUrl = `https://wa.me/?text=${waText}`
 
   return (
-    <div className="bg-slate-950 rounded-2xl p-6 space-y-4">
+    <div className="bg-ink rounded-2xl p-6 space-y-4">
       <div>
-        <p className="text-xs font-bold text-brand-400 uppercase tracking-widest mb-1.5">
+        <p className="text-xs font-bold text-white uppercase tracking-widest mb-1.5">
           Link público
         </p>
-        <p className="text-sm text-slate-400 leading-relaxed">
+        <p className="text-sm text-mute leading-relaxed">
           Comparte este link con tus clientes. Funciona en cualquier dispositivo, sin que necesiten crear cuenta.
         </p>
       </div>
@@ -69,8 +69,8 @@ export default function SharePanel({
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-brand-400" />
-              <span className="text-brand-400">Copiado</span>
+              <Check className="w-3.5 h-3.5 text-ink" />
+              <span className="text-ink">Copiado</span>
             </>
           ) : (
             <>
@@ -81,24 +81,24 @@ export default function SharePanel({
         </button>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <a
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleWhatsApp}
-          className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-bold transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-bold transition-colors"
         >
-          <MessageCircle className="w-4 h-4" />
+          <MessageCircle className="w-4 h-4 flex-shrink-0" />
           Compartir por WhatsApp
         </a>
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold transition-colors"
+          className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold transition-colors"
         >
-          <ExternalLink className="w-4 h-4" />
+          <ExternalLink className="w-4 h-4 flex-shrink-0" />
           Ver
         </a>
       </div>

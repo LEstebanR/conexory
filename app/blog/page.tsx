@@ -1,7 +1,10 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Building2, ArrowLeft, Clock, Tag } from "lucide-react"
+import { Clock, Tag, ArrowUpRight } from "lucide-react"
 import { getAllPosts } from "@/lib/blog"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+import Reveal from "@/components/reveal"
 
 export const metadata: Metadata = {
   title: "Blog — Conexory",
@@ -20,43 +23,44 @@ export default function BlogPage() {
   const posts = getAllPosts()
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center">
-              <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-            </div>
-            <span className="text-base font-black text-slate-950 tracking-tight">Conexory</span>
-          </Link>
-          <Link href="/" className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Volver al inicio
-          </Link>
-        </div>
-      </header>
+    <main className="min-h-screen bg-white overflow-x-hidden">
+      <Navbar />
 
-      <div className="bg-slate-950 py-14 sm:py-20">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-brand-400 font-bold text-xs uppercase tracking-[0.2em] mb-4">Blog</p>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">
-            Consejos para agentes inmobiliarios
+      {/* Hero */}
+      <section className="pt-32 pb-10 lg:pt-40 lg:pb-14 text-center">
+        <div className="max-w-3xl mx-auto px-5 sm:px-6 lg:px-8">
+          <p className="text-body font-semibold text-sm uppercase tracking-[0.2em] mb-5 animate-fade-up">
+            Blog
+          </p>
+          <h1
+            className="text-4xl sm:text-6xl font-black text-ink tracking-tighter leading-[1.05] animate-fade-up text-balance"
+            style={{ animationDelay: "80ms" }}
+          >
+            Consejos para
+            <br />
+            <span className="text-mute">agentes inmobiliarios.</span>
           </h1>
-          <p className="text-slate-400 text-base leading-relaxed">
+          <p
+            className="text-lg text-body leading-relaxed mt-6 max-w-xl mx-auto animate-fade-up"
+            style={{ animationDelay: "160ms" }}
+          >
             Guías prácticas para compartir propiedades, mejorar tus fichas y cerrar más negocios en Colombia.
           </p>
         </div>
-      </div>
+      </section>
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-14">
+      <section className="flex-1 max-w-3xl mx-auto w-full px-5 sm:px-6 lg:px-8 py-10">
         {posts.length === 0 ? (
-          <p className="text-slate-400 text-center py-20">No hay artículos todavía.</p>
+          <p className="text-mute text-center py-20">No hay artículos todavía.</p>
         ) : (
-          <div className="divide-y divide-slate-100">
-            {posts.map((post) => (
-              <article key={post.slug} className="py-8 first:pt-0 group">
-                <Link href={`/blog/${post.slug}`} className="block">
-                  <div className="flex items-center gap-3 mb-3 text-xs text-slate-400">
+          <div className="space-y-4">
+            {posts.map((post, i) => (
+              <Reveal key={post.slug} delay={i * 60}>
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="group block p-6 sm:p-7 rounded-2xl border border-hairline hover:border-ink transition-colors"
+                >
+                  <div className="flex items-center gap-3 mb-3 text-xs text-mute">
                     <time dateTime={post.date}>{formatDate(post.date)}</time>
                     <span>·</span>
                     <span className="flex items-center gap-1">
@@ -64,14 +68,17 @@ export default function BlogPage() {
                       {post.readingTime} min de lectura
                     </span>
                   </div>
-                  <h2 className="text-lg font-black text-slate-950 tracking-tight leading-snug mb-2 group-hover:text-brand-500 transition-colors">
-                    {post.title}
-                  </h2>
-                  <p className="text-sm text-slate-500 leading-relaxed mb-4">{post.description}</p>
+                  <div className="flex items-start justify-between gap-4">
+                    <h2 className="text-xl font-black text-ink tracking-tight leading-snug mb-2">
+                      {post.title}
+                    </h2>
+                    <ArrowUpRight className="w-5 h-5 text-mute group-hover:text-ink transition-colors flex-shrink-0 mt-1" />
+                  </div>
+                  <p className="text-sm text-body leading-relaxed mb-4">{post.description}</p>
                   {post.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {post.tags.map((tag) => (
-                        <span key={tag} className="inline-flex items-center gap-1 text-[11px] font-semibold bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full">
+                        <span key={tag} className="inline-flex items-center gap-1 text-[11px] font-semibold bg-canvas-soft text-body px-2.5 py-1 rounded-full">
                           <Tag className="w-2.5 h-2.5" />
                           {tag}
                         </span>
@@ -79,15 +86,13 @@ export default function BlogPage() {
                     </div>
                   )}
                 </Link>
-              </article>
+              </Reveal>
             ))}
           </div>
         )}
-      </main>
+      </section>
 
-      <footer className="border-t border-slate-100 py-8 text-center">
-        <p className="text-xs text-slate-400">© 2026 Conexory · Hecho con 🇨🇴 en Colombia</p>
-      </footer>
-    </div>
+      <Footer />
+    </main>
   )
 }

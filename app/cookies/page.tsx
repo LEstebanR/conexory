@@ -5,7 +5,6 @@ import LegalLayout, {
   LegalList,
   LegalHighlight,
 } from "@/components/legal-layout"
-import { BRAND_EMAILS } from "@/lib/brand"
 
 export const metadata: Metadata = {
   title: "Política de Cookies — Conexory",
@@ -46,8 +45,8 @@ export default function CookiesPage() {
         </LegalP>
         <LegalP>
           Además de las cookies, usamos tecnologías similares como
-          <strong className="text-slate-800"> localStorage</strong> y{" "}
-          <strong className="text-slate-800">sessionStorage</strong> del
+          <strong className="text-ink"> localStorage</strong> y{" "}
+          <strong className="text-ink">sessionStorage</strong> del
           navegador para almacenar preferencias localmente sin enviarlas a
           nuestros servidores.
         </LegalP>
@@ -55,11 +54,11 @@ export default function CookiesPage() {
 
       <LegalSection id="tipos" number={2} title="Tipos de cookies que usamos">
         <div className="space-y-6">
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
-            <p className="font-semibold text-slate-800 mb-2">
-              🔒 Cookies esenciales
+          <div className="bg-canvas-softer border border-hairline-strong rounded-xl p-5">
+            <p className="font-semibold text-ink mb-2">
+ Cookies esenciales
             </p>
-            <p className="text-sm text-slate-600 mb-3">
+            <p className="text-sm text-body mb-3">
               Indispensables para que la plataforma funcione. Sin ellas no
               puedes iniciar sesión ni usar el servicio.
             </p>
@@ -70,16 +69,16 @@ export default function CookiesPage() {
                 "Cookie de preferencias de consentimiento: recuerda si ya aceptaste esta política.",
               ]}
             />
-            <p className="text-xs text-slate-400 mt-3">
+            <p className="text-xs text-mute mt-3">
               No pueden desactivarse. Son necesarias para operar el servicio.
             </p>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
-            <p className="font-semibold text-slate-800 mb-2">
-              📊 Cookies de análisis (opcionales)
+          <div className="bg-canvas-softer border border-hairline-strong rounded-xl p-5">
+            <p className="font-semibold text-ink mb-2">
+ Cookies de análisis (opcionales)
             </p>
-            <p className="text-sm text-slate-600 mb-3">
+            <p className="text-sm text-body mb-3">
               Nos ayudan a entender cómo se usa la plataforma para mejorarla.
               Todos los datos son anonimizados.
             </p>
@@ -90,7 +89,7 @@ export default function CookiesPage() {
                 "Errores técnicos que nos ayudan a detectar problemas.",
               ]}
             />
-            <p className="text-xs text-slate-400 mt-3">
+            <p className="text-xs text-mute mt-3">
               Puedes desactivarlas desde la configuración de tu navegador.
             </p>
           </div>
@@ -102,17 +101,17 @@ export default function CookiesPage() {
           Conexory utiliza los siguientes servicios de terceros que pueden
           establecer sus propias cookies:
         </LegalP>
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3 text-sm">
+        <div className="bg-canvas-softer border border-hairline-strong rounded-xl p-5 space-y-3 text-sm">
           <div>
-            <p className="font-semibold text-slate-800">Google OAuth</p>
-            <p className="text-slate-500">
+            <p className="font-semibold text-ink">Google OAuth</p>
+            <p className="text-body">
               Si inicias sesión con Google, Google puede establecer cookies según
               su propia política de privacidad.
             </p>
           </div>
           <div>
-            <p className="font-semibold text-slate-800">Vercel</p>
-            <p className="text-slate-500">
+            <p className="font-semibold text-ink">Vercel</p>
+            <p className="text-body">
               Nuestra plataforma de hosting puede usar cookies técnicas para
               enrutamiento y rendimiento.
             </p>
@@ -156,18 +155,18 @@ export default function CookiesPage() {
         <LegalP>
           Si tienes preguntas sobre el uso de cookies en Conexory, escríbenos:
         </LegalP>
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-2 text-sm">
+        <div className="bg-canvas-softer border border-hairline-strong rounded-xl p-5 space-y-2 text-sm">
           <p>
-            <span className="font-semibold text-slate-800">Correo:</span>{" "}
+            <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
-              href={`mailto:${BRAND_EMAILS.privacidad}`}
-              className="text-brand-500 hover:underline"
+              href="mailto:privacidad@conexory.com"
+              className="text-ink hover:underline"
             >
-              {BRAND_EMAILS.privacidad}
+              privacidad@conexory.com
             </a>
           </p>
           <p>
-            <span className="font-semibold text-slate-800">Ciudad:</span>{" "}
+            <span className="font-semibold text-ink">Ciudad:</span>{" "}
             Bogotá D.C., Colombia
           </p>
         </div>

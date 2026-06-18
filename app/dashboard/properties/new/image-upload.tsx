@@ -106,21 +106,21 @@ export default function ImageUpload({
           className={cn(
             "border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-3 text-center cursor-pointer transition-colors",
             dragging
-              ? "border-brand-400 bg-brand-50"
-              : "border-slate-200 hover:border-brand-300 hover:bg-brand-50/20"
+              ? "border-ink bg-canvas-soft"
+              : "border-hairline-strong hover:border-ink hover:bg-canvas-soft/20"
           )}
         >
           <div className={cn(
             "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
-            dragging ? "bg-brand-100" : "bg-slate-100"
+            dragging ? "bg-canvas-soft" : "bg-canvas-soft"
           )}>
-            <ImagePlus className={cn("w-6 h-6", dragging ? "text-brand-500" : "text-slate-400")} strokeWidth={1.75} />
+            <ImagePlus className={cn("w-6 h-6", dragging ? "text-ink" : "text-mute")} strokeWidth={1.75} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-700">
+            <p className="text-sm font-semibold text-ink">
               {items.length === 0 ? "Arrastra las fotos aquí" : "Agregar más fotos"}
             </p>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-mute mt-0.5">
               PNG, JPG, WebP · Máx. {MAX_SIZE_MB} MB · Hasta {MAX_IMAGES} fotos
             </p>
           </div>
@@ -144,7 +144,7 @@ export default function ImageUpload({
           {items.map((item, index) => (
             <div
               key={item.id}
-              className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 group"
+              className="relative aspect-square rounded-xl overflow-hidden bg-canvas-soft group"
             >
               <Image fill unoptimized src={item.preview} alt="" className="object-cover" />
 

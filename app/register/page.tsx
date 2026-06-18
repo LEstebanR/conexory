@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useActionState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Building2, Eye, EyeOff, ArrowRight, Camera, LinkIcon, Send, CheckCircle2 } from "lucide-react"
+import Image from "next/image"
+import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import { signIn, signUp } from "@/lib/auth-client"
+import { signIn } from "@/lib/auth-client"
+import { registerAction } from "./actions"
 
 function GoogleIcon() {
   return (
@@ -20,355 +21,243 @@ function GoogleIcon() {
   )
 }
 
-function MiniSteps() {
-  const steps = [
-    { icon: Camera, label: "Sube fotos y escribe el precio" },
-    { icon: LinkIcon, label: "Obtén tu link único" },
-    { icon: Send, label: "Comparte por WhatsApp" },
-  ]
-  return (
-    <div className="space-y-3">
-      {steps.map((step, i) => (
-        <div key={i} className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-brand-400/15 border border-brand-400/20 flex items-center justify-center flex-shrink-0">
-            <step.icon className="w-4.5 h-4.5 text-brand-400" strokeWidth={2} />
-          </div>
-          <p className="text-sm font-semibold text-white leading-tight">{step.label}</p>
-          <span className="text-xs font-black text-brand-400/40 tabular-nums ml-auto">
-            {String(i + 1).padStart(2, "0")}
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function BrandPanel() {
-  return (
-    <div className="hidden lg:flex lg:w-[420px] xl:w-[460px] flex-col flex-shrink-0 relative bg-slate-950 p-10 xl:p-12 overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-brand-400/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-400/6 rounded-full blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: "radial-gradient(circle, white 1.5px, transparent 1.5px)", backgroundSize: "24px 24px" }} />
-      </div>
-
-      <Link href="/" className="relative flex items-center gap-2.5 w-fit">
-        <div className="w-9 h-9 rounded-xl bg-brand-400 flex items-center justify-center shadow-lg shadow-brand-400/30">
-          <Building2 className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
-        </div>
-        <span className="text-xl font-black text-white tracking-tight">Conexory</span>
-      </Link>
-
-      <div className="relative flex-1 flex flex-col justify-center gap-8 py-12">
-        <div>
-          <p className="text-brand-400 font-bold text-xs uppercase tracking-[0.2em] mb-5">Empieza gratis hoy</p>
-          <h2 className="text-4xl xl:text-5xl font-black text-white tracking-tighter leading-none">
-            Tu primera<br />propiedad,<br />
-            <span className="text-brand-400">en 60 segundos.</span>
-          </h2>
-        </div>
-        <MiniSteps />
-        <div className="flex items-center gap-2.5 bg-brand-400/10 border border-brand-400/20 rounded-2xl px-4 py-3">
-          <CheckCircle2 className="w-4 h-4 text-brand-400 flex-shrink-0" />
-          <p className="text-sm text-white/80 font-medium">Gratis para empezar · Sin tarjeta de crédito</p>
-        </div>
-      </div>
-
-      <div className="relative">
-        <div className="h-px w-full bg-white/8 mb-6" />
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-2">
-            {[{ bg: "bg-amber-400", l: "C" }, { bg: "bg-blue-500", l: "M" }, { bg: "bg-violet-500", l: "A" }].map((a) => (
-              <div key={a.l} className={`w-7 h-7 rounded-full ${a.bg} border-2 border-slate-950 flex items-center justify-center text-white text-[10px] font-bold`}>
-                {a.l}
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-slate-400">
-            <span className="text-white font-bold">+480 agentes</span> ya usan Conexory
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const AUTH_ERRORS: Record<string, string> = {
-  EMAIL_ALREADY_EXISTS: "Ya existe una cuenta con este email. ¿Quieres iniciar sesión?",
-  WEAK_PASSWORD: "La contraseña es muy débil. Usa al menos 8 caracteres.",
-  TOO_MANY_REQUESTS: "Demasiados intentos. Espera unos minutos.",
-  INVALID_EMAIL: "El correo electrónico no es válido.",
-}
-
 export default function RegisterPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [terms, setTerms] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
+  const [state, formAction, isPending] = useActionState(registerAction, {})
 
   const passwordsMatch = confirmPassword === "" || password === confirmPassword
 
-  async function handleSubmit(e: { preventDefault(): void }) {
-    e.preventDefault()
-    if (!passwordsMatch || !terms) return
-
-    setLoading(true)
-    setError("")
-
-    const { error: authError } = await signUp.email({
-      name,
-      email,
-      password,
-    })
-
-    if (authError) {
-      setError(AUTH_ERRORS[authError.code ?? ""] ?? "Algo salió mal. Intenta de nuevo.")
-      setLoading(false)
-    } else {
-      router.push("/dashboard")
-    }
-  }
-
   async function handleGoogle() {
     setGoogleLoading(true)
-    setError("")
-    await signIn.social({
-      provider: "google",
-      callbackURL: "/dashboard",
-    })
+    await signIn.social({ provider: "google", callbackURL: "/dashboard" })
   }
 
   return (
-    <div className="min-h-screen flex">
-      <BrandPanel />
+    <main className="relative min-h-screen bg-white overflow-hidden flex flex-col items-center justify-center px-5 py-12">
+      {/* Background dot grid */}
+      <div className="absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]">
+        <svg className="absolute inset-0 w-full h-full opacity-[0.05]">
+          <defs>
+            <pattern id="register-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="#000000" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#register-dots)" />
+        </svg>
+      </div>
 
-      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto">
-        {/* Mobile logo */}
-        <div className="lg:hidden flex items-center gap-2.5 p-6 border-b border-slate-100">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand-400 flex items-center justify-center">
-              <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
+      <Link
+        href="/"
+        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-mute hover:text-ink transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span className="hidden sm:inline">Volver al inicio</span>
+      </Link>
+
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
+          <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
+            <Image src="/mark-white.png" alt="Conexory" width={22} height={22} className="w-5.5 h-5.5" />
+          </div>
+          <span className="text-xl font-bold text-ink tracking-tight">Conexory</span>
+        </Link>
+
+        {/* Card */}
+        <div className="bg-white border border-hairline rounded-3xl p-7 sm:p-9 shadow-xl shadow-black/5">
+          <div className="text-center mb-7">
+            <h1 className="text-2xl font-black text-ink tracking-tight mb-1.5">Crea tu cuenta</h1>
+            <p className="text-body text-sm">Gratis para empezar · Sin tarjeta de crédito</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogle}
+            disabled={googleLoading}
+            className="w-full flex items-center justify-center gap-3 h-12 rounded-full border border-hairline-strong bg-white text-ink text-sm font-semibold hover:bg-canvas-soft transition-colors mb-5 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {googleLoading ? (
+              <svg className="animate-spin w-4 h-4 text-mute" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+            ) : (
+              <GoogleIcon />
+            )}
+            Continuar con Google
+          </button>
+
+          <div className="relative mb-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-hairline" />
             </div>
-            <span className="text-lg font-black text-slate-950 tracking-tight">Conexory</span>
-          </Link>
-        </div>
+            <div className="relative flex justify-center">
+              <span className="bg-white px-3 text-xs text-mute font-semibold uppercase tracking-wider">
+                o con tu correo
+              </span>
+            </div>
+          </div>
 
-        <div className="flex-1 flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-20 py-12 max-w-lg lg:max-w-none mx-auto w-full">
-          <Link href="/" className="hidden lg:inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-slate-700 transition-colors mb-12 w-fit">
-            <ArrowRight className="w-3.5 h-3.5 rotate-180" />
-            Volver al inicio
-          </Link>
-
-          <div className="max-w-sm xl:max-w-md">
-            <div className="mb-8">
-              <h1 className="text-3xl font-black text-slate-950 tracking-tighter mb-2">Crear cuenta</h1>
-              <p className="text-slate-500 text-sm">Gratis para empezar · Sin tarjeta de crédito</p>
+          <form action={formAction} className="space-y-4">
+            <div className="space-y-1.5">
+              <label htmlFor="name" className="block text-sm font-semibold text-ink">
+                Nombre completo
+              </label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="Carlos Rodríguez"
+                required
+                autoComplete="name"
+                className="h-12"
+              />
             </div>
 
-            {/* Google */}
-            <button
-              type="button"
-              onClick={handleGoogle}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 h-12 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-xs mb-6 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {googleLoading ? (
-                <svg className="animate-spin w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-sm font-semibold text-ink">
+                Correo electrónico
+              </label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="tu@email.com"
+                required
+                autoComplete="email"
+                className="h-12"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="block text-sm font-semibold text-ink">
+                Contraseña
+              </label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPass ? "text" : "password"}
+                  placeholder="Mínimo 8 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="h-12 pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+                  aria-label={showPass ? "Ocultar" : "Mostrar"}
+                >
+                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {password.length > 0 && (
+                <div className="flex gap-1 mt-1.5">
+                  {[1, 2, 3, 4].map((level) => (
+                    <div
+                      key={level}
+                      className={cn(
+                        "h-1 flex-1 rounded-full transition-colors duration-300",
+                        password.length >= level * 2
+                          ? level <= 2 ? "bg-warning-400" : "bg-ink"
+                          : "bg-canvas-soft"
+                      )}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="confirm-password" className="block text-sm font-semibold text-ink">
+                Confirmar contraseña
+              </label>
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  name="confirmPassword"
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Repite tu contraseña"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                  className={cn(
+                    "h-12 pr-12",
+                    !passwordsMatch && "border-red-400 focus:ring-red-400 focus:border-red-400"
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+                  aria-label={showConfirm ? "Ocultar" : "Mostrar"}
+                >
+                  {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {!passwordsMatch && (
+                <p className="text-xs text-red-500 font-medium">Las contraseñas no coinciden</p>
+              )}
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative mt-0.5 flex-shrink-0">
+                <input type="checkbox" name="terms" checked={terms} onChange={(e) => setTerms(e.target.checked)} required className="sr-only" />
+                <div className={cn(
+                  "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200",
+                  terms ? "bg-ink border-ink" : "bg-white border-hairline-strong group-hover:border-ink"
+                )}>
+                  {terms && (
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+              <span className="text-sm text-body leading-relaxed">
+                Acepto los{" "}
+                <Link href="/terms" className="text-ink font-semibold hover:underline">términos de uso</Link>
+                {" "}y la{" "}
+                <Link href="/privacy" className="text-ink font-semibold hover:underline">política de privacidad</Link>
+              </span>
+            </label>
+
+            {state.error && (
+              <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+                {state.error}
+              </p>
+            )}
+
+            <Button type="submit" size="lg" disabled={!passwordsMatch || !terms || isPending} className="w-full h-12 disabled:opacity-50">
+              {isPending ? (
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
               ) : (
-                <GoogleIcon />
+                <>Crear cuenta gratis <ArrowRight className="w-4 h-4" /></>
               )}
-              Continuar con Google
-            </button>
-
-            {/* Divider */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-                  o con tu correo
-                </span>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
-              <div className="space-y-1.5">
-                <label htmlFor="name" className="block text-sm font-semibold text-slate-700">
-                  Nombre completo
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Carlos Rodríguez"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  autoComplete="name"
-                  className="h-12"
-                />
-              </div>
-
-              {/* Email */}
-              <div className="space-y-1.5">
-                <label htmlFor="email" className="block text-sm font-semibold text-slate-700">
-                  Correo electrónico
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  className="h-12"
-                />
-              </div>
-
-              {/* Password */}
-              <div className="space-y-1.5">
-                <label htmlFor="password" className="block text-sm font-semibold text-slate-700">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPass ? "text" : "password"}
-                    placeholder="Mínimo 8 caracteres"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    autoComplete="new-password"
-                    className="h-12 pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label={showPass ? "Ocultar" : "Mostrar"}
-                  >
-                    {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {/* Strength bar */}
-                {password.length > 0 && (
-                  <div className="flex gap-1 mt-1.5">
-                    {[1, 2, 3, 4].map((level) => (
-                      <div
-                        key={level}
-                        className={cn(
-                          "h-1 flex-1 rounded-full transition-colors duration-300",
-                          password.length >= level * 2
-                            ? level <= 2 ? "bg-amber-400" : "bg-brand-400"
-                            : "bg-slate-200"
-                        )}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Confirm password */}
-              <div className="space-y-1.5">
-                <label htmlFor="confirm-password" className="block text-sm font-semibold text-slate-700">
-                  Confirmar contraseña
-                </label>
-                <div className="relative">
-                  <Input
-                    id="confirm-password"
-                    type={showConfirm ? "text" : "password"}
-                    placeholder="Repite tu contraseña"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                    className={cn(
-                      "h-12 pr-12",
-                      !passwordsMatch && "border-red-400 focus:ring-red-400 focus:border-red-400"
-                    )}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label={showConfirm ? "Ocultar" : "Mostrar"}
-                  >
-                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {!passwordsMatch && (
-                  <p className="text-xs text-red-500 font-medium">Las contraseñas no coinciden</p>
-                )}
-              </div>
-
-              {/* Terms */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <div className="relative mt-0.5 flex-shrink-0">
-                  <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} required className="sr-only" />
-                  <div className={cn(
-                    "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200",
-                    terms ? "bg-brand-400 border-brand-400" : "bg-white border-slate-300 group-hover:border-brand-400"
-                  )}>
-                    {terms && (
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                <span className="text-sm text-slate-600 leading-relaxed">
-                  Acepto los{" "}
-                  <Link href="/terms" className="text-brand-500 font-semibold hover:underline">términos de uso</Link>
-                  {" "}y la{" "}
-                  <Link href="/privacy" className="text-brand-500 font-semibold hover:underline">política de privacidad</Link>
-                </span>
-              </label>
-
-              {error && (
-                <p className="text-sm text-red-500 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
-                  {error}
-                </p>
-              )}
-
-              <Button
-                type="submit"
-                size="lg"
-                disabled={!passwordsMatch || !terms || loading}
-                className="w-full h-12 font-bold shadow-sm shadow-brand-400/20 mt-2 disabled:opacity-50"
-              >
-                {loading ? (
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                ) : (
-                  <>Crear cuenta gratis <ArrowRight className="w-4 h-4" /></>
-                )}
-              </Button>
-            </form>
-
-            <p className="text-center text-sm text-slate-500 mt-8">
-              ¿Ya tienes cuenta?{" "}
-              <Link href="/login" className="font-bold text-brand-500 hover:text-brand-600 transition-colors">
-                Iniciar sesión →
-              </Link>
-            </p>
-          </div>
+            </Button>
+          </form>
         </div>
+
+        <p className="text-center text-sm text-body mt-6">
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/login" className="font-bold text-ink hover:opacity-70 transition-opacity">
+            Iniciar sesión
+          </Link>
+        </p>
       </div>
-    </div>
+    </main>
   )
 }

@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useActionState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Building2, Eye, EyeOff, ArrowRight, MessageCircle, Link2 } from "lucide-react"
+import Image from "next/image"
+import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { signIn } from "@/lib/auth-client"
+import { loginAction } from "./actions"
 
 function GoogleIcon() {
   return (
@@ -19,283 +20,170 @@ function GoogleIcon() {
   )
 }
 
-function MiniPropertyCard() {
-  return (
-    <div className="bg-white/8 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden w-full max-w-[260px]">
-      <div className="relative h-28 bg-gradient-to-br from-brand-300/40 via-brand-400/50 to-brand-500/60 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 to-transparent" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-10">
-          <div className="grid grid-cols-3 gap-1 w-24">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className={`bg-white rounded-sm ${i < 3 ? "h-10" : "h-6"}`} />
-            ))}
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 p-3">
-          <p className="text-[9px] text-white/60 font-medium">Chapinero · Bogotá</p>
-          <p className="text-xs font-bold text-white leading-tight">Apartamento moderno</p>
-        </div>
-        <div className="absolute top-2 right-2 bg-brand-400 text-white text-[8px] font-bold px-2 py-0.5 rounded-full">
-          En venta
-        </div>
-      </div>
-      <div className="p-3 space-y-2.5">
-        <div>
-          <p className="text-lg font-black text-white tracking-tighter leading-none">$2.800.000</p>
-          <p className="text-[9px] text-white/40 font-medium">COP / mes</p>
-        </div>
-        <div className="flex gap-3">
-          {["🛏 2 hab", "🚿 1 baño", "📐 65m²"].map((d) => (
-            <span key={d} className="text-[9px] text-white/50 font-medium">{d}</span>
-          ))}
-        </div>
-        <div className="flex gap-1.5">
-          <div className="flex-1 bg-[#25D366]/20 rounded-xl py-1.5 flex items-center justify-center">
-            <MessageCircle className="w-2.5 h-2.5 text-[#25D366]" />
-          </div>
-          <div className="flex-1 bg-white/10 rounded-xl py-1.5 flex items-center justify-center">
-            <Link2 className="w-2.5 h-2.5 text-white/50" />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function BrandPanel() {
-  return (
-    <div className="hidden lg:flex lg:w-[420px] xl:w-[460px] flex-col flex-shrink-0 relative bg-slate-950 p-10 xl:p-12 overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-brand-400/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-400/6 rounded-full blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: "radial-gradient(circle, white 1.5px, transparent 1.5px)", backgroundSize: "24px 24px" }} />
-      </div>
-
-      <Link href="/" className="relative flex items-center gap-2.5 w-fit">
-        <div className="w-9 h-9 rounded-xl bg-brand-400 flex items-center justify-center shadow-lg shadow-brand-400/30">
-          <Building2 className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
-        </div>
-        <span className="text-xl font-black text-white tracking-tight">Conexory</span>
-      </Link>
-
-      <div className="relative flex-1 flex flex-col justify-center gap-8 py-12">
-        <div>
-          <p className="text-brand-400 font-bold text-xs uppercase tracking-[0.2em] mb-5">
-            Bienvenido de vuelta
-          </p>
-          <h2 className="text-4xl xl:text-5xl font-black text-white tracking-tighter leading-none">
-            Tus propiedades<br />
-            <span className="text-brand-400">te esperan.</span>
-          </h2>
-        </div>
-        <MiniPropertyCard />
-        <p className="text-sm text-slate-500 leading-relaxed">
-          Retoma donde lo dejaste. Tus propiedades y links siguen exactamente como los dejaste.
-        </p>
-      </div>
-
-      <div className="relative">
-        <div className="h-px w-full bg-white/8 mb-6" />
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-2">
-            {[{ bg: "bg-amber-400", l: "C" }, { bg: "bg-blue-500", l: "M" }, { bg: "bg-violet-500", l: "A" }].map((a) => (
-              <div key={a.l} className={`w-7 h-7 rounded-full ${a.bg} border-2 border-slate-950 flex items-center justify-center text-white text-[10px] font-bold`}>
-                {a.l}
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-slate-400">
-            <span className="text-white font-bold">+480 agentes</span> ya usan Conexory
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const AUTH_ERRORS: Record<string, string> = {
-  INVALID_EMAIL_OR_PASSWORD: "Email o contraseña incorrectos.",
-  EMAIL_NOT_VERIFIED: "Verifica tu email antes de continuar.",
-  TOO_MANY_REQUESTS: "Demasiados intentos. Espera unos minutos.",
-}
-
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [showPass, setShowPass] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
-
-  async function handleSubmit(e: { preventDefault(): void }) {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-
-    const { error: authError } = await signIn.email({
-      email,
-      password,
-    })
-
-    if (authError) {
-      setError(AUTH_ERRORS[authError.code ?? ""] ?? "Email o contraseña incorrectos.")
-      setLoading(false)
-    } else {
-      router.push("/dashboard")
-    }
-  }
+  const [state, formAction, isPending] = useActionState(loginAction, {})
 
   async function handleGoogle() {
     setGoogleLoading(true)
-    setError("")
-    await signIn.social({
-      provider: "google",
-      callbackURL: "/dashboard",
-    })
-    // La redirección la maneja Better Auth
+    await signIn.social({ provider: "google", callbackURL: "/dashboard" })
   }
 
   return (
-    <div className="min-h-screen flex">
-      <BrandPanel />
+    <main className="relative min-h-screen bg-white overflow-hidden flex flex-col items-center justify-center px-5 py-12">
+      {/* Background dot grid */}
+      <div className="absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]">
+        <svg className="absolute inset-0 w-full h-full opacity-[0.05]">
+          <defs>
+            <pattern id="login-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="#000000" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#login-dots)" />
+        </svg>
+      </div>
 
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Mobile logo */}
-        <div className="lg:hidden flex items-center gap-2.5 p-6 border-b border-slate-100">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand-400 flex items-center justify-center">
-              <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
+      <Link
+        href="/"
+        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-mute hover:text-ink transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span className="hidden sm:inline">Volver al inicio</span>
+      </Link>
+
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
+          <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
+            <Image src="/mark-white.png" alt="Conexory" width={22} height={22} className="w-5.5 h-5.5" />
+          </div>
+          <span className="text-xl font-bold text-ink tracking-tight">Conexory</span>
+        </Link>
+
+        {/* Card */}
+        <div className="bg-white border border-hairline rounded-3xl p-7 sm:p-9 shadow-xl shadow-black/5">
+          <div className="text-center mb-7">
+            <h1 className="text-2xl font-black text-ink tracking-tight mb-1.5">
+              Bienvenido de vuelta
+            </h1>
+            <p className="text-body text-sm">Ingresa a tu cuenta de Conexory</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogle}
+            disabled={googleLoading}
+            className="w-full flex items-center justify-center gap-3 h-12 rounded-full border border-hairline-strong bg-white text-ink text-sm font-semibold hover:bg-canvas-soft transition-colors mb-5 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {googleLoading ? (
+              <svg className="animate-spin w-4 h-4 text-mute" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+            ) : (
+              <GoogleIcon />
+            )}
+            Continuar con Google
+          </button>
+
+          <div className="relative mb-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-hairline" />
             </div>
-            <span className="text-lg font-black text-slate-950 tracking-tight">Conexory</span>
-          </Link>
-        </div>
+            <div className="relative flex justify-center">
+              <span className="bg-white px-3 text-xs text-mute font-semibold uppercase tracking-wider">
+                o con tu correo
+              </span>
+            </div>
+          </div>
 
-        <div className="flex-1 flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-20 py-12 max-w-lg lg:max-w-none mx-auto w-full">
-          <Link href="/" className="hidden lg:inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-slate-700 transition-colors mb-12 w-fit">
-            <ArrowRight className="w-3.5 h-3.5 rotate-180" />
-            Volver al inicio
-          </Link>
-
-          <div className="max-w-sm xl:max-w-md">
-            <div className="mb-8">
-              <h1 className="text-3xl font-black text-slate-950 tracking-tighter mb-2">
-                Iniciar sesión
-              </h1>
-              <p className="text-slate-500 text-sm">Ingresa a tu cuenta de Conexory</p>
+          <form action={formAction} className="space-y-4">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-sm font-semibold text-ink">
+                Correo electrónico
+              </label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="tu@email.com"
+                required
+                autoComplete="email"
+                className="h-12"
+              />
             </div>
 
-            {/* Google */}
-            <button
-              type="button"
-              onClick={handleGoogle}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 h-12 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-xs mb-6 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {googleLoading ? (
-                <svg className="animate-spin w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="block text-sm font-semibold text-ink">
+                  Contraseña
+                </label>
+                <Link href="/forgot-password" className="text-xs text-ink font-semibold hover:opacity-70 transition-opacity">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPass ? "text" : "password"}
+                  placeholder="••••••••"
+                  required
+                  autoComplete="current-password"
+                  className="h-12 pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+                  aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {state.error && (
+              <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+                {state.error}
+              </p>
+            )}
+
+            <Button type="submit" size="lg" disabled={isPending} className="w-full h-12 disabled:opacity-60">
+              {isPending ? (
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
               ) : (
-                <GoogleIcon />
+                <>Iniciar sesión <ArrowRight className="w-4 h-4" /></>
               )}
-              Continuar con Google
-            </button>
+            </Button>
+          </form>
+        </div>
 
-            {/* Divider */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200" />
+        <p className="text-center text-sm text-body mt-6">
+          ¿No tienes cuenta?{" "}
+          <Link href="/register" className="font-bold text-ink hover:opacity-70 transition-opacity">
+            Crear cuenta gratis
+          </Link>
+        </p>
+
+        {/* Social proof */}
+        <div className="flex items-center justify-center gap-3 mt-8">
+          <div className="flex -space-x-2">
+            {["C", "M", "A"].map((l) => (
+              <div key={l} className="w-7 h-7 rounded-full bg-ink border-2 border-white flex items-center justify-center text-white text-[10px] font-bold">
+                {l}
               </div>
-              <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-                  o con tu correo
-                </span>
-              </div>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label htmlFor="email" className="block text-sm font-semibold text-slate-700">
-                  Correo electrónico
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  className="h-12"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="block text-sm font-semibold text-slate-700">
-                    Contraseña
-                  </label>
-                  <Link href="/forgot-password" className="text-xs text-brand-500 font-semibold hover:text-brand-600 transition-colors">
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPass ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="current-password"
-                    className="h-12 pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
-                  >
-                    {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {error && (
-                <p className="text-sm text-red-500 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
-                  {error}
-                </p>
-              )}
-
-              <Button
-                type="submit"
-                size="lg"
-                disabled={loading}
-                className="w-full h-12 font-bold shadow-sm shadow-brand-400/20 mt-2 disabled:opacity-60"
-              >
-                {loading ? (
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                ) : (
-                  <>Iniciar sesión <ArrowRight className="w-4 h-4" /></>
-                )}
-              </Button>
-            </form>
-
-            <p className="text-center text-sm text-slate-500 mt-8">
-              ¿No tienes cuenta?{" "}
-              <Link href="/register" className="font-bold text-brand-500 hover:text-brand-600 transition-colors">
-                Crear cuenta gratis →
-              </Link>
-            </p>
+            ))}
           </div>
+          <p className="text-sm text-body">
+            <span className="font-bold text-ink">+480 agentes</span> ya usan Conexory
+          </p>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

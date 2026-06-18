@@ -60,24 +60,24 @@ export default async function PropertyDetailPage({
       <div className="flex items-center gap-3 mb-8">
         <Link
           href="/dashboard"
-          className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors flex-shrink-0"
+          className="p-2 rounded-xl text-mute hover:bg-canvas-soft hover:text-ink transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-black text-slate-950 tracking-tight">
+          <h1 className="text-xl font-black text-ink tracking-tight">
             {property.published ? "Propiedad publicada" : "Propiedad desactivada"}
           </h1>
-          <p className="text-sm text-slate-500 truncate">{property.title}</p>
+          <p className="text-sm text-body truncate">{property.title}</p>
         </div>
         <PropertyActions propertyId={property.id} initialPublished={property.published} />
       </div>
 
       {/* Banner de desactivada */}
       {!property.published && (
-        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4">
-          <EyeOff className="w-4 h-4 text-amber-600 flex-shrink-0" />
-          <p className="text-sm text-amber-700 font-medium">
+        <div className="flex items-center gap-3 bg-warning-50 border border-warning-200 rounded-2xl px-4 py-3 mb-4">
+          <EyeOff className="w-4 h-4 text-warning-600 flex-shrink-0" />
+          <p className="text-sm text-warning-700 font-medium">
             El link público no está disponible mientras la propiedad esté desactivada.
           </p>
         </div>
@@ -102,48 +102,48 @@ export default async function PropertyDetailPage({
         )}
 
         {/* Resumen */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <span className="inline-flex items-center bg-brand-50 text-brand-700 text-xs font-bold px-2.5 py-1 rounded-full mb-3">
+        <div className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="min-w-0 sm:flex-1">
+              <span className="inline-flex items-center bg-canvas-soft text-ink text-xs font-bold px-2.5 py-1 rounded-full mb-3 whitespace-nowrap">
                 {typeLabel} · En venta
               </span>
-              <h2 className="text-xl font-black text-slate-950 tracking-tight leading-tight mb-1">
+              <h2 className="text-xl font-black text-ink tracking-tight leading-tight mb-1">
                 {property.title}
               </h2>
               {location && (
-                <div className="flex items-center gap-1.5 text-slate-500 text-sm">
+                <div className="flex items-center gap-1.5 text-body text-sm">
                   <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>{location}</span>
                 </div>
               )}
             </div>
-            <p className="text-2xl font-black text-slate-950 tracking-tighter flex-shrink-0">{price}</p>
+            <p className="text-xl sm:text-2xl font-black text-ink tracking-tighter flex-shrink-0">{price}</p>
           </div>
 
           {hasDetails && (
-            <div className="flex flex-wrap gap-4 pt-4 border-t border-slate-100">
+            <div className="flex flex-wrap gap-4 pt-4 border-t border-hairline">
               {property.area != null && (
-                <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                  <Square className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                <div className="flex items-center gap-1.5 text-sm text-body">
+                  <Square className="w-4 h-4 text-mute" strokeWidth={1.75} />
                   <span className="font-semibold">{property.area} m²</span>
                 </div>
               )}
               {property.bedrooms != null && (
-                <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                  <BedDouble className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                <div className="flex items-center gap-1.5 text-sm text-body">
+                  <BedDouble className="w-4 h-4 text-mute" strokeWidth={1.75} />
                   <span className="font-semibold">{property.bedrooms} hab.</span>
                 </div>
               )}
               {property.bathrooms != null && (
-                <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                  <Bath className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                <div className="flex items-center gap-1.5 text-sm text-body">
+                  <Bath className="w-4 h-4 text-mute" strokeWidth={1.75} />
                   <span className="font-semibold">{property.bathrooms} baños</span>
                 </div>
               )}
               {property.parking != null && (
-                <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                  <Car className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                <div className="flex items-center gap-1.5 text-sm text-body">
+                  <Car className="w-4 h-4 text-mute" strokeWidth={1.75} />
                   <span className="font-semibold">{property.parking} parqueaderos</span>
                 </div>
               )}
@@ -152,9 +152,9 @@ export default async function PropertyDetailPage({
         </div>
 
         {property.description && (
-          <div className="bg-white rounded-2xl border border-slate-100 p-6">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Descripción</p>
-            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+          <div className="bg-white rounded-2xl border border-hairline p-6">
+            <p className="text-xs font-bold text-mute uppercase tracking-wide mb-3">Descripción</p>
+            <p className="text-sm text-body leading-relaxed whitespace-pre-wrap">
               {property.description}
             </p>
           </div>

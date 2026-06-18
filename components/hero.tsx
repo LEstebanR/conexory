@@ -1,211 +1,223 @@
-"use client"
+"use client";
 
-import { Building2, MessageCircle, Link2, CheckCircle2, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Image from "next/image";
+import {
+  MessageCircle,
+  ArrowRight,
+  MapPin,
+  BedDouble,
+  Bath,
+  Maximize2,
+  Check,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-function PhoneMockup() {
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=70";
+
+function BrowserMock() {
   return (
-    <div className="relative mx-auto w-[268px] sm:w-[300px] select-none">
-      {/* Glow */}
-      <div className="absolute inset-4 bg-brand-400/25 rounded-[3rem] blur-3xl" />
-
-      {/* Phone outer shell */}
-      <div className="relative bg-slate-900 rounded-[2.8rem] p-[10px] shadow-2xl shadow-slate-900/40">
-        {/* Screen */}
-        <div className="bg-white rounded-[2.2rem] overflow-hidden">
-          {/* Dynamic island */}
-          <div className="flex justify-center pt-3 pb-2 bg-white">
-            <div className="w-24 h-1.5 bg-slate-200 rounded-full" />
+    <div className="relative mx-auto w-full max-w-3xl">
+      {/* Browser frame */}
+      <div className="rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden">
+        {/* Top bar */}
+        <div className="flex items-center gap-3 px-4 h-11 border-b border-hairline bg-canvas-softer">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-surface-pressed" />
+            <span className="w-3 h-3 rounded-full bg-surface-pressed" />
+            <span className="w-3 h-3 rounded-full bg-surface-pressed" />
           </div>
-
-          {/* App bar */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-brand-400 flex items-center justify-center">
-                <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-              </div>
-              <span className="text-xs font-bold text-slate-800 tracking-tight">Conexory</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-              <span className="text-[9px] text-slate-400 font-medium">En línea</span>
+          <div className="flex-1 flex justify-center">
+            <div className="flex items-center gap-2 bg-white border border-hairline rounded-full px-3 py-1 text-xs text-body max-w-xs w-full justify-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-ink" />
+              <span className="truncate">conexory.com/p/casa-laureles</span>
             </div>
           </div>
+          <div className="hidden sm:block w-12" />
+        </div>
 
-          {/* Property photo */}
-          <div className="relative h-40 bg-gradient-to-br from-brand-200 via-brand-300 to-brand-500 overflow-hidden">
-            {/* Simulated building shapes */}
-            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-900/60 to-transparent" />
-            <div className="absolute inset-0 flex items-center justify-center opacity-20">
-              <div className="grid grid-cols-3 gap-1 w-32">
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <div key={i} className="bg-white/60 rounded h-8" />
-                ))}
-              </div>
-            </div>
-            <div className="absolute bottom-0 left-0 p-3 right-0">
-              <p className="text-[9px] text-white/70 font-medium">Laureles · Medellín</p>
-              <p className="text-xs font-bold text-white leading-tight">Casa con jardín privado</p>
-            </div>
-            <div className="absolute top-2.5 right-2.5 bg-brand-400 text-white text-[8px] font-bold px-2 py-1 rounded-full">
+        {/* Public property page mock */}
+        <div className="grid sm:grid-cols-2">
+          {/* Photo */}
+          <div className="relative h-52 sm:h-auto min-h-[220px]">
+            <Image
+              src={HERO_IMAGE}
+              alt="Casa con jardín privado en Laureles, Medellín"
+              fill
+              sizes="(max-width: 640px) 100vw, 384px"
+              className="object-cover"
+            />
+            <div className="absolute top-3 left-3 bg-ink text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
               En venta
             </div>
           </div>
 
-          {/* Property details */}
-          <div className="p-3.5 space-y-3">
+          {/* Details */}
+          <div className="p-6 space-y-4">
+            <div className="flex items-center gap-1.5 text-xs text-body font-medium">
+              <MapPin className="w-3.5 h-3.5" />
+              Laureles · Medellín
+            </div>
+            <h3 className="text-xl font-black text-ink tracking-tight leading-tight">
+              Casa con jardín privado
+            </h3>
             <div>
-              <p className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold">Precio</p>
-              <p className="text-xl font-black text-slate-900 tracking-tight leading-none">
+              <p className="text-2xl font-black text-ink tracking-tighter leading-none">
                 $580.000.000
               </p>
-              <p className="text-[10px] text-slate-500 font-medium">COP</p>
+              <p className="text-xs text-mute font-medium mt-0.5">COP</p>
             </div>
-
-            <div className="flex gap-3">
+            <div className="flex items-center gap-4 py-3 border-t border-b border-hairline">
               {[
-                { e: "🛏", v: "3 hab" },
-                { e: "🚿", v: "2 baños" },
-                { e: "📐", v: "120m²" },
-              ].map((d) => (
-                <span key={d.v} className="text-[9px] text-slate-500 font-medium">
-                  {d.e} {d.v}
-                </span>
+                { icon: BedDouble, label: "3" },
+                { icon: Bath, label: "2" },
+                { icon: Maximize2, label: "120m²" },
+              ].map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-1 text-sm text-ink font-semibold"
+                >
+                  <Icon className="w-4 h-4 text-body" strokeWidth={1.75} />
+                  {label}
+                </div>
               ))}
             </div>
-
-            {/* Share buttons */}
-            <div className="space-y-1.5 pt-0.5">
-              <div className="w-full bg-[#25D366] rounded-xl py-2.5 flex items-center justify-center gap-1.5">
-                <MessageCircle className="w-3 h-3 text-white" />
-                <span className="text-[10px] font-bold text-white">Enviar por WhatsApp</span>
-              </div>
-              <div className="w-full bg-slate-100 rounded-xl py-2 flex items-center justify-center gap-1.5">
-                <Link2 className="w-3 h-3 text-slate-500" />
-                <span className="text-[10px] font-semibold text-slate-600">Copiar link</span>
-              </div>
+            <div className="w-full flex items-center justify-center gap-2 bg-ink rounded-full py-3">
+              <MessageCircle className="w-4 h-4 text-white" />
+              <span className="text-sm font-semibold text-white">
+                Contactar por WhatsApp
+              </span>
             </div>
-          </div>
-
-          {/* Home indicator */}
-          <div className="flex justify-center py-2.5">
-            <div className="w-20 h-1 bg-slate-200 rounded-full" />
           </div>
         </div>
       </div>
 
       {/* Floating: link copied */}
-      <div className="absolute -top-5 -right-8 bg-white rounded-2xl shadow-xl border border-slate-100/80 px-3 py-2 flex items-center gap-2 z-10">
-        <CheckCircle2 className="w-4 h-4 text-brand-500 flex-shrink-0" />
-        <div>
-          <p className="text-[10px] font-bold text-slate-800">Link copiado ✓</p>
-          <p className="text-[9px] text-slate-400">conexory.com/p/casa-laureles</p>
+      <div
+        className="hidden sm:flex absolute -top-5 -left-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
+        style={{ animationDelay: "500ms" }}
+      >
+        <div className="w-5 h-5 rounded-full bg-ink flex items-center justify-center">
+          <Check className="w-3 h-3 text-white" strokeWidth={3} />
         </div>
+        <span className="text-xs font-bold text-ink">Link copiado</span>
       </div>
 
-      {/* Floating: WhatsApp */}
-      <div className="absolute -bottom-5 -left-10 bg-white rounded-2xl shadow-xl border border-slate-100/80 px-3 py-2.5 flex items-center gap-2.5 z-10">
-        <div className="w-7 h-7 rounded-full bg-[#25D366]/15 flex items-center justify-center flex-shrink-0">
-          <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-slate-800">3 interesados hoy</p>
-          <p className="text-[9px] text-slate-400">vía WhatsApp</p>
-        </div>
+      {/* Floating: interested */}
+      <div
+        className="hidden sm:flex absolute -bottom-5 -right-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
+        style={{ animationDelay: "650ms" }}
+      >
+        <MessageCircle className="w-4 h-4 text-ink" />
+        <span className="text-xs font-bold text-ink">+3 interesados hoy</span>
       </div>
     </div>
-  )
+  );
 }
 
 export default function Hero() {
   return (
-    <section className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 overflow-hidden bg-white">
-      {/* Background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        {/* Dot grid */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.04]">
+    <section className="relative pt-32 pb-24 lg:pt-44 lg:pb-32 overflow-hidden bg-white">
+      {/* Background dot grid fading out */}
+      <div className="absolute inset-0 -z-10 overflow-hidden [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]">
+        <svg className="absolute inset-0 w-full h-full opacity-[0.05]">
           <defs>
-            <pattern id="hero-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-              <circle cx="1.5" cy="1.5" r="1.5" fill="#0f172a" />
+            <pattern
+              id="hero-dots"
+              x="0"
+              y="0"
+              width="22"
+              height="22"
+              patternUnits="userSpaceOnUse"
+            >
+              <circle cx="1" cy="1" r="1" fill="#000000" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#hero-dots)" />
         </svg>
-        {/* Green accent blob */}
-        <div className="absolute top-0 right-0 w-[55%] h-[80%] rounded-bl-[120px] bg-gradient-to-bl from-brand-50 via-brand-50/40 to-transparent" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-[1fr_auto] gap-12 lg:gap-20 items-center">
-          {/* Left: Copy */}
-          <div className="space-y-9 max-w-2xl">
-            {/* Tag */}
-            <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-full px-4 py-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
-              <span className="text-sm font-semibold text-brand-700">
-                La forma más rápida de compartir propiedades
-              </span>
-            </div>
-
-            {/* Headline */}
-            <div>
-              <h1 className="font-black tracking-tighter leading-none text-slate-950">
-                <span className="block text-6xl sm:text-7xl lg:text-8xl">Crea</span>
-                <span className="block text-6xl sm:text-7xl lg:text-8xl text-brand-400">
-                  Comparte
-                </span>
-                <span className="block text-6xl sm:text-7xl lg:text-8xl">Vende</span>
-              </h1>
-            </div>
-
-            <p className="text-xl text-slate-500 leading-relaxed max-w-lg">
-              Sube las fotos, escribe el precio y obtén tu link en segundos. Compártelo
-              por WhatsApp y empieza a recibir interesados. Sin portales. Sin complicaciones.
-            </p>
-
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <Button size="xl" className="font-bold text-base shadow-lg shadow-brand-400/25 h-14 px-8" asChild>
-                <a href="/register">
-                  Empezar gratis <ArrowRight className="w-5 h-5" />
-                </a>
-              </Button>
-              <p className="text-sm text-slate-400">
-                Sin tarjeta de crédito · 100% desde el celular
-              </p>
-            </div>
-
-            {/* Social proof */}
-            <div className="flex items-center gap-4 pt-2">
-              <div className="flex -space-x-2">
-                {[
-                  { bg: "bg-amber-400", l: "C" },
-                  { bg: "bg-blue-500", l: "M" },
-                  { bg: "bg-violet-500", l: "A" },
-                  { bg: "bg-rose-400", l: "R" },
-                  { bg: "bg-teal-500", l: "J" },
-                ].map((a, i) => (
-                  <div
-                    key={i}
-                    className={`w-9 h-9 rounded-full ${a.bg} border-2 border-white flex items-center justify-center text-white text-xs font-bold shadow-sm`}
-                  >
-                    {a.l}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-900">+480 agentes activos</p>
-                <p className="text-xs text-slate-500">Bogotá · Medellín · Cali · y más</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Phone mockup */}
-          <div className="hidden lg:flex justify-center lg:justify-end items-center py-10 pr-6">
-            <PhoneMockup />
-          </div>
+      <div className="max-w-4xl mx-auto px-5 sm:px-6 lg:px-8 text-center">
+        {/* Badge */}
+        <div
+          className="inline-flex max-w-full items-center gap-2 bg-canvas-soft rounded-full px-4 py-1.5 mb-10 animate-fade-up"
+          style={{ animationDelay: "0ms" }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-ink flex-shrink-0 animate-pulse" />
+          <span className="text-xs sm:text-sm font-medium text-ink truncate">
+            +100 agentes ya usan Conexory
+          </span>
         </div>
+
+        {/* Headline */}
+        <h1
+          className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tighter leading-[1.05] text-ink animate-fade-up text-balance"
+          style={{ animationDelay: "80ms" }}
+        >
+          Comparte propiedades por WhatsApp en{" "}
+          <span className="relative whitespace-nowrap">
+            segundos
+            <svg
+              aria-hidden="true"
+              className="absolute -bottom-2 sm:-bottom-3 left-0 w-full text-ink"
+              height="14"
+              viewBox="0 0 200 14"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M3 8.5C44 3.2 92 2.4 132 4.1c25 1 47 2.6 65 5.3"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </svg>
+          </span>
+        </h1>
+
+        <p
+          className="text-lg sm:text-xl text-body leading-relaxed max-w-2xl mx-auto mt-8 animate-fade-up text-balance"
+          style={{ animationDelay: "160ms" }}
+        >
+          Sube las fotos, escribe el precio y obtén un link único para cada
+          propiedad. Compártelo por WhatsApp con una preview profesional. Sin
+          portales, sin complicaciones.
+        </p>
+
+        {/* CTA */}
+        <div
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-11 animate-fade-up"
+          style={{ animationDelay: "240ms" }}
+        >
+          <Button size="xl" className="h-14 px-8 w-full sm:w-auto" asChild>
+            <a href="/register">
+              Empezar gratis <ArrowRight className="w-5 h-5" />
+            </a>
+          </Button>
+          <Button
+            size="xl"
+            variant="secondary"
+            className="h-14 px-8 w-full sm:w-auto"
+            asChild
+          >
+            <a href="#how-it-works">Ver cómo funciona</a>
+          </Button>
+        </div>
+        <p
+          className="text-sm text-mute mt-6 animate-fade-up"
+          style={{ animationDelay: "300ms" }}
+        >
+          Gratis para siempre · Sin tarjeta de crédito · 100% desde el celular
+        </p>
+      </div>
+
+      {/* Product mock */}
+      <div
+        className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 mt-20 lg:mt-28 animate-fade-up"
+        style={{ animationDelay: "360ms" }}
+      >
+        <BrowserMock />
       </div>
     </section>
-  )
+  );
 }

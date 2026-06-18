@@ -46,10 +46,10 @@ export default function PropertyActions({
     <div className="flex items-center gap-2 flex-shrink-0">
       <Link
         href={`/dashboard/properties/${propertyId}/edit`}
-        className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors"
+        className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-white border border-hairline-strong text-body text-sm font-bold hover:bg-canvas-softer transition-colors"
       >
         <Pencil className="w-3.5 h-3.5" />
-        Editar
+        <span className="hidden sm:inline">Editar</span>
       </Link>
 
       <button
@@ -58,8 +58,8 @@ export default function PropertyActions({
         className={cn(
           "flex items-center gap-1.5 px-3 h-9 rounded-xl text-sm font-bold border transition-colors disabled:opacity-60",
           published
-            ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
-            : "bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100"
+            ? "bg-warning-50 text-warning-700 border-warning-200 hover:bg-warning-100"
+            : "bg-canvas-soft text-ink border-hairline hover:bg-surface-pressed"
         )}
       >
         {loading ? (
@@ -69,7 +69,7 @@ export default function PropertyActions({
         ) : (
           <Eye className="w-3.5 h-3.5" />
         )}
-        {published ? "Desactivar" : "Activar"}
+        <span className="hidden sm:inline">{published ? "Desactivar" : "Activar"}</span>
       </button>
 
       <button
@@ -82,7 +82,7 @@ export default function PropertyActions({
         ) : (
           <Trash2 className="w-3.5 h-3.5" />
         )}
-        Eliminar
+        <span className="hidden sm:inline">Eliminar</span>
       </button>
     </div>
   )

@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
-  Building2,
   LayoutGrid,
   Plus,
   LogOut,
@@ -30,12 +30,12 @@ function UserAvatar({ name, image, size = 32 }: { name: string; image: string | 
     .slice(0, 2)
 
   const colors = [
-    "bg-amber-400",
-    "bg-blue-500",
-    "bg-violet-500",
-    "bg-rose-400",
-    "bg-teal-500",
-    "bg-brand-400",
+    "bg-ink",
+    "bg-brand-700",
+    "bg-brand-600",
+    "bg-brand-800",
+    "bg-brand-900",
+    "bg-elevated",
   ]
   const color = colors[name.charCodeAt(0) % colors.length]
   const px = `${size}px`
@@ -94,10 +94,10 @@ function NavLink({
 
   if (soon) {
     return (
-      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 cursor-default select-none">
+      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-mute cursor-default select-none">
         <Icon className="w-4.5 h-4.5 flex-shrink-0" strokeWidth={1.75} />
         <span className="text-sm font-medium flex-1">{label}</span>
-        <span className="text-[9px] font-bold text-slate-300 uppercase tracking-wider">Pronto</span>
+        <span className="text-[9px] font-bold text-mute uppercase tracking-wider">Pronto</span>
       </div>
     )
   }
@@ -109,18 +109,18 @@ function NavLink({
       className={cn(
         "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150",
         isActive
-          ? "bg-brand-50 text-brand-700"
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+          ? "bg-canvas-soft text-ink"
+          : "text-body hover:bg-canvas-softer hover:text-ink"
       )}
     >
       <Icon
-        className={cn("w-4.5 h-4.5 flex-shrink-0", isActive ? "text-brand-500" : "")}
+        className={cn("w-4.5 h-4.5 flex-shrink-0", isActive ? "text-ink" : "")}
         strokeWidth={isActive ? 2.25 : 1.75}
       />
       <span className={cn("text-sm flex-1", isActive ? "font-bold" : "font-medium")}>
         {label}
       </span>
-      {isActive && <ChevronRight className="w-3.5 h-3.5 text-brand-400 flex-shrink-0" />}
+      {isActive && <ChevronRight className="w-3.5 h-3.5 text-ink flex-shrink-0" />}
     </Link>
   )
 }
@@ -142,15 +142,15 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="flex items-center justify-between px-4 h-16 border-b border-slate-100 flex-shrink-0">
+      <div className="flex items-center justify-between px-4 h-16 border-b border-hairline flex-shrink-0">
         <Link href="/dashboard" onClick={onClose} className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-brand-400 flex items-center justify-center shadow-sm">
-            <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
+          <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center">
+            <Image src="/mark-white.png" alt="Conexory" width={20} height={20} className="w-5 h-5" />
           </div>
-          <span className="text-base font-black text-slate-950 tracking-tight">Conexory</span>
+          <span className="text-base font-bold text-ink tracking-tight">Conexory</span>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-mute hover:bg-canvas-soft lg:hidden">
             <X className="w-5 h-5" />
           </button>
         )}
@@ -162,7 +162,7 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
         <Link
           href="/dashboard/properties/new"
           onClick={onClose}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-brand-400 text-white hover:bg-brand-500 transition-colors mb-3 shadow-sm shadow-brand-400/20"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-ink text-white hover:bg-elevated transition-colors mb-3"
         >
           <Plus className="w-4.5 h-4.5 flex-shrink-0" strokeWidth={2.5} />
           <span className="text-sm font-bold">Nueva propiedad</span>
@@ -174,17 +174,17 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
       </div>
 
       {/* User */}
-      <div className="flex-shrink-0 border-t border-slate-100 p-3">
+      <div className="flex-shrink-0 border-t border-hairline p-3">
         <div className="flex items-center gap-3 px-2 py-2 mb-1">
           <UserAvatar name={user.name} image={user.image} size={36} />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-slate-900 truncate">{user.name}</p>
-            <p className="text-xs text-slate-400 truncate">{user.email}</p>
+            <p className="text-sm font-bold text-ink truncate">{user.name}</p>
+            <p className="text-xs text-mute truncate">{user.email}</p>
           </div>
         </div>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium cursor-pointer"
         >
           <LogOut className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
           Cerrar sesión
@@ -200,25 +200,25 @@ export default function Sidebar({ user }: { user: User }) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col fixed top-0 left-0 bottom-0 w-60 bg-white border-r border-slate-200 z-30">
+      <aside className="hidden lg:flex flex-col fixed top-0 left-0 bottom-0 w-60 bg-white border-r border-hairline-strong z-30">
         <SidebarContent user={user} />
       </aside>
 
       {/* Mobile header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-slate-100 h-14 flex items-center px-4 gap-3">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-hairline h-14 flex items-center px-4 gap-3">
         <button
           onClick={() => setMobileOpen(true)}
-          className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+          className="p-2 rounded-xl text-body hover:bg-canvas-soft transition-colors"
           aria-label="Abrir menú"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center">
-            <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+          <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center">
+            <Image src="/mark-white.png" alt="Conexory" width={18} height={18} className="w-4.5 h-4.5" />
           </div>
-          <span className="text-base font-black text-slate-950 tracking-tight">Conexory</span>
+          <span className="text-base font-bold text-ink tracking-tight">Conexory</span>
         </div>
 
         <div className="ml-auto">
@@ -231,7 +231,7 @@ export default function Sidebar({ user }: { user: User }) {
         <>
           {/* Overlay */}
           <div
-            className="lg:hidden fixed inset-0 bg-slate-950/40 z-40 backdrop-blur-sm"
+            className="lg:hidden fixed inset-0 bg-ink/40 z-40 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
           {/* Drawer */}

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Building2, MapPin, BedDouble, Bath, Square, Car, EyeOff } from "lucide-react"
+import Image from "next/image"
+import { MapPin, BedDouble, Bath, Square, Car, EyeOff } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import PropertyCarousel from "@/components/property-carousel"
 
@@ -78,32 +79,32 @@ export default async function PublicPropertyPage({
 
   if (!property.published) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <header className="bg-white border-b border-slate-100 px-4 sm:px-6 h-14 flex items-center">
+      <div className="min-h-screen bg-canvas-softer flex flex-col">
+        <header className="bg-white border-b border-hairline px-4 sm:px-6 h-14 flex items-center">
           <Link href="/" className="flex items-center gap-2 w-fit">
-            <div className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center shadow-sm">
-              <Building2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+            <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center shadow-sm">
+              <Image src="/mark-white.png" alt="Conexory" width={18} height={18} className="w-4.5 h-4.5" />
             </div>
-            <span className="text-sm font-black text-slate-950 tracking-tight">Conexory</span>
+            <span className="text-sm font-black text-ink tracking-tight">Conexory</span>
           </Link>
         </header>
 
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center mb-6">
-            <EyeOff className="w-9 h-9 text-slate-400" strokeWidth={1.5} />
+          <div className="w-20 h-20 rounded-3xl bg-canvas-soft flex items-center justify-center mb-6">
+            <EyeOff className="w-9 h-9 text-mute" strokeWidth={1.5} />
           </div>
-          <h1 className="text-xl font-black text-slate-950 tracking-tight mb-2">
+          <h1 className="text-xl font-black text-ink tracking-tight mb-2">
             Propiedad no disponible
           </h1>
-          <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+          <p className="text-body text-sm leading-relaxed max-w-xs">
             Esta propiedad fue desactivada temporalmente por el agente. Es posible que ya no esté disponible.
           </p>
         </main>
 
-        <footer className="border-t border-slate-100 bg-white py-5 px-4 text-center">
-          <p className="text-xs text-slate-400">
+        <footer className="border-t border-hairline bg-white py-5 px-4 text-center">
+          <p className="text-xs text-mute">
             Publicado con{" "}
-            <Link href="/" className="text-brand-500 font-semibold hover:underline">Conexory</Link>
+            <Link href="/" className="text-ink font-semibold hover:underline">Conexory</Link>
           </p>
         </footer>
       </div>
@@ -121,7 +122,7 @@ export default async function PublicPropertyPage({
     property.parking != null
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-canvas-softer flex flex-col">
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 py-8 space-y-4">
         {/* Carrusel de imágenes */}
         {property.images.length > 0 && (
@@ -130,18 +131,18 @@ export default async function PublicPropertyPage({
 
         {/* Badge */}
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-full">
+          <span className="inline-flex items-center bg-canvas-soft text-ink text-xs font-bold px-3 py-1.5 rounded-full">
             {typeLabel} · En venta
           </span>
         </div>
 
         {/* Title + location */}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight mb-2">
+          <h1 className="text-2xl sm:text-3xl font-black text-ink tracking-tight leading-tight mb-2">
             {property.title}
           </h1>
           {location && (
-            <div className="flex items-center gap-1.5 text-slate-500 text-sm">
+            <div className="flex items-center gap-1.5 text-body text-sm">
               <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
               <span>{location}</span>
             </div>
@@ -149,42 +150,42 @@ export default async function PublicPropertyPage({
         </div>
 
         {/* Price */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Precio</p>
-          <p className="text-3xl font-black text-slate-950 tracking-tighter">{price}</p>
+        <div className="bg-white rounded-2xl border border-hairline p-6">
+          <p className="text-xs font-bold text-mute uppercase tracking-wide mb-1">Precio</p>
+          <p className="text-3xl font-black text-ink tracking-tighter">{price}</p>
         </div>
 
         {/* Details */}
         {hasDetails && (
-          <div className="bg-white rounded-2xl border border-slate-100 p-6">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-4">Detalles</p>
+          <div className="bg-white rounded-2xl border border-hairline p-6">
+            <p className="text-xs font-bold text-mute uppercase tracking-wide mb-4">Detalles</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
               {property.area != null && (
                 <div className="flex flex-col gap-1.5">
-                  <Square className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
-                  <p className="text-xl font-black text-slate-950">{property.area}</p>
-                  <p className="text-xs text-slate-400 font-medium">m²</p>
+                  <Square className="w-4 h-4 text-mute" strokeWidth={1.75} />
+                  <p className="text-xl font-black text-ink">{property.area}</p>
+                  <p className="text-xs text-mute font-medium">m²</p>
                 </div>
               )}
               {property.bedrooms != null && (
                 <div className="flex flex-col gap-1.5">
-                  <BedDouble className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
-                  <p className="text-xl font-black text-slate-950">{property.bedrooms}</p>
-                  <p className="text-xs text-slate-400 font-medium">Habitaciones</p>
+                  <BedDouble className="w-4 h-4 text-mute" strokeWidth={1.75} />
+                  <p className="text-xl font-black text-ink">{property.bedrooms}</p>
+                  <p className="text-xs text-mute font-medium">Habitaciones</p>
                 </div>
               )}
               {property.bathrooms != null && (
                 <div className="flex flex-col gap-1.5">
-                  <Bath className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
-                  <p className="text-xl font-black text-slate-950">{property.bathrooms}</p>
-                  <p className="text-xs text-slate-400 font-medium">Baños</p>
+                  <Bath className="w-4 h-4 text-mute" strokeWidth={1.75} />
+                  <p className="text-xl font-black text-ink">{property.bathrooms}</p>
+                  <p className="text-xs text-mute font-medium">Baños</p>
                 </div>
               )}
               {property.parking != null && (
                 <div className="flex flex-col gap-1.5">
-                  <Car className="w-4 h-4 text-slate-400" strokeWidth={1.75} />
-                  <p className="text-xl font-black text-slate-950">{property.parking}</p>
-                  <p className="text-xs text-slate-400 font-medium">Parqueaderos</p>
+                  <Car className="w-4 h-4 text-mute" strokeWidth={1.75} />
+                  <p className="text-xl font-black text-ink">{property.parking}</p>
+                  <p className="text-xs text-mute font-medium">Parqueaderos</p>
                 </div>
               )}
             </div>
@@ -193,9 +194,9 @@ export default async function PublicPropertyPage({
 
         {/* Description */}
         {property.description && (
-          <div className="bg-white rounded-2xl border border-slate-100 p-6">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Descripción</p>
-            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+          <div className="bg-white rounded-2xl border border-hairline p-6">
+            <p className="text-xs font-bold text-mute uppercase tracking-wide mb-3">Descripción</p>
+            <p className="text-sm text-body leading-relaxed whitespace-pre-wrap">
               {property.description}
             </p>
           </div>
@@ -203,10 +204,10 @@ export default async function PublicPropertyPage({
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-100 bg-white py-5 px-4 text-center">
-        <p className="text-xs text-slate-400">
+      <footer className="border-t border-hairline bg-white py-5 px-4 text-center">
+        <p className="text-xs text-mute">
           Publicado con{" "}
-          <Link href="/" className="text-brand-500 font-semibold hover:underline">
+          <Link href="/" className="text-ink font-semibold hover:underline">
             Conexory
           </Link>
         </p>

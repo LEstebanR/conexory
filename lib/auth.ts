@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
+import { nextCookies } from "better-auth/next-js"
 import { prisma } from "@/lib/prisma"
 
 export const auth = betterAuth({
@@ -58,6 +59,9 @@ export const auth = betterAuth({
       },
     },
   },
+
+  // Must stay last: lets Server Actions set the session cookie via next/headers.
+  plugins: [nextCookies()],
 })
 
 export type Session = typeof auth.$Infer.Session

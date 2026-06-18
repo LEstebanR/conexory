@@ -6,7 +6,6 @@ import LegalLayout, {
   LegalSubtitle,
   LegalHighlight,
 } from "@/components/legal-layout"
-import { BRAND_EMAILS } from "@/lib/brand"
 
 export const metadata: Metadata = {
   title: "Términos de Uso — Conexory",
@@ -93,10 +92,10 @@ export default function TermsPage() {
           Eres el único responsable de mantener la confidencialidad de tus
           credenciales de acceso. Debes notificarnos inmediatamente a{" "}
           <a
-            href={`mailto:${BRAND_EMAILS.soporte}`}
-            className="text-brand-500 font-semibold hover:underline"
+            href="mailto:soporte@conexory.com"
+            className="text-ink font-semibold hover:underline"
           >
-            {BRAND_EMAILS.soporte}
+            soporte@conexory.com
           </a>{" "}
           si detectas acceso no autorizado a tu cuenta.
         </LegalP>
@@ -282,22 +281,22 @@ export default function TermsPage() {
           Si tienes preguntas sobre estos términos o necesitas ejercer algún
           derecho reconocido en este documento, puedes contactarnos en:
         </LegalP>
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-2 text-sm">
+        <div className="bg-canvas-softer border border-hairline-strong rounded-xl p-5 space-y-2 text-sm">
           <p>
-            <span className="font-semibold text-slate-800">Empresa:</span>{" "}
+            <span className="font-semibold text-ink">Empresa:</span>{" "}
             Conexory SAS
           </p>
           <p>
-            <span className="font-semibold text-slate-800">Correo:</span>{" "}
+            <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
-              href={`mailto:${BRAND_EMAILS.legal}`}
-              className="text-brand-500 hover:underline"
+              href="mailto:legal@conexory.com"
+              className="text-ink hover:underline"
             >
-              {BRAND_EMAILS.legal}
+              legal@conexory.com
             </a>
           </p>
           <p>
-            <span className="font-semibold text-slate-800">Ciudad:</span>{" "}
+            <span className="font-semibold text-ink">Ciudad:</span>{" "}
             Bogotá D.C., Colombia
           </p>
         </div>
