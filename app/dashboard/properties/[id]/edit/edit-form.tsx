@@ -167,7 +167,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               inputMode="url"
             />
             <p className="text-xs text-mute">
-              Pega el enlace del video y aparecerá de primero en el carrusel.
+              Pega el enlace del video y aparecerá en el carrusel de la propiedad.
             </p>
           </div>
         </SectionCard>

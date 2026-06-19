@@ -23,8 +23,8 @@ export default function PropertyCarousel({
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
 
   const slides: Slide[] = [
-    ...(videoId ? [{ kind: "video", id: videoId } as const] : []),
     ...images.map((url) => ({ kind: "image", url }) as const),
+    ...(videoId ? [{ kind: "video", id: videoId } as const] : []),
   ]
 
   if (slides.length === 0) return null
