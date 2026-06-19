@@ -38,11 +38,17 @@ export async function updateProperty(
         parking: parsed.data.parking,
         description: parsed.data.description,
         images: parsed.data.images,
+        videoUrl: parsed.data.videoUrl,
       },
     })
 
     return { success: true }
-  } catch {
-    return { success: false, error: "Error inesperado al guardar los cambios. Intenta de nuevo." }
+  } catch (err) {
+    console.error("updateProperty failed:", err)
+    return {
+      success: false,
+      error:
+        "No pudimos guardar los cambios. Revisa tu conexión y, si agregaste un video, que el enlace sea de YouTube. Si el problema persiste, recarga la página.",
+    }
   }
 }

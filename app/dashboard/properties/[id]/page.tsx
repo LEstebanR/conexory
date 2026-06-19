@@ -5,6 +5,7 @@ import { ArrowLeft, BedDouble, Bath, Square, Car, MapPin, EyeOff } from "lucide-
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
+import { youtubeId } from "@/lib/youtube"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
@@ -46,6 +47,7 @@ export default async function PropertyDetailPage({
   const publicUrl = `${getAppUrl()}/p/${property.slug}`
   const typeLabel = TYPE_LABELS[property.type] ?? property.type
   const price = formatCOP(Number(property.price))
+  const videoId = youtubeId(property.videoUrl)
   const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
 
   const hasDetails =
@@ -87,6 +89,7 @@ export default async function PropertyDetailPage({
         <SharePanel
           url={publicUrl}
           propertyId={property.id}
+          title={property.title}
           type={typeLabel}
           price={price}
           location={location || undefined}
@@ -97,8 +100,12 @@ export default async function PropertyDetailPage({
         />
 
         {/* Carrusel */}
-        {property.images.length > 0 && (
-          <PropertyCarousel images={property.images} title={property.title} />
+        {(property.images.length > 0 || videoId) && (
+          <PropertyCarousel
+            images={property.images}
+            title={property.title}
+            videoId={videoId}
+          />
         )}
 
         {/* Resumen */}

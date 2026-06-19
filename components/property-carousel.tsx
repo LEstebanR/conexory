@@ -4,20 +4,32 @@ import { useState } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { youtubeEmbedUrl } from "@/lib/youtube"
+
+type Slide =
+  | { kind: "video"; id: string }
+  | { kind: "image"; url: string }
 
 export default function PropertyCarousel({
   images,
   title,
+  videoId,
 }: {
   images: string[]
   title: string
+  videoId?: string | null
 }) {
   const [current, setCurrent] = useState(0)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
 
-  if (images.length === 0) return null
+  const slides: Slide[] = [
+    ...(videoId ? [{ kind: "video", id: videoId } as const] : []),
+    ...images.map((url) => ({ kind: "image", url }) as const),
+  ]
 
-  const total = images.length
+  if (slides.length === 0) return null
+
+  const total = slides.length
 
   function prev() {
     setCurrent((i) => (i === 0 ? total - 1 : i - 1))
@@ -40,25 +52,54 @@ export default function PropertyCarousel({
 
   return (
     <div className="relative rounded-2xl overflow-hidden bg-canvas-soft select-none">
-      {/* Image stack */}
+      {/* Slide stack — each image is object-contain over a blurred fill of
+          itself, so portrait photos aren't center-cropped. */}
       <div
         className="relative aspect-[4/3] sm:aspect-video"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {images.map((url, i) => (
-          <Image
-            key={url}
-            fill
-            src={url}
-            alt={i === 0 ? title : ""}
+        {slides.map((slide, i) => (
+          <div
+            key={slide.kind === "video" ? `v-${slide.id}` : slide.url}
             className={cn(
-              "object-cover transition-opacity duration-300",
+              "absolute inset-0 transition-opacity duration-300",
               i === current ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
-            draggable={false}
-            sizes="(max-width: 768px) 100vw, 672px"
-          />
+          >
+            {slide.kind === "video" ? (
+              <div className="w-full h-full bg-black">
+                {i === current && (
+                  <iframe
+                    src={youtubeEmbedUrl(slide.id)}
+                    title={title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                )}
+              </div>
+            ) : (
+              <>
+                <Image
+                  fill
+                  src={slide.url}
+                  alt=""
+                  aria-hidden
+                  className="object-cover scale-110 blur-2xl opacity-50"
+                  sizes="(max-width: 768px) 100vw, 672px"
+                />
+                <Image
+                  fill
+                  src={slide.url}
+                  alt={i === 0 ? title : ""}
+                  className="object-contain"
+                  draggable={false}
+                  sizes="(max-width: 768px) 100vw, 672px"
+                />
+              </>
+            )}
+          </div>
         ))}
       </div>
 
@@ -92,11 +133,11 @@ export default function PropertyCarousel({
       {/* Dots */}
       {total > 1 && total <= 12 && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-          {images.map((_, i) => (
+          {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrent(i)}
-              aria-label={`Ir a imagen ${i + 1}`}
+              aria-label={`Ir a la diapositiva ${i + 1}`}
               className={cn(
                 "h-1.5 rounded-full transition-all duration-200",
                 i === current ? "w-5 bg-white" : "w-1.5 bg-white/50 hover:bg-white/75"

@@ -57,7 +57,9 @@ export default async function DashboardPage() {
       area: true,
       bedrooms: true,
       bathrooms: true,
+      parking: true,
       images: true,
+      createdAt: true,
     },
     orderBy: [{ published: "desc" }, { createdAt: "desc" }],
   })
@@ -80,15 +82,19 @@ export default async function DashboardPage() {
     id: p.id,
     slug: p.slug,
     title: p.title,
+    type: p.type,
     typeLabel: TYPE_LABELS[p.type] ?? p.type,
     published: p.published,
     shares: p.shares,
     price: formatCompactCOP(p.price.toNumber()),
+    priceValue: p.price.toNumber(),
     location: [p.neighborhood, p.city].filter(Boolean).join(", "),
     area: p.area,
     bedrooms: p.bedrooms,
     bathrooms: p.bathrooms,
+    parking: p.parking,
     image: p.images[0] ?? null,
+    createdAt: p.createdAt.getTime(),
   }))
 
   const stats = [

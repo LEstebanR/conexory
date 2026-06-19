@@ -7,6 +7,7 @@ import { incrementShares } from "./actions"
 export default function SharePanel({
   url,
   propertyId,
+  title,
   type,
   price,
   location,
@@ -17,6 +18,7 @@ export default function SharePanel({
 }: {
   url: string
   propertyId: string
+  title: string
   type: string
   price: string
   location?: string
@@ -37,17 +39,26 @@ export default function SharePanel({
     incrementShares(propertyId).catch(() => {})
   }
 
-  const details = [
-    `• Precio: ${price}`,
-    area != null ? `• ${area} m²` : null,
-    bedrooms != null ? `• ${bedrooms} Habitaciones` : null,
-    bathrooms != null ? `• ${bathrooms} Baños` : null,
-    parking != null ? `• ${parking} Parqueaderos` : null,
-  ].filter(Boolean).join("\n")
+  const features = [
+    bedrooms != null ? `🛏️ ${bedrooms} ${bedrooms === 1 ? "habitación" : "habitaciones"}` : null,
+    bathrooms != null ? `🚿 ${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` : null,
+    area != null ? `📐 ${area} m²` : null,
+    parking != null ? `🚗 ${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
+  ].filter(Boolean).join("  ·  ")
 
-  const waText = encodeURIComponent(
-    `Mira este ${type}${location ? ` en ${location}` : ""}:\n${details}\n\n${url}`
-  )
+  const message = [
+    `✨ ${title}`,
+    `📍 ${type}${location ? ` en ${location}` : ""}`,
+    "",
+    `💰 ${price}`,
+    features || null,
+    "",
+    "¿Te interesa? Escríbeme y con gusto te doy más detalles.",
+    "👇 Mira todas las fotos y la información completa aquí:",
+    url,
+  ].filter((line) => line !== null).join("\n")
+
+  const waText = encodeURIComponent(message)
   const waUrl = `https://wa.me/?text=${waText}`
 
   return (

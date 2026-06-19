@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import Image from "next/image"
 import imageCompression from "browser-image-compression"
-import { ImagePlus, X, Loader2, AlertCircle } from "lucide-react"
+import { ImagePlus, X, Loader2, AlertCircle, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type ImageItem = {
@@ -103,11 +103,21 @@ export default function ImageUpload({
     })
   }
 
+  function move(index: number, dir: -1 | 1) {
+    setItems((prev) => {
+      const target = index + dir
+      if (target < 0 || target >= prev.length) return prev
+      const next = [...prev]
+      ;[next[index], next[target]] = [next[target], next[index]]
+      return next
+    })
+  }
+
   const canAdd = items.length < maxImages
 
   return (
     <div className="space-y-3">
-      {canAdd && (
+      {items.length === 0 && (
         <div
           onDragEnter={() => setDragging(true)}
           onDragLeave={() => setDragging(false)}
@@ -125,21 +135,16 @@ export default function ImageUpload({
               : "border-hairline-strong hover:border-ink hover:bg-canvas-soft/20"
           )}
         >
-          <div className={cn(
-            "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
-            dragging ? "bg-canvas-soft" : "bg-canvas-soft"
-          )}>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-canvas-soft">
             <ImagePlus
               className={cn("w-6 h-6", dragging ? "text-ink" : "text-mute")}
               strokeWidth={1.75}
             />
           </div>
           <div>
-            <p className="text-sm font-semibold text-ink">
-              {items.length === 0 ? "Arrastra las fotos aquí" : "Agregar más fotos"}
-            </p>
+            <p className="text-sm font-semibold text-ink">Arrastra las fotos aquí</p>
             <p className="text-xs text-mute mt-0.5">
-              PNG, JPG, WebP · Máx. {MAX_SIZE_MB} MB · Hasta {maxImages} fotos
+              PNG, JPG · Máx. {MAX_SIZE_MB} MB · Hasta {maxImages} fotos
             </p>
           </div>
         </div>
@@ -158,42 +163,86 @@ export default function ImageUpload({
       />
 
       {items.length > 0 && (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className="relative aspect-square rounded-xl overflow-hidden bg-canvas-soft group"
-            >
-              <Image fill unoptimized src={item.preview} alt="" className="object-cover" />
+        <>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            {items.map((item, index) => {
+              const busy = item.uploading || item.error
+              return (
+                <div
+                  key={item.id}
+                  className="relative aspect-square rounded-xl overflow-hidden bg-canvas-soft"
+                >
+                  <Image fill unoptimized src={item.preview} alt="" className="object-cover" />
 
-              {item.uploading && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 text-white animate-spin" />
-                </div>
-              )}
-              {item.error && (
-                <div className="absolute inset-0 bg-red-500/50 flex flex-col items-center justify-center gap-1">
-                  <AlertCircle className="w-5 h-5 text-white" />
-                  <span className="text-[10px] text-white font-bold">Error</span>
-                </div>
-              )}
+                  {item.uploading && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    </div>
+                  )}
+                  {item.error && (
+                    <div className="absolute inset-0 bg-red-500/50 flex flex-col items-center justify-center gap-1">
+                      <AlertCircle className="w-5 h-5 text-white" />
+                      <span className="text-[10px] text-white font-bold">Error</span>
+                    </div>
+                  )}
 
+                  <button
+                    type="button"
+                    onClick={() => remove(item.id)}
+                    aria-label="Eliminar foto"
+                    className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-sm"
+                  >
+                    <X className="w-4 h-4" strokeWidth={2.5} />
+                  </button>
+
+                  {index === 0 ? (
+                    <div className="absolute top-1.5 left-1.5 text-[9px] font-bold bg-ink text-white px-1.5 py-0.5 rounded-full">
+                      Portada
+                    </div>
+                  ) : null}
+
+                  {!busy && items.length > 1 && (
+                    <div className="absolute inset-x-1.5 bottom-1.5 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => move(index, -1)}
+                        disabled={index === 0}
+                        aria-label="Mover a la izquierda"
+                        className="w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors disabled:opacity-0 disabled:pointer-events-none shadow-sm"
+                      >
+                        <ChevronLeft className="w-4 h-4" strokeWidth={2.5} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => move(index, 1)}
+                        disabled={index === items.length - 1}
+                        aria-label="Mover a la derecha"
+                        className="w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors disabled:opacity-0 disabled:pointer-events-none shadow-sm"
+                      >
+                        <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+
+            {canAdd && (
               <button
                 type="button"
-                onClick={() => remove(item.id)}
-                className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => inputRef.current?.click()}
+                className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong hover:border-ink hover:bg-canvas-soft/30 flex flex-col items-center justify-center gap-1.5 text-mute hover:text-ink transition-colors"
               >
-                <X className="w-3.5 h-3.5 text-white" />
+                <Plus className="w-6 h-6" strokeWidth={2} />
+                <span className="text-xs font-semibold">Agregar</span>
               </button>
+            )}
+          </div>
 
-              {index === 0 && (
-                <div className="absolute bottom-1.5 left-1.5 text-[9px] font-bold bg-black/50 text-white px-1.5 py-0.5 rounded-full">
-                  Portada
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+          <p className="text-xs text-mute">
+            La primera foto es la portada. Usa las flechas para reordenar · {items.length}/{maxImages} fotos
+          </p>
+        </>
       )}
     </div>
   )

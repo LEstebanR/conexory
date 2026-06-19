@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { PRO_PHOTO_LIMIT } from "@/lib/plans"
+import { isYoutubeUrl } from "@/lib/youtube"
 
 const optionalString = (maxLength: number) =>
   z.string().max(maxLength).transform((v) => v.trim() || null)
@@ -51,6 +52,14 @@ export const PropertySchema = z.object({
   description: optionalString(1000),
   // Techo absoluto (plan Pro). El límite por plan (10 free / 20 pro) lo aplican las actions.
   images: z.array(z.string()).max(PRO_PHOTO_LIMIT, `Máximo ${PRO_PHOTO_LIMIT} fotos por propiedad`),
+  videoUrl: z
+    .string()
+    .trim()
+    .max(300)
+    .refine((v) => v === "" || isYoutubeUrl(v), {
+      message: "Pega un enlace válido de YouTube",
+    })
+    .transform((v) => (v === "" ? null : v)),
 })
 
 // type field accepts any string — Zod validates the enum server-side

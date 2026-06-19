@@ -64,6 +64,7 @@ export default function NewPropertyPage() {
   const [bathrooms, setBathrooms] = useState("")
   const [parking, setParking] = useState("")
   const [description, setDescription] = useState("")
+  const [videoUrl, setVideoUrl] = useState("")
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState("")
@@ -94,6 +95,7 @@ export default function NewPropertyPage() {
         parking,
         description,
         images: imageUrls,
+        videoUrl,
       })
       if (!result.success) {
         setError(result.error)
@@ -150,12 +152,25 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Fotos */}
-        <SectionCard title="Fotos">
+        <SectionCard title="Fotos y video">
           <ImageUpload
             onUrlsChange={setImageUrls}
             onUploadingChange={setIsUploading}
             maxImages={maxImages}
           />
+          <div className="space-y-1.5 pt-4 border-t border-hairline">
+            <FieldLabel optional>Video de YouTube</FieldLabel>
+            <Input
+              placeholder="https://youtube.com/watch?v=..."
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              className="h-11"
+              inputMode="url"
+            />
+            <p className="text-xs text-mute">
+              Pega el enlace del video y aparecerá de primero en el carrusel.
+            </p>
+          </div>
         </SectionCard>
 
         {/* Información básica */}

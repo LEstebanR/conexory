@@ -33,6 +33,7 @@ export default async function EditPropertyPage({
     parking: property.parking?.toString() ?? "",
     description: property.description ?? "",
     images: property.images,
+    videoUrl: property.videoUrl ?? "",
   }
 
   return <EditForm initial={initial} isPremium={session.user.isPremium} />

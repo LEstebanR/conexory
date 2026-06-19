@@ -22,13 +22,18 @@ export async function POST(request: Request) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer())
-  const webp = await sharp(buffer)
+  // JPEG (not WebP): WhatsApp and other OG consumers don't render WebP
+  // previews, and these photos exist to be shared over WhatsApp.
+  // `.rotate()` bakes in EXIF orientation so portrait phone photos aren't
+  // displayed sideways.
+  const jpeg = await sharp(buffer)
+    .rotate()
     .resize({ width: 1920, height: 1920, fit: "inside", withoutEnlargement: true })
-    .webp({ quality: 82 })
+    .jpeg({ quality: 82, mozjpeg: true })
     .toBuffer()
 
-  const filename = `properties/${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`
-  const blob = await put(filename, webp, { access: "public", contentType: "image/webp" })
+  const filename = `properties/${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+  const blob = await put(filename, jpeg, { access: "public", contentType: "image/jpeg" })
 
   return NextResponse.json({ url: blob.url })
 }
