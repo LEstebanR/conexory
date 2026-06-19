@@ -1,10 +1,30 @@
 import { ImageResponse } from "next/og"
+import sharp from "sharp"
+import type { ReactElement } from "react"
 import { prisma } from "@/lib/prisma"
 import { youtubeId, youtubeThumb } from "@/lib/youtube"
 
+export const runtime = "nodejs"
 export const alt = "Propiedad en Conexory"
 export const size = { width: 1200, height: 630 }
-export const contentType = "image/png"
+// JPEG, not the default PNG: ImageResponse PNGs run ~1.4MB, too heavy for
+// WhatsApp's link-preview crawler to fetch. JPEG drops it to ~100KB.
+export const contentType = "image/jpeg"
+
+async function render(node: ReactElement): Promise<Response> {
+  const png = Buffer.from(await new ImageResponse(node, size).arrayBuffer())
+  try {
+    const jpeg = await sharp(png).jpeg({ quality: 78, mozjpeg: true }).toBuffer()
+    return new Response(new Uint8Array(jpeg), {
+      headers: {
+        "Content-Type": "image/jpeg",
+        "Cache-Control": "public, max-age=86400",
+      },
+    })
+  } catch {
+    return new Response(new Uint8Array(png), { headers: { "Content-Type": "image/png" } })
+  }
+}
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -41,13 +61,10 @@ export default async function Image({
   const property = await prisma.property.findUnique({ where: { slug } })
 
   if (!property || !property.published) {
-    return new ImageResponse(
-      (
-        <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", backgroundColor: "#000" }}>
-          <Wordmark />
-        </div>
-      ),
-      size
+    return render(
+      <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", backgroundColor: "#000" }}>
+        <Wordmark />
+      </div>
     )
   }
 
@@ -75,40 +92,34 @@ export default async function Image({
   const cover = property.images[0] ?? (videoId ? youtubeThumb(videoId) : null)
 
   if (cover) {
-    return new ImageResponse(
-      (
-        <div style={{ display: "flex", position: "relative", width: "100%", height: "100%", backgroundColor: "#000" }}>
-          <img src={cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-          <div style={{ position: "absolute", inset: 0, display: "flex", background: "linear-gradient(to top, rgba(0,0,0,0.9) 8%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.45))" }} />
-          <div style={{ position: "absolute", top: 50, left: 60, display: "flex" }}>
-            <Wordmark />
-          </div>
-          <div style={{ position: "absolute", left: 60, right: 60, bottom: 54, display: "flex", flexDirection: "column", color: "#fff" }}>
-            <div style={{ display: "flex", fontSize: 30, fontWeight: 600, color: "#e2e2e2" }}>{subtitle}</div>
-            <div style={{ display: "flex", fontSize: 76, fontWeight: 800, letterSpacing: -2, marginTop: 6 }}>{price}</div>
-            <div style={{ display: "flex", fontSize: 38, fontWeight: 600, marginTop: 4 }}>{property.title}</div>
-          </div>
+    return render(
+      <div style={{ display: "flex", position: "relative", width: "100%", height: "100%", backgroundColor: "#000" }}>
+        <img src={cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, display: "flex", background: "linear-gradient(to top, rgba(0,0,0,0.9) 8%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.45))" }} />
+        <div style={{ position: "absolute", top: 50, left: 60, display: "flex" }}>
+          <Wordmark />
         </div>
-      ),
-      size
+        <div style={{ position: "absolute", left: 60, right: 60, bottom: 54, display: "flex", flexDirection: "column", color: "#fff" }}>
+          <div style={{ display: "flex", fontSize: 30, fontWeight: 600, color: "#e2e2e2" }}>{subtitle}</div>
+          <div style={{ display: "flex", fontSize: 76, fontWeight: 800, letterSpacing: -2, marginTop: 6 }}>{price}</div>
+          <div style={{ display: "flex", fontSize: 38, fontWeight: 600, marginTop: 4 }}>{property.title}</div>
+        </div>
+      </div>
     )
   }
 
-  return new ImageResponse(
-    (
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", backgroundColor: "#000", padding: 64 }}>
-        <Wordmark />
-        <div style={{ display: "flex", flexDirection: "column", color: "#fff" }}>
-          <div style={{ display: "flex", fontSize: 30, fontWeight: 600, color: "#afafaf" }}>{subtitle}</div>
-          <div style={{ display: "flex", fontSize: 88, fontWeight: 800, letterSpacing: -2, marginTop: 10 }}>{price}</div>
-          <div style={{ display: "flex", fontSize: 42, fontWeight: 600, marginTop: 8 }}>{property.title}</div>
-          {features ? (
-            <div style={{ display: "flex", fontSize: 28, color: "#afafaf", marginTop: 18 }}>{features}</div>
-          ) : null}
-        </div>
-        <div style={{ display: "flex", fontSize: 24, color: "#5e5e5e" }}>conexory.com</div>
+  return render(
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", backgroundColor: "#000", padding: 64 }}>
+      <Wordmark />
+      <div style={{ display: "flex", flexDirection: "column", color: "#fff" }}>
+        <div style={{ display: "flex", fontSize: 30, fontWeight: 600, color: "#afafaf" }}>{subtitle}</div>
+        <div style={{ display: "flex", fontSize: 88, fontWeight: 800, letterSpacing: -2, marginTop: 10 }}>{price}</div>
+        <div style={{ display: "flex", fontSize: 42, fontWeight: 600, marginTop: 8 }}>{property.title}</div>
+        {features ? (
+          <div style={{ display: "flex", fontSize: 28, color: "#afafaf", marginTop: 18 }}>{features}</div>
+        ) : null}
       </div>
-    ),
-    size
+      <div style={{ display: "flex", fontSize: 24, color: "#5e5e5e" }}>conexory.com</div>
+    </div>
   )
 }
