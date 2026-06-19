@@ -62,8 +62,16 @@ export async function generateMetadata({
 
   const ogTitle = `${type}${location ? ` en ${location}` : ""} · ${price}`
 
-  // og:image comes from the sibling opengraph-image.tsx (always renders a
-  // branded card), so it isn't set here.
+  // og:image points at the clean /p/[slug]/og.jpg route (resolved to an
+  // absolute URL via metadataBase). A real .jpg URL is more reliable for
+  // WhatsApp than the hashed, extension-less opengraph-image route.
+  const ogImage = {
+    url: `/p/${slug}/og.jpg`,
+    width: 1200,
+    height: 630,
+    alt: "Propiedad en Conexory",
+  }
+
   return {
     title: `${type}${location ? ` en ${location}` : ""}`,
     description,
@@ -73,6 +81,13 @@ export async function generateMetadata({
       title: ogTitle,
       description,
       siteName: "Conexory",
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
+      images: [`/p/${slug}/og.jpg`],
     },
   }
 }

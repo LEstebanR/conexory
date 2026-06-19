@@ -5,26 +5,11 @@ import { prisma } from "@/lib/prisma"
 import { youtubeId, youtubeThumb } from "@/lib/youtube"
 
 export const runtime = "nodejs"
-export const alt = "Propiedad en Conexory"
-export const size = { width: 1200, height: 630 }
-// JPEG, not the default PNG: ImageResponse PNGs run ~1.4MB, too heavy for
-// WhatsApp's link-preview crawler to fetch. JPEG drops it to ~100KB.
-export const contentType = "image/jpeg"
 
-async function render(node: ReactElement): Promise<Response> {
-  const png = Buffer.from(await new ImageResponse(node, size).arrayBuffer())
-  try {
-    const jpeg = await sharp(png).jpeg({ quality: 78, mozjpeg: true }).toBuffer()
-    return new Response(new Uint8Array(jpeg), {
-      headers: {
-        "Content-Type": "image/jpeg",
-        "Cache-Control": "public, max-age=86400",
-      },
-    })
-  } catch {
-    return new Response(new Uint8Array(png), { headers: { "Content-Type": "image/png" } })
-  }
-}
+// Served at a clean /p/[slug]/og.jpg URL (real extension, no query string):
+// some WhatsApp clients ignore og:image URLs that don't look like an image
+// file, even when the content-type is correct.
+const size = { width: 1200, height: 630 }
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -52,11 +37,22 @@ function Wordmark() {
   )
 }
 
-export default async function Image({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}) {
+async function render(node: ReactElement): Promise<Response> {
+  const png = Buffer.from(await new ImageResponse(node, size).arrayBuffer())
+  try {
+    const jpeg = await sharp(png).jpeg({ quality: 78, mozjpeg: true }).toBuffer()
+    return new Response(new Uint8Array(jpeg), {
+      headers: { "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=86400" },
+    })
+  } catch {
+    return new Response(new Uint8Array(png), { headers: { "Content-Type": "image/png" } })
+  }
+}
+
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Response> {
   const { slug } = await params
   const property = await prisma.property.findUnique({ where: { slug } })
 
@@ -94,6 +90,7 @@ export default async function Image({
   if (cover) {
     return render(
       <div style={{ display: "flex", position: "relative", width: "100%", height: "100%", backgroundColor: "#000" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
         <div style={{ position: "absolute", inset: 0, display: "flex", background: "linear-gradient(to top, rgba(0,0,0,0.9) 8%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.45))" }} />
         <div style={{ position: "absolute", top: 50, left: 60, display: "flex" }}>
