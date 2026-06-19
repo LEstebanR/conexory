@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { MapPin, BedDouble, Bath, Square, Car, EyeOff, ArrowUpRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
-import { youtubeId, youtubeThumb } from "@/lib/youtube"
+import { youtubeId } from "@/lib/youtube"
 import PublicGallery from "@/components/public-gallery"
 import Reveal from "@/components/reveal"
 
@@ -60,13 +60,10 @@ export async function generateMetadata({
 
   const description = [price, features].filter(Boolean).join(" · ")
 
-  // WhatsApp/OG can't preview a video — use the first photo as the cover, and
-  // fall back to the YouTube thumbnail (a JPG) for video-only properties.
-  const videoId = youtubeId(property.videoUrl)
-  const ogImage = property.images[0] ?? (videoId ? youtubeThumb(videoId) : null)
-
   const ogTitle = `${type}${location ? ` en ${location}` : ""} · ${price}`
 
+  // og:image comes from the sibling opengraph-image.tsx (always renders a
+  // branded card), so it isn't set here.
   return {
     title: `${type}${location ? ` en ${location}` : ""}`,
     description,
@@ -76,7 +73,6 @@ export async function generateMetadata({
       title: ogTitle,
       description,
       siteName: "Conexory",
-      images: ogImage ? [{ url: ogImage }] : undefined,
     },
   }
 }
