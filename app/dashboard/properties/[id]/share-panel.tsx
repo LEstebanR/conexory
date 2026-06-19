@@ -42,40 +42,28 @@ export default function SharePanel({
     parking != null ? `${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
   ].filter(Boolean).join("  ·  ")
 
-  // Warmth comes from the tone + *bold* (which works everywhere). Emojis only
-  // render in the mobile WhatsApp composer — WhatsApp Web shows the prefilled
-  // text with broken glyphs — so they're added only when sharing from a phone.
-  function buildMessage(withEmoji: boolean): string {
-    return [
-      withEmoji
-        ? "Hola 👋 quiero mostrarte esta propiedad que creo que te puede encantar:"
-        : "Hola, quiero mostrarte esta propiedad que creo que te puede encantar:",
-      "",
-      `*${title}*`,
-      `${withEmoji ? "📍 " : ""}${type}${location ? ` en ${location}` : ""}`,
-      "",
-      `Precio: *${price}*`,
-      features || null,
-      "",
-      "Si quieres más detalles o coordinar una visita, escríbeme cuando gustes y con mucho gusto te ayudo.",
-      "",
-      "Aquí puedes ver todas las fotos y la información completa:",
-      url,
-    ].filter((line) => line !== null).join("\n")
-  }
+  // Only 📍 is used: it's the viewer's WhatsApp that renders emojis, and others
+  // (👋, feature icons) show as broken boxes on WhatsApp Web regardless of who
+  // sent them. Warmth comes from the tone and *bold* (which work everywhere).
+  const message = [
+    "Hola, quiero mostrarte esta propiedad que creo que te puede encantar:",
+    "",
+    `*${title}*`,
+    `📍 ${type}${location ? ` en ${location}` : ""}`,
+    "",
+    `Precio: *${price}*`,
+    features || null,
+    "",
+    "Si quieres más detalles o coordinar una visita, escríbeme cuando gustes y con mucho gusto te ayudo.",
+    "",
+    "También puedes ver todas las fotos y la información completa:",
+    url,
+  ].filter((line) => line !== null).join("\n")
 
-  // href is the emoji-free version (safe default + works without JS).
-  const waUrl = `https://wa.me/?text=${encodeURIComponent(buildMessage(false))}`
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
 
-  function handleWhatsApp(e: { preventDefault(): void }) {
+  function handleWhatsApp() {
     incrementShares(propertyId).catch(() => {})
-    const isMobile =
-      typeof navigator !== "undefined" &&
-      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-    if (!isMobile) return // desktop: follow the emoji-free href
-    e.preventDefault()
-    const waLink = `https://wa.me/?text=${encodeURIComponent(buildMessage(true))}`
-    window.open(waLink, "_blank", "noopener,noreferrer")
   }
 
   return (
