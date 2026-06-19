@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react"
-import Image from "next/image"
 import imageCompression from "browser-image-compression"
 import { ImagePlus, X, Loader2, AlertCircle, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -172,7 +171,11 @@ export default function ImageUpload({
                   key={item.id}
                   className="relative aspect-square rounded-xl overflow-hidden bg-canvas-soft"
                 >
-                  <Image fill unoptimized src={item.preview} alt="" className="object-cover" />
+                  {/* Plain <img> (eager) instead of next/image fill: these are
+                      unoptimized previews, and fill's lazy loading sometimes
+                      left the tile blank/gray on client navigation. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.preview} alt="" className="absolute inset-0 w-full h-full object-cover" />
 
                   {item.uploading && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
