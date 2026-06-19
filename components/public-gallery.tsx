@@ -26,8 +26,8 @@ export default function PublicGallery({
   const activeThumbRef = useRef<HTMLButtonElement>(null)
 
   const slides: Slide[] = [
-    ...(videoId ? [{ kind: "video", id: videoId } as const] : []),
     ...images.map((url) => ({ kind: "image", url }) as const),
+    ...(videoId ? [{ kind: "video", id: videoId } as const] : []),
   ]
   const total = slides.length
 
