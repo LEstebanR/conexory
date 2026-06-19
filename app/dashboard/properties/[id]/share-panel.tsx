@@ -35,31 +35,48 @@ export default function SharePanel({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  function handleWhatsApp() {
-    incrementShares(propertyId).catch(() => {})
-  }
-
   const features = [
-    bedrooms != null ? `🛏️ ${bedrooms} ${bedrooms === 1 ? "habitación" : "habitaciones"}` : null,
-    bathrooms != null ? `🚿 ${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` : null,
-    area != null ? `📐 ${area} m²` : null,
-    parking != null ? `🚗 ${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
+    bedrooms != null ? `${bedrooms} ${bedrooms === 1 ? "habitación" : "habitaciones"}` : null,
+    bathrooms != null ? `${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` : null,
+    area != null ? `${area} m²` : null,
+    parking != null ? `${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
   ].filter(Boolean).join("  ·  ")
 
-  const message = [
-    `✨ ${title}`,
-    `📍 ${type}${location ? ` en ${location}` : ""}`,
-    "",
-    `💰 ${price}`,
-    features || null,
-    "",
-    "¿Te interesa? Escríbeme y con gusto te doy más detalles.",
-    "👇 Mira todas las fotos y la información completa aquí:",
-    url,
-  ].filter((line) => line !== null).join("\n")
+  // Warmth comes from the tone + *bold* (which works everywhere). Emojis only
+  // render in the mobile WhatsApp composer — WhatsApp Web shows the prefilled
+  // text with broken glyphs — so they're added only when sharing from a phone.
+  function buildMessage(withEmoji: boolean): string {
+    return [
+      withEmoji
+        ? "Hola 👋 quiero mostrarte esta propiedad que creo que te puede encantar:"
+        : "Hola, quiero mostrarte esta propiedad que creo que te puede encantar:",
+      "",
+      `*${title}*`,
+      `${withEmoji ? "📍 " : ""}${type}${location ? ` en ${location}` : ""}`,
+      "",
+      `Precio: *${price}*`,
+      features || null,
+      "",
+      "Si quieres más detalles o coordinar una visita, escríbeme cuando gustes y con mucho gusto te ayudo.",
+      "",
+      "Aquí puedes ver todas las fotos y la información completa:",
+      url,
+    ].filter((line) => line !== null).join("\n")
+  }
 
-  const waText = encodeURIComponent(message)
-  const waUrl = `https://wa.me/?text=${waText}`
+  // href is the emoji-free version (safe default + works without JS).
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(buildMessage(false))}`
+
+  function handleWhatsApp(e: { preventDefault(): void }) {
+    incrementShares(propertyId).catch(() => {})
+    const isMobile =
+      typeof navigator !== "undefined" &&
+      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+    if (!isMobile) return // desktop: follow the emoji-free href
+    e.preventDefault()
+    const waLink = `https://wa.me/?text=${encodeURIComponent(buildMessage(true))}`
+    window.open(waLink, "_blank", "noopener,noreferrer")
+  }
 
   return (
     <div className="bg-ink rounded-2xl p-6 space-y-4">
