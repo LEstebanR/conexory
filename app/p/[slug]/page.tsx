@@ -2,19 +2,10 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import {
-  MapPin,
-  BedDouble,
-  Bath,
-  Square,
-  Car,
-  EyeOff,
-  ArrowRight,
-} from "lucide-react"
+import { MapPin, BedDouble, Bath, Square, Car, EyeOff, ArrowUpRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { youtubeId, youtubeThumb } from "@/lib/youtube"
 import PublicGallery from "@/components/public-gallery"
-import PublicShareButton from "@/components/public-share-button"
-import AgentAvatar from "@/components/agent-avatar"
 import Reveal from "@/components/reveal"
 
 const TYPE_LABELS: Record<string, string> = {
@@ -43,7 +34,6 @@ export async function generateMetadata({
   const { slug } = await params
   const property = await prisma.property.findUnique({
     where: { slug },
-    include: { user: { select: { name: true } } },
   })
   if (!property) return { title: "Propiedad no encontrada" }
 
@@ -53,17 +43,27 @@ export async function generateMetadata({
     .filter(Boolean)
     .join(", ")
 
-  const description = [
-    `Te comparto este ${type.toLowerCase()}${location ? ` en ${location}` : ""}:`,
-    `• Precio: ${price}`,
-    property.area != null ? `• ${property.area} m²` : null,
-    property.bedrooms != null ? `• ${property.bedrooms} Habitaciones` : null,
-    property.bathrooms != null ? `• ${property.bathrooms} Baños` : null,
-    property.parking != null ? `• ${property.parking} Parqueaderos` : null,
-    `Ofrece: ${property.user.name}`,
+  const features = [
+    property.bedrooms != null
+      ? `${property.bedrooms} ${property.bedrooms === 1 ? "habitación" : "habitaciones"}`
+      : null,
+    property.bathrooms != null
+      ? `${property.bathrooms} ${property.bathrooms === 1 ? "baño" : "baños"}`
+      : null,
+    property.area != null ? `${property.area} m²` : null,
+    property.parking != null
+      ? `${property.parking} ${property.parking === 1 ? "parqueadero" : "parqueaderos"}`
+      : null,
   ]
     .filter(Boolean)
-    .join("\n")
+    .join(" · ")
+
+  const description = [price, features].filter(Boolean).join(" · ")
+
+  // WhatsApp/OG can't preview a video — use the first photo as the cover, and
+  // fall back to the YouTube thumbnail (a JPG) for video-only properties.
+  const videoId = youtubeId(property.videoUrl)
+  const ogImage = property.images[0] ?? (videoId ? youtubeThumb(videoId) : null)
 
   const ogTitle = `${type}${location ? ` en ${location}` : ""} · ${price}`
 
@@ -76,7 +76,7 @@ export async function generateMetadata({
       title: ogTitle,
       description,
       siteName: "Conexory",
-      images: property.images[0] ? [{ url: property.images[0] }] : undefined,
+      images: ogImage ? [{ url: ogImage }] : undefined,
     },
   }
 }
@@ -90,7 +90,6 @@ export default async function PublicPropertyPage({
 
   const property = await prisma.property.findUnique({
     where: { slug },
-    include: { user: { select: { name: true, image: true } } },
   })
 
   if (!property) notFound()
@@ -142,6 +141,7 @@ export default async function PublicPropertyPage({
 
   const typeLabel = TYPE_LABELS[property.type] ?? property.type
   const price = formatCOP(Number(property.price))
+  const videoId = youtubeId(property.videoUrl)
   const location = [property.neighborhood, property.city]
     .filter(Boolean)
     .join(", ")
@@ -171,32 +171,15 @@ export default async function PublicPropertyPage({
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-30 bg-canvas/80 backdrop-blur-md border-b border-hairline">
-        <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 w-fit">
-            <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center shadow-sm">
-              <Image
-                src="/mark-white.png"
-                alt="Conexory"
-                width={18}
-                height={18}
-                className="w-4.5 h-4.5"
-              />
-            </div>
-            <span className="text-sm font-black text-ink tracking-tight">
-              Conexory
-            </span>
-          </Link>
-          <PublicShareButton slug={slug} title={property.title} />
-        </div>
-      </header>
-
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6">
         {/* Gallery */}
-        {property.images.length > 0 && (
+        {(property.images.length > 0 || videoId) && (
           <Reveal>
-            <PublicGallery images={property.images} title={property.title} />
+            <PublicGallery
+              images={property.images}
+              title={property.title}
+              videoId={videoId}
+            />
           </Reveal>
         )}
 
@@ -261,53 +244,31 @@ export default async function PublicPropertyPage({
             </div>
           </Reveal>
         )}
-
-        {/* Agent */}
-        <Reveal delay={200}>
-          <div className="flex items-center gap-3 bg-canvas-softer rounded-2xl p-4">
-            <AgentAvatar
-              name={property.user.name}
-              image={property.user.image}
-            />
-            <div className="min-w-0">
-              <p className="text-xs text-mute font-semibold uppercase tracking-wide">
-                Ofrecido por
-              </p>
-              <p className="text-sm font-bold text-ink truncate">
-                {property.user.name}
-              </p>
-            </div>
-          </div>
-        </Reveal>
-
-        {/* Marketing CTA */}
-        <Reveal delay={240}>
-          <Link
-            href="/"
-            className="group block bg-ink rounded-2xl sm:rounded-3xl p-6 sm:p-8 overflow-hidden"
-          >
-            <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-2">
-              ¿Eres agente inmobiliario?
-            </p>
-            <p className="text-lg sm:text-xl font-black text-white tracking-tight leading-snug mb-4 max-w-sm">
-              Crea fichas como esta y compártelas por WhatsApp en segundos.
-            </p>
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white">
-              Pruébalo gratis
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-            </span>
-          </Link>
-        </Reveal>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-hairline py-5 px-4 text-center">
-        <p className="text-xs text-mute">
-          Publicado con{" "}
-          <Link href="/" className="text-ink font-semibold hover:underline">
-            Conexory
-          </Link>
-        </p>
+      <footer className="border-t border-hairline mt-2">
+        <Link
+          href="/"
+          className="group flex items-center justify-center gap-2.5 py-6 px-4 hover:bg-canvas-softer transition-colors"
+        >
+          <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center shadow-sm transition-transform group-hover:scale-105">
+            <Image
+              src="/mark-white.png"
+              alt="Conexory"
+              width={20}
+              height={20}
+              className="w-5 h-5"
+            />
+          </div>
+          <div className="leading-tight">
+            <p className="text-[11px] text-mute font-medium">Publicado con</p>
+            <p className="inline-flex items-center gap-0.5 text-sm font-black text-ink tracking-tight">
+              Conexory
+              <ArrowUpRight className="w-3.5 h-3.5 text-mute transition-all group-hover:text-ink group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </p>
+          </div>
+        </Link>
       </footer>
     </div>
   )

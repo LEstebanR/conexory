@@ -65,6 +65,7 @@ export type InitialData = {
   parking: string
   description: string
   images: string[]
+  videoUrl: string
 }
 
 export default function EditForm({ initial, isPremium }: { initial: InitialData; isPremium: boolean }) {
@@ -78,6 +79,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
   const [bathrooms, setBathrooms] = useState(initial.bathrooms)
   const [parking, setParking] = useState(initial.parking)
   const [description, setDescription] = useState(initial.description)
+  const [videoUrl, setVideoUrl] = useState(initial.videoUrl)
   const [imageUrls, setImageUrls] = useState<string[]>(initial.images)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState("")
@@ -94,6 +96,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
         title, type, price, city, neighborhood,
         area, bedrooms, bathrooms, parking, description,
         images: imageUrls,
+        videoUrl,
       })
       if (!result.success) {
         setError(result.error)
@@ -147,13 +150,26 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           </div>
         </SectionCard>
 
-        <SectionCard title="Fotos">
+        <SectionCard title="Fotos y video">
           <ImageUpload
             onUrlsChange={setImageUrls}
             onUploadingChange={setIsUploading}
             initialUrls={initial.images}
             maxImages={photoLimit(isPremium)}
           />
+          <div className="space-y-1.5 pt-4 border-t border-hairline">
+            <FieldLabel optional>Video de YouTube</FieldLabel>
+            <Input
+              placeholder="https://youtube.com/watch?v=..."
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              className="h-11"
+              inputMode="url"
+            />
+            <p className="text-xs text-mute">
+              Pega el enlace del video y aparecerá de primero en el carrusel.
+            </p>
+          </div>
         </SectionCard>
 
         <SectionCard title="Información básica">
@@ -240,19 +256,21 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           </p>
         )}
 
-        <div className="flex gap-3 pb-8">
-          <Button type="button" variant="outline" className="flex-1" asChild>
-            <Link href={`/dashboard/properties/${initial.id}`}>Cancelar</Link>
-          </Button>
-          <Button type="submit" disabled={isPending || isUploading} className="flex-1 font-bold shadow-sm ">
-            {isPending ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
-            ) : isUploading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo fotos...</>
-            ) : (
-              "Guardar cambios"
-            )}
-          </Button>
+        <div className="sticky bottom-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 pt-8 pb-4 pointer-events-none bg-gradient-to-t from-canvas-softer from-50% to-transparent">
+          <div className="flex gap-3 max-w-3xl mx-auto pointer-events-auto rounded-full bg-white/70 backdrop-blur-md border border-hairline shadow-lg shadow-black/5 p-1.5">
+            <Button type="button" variant="outline" className="flex-1 border-transparent bg-transparent shadow-none" asChild>
+              <Link href={`/dashboard/properties/${initial.id}`}>Cancelar</Link>
+            </Button>
+            <Button type="submit" disabled={isPending || isUploading} className="flex-1 font-bold">
+              {isPending ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
+              ) : isUploading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo fotos...</>
+              ) : (
+                "Guardar cambios"
+              )}
+            </Button>
+          </div>
         </div>
       </form>
     </div>

@@ -62,11 +62,17 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
         parking: parsed.data.parking,
         description: parsed.data.description,
         images: parsed.data.images,
+        videoUrl: parsed.data.videoUrl,
       },
     })
 
     return { success: true, id: property.id }
-  } catch {
-    return { success: false, error: "Error inesperado al crear la propiedad. Intenta de nuevo." }
+  } catch (err) {
+    console.error("createProperty failed:", err)
+    return {
+      success: false,
+      error:
+        "No pudimos guardar la propiedad. Revisa tu conexión y, si agregaste un video, que el enlace sea de YouTube. Si el problema persiste, recarga la página.",
+    }
   }
 }
