@@ -173,7 +173,7 @@ export default async function PublicPropertyPage({
 
       {/* Gallery — edge-to-edge on mobile, small top gap */}
       {(property.images.length > 0 || videoId) && (
-        <div className="w-full pt-3 sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5">
+        <div className="w-full sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5">
           <PublicGallery
             images={property.images}
             title={property.title}
