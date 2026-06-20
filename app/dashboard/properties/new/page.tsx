@@ -16,11 +16,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import dynamic from "next/dynamic"
 import { createProperty } from "./actions"
 import ImageUpload from "@/components/image-upload"
 import LocationSelect from "@/components/location-select"
 import { useSession } from "@/lib/auth-client"
 import { photoLimit } from "@/lib/plans"
+
+const MapPicker = dynamic(() => import("@/components/map-picker"), { ssr: false })
 
 const PROPERTY_TYPES = [
   { id: "apartment", label: "Apartamento", icon: Building2 },
@@ -67,6 +70,8 @@ export default function NewPropertyPage() {
   const [parking, setParking] = useState("")
   const [description, setDescription] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
+  const [latitude, setLatitude] = useState<number | null>(null)
+  const [longitude, setLongitude] = useState<number | null>(null)
   const [showContact, setShowContact] = useState(false)
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
@@ -100,6 +105,8 @@ export default function NewPropertyPage() {
         description,
         images: imageUrls,
         videoUrl,
+        latitude,
+        longitude,
         showContact,
       })
       if (!result.success) {
@@ -299,6 +306,19 @@ export default function NewPropertyPage() {
             />
             <p className="text-xs text-mute text-right">{description.length}/1000</p>
           </div>
+        </SectionCard>
+
+        {/* Ubicación en mapa */}
+        <SectionCard title="Ubicación en mapa">
+          <p className="text-xs text-mute -mt-1">
+            Opcional. Permite mostrar la ubicación exacta en la ficha pública.
+          </p>
+          <MapPicker
+            latitude={latitude}
+            longitude={longitude}
+            suggestedCity={[city, state].filter(Boolean).join(", ")}
+            onChange={(lat, lng) => { setLatitude(lat); setLongitude(lng) }}
+          />
         </SectionCard>
 
         {/* Datos de contacto */}

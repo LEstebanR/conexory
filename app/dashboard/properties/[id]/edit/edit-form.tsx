@@ -14,12 +14,15 @@ import {
   Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import dynamic from "next/dynamic"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import ImageUpload from "@/components/image-upload"
 import LocationSelect from "@/components/location-select"
 import { photoLimit } from "@/lib/plans"
 import { updateProperty } from "./actions"
+
+const MapPicker = dynamic(() => import("@/components/map-picker"), { ssr: false })
 
 const PROPERTY_TYPES = [
   { id: "apartment", label: "Apartamento", icon: Building2 },
@@ -68,6 +71,8 @@ export type InitialData = {
   description: string
   images: string[]
   videoUrl: string
+  latitude: number | null
+  longitude: number | null
   showContact: boolean
 }
 
@@ -84,6 +89,8 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
   const [parking, setParking] = useState(initial.parking)
   const [description, setDescription] = useState(initial.description)
   const [videoUrl, setVideoUrl] = useState(initial.videoUrl)
+  const [latitude, setLatitude] = useState<number | null>(initial.latitude)
+  const [longitude, setLongitude] = useState<number | null>(initial.longitude)
   const [showContact, setShowContact] = useState(initial.showContact)
   const [imageUrls, setImageUrls] = useState<string[]>(initial.images)
   const [isUploading, setIsUploading] = useState(false)
@@ -102,6 +109,8 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
         area, bedrooms, bathrooms, parking, description,
         images: imageUrls,
         videoUrl,
+        latitude,
+        longitude,
         showContact,
       })
       if (!result.success) {
@@ -256,6 +265,19 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
             />
             <p className="text-xs text-mute text-right">{description.length}/1000</p>
           </div>
+        </SectionCard>
+
+        {/* Ubicación en mapa */}
+        <SectionCard title="Ubicación en mapa">
+          <p className="text-xs text-mute -mt-1">
+            Opcional. Permite mostrar la ubicación exacta en la ficha pública.
+          </p>
+          <MapPicker
+            latitude={latitude}
+            longitude={longitude}
+            suggestedCity={[city, state].filter(Boolean).join(", ")}
+            onChange={(lat, lng) => { setLatitude(lat); setLongitude(lng) }}
+          />
         </SectionCard>
 
         {/* Datos de contacto */}

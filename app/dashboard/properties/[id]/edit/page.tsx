@@ -35,6 +35,8 @@ export default async function EditPropertyPage({
     description: property.description ?? "",
     images: property.images,
     videoUrl: property.videoUrl ?? "",
+    latitude: property.latitude ?? null,
+    longitude: property.longitude ?? null,
     showContact: property.showContact,
   }
 

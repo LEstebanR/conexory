@@ -61,6 +61,8 @@ export const PropertySchema = z.object({
       message: "Pega un enlace válido de YouTube",
     })
     .transform((v) => (v === "" ? null : v)),
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
   showContact: z.boolean().optional().default(false),
 })
 
