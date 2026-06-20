@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { headers, cookies } from "next/headers"
+import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
@@ -81,9 +81,10 @@ export default async function DashboardPage({
   const activeCount = properties.filter((p: P) => p.published).length
   const count = properties.length
   const totalShares = properties.reduce((sum: number, p: P) => sum + p.shares, 0)
-  // On return from a successful payment the session cookie cache still holds
-  // isPremium=false (TTL 5 min). Bypass it with a fresh DB query and delete
-  // the cache cookie so subsequent page loads also pick up the new value.
+  // The session cookie cache (better-auth cookieCache, TTL 5 min) may hold a
+  // stale isPremium=false after the webhook activates Pro. On post-payment
+  // landing (Wompi always appends ?id=), bypass the cache with a direct DB
+  // query for this render. The cache expires naturally within 5 minutes.
   let isPremium = session.user.isPremium
   if (isPostPayment) {
     const freshUser = await prisma.user.findUnique({
@@ -91,9 +92,6 @@ export default async function DashboardPage({
       select: { isPremium: true },
     })
     isPremium = freshUser?.isPremium ?? session.user.isPremium
-    const cookieStore = await cookies()
-    cookieStore.delete("better-auth.session_data")
-    cookieStore.delete("__Secure-better-auth.session_data")
   }
   const limit = propertyLimit(isPremium)
   const atLimit = activeCount >= limit
