@@ -41,6 +41,7 @@ const plans = [
     features: [
       "Hasta 50 propiedades activas",
       "Hasta 20 fotos por propiedad",
+      "Todo lo del plan gratuito",
     ],
   },
   {
