@@ -1,12 +1,16 @@
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
+// Instantiated lazily inside each function so the build doesn't require
+// RESEND_API_KEY at module-load time (Next.js collects route data during build).
 const FROM = "Conexory <noreply@conexory.com>"
+
+function resend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export async function sendSubscriptionConfirmation(email: string, name: string) {
   const firstName = name.split(" ")[0]
-  await resend.emails.send({
+  await resend().emails.send({
     from: FROM,
     to: email,
     subject: "¡Bienvenido a Conexory Pro!",
@@ -34,7 +38,7 @@ export async function sendSubscriptionConfirmation(email: string, name: string) 
 
 export async function sendPaymentFailed(email: string, name: string) {
   const firstName = name.split(" ")[0]
-  await resend.emails.send({
+  await resend().emails.send({
     from: FROM,
     to: email,
     subject: "Problema con tu pago de Conexory Pro",
