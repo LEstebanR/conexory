@@ -289,25 +289,26 @@ export default async function PublicPropertyPage({
               {/* CTAs — full-width on mobile, auto-width on desktop */}
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
                 {property.user.phone && (
-                  property.user.phoneIsWhatsapp ? (
-                    <a
-                      href={`https://wa.me/${property.user.phone.replace(/\D/g, "")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity"
-                    >
-                      <MessageCircle className="w-4 h-4" strokeWidth={2} />
-                      Escribir por WhatsApp
-                    </a>
-                  ) : (
+                  <>
+                    {property.user.phoneIsWhatsapp && (
+                      <a
+                        href={`https://wa.me/${property.user.phone.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                      >
+                        <MessageCircle className="w-4 h-4" strokeWidth={2} />
+                        Escribir por WhatsApp
+                      </a>
+                    )}
                     <a
                       href={`tel:${property.user.phone}`}
                       className="flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-ink text-white text-sm font-bold hover:bg-elevated transition-colors"
                     >
                       <Phone className="w-4 h-4" strokeWidth={2} />
-                      Llamar · {property.user.phone}
+                      Llamar
                     </a>
-                  )
+                  </>
                 )}
                 <a
                   href={`mailto:${property.user.email}`}
