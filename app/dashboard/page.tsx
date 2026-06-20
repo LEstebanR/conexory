@@ -134,13 +134,26 @@ export default async function DashboardPage({
             Tus propiedades
           </h1>
         </div>
-        <Button size="sm" className="flex-shrink-0" asChild>
-          <Link href={atLimit ? upgradeHref : "/dashboard/properties/new"}>
-            {atLimit ? <Zap className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            <span className="hidden sm:inline">{atLimit ? upgradeLabel : "Nueva propiedad"}</span>
-            <span className="sm:hidden">{atLimit ? "Pro" : "Nueva"}</span>
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {!isPremium && (
+            <Button size="sm" variant="secondary" asChild>
+              <Link href="/dashboard/upgrade">
+                <Zap className="w-4 h-4" />
+                <span className="hidden sm:inline">Activar Pro</span>
+                <span className="sm:hidden">Pro</span>
+              </Link>
+            </Button>
+          )}
+          {!atLimit && (
+            <Button size="sm" asChild>
+              <Link href="/dashboard/properties/new">
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Nueva propiedad</span>
+                <span className="sm:hidden">Nueva</span>
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Stats band */}
