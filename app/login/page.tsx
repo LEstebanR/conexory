@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useEffect } from "react"
+import { useState, useActionState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react"
@@ -24,12 +24,11 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [state, formAction, isPending] = useActionState(loginAction, {})
-  const [redirectTo, setRedirectTo] = useState("/dashboard")
-
-  useEffect(() => {
+  const [redirectTo] = useState(() => {
+    if (typeof window === "undefined") return "/dashboard"
     const r = new URLSearchParams(window.location.search).get("redirect")
-    if (r?.startsWith("/")) setRedirectTo(r)
-  }, [])
+    return r?.startsWith("/") ? r : "/dashboard"
+  })
 
   async function handleGoogle() {
     setGoogleLoading(true)
