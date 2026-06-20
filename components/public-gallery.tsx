@@ -1,11 +1,11 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Expand, Play, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { youtubeEmbedUrl, youtubeThumb } from "@/lib/youtube"
+import { youtubeEmbedUrl } from "@/lib/youtube"
 
 type Slide =
   | { kind: "video"; id: string }
@@ -15,15 +15,16 @@ export default function PublicGallery({
   images,
   title,
   videoId,
+  className,
 }: {
   images: string[]
   title: string
   videoId?: string | null
+  className?: string
 }) {
   const [index, setIndex] = useState(0)
   const [lightbox, setLightbox] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
-  const activeThumbRef = useRef<HTMLButtonElement>(null)
 
   const slides: Slide[] = [
     ...images.map((url) => ({ kind: "image", url }) as const),
@@ -51,14 +52,6 @@ export default function PublicGallery({
     }
   }, [lightbox, go])
 
-  useEffect(() => {
-    activeThumbRef.current?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    })
-  }, [index])
-
   if (total === 0) return null
 
   const active = slides[index]
@@ -77,7 +70,7 @@ export default function PublicGallery({
   return (
     <>
       {/* Main stage */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-canvas-soft select-none group">
+      <div className={cn("relative overflow-hidden bg-canvas-soft select-none group", className)}>
         <div
           className="relative aspect-[4/3] sm:aspect-[16/10]"
           onTouchStart={onTouchStart}
@@ -172,39 +165,22 @@ export default function PublicGallery({
         )}
       </div>
 
-      {/* Thumbnails */}
+      {/* Dot indicators */}
       {total > 1 && (
-        <div className="flex gap-2 mt-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {slides.map((slide, i) => (
+        <div className="flex items-center justify-center gap-1.5 py-3">
+          {slides.map((_, i) => (
             <button
-              key={slide.kind === "video" ? `v-${slide.id}` : slide.url}
-              ref={i === index ? activeThumbRef : null}
+              key={i}
               type="button"
               onClick={() => setIndex(i)}
-              aria-label={slide.kind === "video" ? "Ver video" : `Ver imagen ${i + 1}`}
+              aria-label={`Ir a imagen ${i + 1}`}
               className={cn(
-                "relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden transition-all",
+                "rounded-full transition-all duration-200",
                 i === index
-                  ? "ring-2 ring-ink ring-offset-1"
-                  : "opacity-60 hover:opacity-100"
+                  ? "w-4 h-1.5 bg-ink"
+                  : "w-1.5 h-1.5 bg-ink/25 hover:bg-ink/50"
               )}
-            >
-              <Image
-                fill
-                src={slide.kind === "video" ? youtubeThumb(slide.id) : slide.url}
-                alt=""
-                className="object-cover"
-                draggable={false}
-                sizes="80px"
-              />
-              {slide.kind === "video" && (
-                <span className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <span className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center">
-                    <Play className="w-3 h-3 text-ink fill-ink ml-0.5" />
-                  </span>
-                </span>
-              )}
-            </button>
+            />
           ))}
         </div>
       )}
