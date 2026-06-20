@@ -73,12 +73,6 @@ const navItems = [
     href: "/dashboard",
     exact: true,
   },
-  {
-    icon: Settings,
-    label: "Configuración",
-    href: "/dashboard/settings",
-    exact: false,
-  },
 ]
 
 
@@ -197,6 +191,12 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
             <p className="text-xs text-mute truncate">{user.email}</p>
           </div>
         </div>
+        <NavLink
+          href="/dashboard/settings"
+          icon={Settings}
+          label="Configuración"
+          onClick={onClose}
+        />
         <button
           onClick={handleSignOut}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium cursor-pointer"
