@@ -100,9 +100,9 @@ export default function PreciosPage() {
 
       {/* Plans */}
       <section className="max-w-6xl mx-auto w-full px-5 sm:px-6 lg:px-8 pb-12">
-        <div className="grid lg:grid-cols-3 gap-6 items-start">
+        <div className="grid lg:grid-cols-3 gap-6 items-stretch">
           {plans.map((plan, i) => (
-            <Reveal key={plan.name} delay={i * 100}>
+            <Reveal key={plan.name} delay={i * 100} className="h-full">
               <div
                 className={`relative h-full rounded-3xl p-8 flex flex-col ${
                   plan.dark
