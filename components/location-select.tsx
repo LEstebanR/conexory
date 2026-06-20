@@ -47,7 +47,7 @@ export default function LocationSelect({
   }
 
   return (
-    <div className={cn("grid grid-cols-2 gap-3", className)}>
+    <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-3", className)}>
       {/* Departamento */}
       <div className="space-y-1.5">
         <label className="block text-sm font-semibold text-ink">
