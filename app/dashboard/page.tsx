@@ -7,6 +7,7 @@ import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon, Eye, Share2 } fro
 import { Button } from "@/components/ui/button"
 import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import PropertiesList, { type PropertyItem } from "./properties-list"
+import UpgradeSuccessToast from "./upgrade-success-toast"
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -38,9 +39,21 @@ function greeting(name: string): string {
   return `${saludo}, ${name.split(" ")[0]}`
 }
 
-export default async function DashboardPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ upgrade?: string; id?: string }>
+}) {
+  const [session, sp] = await Promise.all([
+    auth.api.getSession({ headers: await headers() }),
+    searchParams,
+  ])
   if (!session) redirect("/login")
+
+  const upgrade = sp.upgrade
+  // Wompi always appends ?id=<transactionId>&env=<env> on redirect.
+  // Use either signal to detect a post-payment landing.
+  const isPostPayment = upgrade === "success" || Boolean(sp.id)
 
   const properties = await prisma.property.findMany({
     where: { userId: session.user.id },
@@ -68,10 +81,17 @@ export default async function DashboardPage() {
   const activeCount = properties.filter((p: P) => p.published).length
   const count = properties.length
   const totalShares = properties.reduce((sum: number, p: P) => sum + p.shares, 0)
-  const isPremium = session.user.isPremium
+  let isPremium = session.user.isPremium
+  if (isPostPayment) {
+    const freshUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isPremium: true },
+    })
+    isPremium = freshUser?.isPremium ?? session.user.isPremium
+  }
   const limit = propertyLimit(isPremium)
   const atLimit = activeCount >= limit
-  const upgradeHref = isPremium ? "/contacto" : "/precios"
+  const upgradeHref = isPremium ? "/contacto" : "/dashboard/upgrade"
   const upgradeLabel = isPremium ? "Plan a medida" : "Actualizar a Pro"
   const limitTitle = isPremium ? "Límite del plan Pro alcanzado" : "Límite del plan gratuito alcanzado"
   const limitMessage = isPremium
@@ -105,6 +125,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
+      {isPostPayment && <UpgradeSuccessToast />}
       {/* Header */}
       <div className="flex items-end justify-between gap-4 mb-8">
         <div>
@@ -113,13 +134,26 @@ export default async function DashboardPage() {
             Tus propiedades
           </h1>
         </div>
-        <Button size="sm" className="flex-shrink-0" asChild>
-          <Link href={atLimit ? upgradeHref : "/dashboard/properties/new"}>
-            {atLimit ? <Zap className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            <span className="hidden sm:inline">{atLimit ? upgradeLabel : "Nueva propiedad"}</span>
-            <span className="sm:hidden">{atLimit ? "Pro" : "Nueva"}</span>
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {!isPremium && (
+            <Button size="sm" variant="secondary" asChild>
+              <Link href="/dashboard/upgrade">
+                <Zap className="w-4 h-4" />
+                <span className="hidden sm:inline">Activar Pro</span>
+                <span className="sm:hidden">Pro</span>
+              </Link>
+            </Button>
+          )}
+          {!atLimit && (
+            <Button size="sm" asChild>
+              <Link href="/dashboard/properties/new">
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Nueva propiedad</span>
+                <span className="sm:hidden">Nueva</span>
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Stats band */}
@@ -136,6 +170,22 @@ export default async function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Pro upsell — always visible for free users */}
+      {!isPremium && !atLimit && (
+        <div className="mb-6 flex items-center gap-4 bg-canvas border border-hairline-strong rounded-2xl px-5 py-4">
+          <div className="w-10 h-10 rounded-xl bg-ink flex items-center justify-center flex-shrink-0">
+            <Zap className="w-5 h-5 text-white" strokeWidth={1.75} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-ink">Pasa a Pro por $99.999/mes</p>
+            <p className="text-xs text-body mt-0.5">50 propiedades activas y hasta 20 fotos por propiedad.</p>
+          </div>
+          <Button size="sm" className="flex-shrink-0 hidden sm:flex" asChild>
+            <Link href="/dashboard/upgrade">Activar Pro</Link>
+          </Button>
+        </div>
+      )}
 
       {/* Plan limit banner */}
       {atLimit && (

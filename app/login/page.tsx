@@ -24,10 +24,15 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [state, formAction, isPending] = useActionState(loginAction, {})
+  const [redirectTo] = useState(() => {
+    if (typeof window === "undefined") return "/dashboard"
+    const r = new URLSearchParams(window.location.search).get("redirect")
+    return r?.startsWith("/") ? r : "/dashboard"
+  })
 
   async function handleGoogle() {
     setGoogleLoading(true)
-    await signIn.social({ provider: "google", callbackURL: "/dashboard" })
+    await signIn.social({ provider: "google", callbackURL: redirectTo })
   }
 
   return (
@@ -99,6 +104,7 @@ export default function LoginPage() {
           </div>
 
           <form action={formAction} className="space-y-4">
+            <input type="hidden" name="redirect" value={redirectTo} />
             <div className="space-y-1.5">
               <label htmlFor="email" className="block text-sm font-semibold text-ink">
                 Correo electrónico
@@ -165,7 +171,10 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-body mt-6">
           ¿No tienes cuenta?{" "}
-          <Link href="/register" className="font-bold text-ink hover:opacity-70 transition-opacity">
+          <Link
+            href={redirectTo !== "/dashboard" ? `/register?redirect=${encodeURIComponent(redirectTo)}` : "/register"}
+            className="font-bold text-ink hover:opacity-70 transition-opacity"
+          >
             Crear cuenta gratis
           </Link>
         </p>

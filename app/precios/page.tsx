@@ -35,14 +35,12 @@ const plans = [
     priceSuffix: "/mes",
     cadence: "COP · facturación mensual",
     cta: "Comenzar con Pro",
-    href: "/register",
+    href: "/login?redirect=/dashboard/upgrade",
     dark: true,
     featured: true,
     features: [
       "Hasta 50 propiedades activas",
       "Hasta 20 fotos por propiedad",
-      "Estadísticas de visitas por propiedad",
-      "Soporte prioritario",
       "Todo lo del plan gratuito",
     ],
   },
@@ -59,7 +57,6 @@ const plans = [
       "Fotos ilimitadas por propiedad",
       "Soporte dedicado",
       "Integraciones a la medida",
-      "Todo lo del plan Pro",
     ],
   },
 ]
@@ -104,9 +101,9 @@ export default function PreciosPage() {
 
       {/* Plans */}
       <section className="max-w-6xl mx-auto w-full px-5 sm:px-6 lg:px-8 pb-12">
-        <div className="grid lg:grid-cols-3 gap-6 items-start">
+        <div className="grid lg:grid-cols-3 gap-6 items-stretch">
           {plans.map((plan, i) => (
-            <Reveal key={plan.name} delay={i * 100}>
+            <Reveal key={plan.name} delay={i * 100} className="h-full">
               <div
                 className={`relative h-full rounded-3xl p-8 flex flex-col ${
                   plan.dark

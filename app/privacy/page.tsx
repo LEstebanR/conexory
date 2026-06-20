@@ -67,10 +67,10 @@ export default function PrivacyPage() {
               Correo para datos personales:
             </span>{" "}
             <a
-              href="mailto:privacidad@conexory.com"
+              href="mailto:Conexory@gmail.com"
               className="text-ink hover:underline"
             >
-              privacidad@conexory.com
+              Conexory@gmail.com
             </a>
           </p>
         </div>
@@ -160,10 +160,10 @@ export default function PrivacyPage() {
         <LegalP>
           Para ejercer cualquiera de estos derechos, escríbenos a{" "}
           <a
-            href="mailto:privacidad@conexory.com"
+            href="mailto:Conexory@gmail.com"
             className="text-ink font-semibold hover:underline"
           >
-            privacidad@conexory.com
+            Conexory@gmail.com
           </a>
           . Responderemos en un plazo máximo de diez (10) días hábiles, según lo
           establece la Ley 1581 de 2012.
@@ -279,10 +279,10 @@ export default function PrivacyPage() {
           Si eres padre, madre o tutor y crees que tu hijo ha creado una cuenta
           en Conexory, contáctanos en{" "}
           <a
-            href="mailto:privacidad@conexory.com"
+            href="mailto:Conexory@gmail.com"
             className="text-ink font-semibold hover:underline"
           >
-            privacidad@conexory.com
+            Conexory@gmail.com
           </a>{" "}
           para proceder a la eliminación inmediata de sus datos.
         </LegalP>
@@ -318,10 +318,10 @@ export default function PrivacyPage() {
           <p>
             <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
-              href="mailto:privacidad@conexory.com"
+              href="mailto:Conexory@gmail.com"
               className="text-ink hover:underline"
             >
-              privacidad@conexory.com
+              Conexory@gmail.com
             </a>
           </p>
           <p>

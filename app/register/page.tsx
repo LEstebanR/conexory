@@ -29,12 +29,17 @@ export default function RegisterPage() {
   const [terms, setTerms] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [state, formAction, isPending] = useActionState(registerAction, {})
+  const [redirectTo] = useState(() => {
+    if (typeof window === "undefined") return "/dashboard"
+    const r = new URLSearchParams(window.location.search).get("redirect")
+    return r?.startsWith("/") ? r : "/dashboard"
+  })
 
   const passwordsMatch = confirmPassword === "" || password === confirmPassword
 
   async function handleGoogle() {
     setGoogleLoading(true)
-    await signIn.social({ provider: "google", callbackURL: "/dashboard" })
+    await signIn.social({ provider: "google", callbackURL: redirectTo })
   }
 
   return (
@@ -104,6 +109,7 @@ export default function RegisterPage() {
           </div>
 
           <form action={formAction} className="space-y-4">
+            <input type="hidden" name="redirect" value={redirectTo} />
             <div className="space-y-1.5">
               <label htmlFor="name" className="block text-sm font-semibold text-ink">
                 Nombre completo
@@ -253,7 +259,10 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-body mt-6">
           ¿Ya tienes cuenta?{" "}
-          <Link href="/login" className="font-bold text-ink hover:opacity-70 transition-opacity">
+          <Link
+            href={redirectTo !== "/dashboard" ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"}
+            className="font-bold text-ink hover:opacity-70 transition-opacity"
+          >
             Iniciar sesión
           </Link>
         </p>

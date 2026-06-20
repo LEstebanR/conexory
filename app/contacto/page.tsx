@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 }
 
 const channels = [
-  { icon: Mail, title: "Email general", value: "hola@conexory.com", note: "Para cualquier consulta", href: "mailto:hola@conexory.com" },
-  { icon: MessageCircle, title: "Soporte técnico", value: "soporte@conexory.com", note: "Problemas con la plataforma", href: "mailto:soporte@conexory.com" },
+  { icon: Mail, title: "Email general", value: "Conexory@gmail.com", note: "Para cualquier consulta", href: "mailto:Conexory@gmail.com" },
+  { icon: MessageCircle, title: "Soporte técnico", value: "Conexory@gmail.com", note: "Problemas con la plataforma", href: "mailto:Conexory@gmail.com" },
   { icon: MapPin, title: "Ubicación", value: "Bogotá D.C.", note: "Colombia", href: null },
 ]
 
@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     q: "¿Cómo elimino mi cuenta?",
-    a: "Escríbenos a soporte@conexory.com y procesamos la eliminación en menos de 24 horas.",
+    a: "Escríbenos a Conexory@gmail.com y procesamos la eliminación en menos de 24 horas.",
   },
   {
     q: "¿Dónde se almacenan mis datos?",

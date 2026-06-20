@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { signOut } from "@/lib/auth-client"
@@ -19,6 +20,7 @@ interface User {
   name: string
   email: string
   image: string | null
+  isPremium: boolean
 }
 
 function UserAvatar({ name, image, size = 32 }: { name: string; image: string | null; size?: number }) {
@@ -173,12 +175,29 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
         ))}
       </div>
 
+      {/* Configuración — encima del separador */}
+      <div className="flex-shrink-0 px-3 pb-2">
+        <NavLink
+          href="/dashboard/settings"
+          icon={Settings}
+          label="Configuración"
+          onClick={onClose}
+        />
+      </div>
+
       {/* User */}
       <div className="flex-shrink-0 border-t border-hairline p-3">
         <div className="flex items-center gap-3 px-2 py-2 mb-1">
           <UserAvatar name={user.name} image={user.image} size={36} />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-ink truncate">{user.name}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-bold text-ink truncate">{user.name}</p>
+              {user.isPremium && (
+                <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-wider bg-ink text-white px-1.5 py-0.5 rounded-full leading-none">
+                  Pro
+                </span>
+              )}
+            </div>
             <p className="text-xs text-mute truncate">{user.email}</p>
           </div>
         </div>
