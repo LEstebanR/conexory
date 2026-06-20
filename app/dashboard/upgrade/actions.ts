@@ -5,26 +5,23 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { buildCheckoutUrl, makeSubscriptionReference } from "@/lib/wompi"
 
-// getAppUrl() always prefers the canonical production URL (good for property links),
-// but Wompi's redirect-url must point to the *current* deploy so the success
-// callback lands on the same app instance being tested.
-function getCurrentBaseUrl(): string {
-  if (process.env.APP_URL) return process.env.APP_URL
-  if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  }
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
-  return "http://localhost:3000"
-}
-
 export async function startSubscription() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const headersList = await headers()
+  const session = await auth.api.getSession({ headers: headersList })
   if (!session) redirect("/login")
 
   if (session.user.isPremium) redirect("/dashboard")
 
+  // Derive base URL from the actual request Host so the Wompi redirect-url
+  // lands on the exact same domain the user is on. Using VERCEL_URL would
+  // return the deployment-specific subdomain, which is a different cookie
+  // domain from the stable branch alias — leaving the user logged out.
+  const host = headersList.get("host") ?? "localhost:3000"
+  const proto = process.env.VERCEL_ENV ? "https" : "http"
+  const baseUrl = `${proto}://${host}`
+
   const reference = makeSubscriptionReference(session.user.id)
-  const redirectUrl = `${getCurrentBaseUrl()}/dashboard?upgrade=success`
+  const redirectUrl = `${baseUrl}/dashboard?upgrade=success`
 
   const checkoutUrl = buildCheckoutUrl({
     reference,
