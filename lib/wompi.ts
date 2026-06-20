@@ -40,20 +40,16 @@ export function buildCheckoutUrl({
   return `${CHECKOUT_BASE}?${parts.join("&")}`
 }
 
-export function verifyWebhookSignature(bodyText: string, checksum: string): boolean {
+export function verifyWebhookSignature(_bodyText: string, checksum: string): boolean {
   if (!WOMPI_EVENTS_SECRET || !checksum) return false
 
-  // Wompi sends SHA256(body + events_secret) as the checksum
-  const expected = crypto
-    .createHash("sha256")
-    .update(`${bodyText}${WOMPI_EVENTS_SECRET}`)
-    .digest("hex")
+  // Wompi sends the plain events secret in the x-event-secret header.
+  // Hash both sides to a fixed length before comparing to avoid timing leaks.
+  const expected = crypto.createHash("sha256").update(WOMPI_EVENTS_SECRET).digest("hex")
+  const received = crypto.createHash("sha256").update(checksum).digest("hex")
 
   try {
-    return crypto.timingSafeEqual(
-      Buffer.from(checksum.toLowerCase()),
-      Buffer.from(expected.toLowerCase()),
-    )
+    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(received))
   } catch {
     return false
   }
