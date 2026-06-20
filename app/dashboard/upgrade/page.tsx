@@ -13,7 +13,6 @@ export const metadata: Metadata = {
 const PRO_FEATURES = [
   "Hasta 50 propiedades activas",
   "Hasta 20 fotos por propiedad",
-  "Estadísticas de visitas por propiedad",
   "Link único por propiedad",
   "Vista pública para tus clientes",
 ]
@@ -78,7 +77,7 @@ export default async function UpgradePage() {
         {/* Trust */}
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-mute">
           <ShieldCheck className="w-3.5 h-3.5" strokeWidth={1.75} />
-          Pago seguro con Wompi · hola@conexory.com
+          Pago seguro con Wompi · Conexory@gmail.com
         </div>
       </div>
     </div>

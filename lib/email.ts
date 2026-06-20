@@ -2,7 +2,7 @@ import { Resend } from "resend"
 
 // Instantiated lazily inside each function so the build doesn't require
 // RESEND_API_KEY at module-load time (Next.js collects route data during build).
-const FROM = "Conexory <noreply@conexory.com>"
+const FROM = "Conexory <Conexory@gmail.com>"
 
 function resend() {
   return new Resend(process.env.RESEND_API_KEY)
@@ -29,7 +29,7 @@ export async function sendSubscriptionConfirmation(email: string, name: string) 
           Ir al dashboard
         </a>
         <p style="color:#afafaf;font-size:12px;margin-top:32px">
-          Conexory · Colombia · Si tienes dudas escríbenos a hola@conexory.com
+          Conexory · Colombia · Si tienes dudas escríbenos a Conexory@gmail.com
         </p>
       </div>
     `,
@@ -57,7 +57,7 @@ export async function sendPaymentFailed(email: string, name: string) {
           Renovar plan Pro
         </a>
         <p style="color:#afafaf;font-size:12px;margin-top:32px">
-          Conexory · Colombia · Si tienes dudas escríbenos a hola@conexory.com
+          Conexory · Colombia · Si tienes dudas escríbenos a Conexory@gmail.com
         </p>
       </div>
     `,

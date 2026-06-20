@@ -159,10 +159,10 @@ export default function CookiesPage() {
           <p>
             <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
-              href="mailto:privacidad@conexory.com"
+              href="mailto:Conexory@gmail.com"
               className="text-ink hover:underline"
             >
-              privacidad@conexory.com
+              Conexory@gmail.com
             </a>
           </p>
           <p>

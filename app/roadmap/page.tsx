@@ -112,7 +112,7 @@ export default function RoadmapPage() {
             Las funciones de este roadmap vienen de agentes como tú. Cuéntanos qué necesitas.
           </p>
           <Button variant="secondary" size="lg" asChild>
-            <a href="mailto:hola@conexory.com?subject=Sugerencia para Conexory">
+            <a href="mailto:Conexory@gmail.com?subject=Sugerencia para Conexory">
               Enviar sugerencia <ArrowRight className="w-4 h-4" />
             </a>
           </Button>

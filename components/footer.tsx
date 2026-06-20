@@ -43,7 +43,7 @@ export default function Footer() {
               Construido por agentes, para agentes.
             </p>
             <a
-              href="mailto:hola@conexory.com"
+              href="mailto:Conexory@gmail.com"
               aria-label="Email"
               className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-mute hover:text-white hover:bg-white/10 transition-colors"
             >

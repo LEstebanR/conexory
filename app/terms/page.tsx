@@ -92,10 +92,10 @@ export default function TermsPage() {
           Eres el único responsable de mantener la confidencialidad de tus
           credenciales de acceso. Debes notificarnos inmediatamente a{" "}
           <a
-            href="mailto:soporte@conexory.com"
+            href="mailto:Conexory@gmail.com"
             className="text-ink font-semibold hover:underline"
           >
-            soporte@conexory.com
+            Conexory@gmail.com
           </a>{" "}
           si detectas acceso no autorizado a tu cuenta.
         </LegalP>
@@ -289,10 +289,10 @@ export default function TermsPage() {
           <p>
             <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
-              href="mailto:legal@conexory.com"
+              href="mailto:Conexory@gmail.com"
               className="text-ink hover:underline"
             >
-              legal@conexory.com
+              Conexory@gmail.com
             </a>
           </p>
           <p>
