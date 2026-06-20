@@ -7,6 +7,7 @@ import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon, Eye, Share2 } fro
 import { Button } from "@/components/ui/button"
 import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import PropertiesList, { type PropertyItem } from "./properties-list"
+import UpgradeSuccessToast from "./upgrade-success-toast"
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -38,8 +39,15 @@ function greeting(name: string): string {
   return `${saludo}, ${name.split(" ")[0]}`
 }
 
-export default async function DashboardPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ upgrade?: string }>
+}) {
+  const [session, { upgrade }] = await Promise.all([
+    auth.api.getSession({ headers: await headers() }),
+    searchParams,
+  ])
   if (!session) redirect("/login")
 
   const properties = await prisma.property.findMany({
@@ -71,7 +79,7 @@ export default async function DashboardPage() {
   const isPremium = session.user.isPremium
   const limit = propertyLimit(isPremium)
   const atLimit = activeCount >= limit
-  const upgradeHref = isPremium ? "/contacto" : "/precios"
+  const upgradeHref = isPremium ? "/contacto" : "/dashboard/upgrade"
   const upgradeLabel = isPremium ? "Plan a medida" : "Actualizar a Pro"
   const limitTitle = isPremium ? "Límite del plan Pro alcanzado" : "Límite del plan gratuito alcanzado"
   const limitMessage = isPremium
@@ -105,6 +113,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
+      {upgrade === "success" && <UpgradeSuccessToast />}
       {/* Header */}
       <div className="flex items-end justify-between gap-4 mb-8">
         <div>
