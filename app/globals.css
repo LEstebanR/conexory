@@ -109,6 +109,25 @@ body {
   color: #ffffff;
 }
 
+/* Prevent iOS Safari auto-zoom on input focus (font-size must be ≥16px) */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Hide native number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

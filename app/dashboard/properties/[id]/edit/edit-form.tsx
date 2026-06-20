@@ -226,19 +226,19 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="space-y-1.5">
               <FieldLabel optional>Área (m²)</FieldLabel>
-              <Input placeholder="65" value={area} onChange={(e) => setArea(e.target.value)} className="h-11" type="number" min="0" />
+              <Input placeholder="65" value={area} onChange={(e) => setArea(e.target.value)} className="h-11" type="number" inputMode="decimal" min="0" />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Habitaciones</FieldLabel>
-              <Input placeholder="2" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} className="h-11" type="number" min="0" />
+              <Input placeholder="2" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} className="h-11" type="number" inputMode="numeric" min="0" />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Baños</FieldLabel>
-              <Input placeholder="1" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} className="h-11" type="number" min="0" />
+              <Input placeholder="1" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} className="h-11" type="number" inputMode="numeric" min="0" />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Parqueaderos</FieldLabel>
-              <Input placeholder="1" value={parking} onChange={(e) => setParking(e.target.value)} className="h-11" type="number" min="0" />
+              <Input placeholder="1" value={parking} onChange={(e) => setParking(e.target.value)} className="h-11" type="number" inputMode="numeric" min="0" />
             </div>
           </div>
         </SectionCard>
