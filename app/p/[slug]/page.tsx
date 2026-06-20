@@ -166,7 +166,7 @@ export default async function PublicPropertyPage({
       value: property.parking,
       label: property.parking === 1 ? "Parqueadero" : "Parqueaderos",
     },
-  ].filter(Boolean) as { icon: typeof Square; value: number; label: string }[]
+  ].filter(Boolean) as { icon: typeof Maximize2; value: number; label: string }[]
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
