@@ -42,13 +42,18 @@ function greeting(name: string): string {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ upgrade?: string }>
+  searchParams: Promise<{ upgrade?: string; id?: string }>
 }) {
-  const [session, { upgrade }] = await Promise.all([
+  const [session, sp] = await Promise.all([
     auth.api.getSession({ headers: await headers() }),
     searchParams,
   ])
   if (!session) redirect("/login")
+
+  const upgrade = sp.upgrade
+  // Wompi always appends ?id=<transactionId>&env=<env> on redirect.
+  // Use either signal to detect a post-payment landing.
+  const isPostPayment = upgrade === "success" || Boolean(sp.id)
 
   const properties = await prisma.property.findMany({
     where: { userId: session.user.id },
@@ -80,7 +85,7 @@ export default async function DashboardPage({
   // isPremium=false (TTL 5 min). Bypass it with a fresh DB query and delete
   // the cache cookie so subsequent page loads also pick up the new value.
   let isPremium = session.user.isPremium
-  if (upgrade === "success") {
+  if (isPostPayment) {
     const freshUser = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { isPremium: true },
