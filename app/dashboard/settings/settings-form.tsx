@@ -51,6 +51,7 @@ export default function SettingsForm({ name, email, image }: Props) {
   return (
     <form action={formAction} className="space-y-6">
       <input type="hidden" name="image" value={avatarUrl} />
+      <input type="hidden" name="previousImage" value={image ?? ""} />
 
       {/* Avatar */}
       <div className="flex items-center gap-4 pb-6 border-b border-hairline">
@@ -76,14 +77,28 @@ export default function SettingsForm({ name, email, image }: Props) {
         <div className="min-w-0">
           <p className="text-sm font-bold text-ink truncate">{name}</p>
           <p className="text-xs text-mute truncate">{email}</p>
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="text-xs text-body hover:text-ink transition-colors mt-1 disabled:opacity-60"
-          >
-            {uploading ? "Subiendo…" : "Cambiar foto"}
-          </button>
+          <div className="flex items-center gap-3 mt-1">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="text-xs text-body hover:text-ink transition-colors disabled:opacity-60"
+            >
+              {uploading ? "Subiendo…" : "Cambiar foto"}
+            </button>
+            {avatarUrl && !uploading && (
+              <>
+                <span className="text-hairline-strong">·</span>
+                <button
+                  type="button"
+                  onClick={() => setAvatarUrl("")}
+                  className="text-xs text-mute hover:text-red-600 transition-colors"
+                >
+                  Eliminar foto
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
