@@ -286,8 +286,8 @@ export default async function PublicPropertyPage({
                 <p className="text-sm text-body leading-relaxed">{property.user.bio}</p>
               )}
 
-              {/* CTAs — full-width on mobile, auto-width on desktop */}
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+              {/* CTAs — full-width on mobile, equal-width on desktop */}
+              <div className="flex flex-col sm:flex-row gap-2">
                 {property.user.phone && (
                   <>
                     {property.user.phoneIsWhatsapp && (
@@ -295,27 +295,33 @@ export default async function PublicPropertyPage({
                         href={`https://wa.me/${property.user.phone.replace(/\D/g, "")}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                        className="sm:flex-1 flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity"
                       >
                         <MessageCircle className="w-4 h-4" strokeWidth={2} />
-                        Escribir por WhatsApp
+                        WhatsApp
                       </a>
                     )}
-                    <a
-                      href={`tel:${property.user.phone}`}
-                      className="flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-ink text-white text-sm font-bold hover:bg-elevated transition-colors"
-                    >
-                      <Phone className="w-4 h-4" strokeWidth={2} />
-                      Llamar
-                    </a>
+                    <div className="relative group sm:flex-1">
+                      <a
+                        href={`tel:${property.user.phone}`}
+                        className="w-full flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-ink text-white text-sm font-bold hover:bg-elevated transition-colors"
+                      >
+                        <Phone className="w-4 h-4" strokeWidth={2} />
+                        Llamar
+                      </a>
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        {property.user.phone}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-ink" />
+                      </div>
+                    </div>
                   </>
                 )}
                 <a
                   href={`mailto:${property.user.email}`}
-                  className="flex items-center justify-center gap-2 h-11 px-5 rounded-full border border-hairline-strong bg-white text-sm font-semibold text-ink hover:bg-canvas-soft transition-colors"
+                  className="sm:flex-1 flex items-center justify-center gap-2 h-11 px-5 rounded-full border border-hairline-strong bg-white text-sm font-semibold text-ink hover:bg-canvas-soft transition-colors"
                 >
                   <Mail className="w-4 h-4 text-mute" strokeWidth={2} />
-                  {property.user.email}
+                  Correo
                 </a>
               </div>
             </div>
