@@ -242,6 +242,7 @@ export default function NewPropertyPage() {
                 onChange={(e) => setArea(e.target.value)}
                 className="h-11"
                 type="number"
+                inputMode="decimal"
                 min="0"
               />
             </div>
@@ -253,6 +254,7 @@ export default function NewPropertyPage() {
                 onChange={(e) => setBedrooms(e.target.value)}
                 className="h-11"
                 type="number"
+                inputMode="numeric"
                 min="0"
               />
             </div>
@@ -264,6 +266,7 @@ export default function NewPropertyPage() {
                 onChange={(e) => setBathrooms(e.target.value)}
                 className="h-11"
                 type="number"
+                inputMode="numeric"
                 min="0"
               />
             </div>
@@ -275,6 +278,7 @@ export default function NewPropertyPage() {
                 onChange={(e) => setParking(e.target.value)}
                 className="h-11"
                 type="number"
+                inputMode="numeric"
                 min="0"
               />
             </div>
