@@ -59,13 +59,7 @@ export async function POST(req: Request) {
   }
 
   if (eventType === "transaction.updated" && transaction?.status === "APPROVED") {
-    try {
-      await handleApproved(userId, transaction.reference)
-      console.log("[wompi] handleApproved completed for userId:", userId)
-    } catch (err) {
-      console.error("[wompi] handleApproved FAILED:", err)
-      throw err
-    }
+    await handleApproved(userId, transaction.reference)
   } else if (
     eventType === "transaction.updated" &&
     (transaction?.status === "DECLINED" || transaction?.status === "VOIDED")
