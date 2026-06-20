@@ -15,10 +15,12 @@ export default function PublicGallery({
   images,
   title,
   videoId,
+  className,
 }: {
   images: string[]
   title: string
   videoId?: string | null
+  className?: string
 }) {
   const [index, setIndex] = useState(0)
   const [lightbox, setLightbox] = useState(false)
@@ -77,7 +79,7 @@ export default function PublicGallery({
   return (
     <>
       {/* Main stage */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-canvas-soft select-none group">
+      <div className={cn("relative overflow-hidden bg-canvas-soft select-none group", className)}>
         <div
           className="relative aspect-[4/3] sm:aspect-[16/10]"
           onTouchStart={onTouchStart}
