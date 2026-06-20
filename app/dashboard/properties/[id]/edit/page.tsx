@@ -34,6 +34,7 @@ export default async function EditPropertyPage({
     description: property.description ?? "",
     images: property.images,
     videoUrl: property.videoUrl ?? "",
+    showContact: property.showContact,
   }
 
   return <EditForm initial={initial} isPremium={session.user.isPremium} />

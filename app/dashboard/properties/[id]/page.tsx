@@ -72,7 +72,7 @@ export default async function PropertyDetailPage({
           </h1>
           <p className="text-sm text-body truncate">{property.title}</p>
         </div>
-        <PropertyActions propertyId={property.id} initialPublished={property.published} />
+        <PropertyActions propertyId={property.id} initialPublished={property.published} initialShowContact={property.showContact} />
       </div>
 
       {/* Banner de desactivada */}

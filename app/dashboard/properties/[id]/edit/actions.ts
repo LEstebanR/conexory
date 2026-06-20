@@ -39,6 +39,7 @@ export async function updateProperty(
         description: parsed.data.description,
         images: parsed.data.images,
         videoUrl: parsed.data.videoUrl,
+        showContact: parsed.data.showContact,
       },
     })
 

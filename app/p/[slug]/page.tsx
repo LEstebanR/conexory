@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, BedDouble, Bath, Ruler, Car, EyeOff, ArrowUpRight } from "lucide-react"
+import { MapPin, BedDouble, Bath, Ruler, Car, EyeOff, ArrowUpRight, Phone, Mail, MessageCircle } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { youtubeId } from "@/lib/youtube"
 import PublicGallery from "@/components/public-gallery"
@@ -119,7 +119,14 @@ export default async function PublicPropertyPage({
 }) {
   const { slug } = await params
 
-  const property = await prisma.property.findUnique({ where: { slug } })
+  const property = await prisma.property.findUnique({
+    where: { slug },
+    include: {
+      user: {
+        select: { name: true, email: true, image: true, location: true, bio: true, phone: true, phoneIsWhatsapp: true },
+      },
+    },
+  })
 
   if (!property) notFound()
 
@@ -171,7 +178,7 @@ export default async function PublicPropertyPage({
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
 
-      {/* Gallery — edge-to-edge on mobile, small top gap */}
+      {/* Gallery — edge-to-edge on mobile */}
       {(property.images.length > 0 || videoId) && (
         <div className="w-full sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5">
           <PublicGallery
@@ -235,6 +242,88 @@ export default async function PublicPropertyPage({
               <p className="text-[15px] text-body leading-relaxed whitespace-pre-wrap">
                 {property.description}
               </p>
+            </div>
+          </Reveal>
+        )}
+
+        {/* Agent contact — only shown when explicitly enabled per property */}
+        {property.showContact && (
+          <Reveal delay={200}>
+            <div className="bg-canvas-softer rounded-2xl p-5 space-y-5">
+              <h2 className="text-xs font-bold text-mute uppercase tracking-widest">
+                Asesor
+              </h2>
+
+              {/* Identity */}
+              <div className="flex items-center gap-4">
+                {property.user.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={property.user.image}
+                    alt={property.user.name}
+                    className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-ink flex items-center justify-center text-white text-lg font-black flex-shrink-0 select-none">
+                    {property.user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-base font-black text-ink tracking-tight leading-tight">
+                    {property.user.name}
+                  </p>
+                  {property.user.location && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <MapPin className="w-3 h-3 text-mute flex-shrink-0" strokeWidth={2} />
+                      <span className="text-xs text-mute truncate">{property.user.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bio */}
+              {property.user.bio && (
+                <p className="text-sm text-body leading-relaxed">{property.user.bio}</p>
+              )}
+
+              {/* CTAs — full-width on mobile, equal-width on desktop */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                {property.user.phone && (
+                  <>
+                    {property.user.phoneIsWhatsapp && (
+                      <a
+                        href={`https://wa.me/${property.user.phone.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="sm:flex-1 flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                      >
+                        <MessageCircle className="w-4 h-4" strokeWidth={2} />
+                        WhatsApp
+                      </a>
+                    )}
+                    <div className="relative group sm:flex-1">
+                      <a
+                        href={`tel:${property.user.phone}`}
+                        className="w-full flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-ink text-white text-sm font-bold hover:bg-elevated transition-colors"
+                      >
+                        <Phone className="w-4 h-4" strokeWidth={2} />
+                        Llamar
+                      </a>
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3.5 py-2 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+                        {property.user.phone}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-ink" />
+                      </div>
+                    </div>
+                  </>
+                )}
+                <a
+                  href={`mailto:${property.user.email}`}
+                  className="sm:flex-1 flex items-center justify-center gap-2 h-11 px-5 rounded-full border border-hairline-strong bg-white text-sm font-semibold text-ink hover:bg-canvas-soft transition-colors"
+                >
+                  <Mail className="w-4 h-4 text-mute" strokeWidth={2} />
+                  Correo
+                </a>
+              </div>
             </div>
           </Reveal>
         )}

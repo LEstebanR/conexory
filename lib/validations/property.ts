@@ -60,6 +60,7 @@ export const PropertySchema = z.object({
       message: "Pega un enlace válido de YouTube",
     })
     .transform((v) => (v === "" ? null : v)),
+  showContact: z.boolean().optional().default(false),
 })
 
 // type field accepts any string — Zod validates the enum server-side

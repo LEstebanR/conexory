@@ -5,18 +5,24 @@ import { toast } from "sonner"
 import { Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 import { updateProfile, type ProfileState } from "./actions"
 
 interface Props {
   name: string
   email: string
   image: string | null
+  location: string
+  bio: string
+  phone: string
+  phoneIsWhatsapp: boolean
 }
 
-export default function SettingsForm({ name, email, image }: Props) {
+export default function SettingsForm({ name, email, image, location, bio, phone, phoneIsWhatsapp }: Props) {
   const [state, formAction, isPending] = useActionState<ProfileState, FormData>(updateProfile, {})
   const [avatarUrl, setAvatarUrl] = useState(image ?? "")
   const [uploading, setUploading] = useState(false)
+  const [isWhatsapp, setIsWhatsapp] = useState(phoneIsWhatsapp)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -52,6 +58,7 @@ export default function SettingsForm({ name, email, image }: Props) {
     <form action={formAction} className="space-y-6">
       <input type="hidden" name="image" value={avatarUrl} />
       <input type="hidden" name="previousImage" value={image ?? ""} />
+      <input type="hidden" name="phoneIsWhatsapp" value={isWhatsapp ? "true" : "false"} />
 
       {/* Avatar */}
       <div className="flex items-center gap-4 pb-6 border-b border-hairline">
@@ -108,6 +115,79 @@ export default function SettingsForm({ name, email, image }: Props) {
           Nombre completo
         </label>
         <Input id="name" name="name" defaultValue={name} required maxLength={80} className="h-11" />
+      </div>
+
+      {/* Ubicación */}
+      <div className="space-y-1.5">
+        <label htmlFor="location" className="block text-sm font-semibold text-ink">
+          Ciudad de trabajo
+          <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>
+        </label>
+        <Input
+          id="location"
+          name="location"
+          defaultValue={location}
+          placeholder="Ej. Medellín, Bogotá, Cali…"
+          maxLength={80}
+          className="h-11"
+        />
+      </div>
+
+      {/* Bio */}
+      <div className="space-y-1.5">
+        <label htmlFor="bio" className="block text-sm font-semibold text-ink">
+          Descripción breve
+          <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>
+        </label>
+        <textarea
+          id="bio"
+          name="bio"
+          defaultValue={bio}
+          placeholder="Cuéntale a tus clientes un poco sobre ti y tu experiencia…"
+          maxLength={300}
+          rows={3}
+          className="w-full rounded-xl border border-hairline bg-white px-3 py-2.5 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-ink resize-none"
+        />
+      </div>
+
+      {/* Teléfono */}
+      <div className="space-y-1.5">
+        <label htmlFor="phone" className="block text-sm font-semibold text-ink">
+          Teléfono de contacto
+          <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>
+        </label>
+        <Input
+          id="phone"
+          name="phone"
+          type="tel"
+          defaultValue={phone}
+          placeholder="Ej. 3001234567"
+          maxLength={20}
+          className="h-11"
+        />
+        <label className="flex items-center gap-2.5 cursor-pointer mt-2 select-none">
+          <div className="relative flex-shrink-0">
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={isWhatsapp}
+              onChange={(e) => setIsWhatsapp(e.target.checked)}
+            />
+            <div
+              className={cn(
+                "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200",
+                isWhatsapp ? "bg-ink border-ink" : "bg-white border-hairline-strong hover:border-ink"
+              )}
+            >
+              {isWhatsapp && (
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+          </div>
+          <span className="text-sm text-body">Este número también es WhatsApp</span>
+        </label>
       </div>
 
       <div className="pt-2">

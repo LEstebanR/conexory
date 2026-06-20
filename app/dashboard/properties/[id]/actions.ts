@@ -15,6 +15,16 @@ export async function togglePublished(propertyId: string, published: boolean) {
   })
 }
 
+export async function toggleShowContact(propertyId: string, showContact: boolean) {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) throw new Error("No autenticado")
+
+  await prisma.property.update({
+    where: { id: propertyId, userId: session.user.id },
+    data: { showContact },
+  })
+}
+
 export async function incrementShares(propertyId: string) {
   await prisma.property.update({
     where: { id: propertyId },
