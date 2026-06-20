@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, BedDouble, Bath, Square, Car, EyeOff, ArrowUpRight } from "lucide-react"
+import { MapPin, BedDouble, Bath, Maximize2, Car, EyeOff, ArrowUpRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { youtubeId } from "@/lib/youtube"
 import PublicGallery from "@/components/public-gallery"
@@ -150,7 +150,7 @@ export default async function PublicPropertyPage({
   const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
 
   const stats = [
-    property.area != null && { icon: Square, value: property.area, label: "m²" },
+    property.area != null && { icon: Maximize2, value: property.area, label: "m²" },
     property.bedrooms != null && {
       icon: BedDouble,
       value: property.bedrooms,
