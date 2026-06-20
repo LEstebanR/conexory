@@ -40,10 +40,7 @@ export default function PropertyMap({ latitude, longitude, label }: Props) {
           center={[latitude, longitude]}
           zoom={14}
           style={{ height: "100%", width: "100%" }}
-          zoomControl={false}
           scrollWheelZoom={false}
-          dragging={false}
-          doubleClickZoom={false}
           attributionControl={false}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
