@@ -12,10 +12,7 @@ export async function startSubscription() {
 
   if (session.user.isPremium) redirect("/dashboard")
 
-  // Derive base URL from the actual request Host so the Wompi redirect-url
-  // lands on the exact same domain the user is on. Using VERCEL_URL would
-  // return the deployment-specific subdomain, which is a different cookie
-  // domain from the stable branch alias — leaving the user logged out.
+  // Use request Host (not VERCEL_URL) — each deploy has a different subdomain and they don't share cookies.
   const host = headersList.get("host") ?? "localhost:3000"
   const proto = process.env.VERCEL_ENV ? "https" : "http"
   const baseUrl = `${proto}://${host}`

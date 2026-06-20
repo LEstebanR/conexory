@@ -4,10 +4,7 @@ const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY ?? ""
 const WOMPI_INTEGRITY_SECRET = process.env.WOMPI_INTEGRITY_SECRET ?? ""
 const WOMPI_EVENTS_SECRET = process.env.WOMPI_EVENTS_SECRET ?? ""
 
-const CHECKOUT_BASE =
-  process.env.NODE_ENV === "production"
-    ? "https://checkout.wompi.co/p/"
-    : "https://checkout.wompi.co/p/"
+const CHECKOUT_BASE = "https://checkout.wompi.co/p/"
 
 export const PRO_AMOUNT_CENTS = 9_999_900 // $99.999 COP
 const CURRENCY = "COP"

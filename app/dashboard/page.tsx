@@ -81,10 +81,6 @@ export default async function DashboardPage({
   const activeCount = properties.filter((p: P) => p.published).length
   const count = properties.length
   const totalShares = properties.reduce((sum: number, p: P) => sum + p.shares, 0)
-  // The session cookie cache (better-auth cookieCache, TTL 5 min) may hold a
-  // stale isPremium=false after the webhook activates Pro. On post-payment
-  // landing (Wompi always appends ?id=), bypass the cache with a direct DB
-  // query for this render. The cache expires naturally within 5 minutes.
   let isPremium = session.user.isPremium
   if (isPostPayment) {
     const freshUser = await prisma.user.findUnique({
