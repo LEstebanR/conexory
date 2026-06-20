@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, BedDouble, Bath, Maximize2, Car, EyeOff, ArrowUpRight } from "lucide-react"
+import { MapPin, BedDouble, Bath, Ruler, Car, EyeOff, ArrowUpRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { youtubeId } from "@/lib/youtube"
 import PublicGallery from "@/components/public-gallery"
@@ -150,7 +150,7 @@ export default async function PublicPropertyPage({
   const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
 
   const stats = [
-    property.area != null && { icon: Maximize2, value: property.area, label: "m²" },
+    property.area != null && { icon: Ruler, value: property.area, label: "m²" },
     property.bedrooms != null && {
       icon: BedDouble,
       value: property.bedrooms,
@@ -166,7 +166,7 @@ export default async function PublicPropertyPage({
       value: property.parking,
       label: property.parking === 1 ? "Parqueadero" : "Parqueaderos",
     },
-  ].filter(Boolean) as { icon: typeof Maximize2; value: number; label: string }[]
+  ].filter(Boolean) as { icon: typeof Ruler; value: number; label: string }[]
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">

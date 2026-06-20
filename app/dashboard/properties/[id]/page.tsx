@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
-import { ArrowLeft, BedDouble, Bath, Square, Car, MapPin, EyeOff } from "lucide-react"
+import { ArrowLeft, BedDouble, Bath, Ruler, Car, MapPin, EyeOff } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
@@ -132,26 +132,26 @@ export default async function PropertyDetailPage({
             <div className="flex flex-wrap gap-4 pt-4 border-t border-hairline">
               {property.area != null && (
                 <div className="flex items-center gap-1.5 text-sm text-body">
-                  <Square className="w-4 h-4 text-mute" strokeWidth={1.75} />
+                  <Ruler className="w-4 h-4 text-mute" strokeWidth={1.75} />
                   <span className="font-semibold">{property.area} m²</span>
                 </div>
               )}
               {property.bedrooms != null && (
                 <div className="flex items-center gap-1.5 text-sm text-body">
                   <BedDouble className="w-4 h-4 text-mute" strokeWidth={1.75} />
-                  <span className="font-semibold">{property.bedrooms} hab.</span>
+                  <span className="font-semibold">{property.bedrooms} {property.bedrooms === 1 ? "habitación" : "habitaciones"}</span>
                 </div>
               )}
               {property.bathrooms != null && (
                 <div className="flex items-center gap-1.5 text-sm text-body">
                   <Bath className="w-4 h-4 text-mute" strokeWidth={1.75} />
-                  <span className="font-semibold">{property.bathrooms} baños</span>
+                  <span className="font-semibold">{property.bathrooms} {property.bathrooms === 1 ? "baño" : "baños"}</span>
                 </div>
               )}
               {property.parking != null && (
                 <div className="flex items-center gap-1.5 text-sm text-body">
                   <Car className="w-4 h-4 text-mute" strokeWidth={1.75} />
-                  <span className="font-semibold">{property.parking} parqueaderos</span>
+                  <span className="font-semibold">{property.parking} {property.parking === 1 ? "parqueadero" : "parqueaderos"}</span>
                 </div>
               )}
             </div>
