@@ -83,29 +83,6 @@ export async function generateMetadata({
   }
 }
 
-function StickyHeader({ typeLabel }: { typeLabel: string }) {
-  return (
-    <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-hairline">
-      <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-ink flex items-center justify-center">
-            <Image
-              src="/mark-white.png"
-              alt="Conexory"
-              width={14}
-              height={14}
-              className="w-3.5 h-3.5"
-            />
-          </div>
-          <span className="text-xs font-black text-ink tracking-tight">Conexory</span>
-        </Link>
-        <span className="inline-flex items-center bg-canvas-soft text-ink text-xs font-bold px-3 py-1 rounded-full">
-          {typeLabel}
-        </span>
-      </div>
-    </header>
-  )
-}
 
 function PageFooter() {
   return (
@@ -142,10 +119,7 @@ export default async function PublicPropertyPage({
 }) {
   const { slug } = await params
 
-  const property = await prisma.property.findUnique({
-    where: { slug },
-    include: { user: { select: { name: true, image: true } } },
-  })
+  const property = await prisma.property.findUnique({ where: { slug } })
 
   if (!property) notFound()
 
@@ -154,7 +128,6 @@ export default async function PublicPropertyPage({
   if (!property.published) {
     return (
       <div className="min-h-screen bg-canvas flex flex-col">
-        <StickyHeader typeLabel={typeLabel} />
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <div className="w-20 h-20 rounded-3xl bg-canvas-soft flex items-center justify-center mb-6">
             <EyeOff className="w-9 h-9 text-mute" strokeWidth={1.5} />
@@ -195,15 +168,12 @@ export default async function PublicPropertyPage({
     },
   ].filter(Boolean) as { icon: typeof Square; value: number; label: string }[]
 
-  const agentInitial = property.user.name.charAt(0).toUpperCase()
-
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
-      <StickyHeader typeLabel={typeLabel} />
 
-      {/* Gallery — edge-to-edge on mobile */}
+      {/* Gallery — edge-to-edge on mobile, small top gap */}
       {(property.images.length > 0 || videoId) && (
-        <div className="w-full sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5">
+        <div className="w-full pt-3 sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5">
           <PublicGallery
             images={property.images}
             title={property.title}
@@ -269,27 +239,6 @@ export default async function PublicPropertyPage({
           </Reveal>
         )}
 
-        {/* Agent card */}
-        <Reveal delay={180}>
-          <div className="flex items-center gap-3 pt-2 border-t border-hairline">
-            {property.user.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={property.user.image}
-                alt={property.user.name}
-                className="w-11 h-11 rounded-full object-cover flex-shrink-0"
-              />
-            ) : (
-              <div className="w-11 h-11 rounded-full bg-ink flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                {agentInitial}
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="text-xs text-mute">Asesor inmobiliario</p>
-              <p className="text-sm font-bold text-ink truncate">{property.user.name}</p>
-            </div>
-          </div>
-        </Reveal>
       </main>
 
       <PageFooter />
