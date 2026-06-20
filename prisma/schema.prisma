@@ -70,6 +70,7 @@ model Property {
   slug         String   @unique
   type         String
   price        Decimal  @db.Decimal(15, 2)
+  state        String?
   city         String
   neighborhood String?
   area         Float?

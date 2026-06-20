@@ -39,6 +39,7 @@ export const PropertySchema = z.object({
     .refine((n) => n <= 9_999_999_999_999, {
       message: "El precio es demasiado alto",
     }),
+  state: optionalString(100),
   city: z
     .string()
     .trim()

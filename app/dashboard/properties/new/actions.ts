@@ -54,6 +54,7 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
         title: parsed.data.title,
         type: parsed.data.type,
         price: parsed.data.price,
+        state: parsed.data.state,
         city: parsed.data.city,
         neighborhood: parsed.data.neighborhood,
         area: parsed.data.area,

@@ -48,7 +48,7 @@ export default async function PropertyDetailPage({
   const typeLabel = TYPE_LABELS[property.type] ?? property.type
   const price = formatCOP(Number(property.price))
   const videoId = youtubeId(property.videoUrl)
-  const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
+  const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
 
   const hasDetails =
     property.area != null ||
