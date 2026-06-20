@@ -129,7 +129,7 @@ export default async function DashboardPage({
 
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
-      {upgrade === "success" && <UpgradeSuccessToast />}
+      {isPostPayment && <UpgradeSuccessToast />}
       {/* Header */}
       <div className="flex items-end justify-between gap-4 mb-8">
         <div>
