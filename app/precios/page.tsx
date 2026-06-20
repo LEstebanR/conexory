@@ -42,7 +42,6 @@ const plans = [
       "Hasta 50 propiedades activas",
       "Hasta 20 fotos por propiedad",
       "Estadísticas de visitas por propiedad",
-      "Soporte prioritario",
       "Todo lo del plan gratuito",
     ],
   },

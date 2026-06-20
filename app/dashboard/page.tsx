@@ -179,7 +179,7 @@ export default async function DashboardPage({
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-ink">Pasa a Pro por $99.999/mes</p>
-            <p className="text-xs text-body mt-0.5">50 propiedades, 20 fotos cada una y soporte prioritario.</p>
+            <p className="text-xs text-body mt-0.5">50 propiedades activas y hasta 20 fotos por propiedad.</p>
           </div>
           <Button size="sm" className="flex-shrink-0 hidden sm:flex" asChild>
             <Link href="/dashboard/upgrade">Activar Pro</Link>

@@ -16,7 +16,6 @@ const PRO_FEATURES = [
   "Estadísticas de visitas por propiedad",
   "Link único por propiedad",
   "Vista pública para tus clientes",
-  "Soporte prioritario",
 ]
 
 export default async function UpgradePage() {
