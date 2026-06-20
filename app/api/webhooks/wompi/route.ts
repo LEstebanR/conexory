@@ -6,10 +6,6 @@ export async function POST(req: Request) {
   const bodyText = await req.text()
   const checksum = req.headers.get("x-event-secret") ?? ""
 
-  console.log("[wompi webhook] headers:", Object.fromEntries(req.headers))
-  console.log("[wompi webhook] checksum:", checksum)
-  console.log("[wompi webhook] body:", bodyText.slice(0, 500))
-
   // Skip signature verification outside production. VERCEL_ENV is "production"
   // only on the production deployment; local and preview both skip so we can
   // capture real Wompi events and confirm the exact signature format before
