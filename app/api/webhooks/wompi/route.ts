@@ -6,7 +6,12 @@ export async function POST(req: Request) {
   const bodyText = await req.text()
   const checksum = req.headers.get("x-event-secret") ?? ""
 
+  const secretEnv = process.env.WOMPI_EVENTS_SECRET ?? ""
+  console.log("[wompi-webhook] secret_set:", secretEnv.length > 0, "secret_len:", secretEnv.length)
+  console.log("[wompi-webhook] checksum_len:", checksum.length, "checksum_prefix:", checksum.slice(0, 8))
+
   if (!verifyWebhookSignature(bodyText, checksum)) {
+    console.log("[wompi-webhook] signature_failed")
     return new Response(null, { status: 401 })
   }
 
