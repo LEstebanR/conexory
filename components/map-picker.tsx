@@ -220,7 +220,17 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
           <ClickHandler onPick={handlePick} />
           <FlyTo coords={flyTarget} zoom={flyZoom} />
           {position && pinIconRef.current && (
-            <Marker position={position} icon={pinIconRef.current} />
+            <Marker
+              position={position}
+              icon={pinIconRef.current}
+              draggable
+              eventHandlers={{
+                dragend(e) {
+                  const { lat, lng } = (e.target as L.Marker).getLatLng()
+                  handlePick(lat, lng)
+                },
+              }}
+            />
           )}
           {!position && suggestedPos && suggestedIconRef.current && (
             <Marker position={suggestedPos} icon={suggestedIconRef.current} />
