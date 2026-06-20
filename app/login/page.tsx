@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState } from "react"
+import { useState, useActionState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react"
@@ -24,10 +24,16 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [state, formAction, isPending] = useActionState(loginAction, {})
+  const [redirectTo, setRedirectTo] = useState("/dashboard")
+
+  useEffect(() => {
+    const r = new URLSearchParams(window.location.search).get("redirect")
+    if (r?.startsWith("/")) setRedirectTo(r)
+  }, [])
 
   async function handleGoogle() {
     setGoogleLoading(true)
-    await signIn.social({ provider: "google", callbackURL: "/dashboard" })
+    await signIn.social({ provider: "google", callbackURL: redirectTo })
   }
 
   return (
@@ -99,6 +105,7 @@ export default function LoginPage() {
           </div>
 
           <form action={formAction} className="space-y-4">
+            <input type="hidden" name="redirect" value={redirectTo} />
             <div className="space-y-1.5">
               <label htmlFor="email" className="block text-sm font-semibold text-ink">
                 Correo electrónico
@@ -165,7 +172,10 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-body mt-6">
           ¿No tienes cuenta?{" "}
-          <Link href="/register" className="font-bold text-ink hover:opacity-70 transition-opacity">
+          <Link
+            href={redirectTo !== "/dashboard" ? `/register?redirect=${encodeURIComponent(redirectTo)}` : "/register"}
+            className="font-bold text-ink hover:opacity-70 transition-opacity"
+          >
             Crear cuenta gratis
           </Link>
         </p>

@@ -35,7 +35,7 @@ const plans = [
     priceSuffix: "/mes",
     cadence: "COP · facturación mensual",
     cta: "Comenzar con Pro",
-    href: "/register",
+    href: "/login?redirect=/dashboard/upgrade",
     dark: true,
     featured: true,
     features: [

@@ -62,5 +62,10 @@ export async function registerAction(
     throw error
   }
 
-  redirect("/dashboard")
+  const redirectTo = formData.get("redirect")
+  const destination =
+    typeof redirectTo === "string" && redirectTo.startsWith("/")
+      ? redirectTo
+      : "/dashboard"
+  redirect(destination)
 }
