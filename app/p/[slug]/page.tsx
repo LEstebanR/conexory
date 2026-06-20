@@ -309,9 +309,9 @@ export default async function PublicPropertyPage({
                         <Phone className="w-4 h-4" strokeWidth={2} />
                         Llamar
                       </a>
-                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3.5 py-2 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
                         {property.user.phone}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-ink" />
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-ink" />
                       </div>
                     </div>
                   </>
