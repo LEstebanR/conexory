@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { createProperty } from "./actions"
 import ImageUpload from "@/components/image-upload"
+import LocationSelect from "@/components/location-select"
 import { useSession } from "@/lib/auth-client"
 import { photoLimit } from "@/lib/plans"
 
@@ -57,6 +58,7 @@ export default function NewPropertyPage() {
   const [type, setType] = useState("")
   const [title, setTitle] = useState("")
   const [price, setPrice] = useState("") // dígitos puros sin puntos
+  const [state, setState] = useState("")
   const [city, setCity] = useState("")
   const [neighborhood, setNeighborhood] = useState("")
   const [area, setArea] = useState("")
@@ -88,6 +90,7 @@ export default function NewPropertyPage() {
         title,
         type,
         price,
+        state,
         city,
         neighborhood,
         area,
@@ -211,26 +214,20 @@ export default function NewPropertyPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <FieldLabel>Ciudad</FieldLabel>
-              <Input
-                placeholder="Bogotá"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="h-11"
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel optional>Barrio / Zona</FieldLabel>
-              <Input
-                placeholder="Chapinero"
-                value={neighborhood}
-                onChange={(e) => setNeighborhood(e.target.value)}
-                className="h-11"
-              />
-            </div>
+          <LocationSelect
+            onStateChange={setState}
+            onCityChange={setCity}
+            required
+          />
+
+          <div className="space-y-1.5">
+            <FieldLabel optional>Barrio / Zona</FieldLabel>
+            <Input
+              placeholder="Chapinero"
+              value={neighborhood}
+              onChange={(e) => setNeighborhood(e.target.value)}
+              className="h-11"
+            />
           </div>
         </SectionCard>
 

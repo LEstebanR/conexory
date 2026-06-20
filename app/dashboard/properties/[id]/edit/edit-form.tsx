@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import ImageUpload from "@/components/image-upload"
+import LocationSelect from "@/components/location-select"
 import { photoLimit } from "@/lib/plans"
 import { updateProperty } from "./actions"
 
@@ -57,6 +58,7 @@ export type InitialData = {
   title: string
   type: string
   price: string
+  state: string
   city: string
   neighborhood: string
   area: string
@@ -73,6 +75,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
   const [type, setType] = useState(initial.type)
   const [title, setTitle] = useState(initial.title)
   const [price, setPrice] = useState(initial.price)
+  const [state, setState] = useState(initial.state)
   const [city, setCity] = useState(initial.city)
   const [neighborhood, setNeighborhood] = useState(initial.neighborhood)
   const [area, setArea] = useState(initial.area)
@@ -95,7 +98,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
 
     startTransition(async () => {
       const result = await updateProperty(initial.id, {
-        title, type, price, city, neighborhood,
+        title, type, price, state, city, neighborhood,
         area, bedrooms, bathrooms, parking, description,
         images: imageUrls,
         videoUrl,
@@ -205,15 +208,17 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <FieldLabel>Ciudad</FieldLabel>
-              <Input placeholder="Bogotá" value={city} onChange={(e) => setCity(e.target.value)} className="h-11" required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel optional>Barrio / Zona</FieldLabel>
-              <Input placeholder="Chapinero" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="h-11" />
-            </div>
+          <LocationSelect
+            initialState={initial.state}
+            initialCity={initial.city}
+            onStateChange={setState}
+            onCityChange={setCity}
+            required
+          />
+
+          <div className="space-y-1.5">
+            <FieldLabel optional>Barrio / Zona</FieldLabel>
+            <Input placeholder="Chapinero" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="h-11" />
           </div>
         </SectionCard>
 

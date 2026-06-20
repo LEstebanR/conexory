@@ -37,7 +37,7 @@ export async function generateMetadata({
 
   const type = TYPE_LABELS[property.type] ?? property.type
   const price = formatCOP(Number(property.price))
-  const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
+  const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
 
   const features = [
     property.bedrooms != null
@@ -154,7 +154,7 @@ export default async function PublicPropertyPage({
 
   const price = formatCOP(Number(property.price))
   const videoId = youtubeId(property.videoUrl)
-  const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
+  const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
 
   const stats = [
     property.area != null && { icon: Ruler, value: property.area, label: "m²" },

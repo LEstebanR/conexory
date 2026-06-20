@@ -25,6 +25,7 @@ export default async function EditPropertyPage({
     title: property.title,
     type: property.type,
     price: Math.round(Number(property.price)).toString(),
+    state: property.state ?? "",
     city: property.city,
     neighborhood: property.neighborhood ?? "",
     area: property.area?.toString() ?? "",
