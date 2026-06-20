@@ -11,6 +11,10 @@ const profileSchema = z.object({
   name: z.string().trim().min(1, "El nombre no puede estar vacío.").max(80, "Máximo 80 caracteres."),
   image: z.string().optional().or(z.literal("")),
   previousImage: z.string().optional().or(z.literal("")),
+  location: z.string().trim().max(80, "Máximo 80 caracteres.").optional().or(z.literal("")),
+  bio: z.string().trim().max(300, "Máximo 300 caracteres.").optional().or(z.literal("")),
+  phone: z.string().trim().max(20, "Máximo 20 caracteres.").optional().or(z.literal("")),
+  phoneIsWhatsapp: z.enum(["true", "false"]).optional(),
 })
 
 export type ProfileState = { error?: string; success?: boolean }
@@ -26,13 +30,17 @@ export async function updateProfile(
     name: formData.get("name"),
     image: formData.get("image") ?? "",
     previousImage: formData.get("previousImage") ?? "",
+    location: formData.get("location") ?? "",
+    bio: formData.get("bio") ?? "",
+    phone: formData.get("phone") ?? "",
+    phoneIsWhatsapp: formData.get("phoneIsWhatsapp") ?? "false",
   })
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." }
   }
 
-  const { name, image, previousImage } = parsed.data
+  const { name, image, previousImage, location, bio, phone, phoneIsWhatsapp } = parsed.data
   const newImage = image || null
 
   // Delete previous avatar from Vercel Blob if it's being cleared or replaced
@@ -42,7 +50,14 @@ export async function updateProfile(
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { name, image: newImage },
+    data: {
+      name,
+      image: newImage,
+      location: location || null,
+      bio: bio || null,
+      phone: phone || null,
+      phoneIsWhatsapp: phoneIsWhatsapp === "true",
+    },
   })
 
   revalidatePath("/dashboard", "layout")

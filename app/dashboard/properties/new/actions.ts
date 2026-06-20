@@ -63,6 +63,7 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
         description: parsed.data.description,
         images: parsed.data.images,
         videoUrl: parsed.data.videoUrl,
+        showContact: parsed.data.showContact,
       },
     })
 

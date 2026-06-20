@@ -66,6 +66,7 @@ export type InitialData = {
   description: string
   images: string[]
   videoUrl: string
+  showContact: boolean
 }
 
 export default function EditForm({ initial, isPremium }: { initial: InitialData; isPremium: boolean }) {
@@ -80,6 +81,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
   const [parking, setParking] = useState(initial.parking)
   const [description, setDescription] = useState(initial.description)
   const [videoUrl, setVideoUrl] = useState(initial.videoUrl)
+  const [showContact, setShowContact] = useState(initial.showContact)
   const [imageUrls, setImageUrls] = useState<string[]>(initial.images)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState("")
@@ -97,6 +99,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
         area, bedrooms, bathrooms, parking, description,
         images: imageUrls,
         videoUrl,
+        showContact,
       })
       if (!result.success) {
         setError(result.error)
@@ -248,6 +251,35 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
             />
             <p className="text-xs text-mute text-right">{description.length}/1000</p>
           </div>
+        </SectionCard>
+
+        {/* Datos de contacto */}
+        <SectionCard title="Datos de contacto">
+          <label className="flex items-start gap-3 cursor-pointer group select-none">
+            <div className="relative flex-shrink-0 mt-0.5">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={showContact}
+                onChange={(e) => setShowContact(e.target.checked)}
+              />
+              <div
+                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${showContact ? "bg-ink border-ink" : "bg-white border-hairline-strong group-hover:border-ink"}`}
+              >
+                {showContact && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-ink">Mostrar mis datos de contacto</p>
+              <p className="text-xs text-mute leading-relaxed mt-0.5">
+                Tu nombre, teléfono y correo aparecerán al final del link público. Útil para compartir en redes como Instagram.
+              </p>
+            </div>
+          </label>
         </SectionCard>
 
         {error && (
