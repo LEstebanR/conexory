@@ -175,6 +175,16 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
         ))}
       </div>
 
+      {/* Configuración — encima del separador */}
+      <div className="flex-shrink-0 px-3 pb-2">
+        <NavLink
+          href="/dashboard/settings"
+          icon={Settings}
+          label="Configuración"
+          onClick={onClose}
+        />
+      </div>
+
       {/* User */}
       <div className="flex-shrink-0 border-t border-hairline p-3">
         <div className="flex items-center gap-3 px-2 py-2 mb-1">
@@ -191,12 +201,6 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
             <p className="text-xs text-mute truncate">{user.email}</p>
           </div>
         </div>
-        <NavLink
-          href="/dashboard/settings"
-          icon={Settings}
-          label="Configuración"
-          onClick={onClose}
-        />
         <button
           onClick={handleSignOut}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium cursor-pointer"

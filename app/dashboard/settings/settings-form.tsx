@@ -1,8 +1,7 @@
 "use client"
 
-import { useActionState, useRef, useState } from "react"
+import { useActionState, useRef, useState, useEffect } from "react"
 import { toast } from "sonner"
-import { useEffect } from "react"
 import { Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -54,17 +53,13 @@ export default function SettingsForm({ name, email, image }: Props) {
       <input type="hidden" name="image" value={avatarUrl} />
 
       {/* Avatar */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-4 pb-6 border-b border-hairline">
         <div className="relative flex-shrink-0">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl}
-              alt={name}
-              className="w-20 h-20 rounded-full object-cover"
-            />
+            <img src={avatarUrl} alt={name} className="w-16 h-16 rounded-full object-cover" />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-ink flex items-center justify-center text-white text-2xl font-bold">
+            <div className="w-16 h-16 rounded-full bg-ink flex items-center justify-center text-white text-xl font-bold">
               {initials}
             </div>
           )}
@@ -72,50 +67,39 @@ export default function SettingsForm({ name, email, image }: Props) {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-hairline-strong flex items-center justify-center hover:bg-canvas-soft transition-colors disabled:opacity-60"
+            className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-white border border-hairline-strong flex items-center justify-center hover:bg-canvas-soft transition-colors disabled:opacity-60"
           >
-            <Camera className="w-3.5 h-3.5 text-ink" strokeWidth={2} />
+            <Camera className="w-3 h-3 text-ink" strokeWidth={2} />
           </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleAvatarChange}
-          />
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
         </div>
-        <div>
-          <p className="text-sm font-bold text-ink">{name}</p>
-          <p className="text-xs text-mute mt-0.5">{email}</p>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-ink truncate">{name}</p>
+          <p className="text-xs text-mute truncate">{email}</p>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="text-xs text-body hover:text-ink transition-colors mt-1.5 disabled:opacity-60"
+            className="text-xs text-body hover:text-ink transition-colors mt-1 disabled:opacity-60"
           >
             {uploading ? "Subiendo…" : "Cambiar foto"}
           </button>
         </div>
       </div>
 
-      {/* Name */}
+      {/* Nombre */}
       <div className="space-y-1.5">
         <label htmlFor="name" className="block text-sm font-semibold text-ink">
           Nombre completo
         </label>
-        <Input
-          id="name"
-          name="name"
-          defaultValue={name}
-          required
-          maxLength={80}
-          className="h-11"
-        />
+        <Input id="name" name="name" defaultValue={name} required maxLength={80} className="h-11" />
       </div>
 
-      <Button type="submit" disabled={isPending || uploading} className="w-full sm:w-auto">
-        {isPending ? "Guardando…" : "Guardar cambios"}
-      </Button>
+      <div className="pt-2">
+        <Button type="submit" disabled={isPending || uploading}>
+          {isPending ? "Guardando…" : "Guardar cambios"}
+        </Button>
+      </div>
     </form>
   )
 }
