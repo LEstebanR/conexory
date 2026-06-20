@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { headers } from "next/headers"
+import { headers, cookies } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
@@ -76,7 +76,20 @@ export default async function DashboardPage({
   const activeCount = properties.filter((p: P) => p.published).length
   const count = properties.length
   const totalShares = properties.reduce((sum: number, p: P) => sum + p.shares, 0)
-  const isPremium = session.user.isPremium
+  // On return from a successful payment the session cookie cache still holds
+  // isPremium=false (TTL 5 min). Bypass it with a fresh DB query and delete
+  // the cache cookie so subsequent page loads also pick up the new value.
+  let isPremium = session.user.isPremium
+  if (upgrade === "success") {
+    const freshUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isPremium: true },
+    })
+    isPremium = freshUser?.isPremium ?? session.user.isPremium
+    const cookieStore = await cookies()
+    cookieStore.delete("better-auth.session_data")
+    cookieStore.delete("__Secure-better-auth.session_data")
+  }
   const limit = propertyLimit(isPremium)
   const atLimit = activeCount >= limit
   const upgradeHref = isPremium ? "/contacto" : "/dashboard/upgrade"
