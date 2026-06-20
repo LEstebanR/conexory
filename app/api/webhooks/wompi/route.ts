@@ -6,12 +6,7 @@ export async function POST(req: Request) {
   const bodyText = await req.text()
   const checksum = req.headers.get("x-event-secret") ?? ""
 
-  // Skip signature verification outside production. VERCEL_ENV is "production"
-  // only on the production deployment; local and preview both skip so we can
-  // capture real Wompi events and confirm the exact signature format before
-  // enforcing it.
-  const isProduction = process.env.VERCEL_ENV === "production"
-  if (isProduction && !verifyWebhookSignature(bodyText, checksum)) {
+  if (!verifyWebhookSignature(bodyText, checksum)) {
     return new Response(null, { status: 401 })
   }
 
