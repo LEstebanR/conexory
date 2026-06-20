@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { signOut } from "@/lib/auth-client"
@@ -71,6 +72,12 @@ const navItems = [
     label: "Mis propiedades",
     href: "/dashboard",
     exact: true,
+  },
+  {
+    icon: Settings,
+    label: "Configuración",
+    href: "/dashboard/settings",
+    exact: false,
   },
 ]
 
