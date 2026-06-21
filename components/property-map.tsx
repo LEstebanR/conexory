@@ -1,7 +1,7 @@
 "use client"
 
 import "leaflet/dist/leaflet.css"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { MapContainer, TileLayer, Marker } from "react-leaflet"
 import L from "leaflet"
 
@@ -12,10 +12,8 @@ type Props = {
 }
 
 export default function PropertyMap({ latitude, longitude, label }: Props) {
-  const [pinIcon, setPinIcon] = useState<L.DivIcon | null>(null)
-
-  useEffect(() => {
-    setPinIcon(L.divIcon({
+  const [pinIcon] = useState<L.DivIcon>(() =>
+    L.divIcon({
       className: "",
       html: `<div style="
         width:28px;height:28px;
@@ -26,8 +24,8 @@ export default function PropertyMap({ latitude, longitude, label }: Props) {
       "></div>`,
       iconSize: [20, 20],
       iconAnchor: [10, 20],
-    }))
-  }, [])
+    })
+  )
 
   return (
     <div className="rounded-2xl border border-hairline overflow-hidden">

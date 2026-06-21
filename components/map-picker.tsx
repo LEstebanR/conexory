@@ -94,8 +94,8 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
   const [results, setResults] = useState<NominatimResult[]>([])
   const [searching, setSearching] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [pinIcon, setPinIcon] = useState<L.DivIcon | null>(null)
-  const [suggestedIcon, setSuggestedIcon] = useState<L.DivIcon | null>(null)
+  const [pinIcon] = useState<L.DivIcon>(() => createPinIcon(false))
+  const [suggestedIcon] = useState<L.DivIcon>(() => createPinIcon(true))
   const prevCityRef = useRef<string | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
@@ -108,11 +108,6 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
     }
     document.addEventListener("mousedown", onClickOutside)
     return () => document.removeEventListener("mousedown", onClickOutside)
-  }, [])
-
-  useEffect(() => {
-    setPinIcon(createPinIcon(false))
-    setSuggestedIcon(createPinIcon(true))
   }, [])
 
   // Auto-suggest when city changes and no pin is placed
