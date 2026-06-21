@@ -1,24 +1,9 @@
 "use client"
 
 import "leaflet/dist/leaflet.css"
-import { useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { MapContainer, TileLayer, Marker } from "react-leaflet"
 import L from "leaflet"
-
-function createPinIcon() {
-  return L.divIcon({
-    className: "",
-    html: `<div style="
-      width:28px;height:28px;
-      background:#000;border:3px solid #fff;
-      border-radius:50% 50% 50% 0;
-      transform:rotate(-45deg) translate(-4px,-4px);
-      box-shadow:0 2px 8px rgba(0,0,0,0.35);
-    "></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 20],
-  })
-}
 
 type Props = {
   latitude: number
@@ -27,10 +12,21 @@ type Props = {
 }
 
 export default function PropertyMap({ latitude, longitude, label }: Props) {
-  const pinIcon = useRef<L.DivIcon | null>(null)
+  const [pinIcon, setPinIcon] = useState<L.DivIcon | null>(null)
 
   useEffect(() => {
-    pinIcon.current = createPinIcon()
+    setPinIcon(L.divIcon({
+      className: "",
+      html: `<div style="
+        width:28px;height:28px;
+        background:#000;border:3px solid #fff;
+        border-radius:50% 50% 50% 0;
+        transform:rotate(-45deg) translate(-4px,-4px);
+        box-shadow:0 2px 8px rgba(0,0,0,0.35);
+      "></div>`,
+      iconSize: [20, 20],
+      iconAnchor: [10, 20],
+    }))
   }, [])
 
   return (
@@ -44,8 +40,8 @@ export default function PropertyMap({ latitude, longitude, label }: Props) {
           attributionControl={false}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {pinIcon.current && (
-            <Marker position={[latitude, longitude]} icon={pinIcon.current} />
+          {pinIcon && (
+            <Marker position={[latitude, longitude]} icon={pinIcon} />
           )}
         </MapContainer>
       </div>
