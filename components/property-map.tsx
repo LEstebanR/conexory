@@ -34,7 +34,7 @@ export default function PropertyMap({ latitude, longitude, label }: Props) {
       <div style={{ height: 280 }}>
         <MapContainer
           center={[latitude, longitude]}
-          zoom={14}
+          zoom={16}
           style={{ height: "100%", width: "100%" }}
           scrollWheelZoom={false}
           attributionControl={false}
