@@ -84,7 +84,7 @@ export async function generateMetadata({
   const agent = await getAgent(slug)
   if (!agent || !agent.profilePublished) return {}
 
-  const title = `${agent.name} · Agente inmobiliario`
+  const title = `${agent.name} · Asesor inmobiliario`
   const description =
     agent.bio ||
     `Conoce las propiedades de ${agent.name} en Conexory. ${agent.properties.length} propiedad${agent.properties.length !== 1 ? "es" : ""} activa${agent.properties.length !== 1 ? "s" : ""}.`
@@ -171,7 +171,7 @@ export default async function AgentProfilePage({
           <h1 className="text-2xl font-black text-ink tracking-tight leading-tight">
             {agent.name}
           </h1>
-          <p className="text-sm font-semibold text-body mt-0.5">Agente inmobiliario</p>
+          <p className="text-sm font-semibold text-body mt-0.5">Asesor inmobiliario</p>
 
           {agent.location && (
             <div className="flex items-center justify-center gap-1 mt-2">

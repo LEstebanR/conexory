@@ -8,7 +8,7 @@ import Reveal from "@/components/reveal"
 
 export const metadata: Metadata = {
   title: "Blog — Conexory",
-  description: "Consejos, guías y estrategias para agentes inmobiliarios en Colombia. Aprende a compartir propiedades por WhatsApp, mejorar tus fichas y cerrar más negocios.",
+  description: "Consejos, guías y estrategias para asesores inmobiliarios en Colombia. Aprende a compartir propiedades por WhatsApp, mejorar tus fichas y cerrar más negocios.",
 }
 
 function formatDate(dateStr: string) {
@@ -38,7 +38,7 @@ export default function BlogPage() {
           >
             Consejos para
             <br />
-            <span className="text-mute">agentes inmobiliarios.</span>
+            <span className="text-mute">asesores inmobiliarios.</span>
           </h1>
           <p
             className="text-lg text-body leading-relaxed mt-6 max-w-xl mx-auto animate-fade-up"

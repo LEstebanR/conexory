@@ -270,7 +270,7 @@ export default function PrivacyPage() {
       <LegalSection id="menores" number={11} title="Menores de edad">
         <LegalP>
           El Servicio está dirigido exclusivamente a personas mayores de 18 años
-          con capacidad legal para ejercer como agentes inmobiliarios. No
+          con capacidad legal para ejercer como asesores inmobiliarios. No
           recopilamos intencionalmente datos de menores de edad. Si detectamos
           que un usuario es menor de edad, eliminaremos su cuenta y datos de
           inmediato.

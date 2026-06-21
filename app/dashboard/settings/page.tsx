@@ -72,7 +72,7 @@ export default async function SettingsPage() {
             </div>
             <p className="text-xs text-mute leading-relaxed mb-4">
               {user.profilePublished
-                ? "Tu perfil es visible para cualquier persona con el link."
+                ? "Tu perfil es visible para cualquier persona con el link. Ocultarlo solo lo hace privado — no borra tus datos."
                 : "Tu perfil está oculto. Actívalo para compartir tus propiedades con un link."}
             </p>
 
@@ -97,7 +97,7 @@ export default async function SettingsPage() {
                 size="sm"
                 className="w-full"
               >
-                {user.profilePublished ? "Desactivar perfil" : "Activar perfil público"}
+                {user.profilePublished ? "Ocultar perfil público" : "Activar perfil público"}
               </Button>
             </form>
           </div>

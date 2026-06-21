@@ -2,7 +2,7 @@
 title: "¿Cuántas propiedades debería tener en portafolio un agente activo?"
 date: "2026-06-01"
 description: "Más propiedades no siempre significa más ventas. Descubre cuál es el número óptimo de inmuebles para gestionar bien tu portafolio y cerrar más negocios."
-tags: ["portafolio", "gestión", "productividad", "agente inmobiliario"]
+tags: ["portafolio", "gestión", "productividad", "asesor inmobiliario"]
 ---
 
 Es una pregunta que casi ningún agente se hace en voz alta pero todos se hacen en silencio: ¿tengo demasiadas propiedades? ¿o muy pocas?

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
   title: "Precios — Conexory",
-  description: "Planes y precios de Conexory para agentes inmobiliarios en Colombia.",
+  description: "Planes y precios de Conexory para asesores inmobiliarios en Colombia.",
 }
 
 const plans = [
