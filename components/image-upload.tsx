@@ -1,8 +1,23 @@
 "use client"
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react"
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import imageCompression from "browser-image-compression"
-import { ImagePlus, X, Loader2, AlertCircle, Plus, ChevronLeft, ChevronRight } from "lucide-react"
+import { ImagePlus, X, Loader2, AlertCircle, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type ImageItem = {
@@ -14,6 +29,72 @@ type ImageItem = {
 }
 
 const MAX_SIZE_MB = 20
+
+function SortablePhoto({
+  item,
+  index,
+  onRemove,
+}: {
+  item: ImageItem
+  index: number
+  onRemove: (id: string) => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative aspect-square rounded-xl overflow-hidden bg-canvas-soft touch-none"
+    >
+      {/* Drag target — whole tile (excluding the X button) */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute inset-0 cursor-grab active:cursor-grabbing"
+      />
+
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={item.preview} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+
+      {item.uploading && (
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+          <Loader2 className="w-5 h-5 text-white animate-spin" />
+        </div>
+      )}
+      {item.error && (
+        <div className="absolute inset-0 bg-red-500/50 flex flex-col items-center justify-center gap-1 pointer-events-none">
+          <AlertCircle className="w-5 h-5 text-white" />
+          <span className="text-[10px] text-white font-bold">Error</span>
+        </div>
+      )}
+
+      {/* X button — sits above drag listeners */}
+      <button
+        type="button"
+        onClick={() => onRemove(item.id)}
+        aria-label="Eliminar foto"
+        className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-sm"
+      >
+        <X className="w-4 h-4" strokeWidth={2.5} />
+      </button>
+
+      {index === 0 && (
+        <div className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold bg-ink text-white px-1.5 py-0.5 rounded-full pointer-events-none">
+          Portada
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function ImageUpload({
   onUrlsChange,
@@ -35,7 +116,7 @@ export default function ImageUpload({
       error: false,
     }))
   )
-  const [dragging, setDragging] = useState(false)
+  const [dropActive, setDropActive] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const onUrlsChangeRef = useRef(onUrlsChange)
@@ -49,6 +130,22 @@ export default function ImageUpload({
     onUrlsChangeRef.current(items.filter((i) => i.url).map((i) => i.url!))
     onUploadingChangeRef.current(items.some((i) => i.uploading))
   }, [items])
+
+  // distance:8 prevents accidental drags on click/tap
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      setItems((prev) => {
+        const from = prev.findIndex((i) => i.id === active.id)
+        const to = prev.findIndex((i) => i.id === over.id)
+        return arrayMove(prev, from, to)
+      })
+    }
+  }
 
   async function uploadOne(file: File, itemId: string) {
     try {
@@ -75,13 +172,10 @@ export default function ImageUpload({
   function handleFiles(files: File[]) {
     const remaining = maxImages - items.length
     if (remaining <= 0) return
-
     const valid = files
       .filter((f) => f.type.startsWith("image/") && f.size <= MAX_SIZE_MB * 1024 * 1024)
       .slice(0, remaining)
-
     if (!valid.length) return
-
     const newItems: ImageItem[] = valid.map((f) => ({
       id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       preview: URL.createObjectURL(f),
@@ -89,7 +183,6 @@ export default function ImageUpload({
       uploading: true,
       error: false,
     }))
-
     setItems((prev) => [...prev, ...newItems])
     valid.forEach((file, i) => uploadOne(file, newItems[i].id))
   }
@@ -102,41 +195,31 @@ export default function ImageUpload({
     })
   }
 
-  function move(index: number, dir: -1 | 1) {
-    setItems((prev) => {
-      const target = index + dir
-      if (target < 0 || target >= prev.length) return prev
-      const next = [...prev]
-      ;[next[index], next[target]] = [next[target], next[index]]
-      return next
-    })
-  }
-
   const canAdd = items.length < maxImages
 
   return (
     <div className="space-y-3">
       {items.length === 0 && (
         <div
-          onDragEnter={() => setDragging(true)}
-          onDragLeave={() => setDragging(false)}
+          onDragEnter={() => setDropActive(true)}
+          onDragLeave={() => setDropActive(false)}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault()
-            setDragging(false)
+            setDropActive(false)
             handleFiles(Array.from(e.dataTransfer.files))
           }}
           onClick={() => inputRef.current?.click()}
           className={cn(
             "border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-3 text-center cursor-pointer transition-colors",
-            dragging
+            dropActive
               ? "border-ink bg-canvas-soft"
               : "border-hairline-strong hover:border-ink hover:bg-canvas-soft/20"
           )}
         >
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-canvas-soft">
             <ImagePlus
-              className={cn("w-6 h-6", dragging ? "text-ink" : "text-mute")}
+              className={cn("w-6 h-6", dropActive ? "text-ink" : "text-mute")}
               strokeWidth={1.75}
             />
           </div>
@@ -163,87 +246,38 @@ export default function ImageUpload({
 
       {items.length > 0 && (
         <>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-            {items.map((item, index) => {
-              const busy = item.uploading || item.error
-              return (
-                <div
-                  key={item.id}
-                  className="relative aspect-square rounded-xl overflow-hidden bg-canvas-soft"
-                >
-                  {/* Plain <img> (eager) instead of next/image fill: these are
-                      unoptimized previews, and fill's lazy loading sometimes
-                      left the tile blank/gray on client navigation. */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.preview} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={items.map((i) => i.id)} strategy={rectSortingStrategy}>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {items.map((item, index) => (
+                  <SortablePhoto
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    onRemove={remove}
+                  />
+                ))}
 
-                  {item.uploading && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <Loader2 className="w-5 h-5 text-white animate-spin" />
-                    </div>
-                  )}
-                  {item.error && (
-                    <div className="absolute inset-0 bg-red-500/50 flex flex-col items-center justify-center gap-1">
-                      <AlertCircle className="w-5 h-5 text-white" />
-                      <span className="text-[10px] text-white font-bold">Error</span>
-                    </div>
-                  )}
-
+                {canAdd && (
                   <button
                     type="button"
-                    onClick={() => remove(item.id)}
-                    aria-label="Eliminar foto"
-                    className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-sm"
+                    onClick={() => inputRef.current?.click()}
+                    className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong hover:border-ink hover:bg-canvas-soft/30 flex flex-col items-center justify-center gap-1.5 text-mute hover:text-ink transition-colors"
                   >
-                    <X className="w-4 h-4" strokeWidth={2.5} />
+                    <Plus className="w-6 h-6" strokeWidth={2} />
+                    <span className="text-xs font-semibold">Agregar</span>
                   </button>
-
-                  {index === 0 ? (
-                    <div className="absolute top-1.5 left-1.5 text-[9px] font-bold bg-ink text-white px-1.5 py-0.5 rounded-full">
-                      Portada
-                    </div>
-                  ) : null}
-
-                  {!busy && items.length > 1 && (
-                    <div className="absolute inset-x-1.5 bottom-1.5 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => move(index, -1)}
-                        disabled={index === 0}
-                        aria-label="Mover a la izquierda"
-                        className="w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors disabled:opacity-0 disabled:pointer-events-none shadow-sm"
-                      >
-                        <ChevronLeft className="w-4 h-4" strokeWidth={2.5} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => move(index, 1)}
-                        disabled={index === items.length - 1}
-                        aria-label="Mover a la derecha"
-                        className="w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors disabled:opacity-0 disabled:pointer-events-none shadow-sm"
-                      >
-                        <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-
-            {canAdd && (
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong hover:border-ink hover:bg-canvas-soft/30 flex flex-col items-center justify-center gap-1.5 text-mute hover:text-ink transition-colors"
-              >
-                <Plus className="w-6 h-6" strokeWidth={2} />
-                <span className="text-xs font-semibold">Agregar</span>
-              </button>
-            )}
-          </div>
+                )}
+              </div>
+            </SortableContext>
+          </DndContext>
 
           <p className="text-xs text-mute">
-            La primera foto es la portada. Usa las flechas para reordenar · {items.length}/{maxImages} fotos
+            Arrastra las fotos para reordenar · La primera es la portada · {items.length}/{maxImages} fotos
           </p>
         </>
       )}
