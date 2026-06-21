@@ -94,8 +94,8 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
   const [results, setResults] = useState<NominatimResult[]>([])
   const [searching, setSearching] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pinIconRef = useRef<L.DivIcon | null>(null)
-  const suggestedIconRef = useRef<L.DivIcon | null>(null)
+  const [pinIcon, setPinIcon] = useState<L.DivIcon | null>(null)
+  const [suggestedIcon, setSuggestedIcon] = useState<L.DivIcon | null>(null)
   const prevCityRef = useRef<string | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
@@ -111,8 +111,8 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
   }, [])
 
   useEffect(() => {
-    pinIconRef.current = createPinIcon(false)
-    suggestedIconRef.current = createPinIcon(true)
+    setPinIcon(createPinIcon(false))
+    setSuggestedIcon(createPinIcon(true))
   }, [])
 
   // Auto-suggest when city changes and no pin is placed
@@ -239,10 +239,10 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
           />
           <ClickHandler onClickPick={handleClickPick} />
           <FlyTo coords={flyTarget} zoom={flyZoom} />
-          {position && pinIconRef.current && (
+          {position && pinIcon && (
             <Marker
               position={position}
-              icon={pinIconRef.current}
+              icon={pinIcon}
               draggable
               eventHandlers={{
                 dragend(e) {
@@ -252,8 +252,8 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
               }}
             />
           )}
-          {!position && suggestedPos && suggestedIconRef.current && (
-            <Marker position={suggestedPos} icon={suggestedIconRef.current} />
+          {!position && suggestedPos && suggestedIcon && (
+            <Marker position={suggestedPos} icon={suggestedIcon} />
           )}
         </MapContainer>
 
