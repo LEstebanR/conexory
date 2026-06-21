@@ -55,6 +55,11 @@ export default async function DashboardPage({
   // Use either signal to detect a post-payment landing.
   const isPostPayment = upgrade === "success" || Boolean(sp.id)
 
+  const agentProfile = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { agentSlug: true, profilePublished: true },
+  })
+
   const properties = await prisma.property.findMany({
     where: { userId: session.user.id },
     select: {
@@ -135,6 +140,14 @@ export default async function DashboardPage({
           </h1>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
+          {agentProfile?.profilePublished && agentProfile.agentSlug && (
+            <Button size="sm" variant="outline" asChild>
+              <Link href={`/agente/${agentProfile.agentSlug}`} target="_blank">
+                <LinkIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Mi perfil</span>
+              </Link>
+            </Button>
+          )}
           {!isPremium && (
             <Button size="sm" variant="secondary" asChild>
               <Link href="/dashboard/upgrade">

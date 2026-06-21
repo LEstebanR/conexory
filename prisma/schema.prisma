@@ -16,8 +16,10 @@ model User {
   email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
-  isPremium       Boolean   @default(false)
-  location        String?
+  isPremium        Boolean   @default(false)
+  agentSlug        String?   @unique
+  profilePublished Boolean   @default(false)
+  location         String?
   bio             String?
   phone           String?
   phoneIsWhatsapp Boolean   @default(false)

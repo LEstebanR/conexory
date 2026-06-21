@@ -5,6 +5,8 @@ import { headers } from "next/headers"
 import { z } from "zod"
 import { APIError } from "better-auth/api"
 import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+import { generateAgentSlug } from "@/lib/agent-slug"
 
 const AUTH_ERRORS: Record<string, string> = {
   EMAIL_ALREADY_EXISTS: "Ya existe una cuenta con este email. ¿Quieres iniciar sesión?",
@@ -52,6 +54,12 @@ export async function registerAction(
       body: { name, email, password },
       headers: await headers(),
     })
+    // Generate agent slug for the new user (best-effort, non-blocking)
+    const newUser = await prisma.user.findUnique({ where: { email }, select: { id: true } })
+    if (newUser) {
+      const slug = await generateAgentSlug(name, prisma)
+      await prisma.user.update({ where: { id: newUser.id }, data: { agentSlug: slug } })
+    }
   } catch (error) {
     if (error instanceof APIError) {
       return {

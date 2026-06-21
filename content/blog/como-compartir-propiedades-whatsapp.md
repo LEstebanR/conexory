@@ -5,7 +5,7 @@ description: "Aprende la estrategia que usan los mejores agentes inmobiliarios e
 tags: ["WhatsApp", "estrategia", "ventas"]
 ---
 
-WhatsApp es el canal de ventas más poderoso que tiene un agente inmobiliario en Colombia. Con más de 40 millones de usuarios activos en el país, prácticamente todos tus clientes potenciales ya están ahí. El problema no es el canal — es cómo lo estás usando.
+WhatsApp es el canal de ventas más poderoso que tiene un asesor inmobiliario en Colombia. Con más de 40 millones de usuarios activos en el país, prácticamente todos tus clientes potenciales ya están ahí. El problema no es el canal — es cómo lo estás usando.
 
 ## El error más común: el PDF
 

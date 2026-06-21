@@ -19,9 +19,9 @@ export const metadata: Metadata = {
     template: "%s — Conexory",
   },
   description:
-    "La herramienta más rápida para agentes inmobiliarios en Colombia. Publica tu propiedad en 60 segundos y compártela por WhatsApp con un link único y profesional.",
+    "La herramienta más rápida para asesores inmobiliarios en Colombia. Publica tu propiedad en 60 segundos y compártela por WhatsApp con un link único y profesional.",
   keywords: [
-    "agente inmobiliario Colombia",
+    "asesor inmobiliario Colombia",
     "compartir propiedades WhatsApp",
     "publicar propiedades online",
     "ficha de propiedad digital",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Conexory — Crea. Comparte. Vende.",
     description:
-      "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para agentes inmobiliarios colombianos.",
+      "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para asesores inmobiliarios colombianos.",
     type: "website",
     locale: "es_CO",
     siteName: "Conexory",

@@ -10,7 +10,7 @@ import LegalLayout, {
 export const metadata: Metadata = {
   title: "Términos de Uso — Conexory",
   description:
-    "Términos y condiciones de uso de la plataforma Conexory para agentes inmobiliarios en Colombia.",
+    "Términos y condiciones de uso de la plataforma Conexory para asesores inmobiliarios en Colombia.",
 }
 
 const sections = [
@@ -59,7 +59,7 @@ export default function TermsPage() {
       <LegalSection id="servicio" number={2} title="El servicio Conexory">
         <LegalP>
           Conexory es una plataforma SaaS (Software como Servicio) que permite
-          a agentes inmobiliarios crear fichas de propiedades y compartirlas
+          a asesores inmobiliarios crear fichas de propiedades y compartirlas
           mediante un link único. El Servicio incluye, entre otras
           funcionalidades:
         </LegalP>

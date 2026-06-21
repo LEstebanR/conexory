@@ -6,6 +6,7 @@ import { z } from "zod"
 import { del } from "@vercel/blob"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { ensureAgentSlug } from "@/lib/agent-slug"
 
 const profileSchema = z.object({
   name: z.string().trim().min(1, "El nombre no puede estar vacío.").max(80, "Máximo 80 caracteres."),
@@ -62,4 +63,24 @@ export async function updateProfile(
 
   revalidatePath("/dashboard", "layout")
   return { success: true }
+}
+
+export async function toggleProfilePublished(): Promise<void> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return
+
+  await ensureAgentSlug(session.user.id, session.user.name, prisma)
+
+  const current = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { profilePublished: true },
+  })
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { profilePublished: !current?.profilePublished },
+  })
+
+  revalidatePath("/dashboard/settings")
+  revalidatePath("/agente", "layout")
 }
