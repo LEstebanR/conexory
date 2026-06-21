@@ -9,6 +9,7 @@ import { youtubeId } from "@/lib/youtube"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
+import PropertyMap from "@/components/property-map-client"
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -165,6 +166,14 @@ export default async function PropertyDetailPage({
               {property.description}
             </p>
           </div>
+        )}
+
+        {property.latitude != null && property.longitude != null && (
+          <PropertyMap
+            latitude={property.latitude}
+            longitude={property.longitude}
+            label={location || undefined}
+          />
         )}
       </div>
     </div>

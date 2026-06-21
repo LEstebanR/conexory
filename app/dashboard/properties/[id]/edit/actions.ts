@@ -40,6 +40,8 @@ export async function updateProperty(
         description: parsed.data.description,
         images: parsed.data.images,
         videoUrl: parsed.data.videoUrl,
+        latitude: parsed.data.latitude ?? null,
+        longitude: parsed.data.longitude ?? null,
         showContact: parsed.data.showContact,
       },
     })

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma"
 import { youtubeId } from "@/lib/youtube"
 import PublicGallery from "@/components/public-gallery"
 import Reveal from "@/components/reveal"
+import PropertyMap from "@/components/property-map-client"
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -243,6 +244,17 @@ export default async function PublicPropertyPage({
                 {property.description}
               </p>
             </div>
+          </Reveal>
+        )}
+
+        {/* Map — only shown when coordinates are set */}
+        {property.latitude != null && property.longitude != null && (
+          <Reveal delay={180}>
+            <PropertyMap
+              latitude={property.latitude}
+              longitude={property.longitude}
+              label={location || undefined}
+            />
           </Reveal>
         )}
 
