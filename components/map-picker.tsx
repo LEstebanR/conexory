@@ -48,8 +48,8 @@ async function geocode(query: string): Promise<NominatimResult | null> {
   }
 }
 
-function ClickHandler({ onPick }: { onPick: (lat: number, lng: number) => void }) {
-  useMapEvents({ click(e) { onPick(e.latlng.lat, e.latlng.lng) } })
+function ClickHandler({ onClickPick }: { onClickPick: (lat: number, lng: number) => void }) {
+  useMapEvents({ click(e) { onClickPick(e.latlng.lat, e.latlng.lng) } })
   return null
 }
 
@@ -83,7 +83,12 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
   const [position, setPosition] = useState<[number, number] | null>(
     hasInitial ? [latitude!, longitude!] : null
   )
-  // Suggested location (no pin, just center the map)
+  // Separate fly-to intent: only updated when we explicitly want to animate the camera
+  // (search result selected, suggested city geocoded). Click on map does NOT trigger fly.
+  const [flyTarget, setFlyTarget] = useState<[number, number] | null>(
+    hasInitial ? [latitude!, longitude!] : null
+  )
+  const [flyZoom, setFlyZoom] = useState(PICKED_ZOOM)
   const [suggestedPos, setSuggestedPos] = useState<[number, number] | null>(null)
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<NominatimResult[]>([])
@@ -116,17 +121,41 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
     prevCityRef.current = suggestedCity
     geocode(`${suggestedCity}, Colombia`).then((result) => {
       if (result) {
-        setSuggestedPos([parseFloat(result.lat), parseFloat(result.lon)])
+        const coords: [number, number] = [parseFloat(result.lat), parseFloat(result.lon)]
+        setSuggestedPos(coords)
+        setFlyTarget(coords)
+        setFlyZoom(SUGGESTED_ZOOM)
       }
     })
   }, [suggestedCity, position])
 
-  function handlePick(lat: number, lng: number) {
+  // Click on map: place pin without flying (user is already looking at the right spot)
+  function handleClickPick(lat: number, lng: number) {
     const pos: [number, number] = [lat, lng]
     setPosition(pos)
     setSuggestedPos(null)
     onChange(lat, lng)
     setResults([])
+  }
+
+  // Drag end: update pin without flying
+  function handleDragPick(lat: number, lng: number) {
+    setPosition([lat, lng])
+    onChange(lat, lng)
+  }
+
+  // Search result selected: fly to result and place pin
+  function selectResult(r: NominatimResult) {
+    const lat = parseFloat(r.lat)
+    const lng = parseFloat(r.lon)
+    const pos: [number, number] = [lat, lng]
+    setQuery(r.display_name.split(",")[0])
+    setResults([])
+    setPosition(pos)
+    setSuggestedPos(null)
+    setFlyTarget(pos)
+    setFlyZoom(PICKED_ZOOM)
+    onChange(lat, lng)
   }
 
   function handleClear() {
@@ -154,15 +183,6 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
       }
     }, 500)
   }
-
-  function selectResult(r: NominatimResult) {
-    setQuery(r.display_name.split(",")[0])
-    setResults([])
-    handlePick(parseFloat(r.lat), parseFloat(r.lon))
-  }
-
-  const flyTarget = position ?? suggestedPos
-  const flyZoom = position ? PICKED_ZOOM : SUGGESTED_ZOOM
 
   return (
     <div className="space-y-2">
@@ -217,7 +237,7 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
-          <ClickHandler onPick={handlePick} />
+          <ClickHandler onClickPick={handleClickPick} />
           <FlyTo coords={flyTarget} zoom={flyZoom} />
           {position && pinIconRef.current && (
             <Marker
@@ -227,7 +247,7 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
               eventHandlers={{
                 dragend(e) {
                   const { lat, lng } = (e.target as L.Marker).getLatLng()
-                  handlePick(lat, lng)
+                  handleDragPick(lat, lng)
                 },
               }}
             />
