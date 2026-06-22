@@ -178,7 +178,7 @@ export default async function AgentProfilePage({
     <div className="min-h-screen bg-canvas flex flex-col">
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="bg-canvas-softer/60 border-b border-hairline pt-12 pb-10 px-5">
+      <section className="pt-12 pb-10 px-5">
         <div className="max-w-lg mx-auto flex flex-col items-center text-center">
 
           {/* Avatar */}
@@ -293,7 +293,7 @@ export default async function AgentProfilePage({
 
       {/* ── Properties ───────────────────────────────────────────────────── */}
       {properties.length > 0 && (
-        <section className="border-t border-hairline flex-1">
+        <section className="flex-1">
           <div className="max-w-lg mx-auto w-full px-5 py-7">
             <AgentProperties properties={properties} />
           </div>
