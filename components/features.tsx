@@ -76,7 +76,7 @@ function ShareMock() {
       </div>
       <div className="h-11 rounded-full bg-ink flex items-center justify-center gap-2 text-sm font-semibold text-white">
         <MessageCircle className="w-4 h-4" />
-        Enviar por WhatsApp
+        Compartir link
       </div>
       {/* OG image preview — split layout matching real design */}
       <div className="rounded-xl overflow-hidden border border-hairline flex h-24">
@@ -151,8 +151,8 @@ const blocks = [
     icon: Link2,
     title: "Un link, una preview perfecta.",
     description:
-      "Cada propiedad tiene su URL única. Compártela por WhatsApp, Instagram o email y se ve siempre profesional, con foto, precio y detalles en la preview.",
-    points: ["Preview enriquecida en WhatsApp", "Link único por propiedad", "Cambios reflejados al instante"],
+      "Cada propiedad tiene su URL única. Compártela por cualquier canal y se ve siempre profesional, con foto, precio y detalles en la preview.",
+    points: ["Preview enriquecida en cualquier canal", "Link único por propiedad", "Cambios reflejados al instante"],
     mock: <ShareMock />,
   },
   {

@@ -155,7 +155,7 @@ export default function Hero() {
           className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tighter leading-[1.05] text-ink animate-fade-up text-balance"
           style={{ animationDelay: "80ms" }}
         >
-          Comparte propiedades por WhatsApp en{" "}
+          Publica y comparte propiedades en{" "}
           <span className="relative whitespace-nowrap">
             {/* Highlighter — behind text, slightly tilted */}
             <span
@@ -186,9 +186,9 @@ export default function Hero() {
           className="text-lg sm:text-xl text-body leading-relaxed max-w-2xl mx-auto mt-8 animate-fade-up text-balance"
           style={{ animationDelay: "160ms" }}
         >
-          Sube las fotos, escribe el precio y obtén un link único para cada
-          propiedad. Compártelo por WhatsApp con una preview profesional. Sin
-          portales, sin complicaciones.
+          Sube las fotos, escribe el precio y obtén un link único por propiedad.
+          Compártelo donde quieras con una preview profesional. Sin portales, sin
+          complicaciones.
         </p>
 
         {/* CTA */}

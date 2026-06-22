@@ -7,15 +7,15 @@ const faqs = [
   },
   {
     q: "¿Funciona desde el celular?",
-    a: "Sí, 100%. Conexory está diseñado para usarse desde el celular: subís las fotos, escribís el precio y obtenés el link para compartir por WhatsApp, todo sin necesidad de un computador.",
+    a: "Sí, 100%. Conexory está diseñado para usarse desde el celular: subes las fotos, escribes el precio y obtienes el link para compartir donde quieras, todo sin necesidad de un computador.",
   },
   {
     q: "¿Puedo cancelar cuando quiera?",
-    a: "Sí. El plan Pro no tiene permanencia. Cancelás en cualquier momento desde tu perfil y no se te cobra el siguiente mes. El plan gratuito es para siempre sin ningún costo.",
+    a: "Sí. El plan Pro no tiene permanencia. Cancela en cualquier momento desde tu perfil y no se te cobra el siguiente mes. El plan gratuito es para siempre sin ningún costo.",
   },
   {
-    q: "¿Cómo se ve la propiedad cuando la comparto por WhatsApp?",
-    a: "WhatsApp muestra automáticamente una preview con la foto principal de la propiedad, el precio y el título. Tu cliente ve la información antes de abrir el link, lo que genera más clics e interés.",
+    q: "¿Cómo se ve la propiedad cuando la comparto?",
+    a: "Cuando compartes el link, aparece automáticamente una preview con la foto principal de la propiedad, el precio y el título. Tu cliente ve la información antes de abrir el link, lo que genera más clics e interés. Funciona en WhatsApp, Telegram, correo y la mayoría de plataformas.",
   },
   {
     q: "¿Puedo usar Conexory si tengo muchas propiedades?",
