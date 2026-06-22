@@ -23,6 +23,7 @@ model User {
   bio             String?
   phone           String?
   phoneIsWhatsapp Boolean   @default(false)
+  instagram       String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

@@ -8,10 +8,20 @@ import {
   MessageCircle,
   Mail,
   ArrowUpRight,
-  Building2,
 } from "lucide-react"
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
+import AgentProperties, { type AgentProperty } from "./agent-properties"
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -21,23 +31,7 @@ const TYPE_LABELS: Record<string, string> = {
   lot: "Lote",
   warehouse: "Bodega",
 }
-
-function formatCOP(amount: number): string {
-  if (amount >= 1_000_000_000) {
-    const b = amount / 1_000_000_000
-    return `$${Number.isInteger(b) ? b.toLocaleString("es-CO") : b.toLocaleString("es-CO", { maximumFractionDigits: 1 })} B`
-  }
-  if (amount >= 1_000_000) {
-    const m = amount / 1_000_000
-    return `$${Number.isInteger(m) ? m.toLocaleString("es-CO") : m.toLocaleString("es-CO", { maximumFractionDigits: 0 })} M`
-  }
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
+void TYPE_LABELS
 
 async function getAgent(slug: string) {
   return prisma.user.findUnique({
@@ -51,6 +45,7 @@ async function getAgent(slug: string) {
       bio: true,
       phone: true,
       phoneIsWhatsapp: true,
+      instagram: true,
       profilePublished: true,
       properties: {
         where: { published: true },
@@ -69,6 +64,8 @@ async function getAgent(slug: string) {
           bedrooms: true,
           bathrooms: true,
           shares: true,
+          latitude: true,
+          longitude: true,
         },
       },
     },
@@ -102,6 +99,14 @@ export async function generateMetadata({
     },
     twitter: { card: "summary_large_image", title, description },
   }
+}
+
+function formatPhone(raw: string): string {
+  const d = raw.replace(/\D/g, "")
+  if (d.length === 10 && d.startsWith("3")) return `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`
+  if (d.length === 10) return `(${d.slice(0, 3)}) ${d.slice(3, 6)} ${d.slice(6)}`
+  if (d.length === 7) return `${d.slice(0, 3)} ${d.slice(3)}`
+  return raw
 }
 
 function PageFooter() {
@@ -146,11 +151,16 @@ export default async function AgentProfilePage({
   const totalShares = agent.properties.reduce((s, p) => s + p.shares, 0)
   const uniqueCities = new Set(agent.properties.map((p) => p.city)).size
 
+  const properties: AgentProperty[] = agent.properties.map((p) => ({
+    ...p,
+    price: Number(p.price),
+  }))
+
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
       <main className="flex-1 max-w-lg mx-auto w-full px-4 pt-10 pb-10">
 
-        {/* Avatar + info centrada */}
+        {/* Avatar + info */}
         <div className="flex flex-col items-center text-center mb-6">
           <div className="relative mb-4">
             {agent.image ? (
@@ -177,6 +187,19 @@ export default async function AgentProfilePage({
               <MapPin className="w-3.5 h-3.5 text-mute flex-shrink-0" strokeWidth={2} />
               <span className="text-sm text-mute">{agent.location}</span>
             </div>
+          )}
+
+          {/* Instagram link */}
+          {agent.instagram && (
+            <a
+              href={`https://instagram.com/${agent.instagram}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 mt-2 text-sm text-mute hover:text-ink transition-colors"
+            >
+              <InstagramIcon className="w-3.5 h-3.5" />
+              @{agent.instagram}
+            </a>
           )}
 
           {agent.bio && (
@@ -220,7 +243,7 @@ export default async function AgentProfilePage({
                     className="flex items-center justify-center gap-2 h-12 rounded-full border border-hairline-strong text-ink text-sm font-bold hover:bg-canvas-soft transition-colors"
                   >
                     <Phone className="w-4 h-4" strokeWidth={2} />
-                    Llamar
+                    {formatPhone(agent.phone)}
                   </a>
                 )}
                 <a
@@ -235,86 +258,8 @@ export default async function AgentProfilePage({
           </div>
         )}
 
-        {/* Properties */}
-        {agent.properties.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-baseline justify-between">
-              <h2 className="text-base font-black text-ink">Propiedades disponibles</h2>
-              <span className="text-sm font-bold text-mute">{agent.properties.length}</span>
-            </div>
-
-            <div className="space-y-3">
-              {agent.properties.map((property) => {
-                const cover = property.images[0]
-                const location = [property.neighborhood, property.city]
-                  .filter(Boolean)
-                  .join(", ")
-                const typeLabel = TYPE_LABELS[property.type] ?? property.type
-                const hasStats = property.area != null || property.bedrooms != null || property.bathrooms != null
-
-                return (
-                  <Link
-                    key={property.id}
-                    href={`/p/${property.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex gap-3 bg-white rounded-2xl border border-hairline hover:border-hairline-strong overflow-hidden transition-all hover:shadow-sm p-3"
-                  >
-                    {/* Thumbnail */}
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-canvas-soft flex-shrink-0 relative">
-                      {cover ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={cover}
-                          alt={property.title}
-                          className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Building2 className="w-7 h-7 text-mute" strokeWidth={1.5} />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                      <div>
-                        <span className="inline-block text-[10px] font-bold bg-canvas-soft text-body px-2 py-0.5 rounded-full mb-1.5">
-                          {typeLabel}
-                        </span>
-                        <p className="text-sm font-black text-ink leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">
-                          {property.title}
-                        </p>
-                        {location && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <MapPin className="w-3 h-3 text-mute flex-shrink-0" strokeWidth={2} />
-                            <span className="text-xs text-mute truncate">{location}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-base font-black text-ink tracking-tight mt-1.5">
-                          {formatCOP(Number(property.price))}
-                        </p>
-                        {hasStats && (
-                          <p className="text-xs text-mute mt-0.5">
-                            {[
-                              property.bedrooms != null && `${property.bedrooms} hab`,
-                              property.bathrooms != null && `${property.bathrooms} baño${property.bathrooms !== 1 ? "s" : ""}`,
-                              property.area != null && `${property.area} m²`,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        )}
+        {/* Properties + search + filters + map */}
+        <AgentProperties properties={properties} />
       </main>
 
       <PageFooter />

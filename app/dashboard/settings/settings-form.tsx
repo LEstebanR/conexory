@@ -16,9 +16,10 @@ interface Props {
   bio: string
   phone: string
   phoneIsWhatsapp: boolean
+  instagram: string
 }
 
-export default function SettingsForm({ name, email, image, location, bio, phone, phoneIsWhatsapp }: Props) {
+export default function SettingsForm({ name, email, image, location, bio, phone, phoneIsWhatsapp, instagram }: Props) {
   const [state, formAction, isPending] = useActionState<ProfileState, FormData>(updateProfile, {})
   const [avatarUrl, setAvatarUrl] = useState(image ?? "")
   const [uploading, setUploading] = useState(false)
@@ -148,6 +149,25 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
           rows={3}
           className="w-full rounded-xl border border-hairline bg-white px-3 py-2.5 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-ink resize-none"
         />
+      </div>
+
+      {/* Instagram */}
+      <div className="space-y-1.5">
+        <label htmlFor="instagram" className="block text-sm font-semibold text-ink">
+          Instagram
+          <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>
+        </label>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-mute font-medium select-none">@</span>
+          <Input
+            id="instagram"
+            name="instagram"
+            defaultValue={instagram.replace(/^@/, "")}
+            placeholder="tu_usuario"
+            maxLength={30}
+            className="h-11 pl-7"
+          />
+        </div>
       </div>
 
       {/* Teléfono */}

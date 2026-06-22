@@ -16,6 +16,7 @@ const profileSchema = z.object({
   bio: z.string().trim().max(300, "Máximo 300 caracteres.").optional().or(z.literal("")),
   phone: z.string().trim().max(20, "Máximo 20 caracteres.").optional().or(z.literal("")),
   phoneIsWhatsapp: z.enum(["true", "false"]).optional(),
+  instagram: z.string().trim().max(30, "Máximo 30 caracteres.").optional().or(z.literal("")),
 })
 
 export type ProfileState = { error?: string; success?: boolean }
@@ -41,7 +42,7 @@ export async function updateProfile(
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." }
   }
 
-  const { name, image, previousImage, location, bio, phone, phoneIsWhatsapp } = parsed.data
+  const { name, image, previousImage, location, bio, phone, phoneIsWhatsapp, instagram } = parsed.data
   const newImage = image || null
 
   // Delete previous avatar from Vercel Blob if it's being cleared or replaced
@@ -58,6 +59,7 @@ export async function updateProfile(
       bio: bio || null,
       phone: phone || null,
       phoneIsWhatsapp: phoneIsWhatsapp === "true",
+      instagram: instagram ? instagram.replace(/^@/, "") : null,
     },
   })
 
