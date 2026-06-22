@@ -1,10 +1,14 @@
 import { ImageResponse } from "next/og"
 import sharp from "sharp"
+import fs from "fs"
+import path from "path"
 import type { ReactElement } from "react"
 import { prisma } from "@/lib/prisma"
 import { youtubeId, youtubeThumb } from "@/lib/youtube"
 
 export const runtime = "nodejs"
+
+const markWhite = `data:image/png;base64,${fs.readFileSync(path.join(process.cwd(), "public/mark-white.png")).toString("base64")}`
 
 const size = { width: 1200, height: 630 }
 
@@ -56,13 +60,17 @@ export async function GET(
           width: "100%",
           height: "100%",
           backgroundColor: "#000",
-          gap: 12,
+          gap: 16,
         }}
       >
-        <div style={{ display: "flex", fontSize: 56, fontWeight: 900, color: "#fff", letterSpacing: -2 }}>
-          Conexory
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={markWhite} alt="" style={{ width: 48, height: 48 }} />
+          <div style={{ display: "flex", fontSize: 52, fontWeight: 900, color: "#fff", letterSpacing: -2 }}>
+            Conexory
+          </div>
         </div>
-        <div style={{ display: "flex", fontSize: 18, color: "#444", letterSpacing: 3, textTransform: "uppercase" }}>
+        <div style={{ display: "flex", fontSize: 16, color: "#444", letterSpacing: 3, textTransform: "uppercase" }}>
           conexory.com
         </div>
       </div>
@@ -123,16 +131,20 @@ export async function GET(
           }}
         >
           {/* Wordmark */}
-          <div
-            style={{
-              display: "flex",
-              fontSize: 24,
-              fontWeight: 900,
-              color: "#fff",
-              letterSpacing: -0.5,
-            }}
-          >
-            Conexory
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={markWhite} alt="" style={{ width: 22, height: 22 }} />
+            <div
+              style={{
+                display: "flex",
+                fontSize: 22,
+                fontWeight: 900,
+                color: "#fff",
+                letterSpacing: -0.5,
+              }}
+            >
+              Conexory
+            </div>
           </div>
 
           {/* Main content */}
@@ -258,16 +270,20 @@ export async function GET(
       }}
     >
       {/* Wordmark */}
-      <div
-        style={{
-          display: "flex",
-          fontSize: 26,
-          fontWeight: 900,
-          color: "#fff",
-          letterSpacing: -1,
-        }}
-      >
-        Conexory
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={markWhite} alt="" style={{ width: 24, height: 24 }} />
+        <div
+          style={{
+            display: "flex",
+            fontSize: 24,
+            fontWeight: 900,
+            color: "#fff",
+            letterSpacing: -1,
+          }}
+        >
+          Conexory
+        </div>
       </div>
 
       {/* Main content */}
