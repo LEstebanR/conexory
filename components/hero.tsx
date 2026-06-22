@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=70";
 
+
 function BrowserMock() {
   return (
     <div className="relative mx-auto w-full max-w-3xl">
@@ -42,7 +43,7 @@ function BrowserMock() {
           <div className="relative h-52 sm:h-auto min-h-[220px]">
             <Image
               src={HERO_IMAGE}
-              alt="Casa con jardín privado en Laureles, Medellín"
+              alt="Casa con jardín privado"
               fill
               sizes="(max-width: 640px) 100vw, 384px"
               className="object-cover"
@@ -56,7 +57,7 @@ function BrowserMock() {
           <div className="p-6 space-y-4">
             <div className="flex items-center gap-1.5 text-xs text-body font-medium">
               <MapPin className="w-3.5 h-3.5" />
-              Laureles · Medellín
+              Zona residencial · Colombia
             </div>
             <h3 className="text-xl font-black text-ink tracking-tight leading-tight">
               Casa con jardín privado
@@ -103,7 +104,7 @@ function BrowserMock() {
         <span className="text-xs font-bold text-ink">Link copiado</span>
       </div>
 
-      {/* Floating: interested */}
+      {/* Floating: shares count */}
       <div
         className="hidden sm:flex absolute -bottom-5 -right-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
         style={{ animationDelay: "650ms" }}
@@ -154,9 +155,15 @@ export default function Hero() {
           className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tighter leading-[1.05] text-ink animate-fade-up text-balance"
           style={{ animationDelay: "80ms" }}
         >
-          Comparte propiedades por WhatsApp en{" "}
+          Publica y comparte propiedades en{" "}
           <span className="relative whitespace-nowrap">
-            segundos
+            {/* Highlighter — behind text, slightly tilted */}
+            <span
+              aria-hidden="true"
+              className="absolute -inset-x-1 top-[10%] bottom-[5%] -rotate-[0.6deg] rounded-[4px]"
+              style={{ backgroundColor: "rgba(253, 224, 71, 0.45)" }}
+            />
+            <span className="relative">segundos</span>
             <svg
               aria-hidden="true"
               className="absolute -bottom-2 sm:-bottom-3 left-0 w-full text-ink"
@@ -179,9 +186,9 @@ export default function Hero() {
           className="text-lg sm:text-xl text-body leading-relaxed max-w-2xl mx-auto mt-8 animate-fade-up text-balance"
           style={{ animationDelay: "160ms" }}
         >
-          Sube las fotos, escribe el precio y obtén un link único para cada
-          propiedad. Compártelo por WhatsApp con una preview profesional. Sin
-          portales, sin complicaciones.
+          Sube las fotos, escribe el precio y obtén un link único por propiedad.
+          Compártelo donde quieras con una preview profesional. Sin portales, sin
+          complicaciones.
         </p>
 
         {/* CTA */}

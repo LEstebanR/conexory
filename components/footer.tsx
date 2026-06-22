@@ -77,7 +77,7 @@ export default function Footer() {
             © 2026 Conexory · Hecho en Colombia
           </p>
           <p className="text-xs text-white/30">
-            En proceso de registro · Bogotá D.C.
+            En proceso de registro · Colombia
           </p>
         </div>
       </div>

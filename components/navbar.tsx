@@ -9,7 +9,7 @@ import { Menu, X } from "lucide-react"
 const navLinks = [
   { label: "Funciones", href: "/#features" },
   { label: "Cómo funciona", href: "/#how-it-works" },
-  { label: "Precios", href: "/precios" },
+  { label: "Precios", href: "/#pricing" },
 ]
 
 export default function Navbar() {
