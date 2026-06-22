@@ -11,11 +11,9 @@ export async function POST(req: Request) {
   console.log("[wompi-webhook] checksum_len:", checksum.length, "checksum_prefix:", checksum.slice(0, 12))
   console.log("[wompi-webhook] headers:", JSON.stringify(Object.fromEntries(req.headers)))
 
-  // Signature verification temporarily bypassed to diagnose exact header format.
-  // Re-enable once we confirm what Wompi sends in x-event-secret.
-  // if (!verifyWebhookSignature(bodyText, checksum)) {
-  //   return new Response(null, { status: 401 })
-  // }
+  if (!verifyWebhookSignature(bodyText, checksum)) {
+    return new Response(null, { status: 401 })
+  }
 
   let event: WompiEvent
   try {
