@@ -1,10 +1,23 @@
 "use client"
 
 import { useEffect } from "react"
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import L from "leaflet"
 import Link from "next/link"
 import "leaflet/dist/leaflet.css"
+
+function FitBounds({ positions }: { positions: [number, number][] }) {
+  const map = useMap()
+  useEffect(() => {
+    if (positions.length === 0) return
+    if (positions.length === 1) {
+      map.setView(positions[0], 14)
+    } else {
+      map.fitBounds(L.latLngBounds(positions), { padding: [48, 48], maxZoom: 14 })
+    }
+  }, [map, positions])
+  return null
+}
 
 // Fix Leaflet default icon paths broken by webpack
 function fixLeafletIcons() {
@@ -97,10 +110,12 @@ export default function AgentMap({ properties }: { properties: MapProperty[] }) 
   const centerLat = positioned.reduce((s, p) => s + p.lat, 0) / positioned.length
   const centerLng = positioned.reduce((s, p) => s + p.lng, 0) / positioned.length
 
+  const allPositions: [number, number][] = positioned.map((p) => [p.lat, p.lng])
+
   return (
     <MapContainer
       center={[centerLat, centerLng]}
-      zoom={positioned.length === 1 ? 13 : 6}
+      zoom={5}
       style={{ height: "100%", width: "100%" }}
       scrollWheelZoom={false}
     >
@@ -108,6 +123,7 @@ export default function AgentMap({ properties }: { properties: MapProperty[] }) 
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      <FitBounds positions={allPositions} />
       {positioned.map((p) => (
         <Marker key={p.id} position={[p.lat, p.lng]}>
           <Popup>
