@@ -5,7 +5,7 @@ import Link from "next/link"
 import dynamic from "next/dynamic"
 import {
   Search, MapPin, Building2, ChevronLeft, ChevronRight,
-  SlidersHorizontal, ArrowUpDown,
+  SlidersHorizontal, ArrowUpDown, Check,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
@@ -126,17 +126,20 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
   const [minBaths, setMinBaths] = useState("")
   const [minParking, setMinParking] = useState("")
   const [showFilters, setShowFilters] = useState(false)
+  const [showSort, setShowSort] = useState(false)
   const [page, setPage] = useState(1)
   const filterRef = useRef<HTMLDivElement>(null)
+  const sortRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!showFilters) return
+    if (!showFilters && !showSort) return
     function onDown(e: MouseEvent) {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) setShowFilters(false)
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setShowSort(false)
     }
     window.addEventListener("mousedown", onDown)
     return () => window.removeEventListener("mousedown", onDown)
-  }, [showFilters])
+  }, [showFilters, showSort])
 
   const types = useMemo(() => {
     const seen = new Map<string, string>()
@@ -287,13 +290,39 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
           )}
         </div>
 
-        {/* Sort */}
-        <div className="relative flex-shrink-0">
-          <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-mute pointer-events-none" />
-          <select value={sort} onChange={(e) => { setSort(e.target.value as SortKey); setPage(1) }}
-            aria-label="Ordenar" className={cn(selectClass, "pl-9")}>
-            {SORT_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-          </select>
+        {/* Sort dropdown */}
+        <div className="relative flex-shrink-0" ref={sortRef}>
+          <button
+            type="button"
+            onClick={() => setShowSort((s) => !s)}
+            aria-label="Ordenar"
+            className={cn(
+              "inline-flex items-center justify-center h-9 px-3.5 rounded-full border text-sm font-semibold transition-colors",
+              showSort || sort !== "recent"
+                ? "border-ink bg-ink text-white"
+                : "border-hairline-strong bg-white text-ink hover:bg-canvas-soft"
+            )}
+          >
+            <ArrowUpDown className="w-4 h-4" />
+          </button>
+
+          {showSort && (
+            <div className="absolute right-0 mt-2 z-20 w-52 bg-white rounded-2xl border border-hairline shadow-xl shadow-black/10 py-1.5 overflow-hidden">
+              {SORT_OPTIONS.map((o) => (
+                <button
+                  key={o.key}
+                  type="button"
+                  onClick={() => { setSort(o.key); setPage(1); setShowSort(false) }}
+                  className="flex items-center justify-between w-full px-4 py-2.5 text-sm text-left hover:bg-canvas-soft transition-colors"
+                >
+                  <span className={cn("font-medium", sort === o.key ? "text-ink font-semibold" : "text-body")}>
+                    {o.label}
+                  </span>
+                  {sort === o.key && <Check className="w-3.5 h-3.5 text-ink flex-shrink-0" />}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>}
 
