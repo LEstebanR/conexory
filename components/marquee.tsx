@@ -1,4 +1,5 @@
 const cities = [
+  "Bogotá",
   "Medellín",
   "Cali",
   "Barranquilla",
@@ -7,7 +8,6 @@ const cities = [
   "Pereira",
   "Santa Marta",
   "Manizales",
-  "Ibagué",
   "Cúcuta",
 ]
 
