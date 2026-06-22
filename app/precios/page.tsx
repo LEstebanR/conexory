@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Check } from "lucide-react"
+import { Check, Minus } from "lucide-react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Reveal from "@/components/reveal"
@@ -24,9 +24,10 @@ const plans = [
       "Hasta 3 propiedades activas",
       "Hasta 10 fotos por propiedad",
       "Link único por propiedad",
-      "Compartir por WhatsApp",
+      "Preview enriquecida al compartir",
       "Vista pública para tus clientes",
       "Contador de veces compartida",
+      "Perfil de agente con galería",
     ],
   },
   {
@@ -41,7 +42,12 @@ const plans = [
     features: [
       "Hasta 50 propiedades activas",
       "Hasta 20 fotos por propiedad",
-      "Todo lo del plan gratuito",
+      "Link único por propiedad",
+      "Preview enriquecida al compartir",
+      "Vista pública para tus clientes",
+      "Contador de veces compartida",
+      "Perfil de agente con galería",
+      "Sin permanencia — cancela cuando quieras",
     ],
   },
   {
@@ -55,11 +61,72 @@ const plans = [
     features: [
       "Propiedades ilimitadas",
       "Fotos ilimitadas por propiedad",
+      "Todo lo del plan Pro",
       "Soporte dedicado",
       "Integraciones a la medida",
     ],
   },
 ]
+
+type CellValue = string | boolean
+
+interface FeatureRow {
+  label: string
+  free: CellValue
+  pro: CellValue
+  custom: CellValue
+}
+
+interface FeatureGroup {
+  group: string
+  rows: FeatureRow[]
+}
+
+const comparison: FeatureGroup[] = [
+  {
+    group: "Propiedades y fotos",
+    rows: [
+      { label: "Propiedades activas", free: "3", pro: "50", custom: "Ilimitadas" },
+      { label: "Fotos por propiedad", free: "10", pro: "20", custom: "Ilimitadas" },
+    ],
+  },
+  {
+    group: "Funciones",
+    rows: [
+      { label: "Link único por propiedad", free: true, pro: true, custom: true },
+      { label: "Preview enriquecida al compartir", free: true, pro: true, custom: true },
+      { label: "Vista pública para clientes", free: true, pro: true, custom: true },
+      { label: "Contador de veces compartida", free: true, pro: true, custom: true },
+      { label: "Perfil de agente con galería", free: true, pro: true, custom: true },
+    ],
+  },
+  {
+    group: "Soporte",
+    rows: [
+      { label: "Soporte en español", free: true, pro: true, custom: true },
+      { label: "Soporte dedicado", free: false, pro: false, custom: true },
+      { label: "Integraciones a la medida", free: false, pro: false, custom: true },
+    ],
+  },
+]
+
+function Cell({ value, dark }: { value: CellValue; dark?: boolean }) {
+  if (value === true) {
+    return (
+      <span className={`flex h-5 w-5 items-center justify-center rounded-full mx-auto ${dark ? "bg-white" : "bg-ink"}`}>
+        <Check className={`w-3 h-3 ${dark ? "text-ink" : "text-white"}`} strokeWidth={3.5} />
+      </span>
+    )
+  }
+  if (value === false) {
+    return <Minus className="w-4 h-4 text-mute mx-auto" strokeWidth={2} />
+  }
+  return (
+    <span className={`text-sm font-bold ${dark ? "text-white" : "text-ink"}`}>
+      {value}
+    </span>
+  )
+}
 
 export default function PreciosPage() {
   return (
@@ -100,7 +167,7 @@ export default function PreciosPage() {
       </section>
 
       {/* Plans */}
-      <section className="max-w-6xl mx-auto w-full px-5 sm:px-6 lg:px-8 pb-12">
+      <section className="max-w-6xl mx-auto w-full px-5 sm:px-6 lg:px-8 pb-16">
         <div className="grid lg:grid-cols-3 gap-6 items-stretch">
           {plans.map((plan, i) => (
             <Reveal key={plan.name} delay={i * 100} className="h-full">
@@ -117,11 +184,7 @@ export default function PreciosPage() {
                   </span>
                 )}
                 <div className="mb-8">
-                  <p
-                    className={`text-xs font-bold uppercase tracking-widest mb-3 ${
-                      plan.dark ? "text-mute" : "text-mute"
-                    }`}
-                  >
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-mute">
                     {plan.name}
                   </p>
                   <p className={`text-5xl font-black tracking-tighter ${plan.dark ? "text-white" : "text-ink"}`}>
@@ -152,7 +215,7 @@ export default function PreciosPage() {
                 </ul>
 
                 <Button
-                  variant={plan.dark ? "secondary" : plan.featured ? "default" : "outline"}
+                  variant={plan.dark ? "secondary" : "outline"}
                   size="lg"
                   className="w-full"
                   asChild
@@ -163,10 +226,115 @@ export default function PreciosPage() {
             </Reveal>
           ))}
         </div>
+      </section>
 
-        <p className="text-center text-sm text-mute mt-10">
-          Todos los planes incluyen link público, preview de WhatsApp y soporte en español.
-        </p>
+      {/* Comparison table */}
+      <section className="bg-canvas-softer py-24">
+        <div className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8">
+          <Reveal className="mb-12 text-center">
+            <h2 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter leading-none">
+              Compara los planes
+            </h2>
+            <p className="text-body mt-3">Elige el que mejor se adapta a tu ritmo de trabajo.</p>
+          </Reveal>
+
+          <Reveal delay={60}>
+            <div className="rounded-3xl overflow-hidden border border-hairline bg-white">
+              {/* Table header */}
+              <div className="grid grid-cols-4 border-b border-hairline">
+                <div className="p-5" />
+                {["Gratuito", "Pro", "Personalizado"].map((name, i) => (
+                  <div
+                    key={name}
+                    className={`p-5 text-center ${i === 1 ? "bg-ink" : ""}`}
+                  >
+                    <p className={`text-xs font-bold uppercase tracking-widest ${i === 1 ? "text-white/50" : "text-mute"}`}>
+                      {name}
+                    </p>
+                    <p className={`text-xl font-black mt-1 tracking-tight ${i === 1 ? "text-white" : "text-ink"}`}>
+                      {i === 0 ? "$0" : i === 1 ? "$99.999" : "—"}
+                    </p>
+                    {i === 1 && (
+                      <p className="text-[11px] text-white/40 mt-0.5">COP/mes</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Feature groups */}
+              {comparison.map((section, si) => (
+                <div key={section.group}>
+                  {/* Group header */}
+                  <div className="grid grid-cols-4 bg-canvas-softer border-b border-hairline">
+                    <div className="col-span-4 px-5 py-2.5">
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-mute">
+                        {section.group}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Rows */}
+                  {section.rows.map((row, ri) => (
+                    <div
+                      key={row.label}
+                      className={`grid grid-cols-4 border-b border-hairline last:border-b-0 ${
+                        si === comparison.length - 1 && ri === section.rows.length - 1
+                          ? "border-b-0"
+                          : ""
+                      }`}
+                    >
+                      <div className="px-5 py-4">
+                        <span className="text-sm text-body">{row.label}</span>
+                      </div>
+                      <div className="px-5 py-4 flex items-center justify-center">
+                        <Cell value={row.free} />
+                      </div>
+                      <div className="px-5 py-4 flex items-center justify-center bg-ink/[0.03]">
+                        <Cell value={row.pro} dark />
+                      </div>
+                      <div className="px-5 py-4 flex items-center justify-center">
+                        <Cell value={row.custom} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+
+              {/* Footer row with CTAs */}
+              <div className="grid grid-cols-4 border-t border-hairline bg-canvas-softer">
+                <div className="p-5" />
+                <div className="p-4 flex items-center justify-center">
+                  <Link
+                    href="/register"
+                    className="text-xs font-bold text-ink underline underline-offset-4 hover:text-mute transition-colors"
+                  >
+                    Empezar gratis
+                  </Link>
+                </div>
+                <div className="p-4 flex items-center justify-center bg-ink/[0.03]">
+                  <Link
+                    href="/login?redirect=/dashboard/upgrade"
+                    className="text-xs font-bold text-ink underline underline-offset-4 hover:text-mute transition-colors"
+                  >
+                    Comenzar con Pro
+                  </Link>
+                </div>
+                <div className="p-4 flex items-center justify-center">
+                  <Link
+                    href="/contacto"
+                    className="text-xs font-bold text-ink underline underline-offset-4 hover:text-mute transition-colors"
+                  >
+                    Contáctanos
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          <p className="text-center text-sm text-mute mt-8">
+            Todos los planes incluyen link público, preview enriquecida al compartir y soporte en español.
+          </p>
+        </div>
       </section>
 
       <Footer />

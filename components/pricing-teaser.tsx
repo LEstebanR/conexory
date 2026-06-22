@@ -35,7 +35,7 @@ const plans = [
 
 export default function PricingTeaser() {
   return (
-    <section className="py-24 bg-canvas-softer">
+    <section id="pricing" className="py-24 bg-canvas-softer">
       <div className="max-w-4xl mx-auto px-5 sm:px-6 lg:px-8">
         <Reveal className="text-center mb-12">
           <p className="text-body font-semibold text-sm uppercase tracking-[0.2em] mb-4">
