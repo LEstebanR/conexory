@@ -291,11 +291,7 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
         <div className="relative flex-shrink-0">
           <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-mute pointer-events-none" />
           <select value={sort} onChange={(e) => { setSort(e.target.value as SortKey); setPage(1) }}
-            aria-label="Ordenar" className={cn(selectClass, "pl-9 hidden sm:block")}>
-            {SORT_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-          </select>
-          <select value={sort} onChange={(e) => { setSort(e.target.value as SortKey); setPage(1) }}
-            aria-label="Ordenar" className={cn(selectClass, "pl-9 sm:hidden")}>
+            aria-label="Ordenar" className={cn(selectClass, "pl-9")}>
             {SORT_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
           </select>
         </div>
