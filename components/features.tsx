@@ -78,14 +78,24 @@ function ShareMock() {
         <MessageCircle className="w-4 h-4" />
         Enviar por WhatsApp
       </div>
-      <div className="rounded-xl bg-canvas-softer p-3 flex items-center gap-3">
-        <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
-          <Image src={PHOTOS.laureles} alt="Preview de la propiedad" fill sizes="56px" className="object-cover" />
+      {/* OG image preview — split layout matching real design */}
+      <div className="rounded-xl overflow-hidden border border-hairline flex h-24">
+        <div className="relative w-[45%] flex-shrink-0">
+          <Image src={PHOTOS.laureles} alt="Preview de la propiedad" fill sizes="160px" className="object-cover" />
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-bold text-ink truncate">Casa con jardín privado</p>
-          <p className="text-xs text-body truncate">$580.000.000 · Laureles, Medellín</p>
-          <p className="text-[10px] text-mute mt-0.5">conexory.com</p>
+        <div className="flex-1 bg-black px-3 py-2.5 flex flex-col justify-between">
+          <span className="text-[9px] font-black text-white tracking-tight">Conexory</span>
+          <div>
+            <p className="text-sm font-black text-white leading-none tracking-tight">$580.000.000</p>
+            <p className="text-[10px] text-white/60 mt-0.5">Casa · Laureles, Medellín</p>
+          </div>
+          <div className="flex gap-1 flex-wrap">
+            {["3 hab.", "2 baños", "120 m²"].map((f) => (
+              <span key={f} className="text-[8px] text-white/70 border border-white/20 rounded-full px-1.5 py-0.5">
+                {f}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -94,25 +104,30 @@ function ShareMock() {
 
 function GalleryMock() {
   return (
-    <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-ink flex items-center justify-center text-white text-sm font-bold">
+    <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 overflow-hidden">
+      {/* Agent header */}
+      <div className="px-5 py-4 border-b border-hairline flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-ink flex items-center justify-center text-white text-sm font-black flex-shrink-0">
           CR
         </div>
-        <div>
-          <p className="text-sm font-bold text-ink leading-tight">Carolina Restrepo</p>
-          <p className="text-xs text-body">4 propiedades activas</p>
+        <div className="min-w-0">
+          <p className="text-sm font-black text-ink leading-tight tracking-tight">Carolina Restrepo</p>
+          <p className="text-xs text-mute">Asesor inmobiliario · Medellín</p>
+        </div>
+        <div className="ml-auto flex-shrink-0 text-[10px] font-bold text-white bg-ink px-2.5 py-1 rounded-full">
+          4 propiedades
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      {/* Property grid */}
+      <div className="grid grid-cols-2 gap-px bg-hairline">
         {gallery.map((p) => (
-          <div key={p.title} className="rounded-xl border border-hairline overflow-hidden">
-            <div className="relative h-20">
-              <Image src={p.src} alt={p.title} fill sizes="160px" className="object-cover" />
+          <div key={p.title} className="bg-white">
+            <div className="relative h-24">
+              <Image src={p.src} alt={p.title} fill sizes="200px" className="object-cover" />
             </div>
-            <div className="p-2">
-              <p className="text-[11px] font-bold text-ink truncate">{p.title}</p>
-              <p className="text-[11px] text-body">{p.price}</p>
+            <div className="px-3 py-2.5">
+              <p className="text-[11px] font-black text-ink truncate leading-tight">{p.title}</p>
+              <p className="text-[11px] font-bold text-body mt-0.5">{p.price}</p>
             </div>
           </div>
         ))}

@@ -7,6 +7,7 @@ import Marquee from "@/components/marquee"
 import Features from "@/components/features"
 import HowItWorks from "@/components/how-it-works"
 import Stats from "@/components/stats"
+import FAQ from "@/components/faq"
 import SignupCTA from "@/components/signup-cta"
 import Footer from "@/components/footer"
 
@@ -22,6 +23,7 @@ export default async function Home() {
       <Features />
       <HowItWorks />
       <Stats />
+      <FAQ />
       <SignupCTA />
       <Footer />
     </main>
