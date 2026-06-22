@@ -10,10 +10,6 @@ const faqs = [
     a: "Sí, 100%. Conexory está diseñado para usarse desde el celular: subís las fotos, escribís el precio y obtenés el link para compartir por WhatsApp, todo sin necesidad de un computador.",
   },
   {
-    q: "¿Qué pasa si ya tengo mis propiedades en Finca Raíz o MetroCuadrado?",
-    a: "Conexory es complementario, no un reemplazo. Los portales son para que te encuentren. Conexory es para cuando ya tienes el interesado y quieres enviarle la información de forma profesional y directa por WhatsApp.",
-  },
-  {
     q: "¿Puedo cancelar cuando quiera?",
     a: "Sí. El plan Pro no tiene permanencia. Cancelás en cualquier momento desde tu perfil y no se te cobra el siguiente mes. El plan gratuito es para siempre sin ningún costo.",
   },

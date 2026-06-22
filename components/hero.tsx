@@ -9,75 +9,12 @@ import {
   Bath,
   Maximize2,
   Check,
-  CheckCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=70";
 
-function WhatsAppBubble() {
-  return (
-    <div className="flex flex-col gap-1 items-end">
-      {/* Outgoing message bubble */}
-      <div className="bg-[#005c4b] rounded-2xl rounded-tr-sm px-3.5 pt-3 pb-2 max-w-[280px] sm:max-w-[320px] shadow-md">
-        {/* Link preview card */}
-        <div className="bg-[#004035] rounded-xl overflow-hidden mb-2">
-          {/* OG image — split layout matching the real OG */}
-          <div className="flex h-24">
-            <div className="relative w-[55%] flex-shrink-0">
-              <Image
-                src={HERO_IMAGE}
-                alt="Preview de propiedad"
-                fill
-                sizes="140px"
-                className="object-cover"
-              />
-            </div>
-            <div className="flex-1 bg-black px-2.5 py-2 flex flex-col justify-between">
-              <span className="text-[8px] font-black text-white leading-none tracking-tight">
-                Conexory
-              </span>
-              <div>
-                <p className="text-[10px] font-black text-white leading-tight tracking-tight">
-                  $580.000.000
-                </p>
-                <p className="text-[8px] text-white/60 leading-tight mt-0.5">
-                  Casa · Laureles
-                </p>
-              </div>
-              <div className="flex gap-1 flex-wrap">
-                {["3 hab.", "2 baños", "120 m²"].map((f) => (
-                  <span
-                    key={f}
-                    className="text-[7px] text-white/70 border border-white/20 rounded-full px-1.5 py-0.5"
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-          {/* Link meta */}
-          <div className="px-2.5 py-2">
-            <p className="text-[10px] font-bold text-white/90 leading-snug">
-              Casa con jardín privado en Laureles
-            </p>
-            <p className="text-[9px] text-white/50 mt-0.5">conexory.com</p>
-          </div>
-        </div>
-        {/* Message text */}
-        <p className="text-[12px] text-white leading-snug mb-1">
-          Hola, te comparto la propiedad 👇
-        </p>
-        <div className="flex items-center justify-end gap-1">
-          <span className="text-[10px] text-white/50">9:42 a. m.</span>
-          <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" strokeWidth={2.5} />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function BrowserMock() {
   return (
@@ -167,26 +104,13 @@ function BrowserMock() {
         <span className="text-xs font-bold text-ink">Link copiado</span>
       </div>
 
-      {/* Floating: WhatsApp bubble */}
+      {/* Floating: shares count */}
       <div
-        className="hidden sm:flex absolute -bottom-8 -right-4 z-10 animate-fade-up"
+        className="hidden sm:flex absolute -bottom-5 -right-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
         style={{ animationDelay: "650ms" }}
       >
-        {/* Phone frame */}
-        <div className="bg-[#0b1417] rounded-2xl p-3 shadow-2xl shadow-black/30 border border-white/5 w-[300px] sm:w-[340px]">
-          {/* WhatsApp top bar */}
-          <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-white/10">
-            <div className="w-7 h-7 rounded-full bg-[#005c4b] flex items-center justify-center text-white text-[10px] font-black">
-              CR
-            </div>
-            <div>
-              <p className="text-[11px] font-bold text-white leading-none">Carolina Restrepo</p>
-              <p className="text-[9px] text-white/40">en línea</p>
-            </div>
-            <MessageCircle className="w-3.5 h-3.5 text-white/30 ml-auto" />
-          </div>
-          <WhatsAppBubble />
-        </div>
+        <MessageCircle className="w-4 h-4 text-ink" />
+        <span className="text-xs font-bold text-ink">+3 interesados hoy</span>
       </div>
     </div>
   );
@@ -233,7 +157,13 @@ export default function Hero() {
         >
           Comparte propiedades por WhatsApp en{" "}
           <span className="relative whitespace-nowrap">
-            segundos
+            {/* Highlighter — behind text, slightly tilted */}
+            <span
+              aria-hidden="true"
+              className="absolute -inset-x-1 top-[10%] bottom-[5%] -rotate-[0.6deg] rounded-[4px]"
+              style={{ backgroundColor: "rgba(253, 224, 71, 0.45)" }}
+            />
+            <span className="relative">segundos</span>
             <svg
               aria-hidden="true"
               className="absolute -bottom-2 sm:-bottom-3 left-0 w-full text-ink"
