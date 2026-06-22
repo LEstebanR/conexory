@@ -19,6 +19,41 @@ function InstagramIcon({ className }: { className?: string }) {
     </svg>
   )
 }
+
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  )
+}
+
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.97a8.19 8.19 0 0 0 4.78 1.52V7.03a4.85 4.85 0 0 1-1.01-.34z" />
+    </svg>
+  )
+}
+
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+      <rect x="2" y="9" width="4" height="12" />
+      <circle cx="4" cy="4" r="2" />
+    </svg>
+  )
+}
+
+function YouTubeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.96-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+      <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white" />
+    </svg>
+  )
+}
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import AgentProperties, { type AgentProperty } from "./agent-properties"
@@ -46,6 +81,10 @@ async function getAgent(slug: string) {
       phone: true,
       phoneIsWhatsapp: true,
       instagram: true,
+      facebook: true,
+      tiktok: true,
+      linkedin: true,
+      youtube: true,
       profilePublished: true,
       properties: {
         where: { published: true },
@@ -192,17 +231,28 @@ export default async function AgentProfilePage({
             </div>
           )}
 
-          {/* Instagram link */}
-          {agent.instagram && (
-            <a
-              href={`https://instagram.com/${agent.instagram}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 mt-2 text-sm text-mute hover:text-ink transition-colors"
-            >
-              <InstagramIcon className="w-3.5 h-3.5" />
-              @{agent.instagram}
-            </a>
+          {/* Redes sociales */}
+          {(agent.instagram || agent.facebook || agent.tiktok || agent.linkedin || agent.youtube) && (
+            <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
+              {[
+                { handle: agent.instagram, href: `https://instagram.com/${agent.instagram}`, label: "Instagram", Icon: InstagramIcon },
+                { handle: agent.tiktok,    href: `https://tiktok.com/@${agent.tiktok}`,     label: "TikTok",    Icon: TikTokIcon },
+                { handle: agent.facebook,  href: `https://facebook.com/${agent.facebook}`,  label: "Facebook",  Icon: FacebookIcon },
+                { handle: agent.linkedin,  href: `https://linkedin.com/in/${agent.linkedin}`,label: "LinkedIn",  Icon: LinkedInIcon },
+                { handle: agent.youtube,   href: `https://youtube.com/@${agent.youtube}`,   label: "YouTube",   Icon: YouTubeIcon },
+              ].filter(({ handle }) => !!handle).map(({ href, label, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="w-9 h-9 rounded-full border border-hairline-strong bg-white flex items-center justify-center text-body hover:text-ink hover:border-ink hover:bg-canvas-soft transition-colors"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
           )}
 
           {agent.bio && (

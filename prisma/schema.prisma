@@ -24,6 +24,10 @@ model User {
   phone           String?
   phoneIsWhatsapp Boolean   @default(false)
   instagram       String?
+  facebook        String?
+  tiktok          String?
+  linkedin        String?
+  youtube         String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
