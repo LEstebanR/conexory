@@ -45,11 +45,6 @@ function CityCombobox({
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Keep input in sync when parent clears value
-  useEffect(() => {
-    setInputValue(value)
-  }, [value])
-
   useEffect(() => {
     if (!open) return
     function onDown(e: MouseEvent) {
@@ -192,6 +187,7 @@ export default function LocationSelect({
       <div className="space-y-1.5">
         <label className="block text-sm font-semibold text-ink">Ciudad</label>
         <CityCombobox
+          key={selectedState}
           cities={cities}
           value={selectedCity}
           onChange={handleCityChange}
