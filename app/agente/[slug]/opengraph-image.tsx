@@ -103,6 +103,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           justifyContent: "center",
           flexShrink: 0,
           overflow: "hidden",
+          position: "relative",
         }}
       >
         {agent.image ? (
@@ -127,6 +128,17 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             {initials}
           </span>
         )}
+        {/* Fade to black on right edge so the panel blends */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: "25%",
+            background: "linear-gradient(to right, transparent, #000)",
+          }}
+        />
       </div>
 
       {/* Right panel — content */}

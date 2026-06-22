@@ -16,9 +16,14 @@ interface Props {
   bio: string
   phone: string
   phoneIsWhatsapp: boolean
+  instagram: string
+  facebook: string
+  tiktok: string
+  linkedin: string
+  youtube: string
 }
 
-export default function SettingsForm({ name, email, image, location, bio, phone, phoneIsWhatsapp }: Props) {
+export default function SettingsForm({ name, email, image, location, bio, phone, phoneIsWhatsapp, instagram, facebook, tiktok, linkedin, youtube }: Props) {
   const [state, formAction, isPending] = useActionState<ProfileState, FormData>(updateProfile, {})
   const [avatarUrl, setAvatarUrl] = useState(image ?? "")
   const [uploading, setUploading] = useState(false)
@@ -162,9 +167,10 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
           type="tel"
           defaultValue={phone}
           placeholder="Ej. 3001234567"
-          maxLength={20}
+          maxLength={10}
           className="h-11"
         />
+        <p className="text-xs text-mute mt-1.5">Solo números, sin espacios ni guiones. Ej: 3001234567</p>
         <label className="flex items-center gap-2.5 cursor-pointer mt-2 select-none">
           <div className="relative flex-shrink-0">
             <input
@@ -188,6 +194,33 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
           </div>
           <span className="text-sm text-body">Este número también es WhatsApp</span>
         </label>
+      </div>
+
+      {/* Redes sociales */}
+      <div className="space-y-3 pt-2 border-t border-hairline">
+        <p className="text-sm font-semibold text-ink pt-2">Redes sociales <span className="ml-1 text-xs font-normal text-mute">Opcional · solo el usuario, sin @</span></p>
+        {([
+          { id: "instagram", name: "instagram", label: "Instagram", placeholder: "tu_usuario", value: instagram },
+          { id: "tiktok",    name: "tiktok",    label: "TikTok",    placeholder: "tu_usuario", value: tiktok },
+          { id: "facebook",  name: "facebook",  label: "Facebook",  placeholder: "usuario o página", value: facebook },
+          { id: "linkedin",  name: "linkedin",  label: "LinkedIn",  placeholder: "perfil de LinkedIn", value: linkedin },
+          { id: "youtube",   name: "youtube",   label: "YouTube",   placeholder: "canal", value: youtube },
+        ] as const).map((field) => (
+          <div key={field.id} className="flex items-center gap-3">
+            <label htmlFor={field.id} className="w-24 text-xs font-medium text-body flex-shrink-0">{field.label}</label>
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-mute font-medium select-none">@</span>
+              <Input
+                id={field.id}
+                name={field.name}
+                defaultValue={(field.value ?? "").replace(/^@/, "")}
+                placeholder={field.placeholder}
+                maxLength={50}
+                className="h-9 pl-7 text-sm"
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="pt-2">

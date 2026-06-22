@@ -29,6 +29,11 @@ export default async function SettingsPage() {
       bio: true,
       phone: true,
       phoneIsWhatsapp: true,
+      instagram: true,
+      facebook: true,
+      tiktok: true,
+      linkedin: true,
+      youtube: true,
       agentSlug: true,
       profilePublished: true,
     },
@@ -60,6 +65,11 @@ export default async function SettingsPage() {
             bio={user.bio ?? ""}
             phone={user.phone ?? ""}
             phoneIsWhatsapp={user.phoneIsWhatsapp}
+            instagram={user.instagram ?? ""}
+            facebook={user.facebook ?? ""}
+            tiktok={user.tiktok ?? ""}
+            linkedin={user.linkedin ?? ""}
+            youtube={user.youtube ?? ""}
           />
         </div>
 
