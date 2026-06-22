@@ -66,7 +66,7 @@ function PreviewVisual() {
           <span className="text-[9px] font-black text-white tracking-tight">Conexory</span>
           <div>
             <p className="text-sm font-black text-white leading-none tracking-tight">$580M</p>
-            <p className="text-[9px] text-white/60 mt-0.5">Casa · Laureles</p>
+            <p className="text-[9px] text-white/60 mt-0.5">Casa · zona residencial</p>
           </div>
           <div className="flex gap-1 flex-wrap">
             {["3 hab.", "2 baños", "120 m²"].map((f) => (
@@ -78,7 +78,7 @@ function PreviewVisual() {
         </div>
       </div>
       <div className="bg-white px-3 py-2.5 border-t border-hairline">
-        <p className="text-[11px] font-bold text-ink leading-tight">Casa con jardín privado en Laureles</p>
+        <p className="text-[11px] font-bold text-ink leading-tight">Casa con jardín privado</p>
         <p className="text-[9px] text-mute mt-0.5">conexory.com</p>
       </div>
     </div>

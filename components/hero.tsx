@@ -43,7 +43,7 @@ function BrowserMock() {
           <div className="relative h-52 sm:h-auto min-h-[220px]">
             <Image
               src={HERO_IMAGE}
-              alt="Casa con jardín privado en Laureles, Medellín"
+              alt="Casa con jardín privado"
               fill
               sizes="(max-width: 640px) 100vw, 384px"
               className="object-cover"
@@ -57,7 +57,7 @@ function BrowserMock() {
           <div className="p-6 space-y-4">
             <div className="flex items-center gap-1.5 text-xs text-body font-medium">
               <MapPin className="w-3.5 h-3.5" />
-              Laureles · Medellín
+              Zona residencial · Colombia
             </div>
             <h3 className="text-xl font-black text-ink tracking-tight leading-tight">
               Casa con jardín privado

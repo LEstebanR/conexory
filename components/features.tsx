@@ -22,9 +22,9 @@ const PHOTOS = {
 }
 
 const gallery = [
-  { src: PHOTOS.poblado, title: "Apartamento El Poblado", price: "$420.000.000" },
+  { src: PHOTOS.poblado, title: "Apartamento exclusivo", price: "$420.000.000" },
   { src: PHOTOS.campestre, title: "Casa campestre", price: "$750.000.000" },
-  { src: PHOTOS.loft, title: "Loft en Chapinero", price: "$310.000.000" },
+  { src: PHOTOS.loft, title: "Loft de diseño", price: "$310.000.000" },
   { src: PHOTOS.penthouse, title: "Penthouse con vista", price: "$1.200.000.000" },
 ]
 
@@ -87,7 +87,7 @@ function ShareMock() {
           <span className="text-[9px] font-black text-white tracking-tight">Conexory</span>
           <div>
             <p className="text-sm font-black text-white leading-none tracking-tight">$580.000.000</p>
-            <p className="text-[10px] text-white/60 mt-0.5">Casa · Laureles, Medellín</p>
+            <p className="text-[10px] text-white/60 mt-0.5">Casa · zona residencial</p>
           </div>
           <div className="flex gap-1 flex-wrap">
             {["3 hab.", "2 baños", "120 m²"].map((f) => (
@@ -112,7 +112,7 @@ function GalleryMock() {
         </div>
         <div className="min-w-0">
           <p className="text-sm font-black text-ink leading-tight tracking-tight">Carolina Restrepo</p>
-          <p className="text-xs text-mute">Asesor inmobiliario · Medellín</p>
+          <p className="text-xs text-mute">Asesor inmobiliario · Colombia</p>
         </div>
         <div className="ml-auto flex-shrink-0 text-[10px] font-bold text-white bg-ink px-2.5 py-1 rounded-full">
           4 propiedades
