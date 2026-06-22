@@ -290,7 +290,7 @@ export default function PreciosPage() {
                         <Cell value={row.free} />
                       </div>
                       <div className="px-5 py-4 flex items-center justify-center bg-ink/[0.03]">
-                        <Cell value={row.pro} dark />
+                        <Cell value={row.pro} />
                       </div>
                       <div className="px-5 py-4 flex items-center justify-center">
                         <Cell value={row.custom} />
