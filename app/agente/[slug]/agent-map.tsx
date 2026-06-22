@@ -76,6 +76,7 @@ export interface MapProperty {
   title: string
   city: string
   price: number
+  images: string[]
   latitude: number | null
   longitude: number | null
 }
@@ -126,19 +127,25 @@ export default function AgentMap({ properties }: { properties: MapProperty[] }) 
       <FitBounds positions={allPositions} />
       {positioned.map((p) => (
         <Marker key={p.id} position={[p.lat, p.lng]}>
-          <Popup>
-            <div className="text-sm min-w-[160px]">
-              <p className="font-bold leading-snug mb-1">{p.title}</p>
-              <p className="text-gray-500 text-xs mb-2">{p.city}</p>
-              <p className="font-black text-base mb-2">{formatCOP(p.price)}</p>
-              <Link
-                href={`/p/${p.slug}`}
-                target="_blank"
-                className="block text-center text-xs font-bold bg-black text-white rounded-full px-3 py-1.5 hover:bg-gray-800"
-              >
-                Ver propiedad
-              </Link>
-            </div>
+          <Popup minWidth={200} maxWidth={220}>
+            <Link href={`/p/${p.slug}`} target="_blank" className="block no-underline">
+              {p.images[0] && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={p.images[0]}
+                  alt={p.title}
+                  style={{ width: "100%", height: 120, objectFit: "cover", display: "block", borderRadius: "8px 8px 0 0", margin: 0 }}
+                />
+              )}
+              <div style={{ padding: "10px 12px 12px" }}>
+                <p style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.3, margin: "0 0 4px", color: "#000" }}>{p.title}</p>
+                <p style={{ fontSize: 11, color: "#afafaf", margin: "0 0 8px" }}>{p.city}</p>
+                <p style={{ fontWeight: 900, fontSize: 15, margin: "0 0 10px", color: "#000" }}>{formatCOP(p.price)}</p>
+                <span style={{ display: "block", textAlign: "center", fontSize: 12, fontWeight: 700, background: "#000", color: "#fff", borderRadius: 999, padding: "6px 14px" }}>
+                  Ver propiedad
+                </span>
+              </div>
+            </Link>
           </Popup>
         </Marker>
       ))}

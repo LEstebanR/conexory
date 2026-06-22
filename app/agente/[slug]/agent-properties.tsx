@@ -201,7 +201,7 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
 
   const mapProperties: MapProperty[] = properties.map((p) => ({
     id: p.id, slug: p.slug, title: p.title, city: p.city, price: p.price,
-    latitude: p.latitude, longitude: p.longitude,
+    images: p.images, latitude: p.latitude, longitude: p.longitude,
   }))
 
   if (properties.length === 0) return null
