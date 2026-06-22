@@ -71,17 +71,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const propLabel = count === 1 ? "propiedad activa" : "propiedades activas"
 
   const bio = agent.bio
-    ? agent.bio.length > 100
-      ? agent.bio.slice(0, 97) + "…"
+    ? agent.bio.length > 90
+      ? agent.bio.slice(0, 87) + "…"
       : agent.bio
     : null
 
-  const subtitle = [
-    "Asesor inmobiliario",
-    agent.location,
-  ]
-    .filter(Boolean)
-    .join("  ·  ")
+  const subtitle = ["Asesor inmobiliario", agent.location].filter(Boolean).join("  ·  ")
 
   return new ImageResponse(
     <div
@@ -91,16 +86,16 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        padding: "72px 88px 64px",
+        padding: "56px 88px 60px",
         fontFamily: "Inter",
         position: "relative",
       }}
     >
-      {/* Conexory mark — top right */}
+      {/* Conexory mark — top right, absolute */}
       <div
         style={{
           position: "absolute",
-          top: 56,
+          top: 52,
           right: 88,
           display: "flex",
           alignItems: "center",
@@ -118,63 +113,75 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             justifyContent: "center",
           }}
         >
-          <span style={{ color: "#000", fontWeight: 900, fontSize: 16, lineHeight: 1 }}>
-            C
-          </span>
+          <span style={{ color: "#000", fontWeight: 900, fontSize: 16, lineHeight: 1 }}>C</span>
         </div>
         <span style={{ color: "#fff", fontWeight: 900, fontSize: 20, letterSpacing: -0.5 }}>
           Conexory
         </span>
       </div>
 
-      {/* Main content */}
-      <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", gap: 52, flex: 1, marginTop: 8 }}>
-
+      {/* Central block — avatar + text, vertically centered */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          flex: 1,
+          gap: 56,
+        }}
+      >
         {/* Avatar */}
-        <div style={{ display: "flex", flexShrink: 0, marginTop: 4 }}>
-          {agent.image ? (
-            <img
-              src={agent.image}
-              alt=""
-              width={128}
-              height={128}
-              style={{
-                borderRadius: "50%",
-                border: "3px solid #333",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: 128,
-                height: 128,
-                borderRadius: "50%",
-                background: "#1a1a1a",
-                border: "3px solid #333",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span style={{ color: "#fff", fontWeight: 900, fontSize: 44, lineHeight: 1 }}>
-                {initials}
-              </span>
-            </div>
-          )}
-        </div>
+        {agent.image ? (
+          <img
+            src={agent.image}
+            alt=""
+            width={156}
+            height={156}
+            style={{
+              borderRadius: "50%",
+              border: "4px solid #2a2a2a",
+              objectFit: "cover",
+              flexShrink: 0,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 156,
+              height: 156,
+              borderRadius: "50%",
+              background: "#1a1a1a",
+              border: "4px solid #2a2a2a",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ color: "#fff", fontWeight: 900, fontSize: 52, lineHeight: 1 }}>
+              {initials}
+            </span>
+          </div>
+        )}
 
-        {/* Text content */}
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 0 }}>
+        {/* Text column */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            gap: 0,
+          }}
+        >
           {/* Name */}
           <span
             style={{
               color: "#fff",
               fontWeight: 900,
-              fontSize: 60,
+              fontSize: 64,
               letterSpacing: -2.5,
               lineHeight: 1.05,
-              marginBottom: 12,
+              marginBottom: 14,
             }}
           >
             {agent.name}
@@ -185,9 +192,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             style={{
               color: "#666",
               fontWeight: 700,
-              fontSize: 22,
+              fontSize: 24,
               letterSpacing: -0.3,
-              marginBottom: bio ? 28 : 40,
+              marginBottom: bio ? 24 : 0,
             }}
           >
             {subtitle}
@@ -197,44 +204,56 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           {bio && (
             <span
               style={{
-                color: "#4a4a4a",
+                color: "#444",
                 fontWeight: 700,
                 fontSize: 20,
                 lineHeight: 1.5,
-                marginBottom: 40,
               }}
             >
               &ldquo;{bio}&rdquo;
             </span>
           )}
+        </div>
+      </div>
 
-          {/* Divider */}
-          <div style={{ display: "flex", width: "100%", height: 1, background: "#1f1f1f", marginBottom: 28 }} />
-
-          {/* Properties count */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "#111",
-                border: "1px solid #2a2a2a",
-                borderRadius: 50,
-                paddingLeft: 22,
-                paddingRight: 22,
-                paddingTop: 10,
-                paddingBottom: 10,
-              }}
-            >
-              <span style={{ color: "#fff", fontWeight: 900, fontSize: 18, letterSpacing: -0.3 }}>
-                {count} {propLabel}
-              </span>
-            </div>
-            <span style={{ color: "#333", fontWeight: 700, fontSize: 14, letterSpacing: 2, textTransform: "uppercase" }}>
-              en Conexory
+      {/* Bottom bar — divider + property count */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 20,
+        }}
+      >
+        <div style={{ width: "100%", height: 1, background: "#1f1f1f" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              background: "#111",
+              border: "1px solid #2a2a2a",
+              borderRadius: 50,
+              paddingLeft: 22,
+              paddingRight: 22,
+              paddingTop: 10,
+              paddingBottom: 10,
+            }}
+          >
+            <span style={{ color: "#fff", fontWeight: 900, fontSize: 18, letterSpacing: -0.3 }}>
+              {count} {propLabel}
             </span>
           </div>
+          <span
+            style={{
+              color: "#333",
+              fontWeight: 700,
+              fontSize: 13,
+              letterSpacing: 2,
+              textTransform: "uppercase",
+            }}
+          >
+            en Conexory
+          </span>
         </div>
       </div>
     </div>,
