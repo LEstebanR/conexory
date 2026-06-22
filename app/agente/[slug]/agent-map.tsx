@@ -82,7 +82,6 @@ export interface MapProperty {
 }
 
 function formatCOP(n: number): string {
-  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toLocaleString("es-CO", { maximumFractionDigits: 1 })} B`
   if (n >= 1_000_000) return `$${Math.round(n / 1_000_000).toLocaleString("es-CO")} M`
   return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(n)
 }

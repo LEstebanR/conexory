@@ -58,7 +58,6 @@ const selectClass =
   "h-9 rounded-full border border-hairline-strong bg-white pl-3.5 pr-8 text-sm font-semibold text-ink cursor-pointer focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors appearance-none bg-[length:16px] bg-[right_0.6rem_center] bg-no-repeat bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23afafaf%22 stroke-width=%222%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 d=%22M19 9l-7 7-7-7%22/></svg>')]"
 
 function formatCOP(amount: number): string {
-  if (amount >= 1_000_000_000) return `$${(amount / 1_000_000_000).toLocaleString("es-CO", { maximumFractionDigits: 1 })} B`
   if (amount >= 1_000_000) return `$${Math.round(amount / 1_000_000).toLocaleString("es-CO")} M`
   return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(amount)
 }
@@ -335,7 +334,7 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
 
       {/* Property list */}
       {paginated.length > 0 ? (
-        <div className="space-y-3">
+        <div key={currentPage} className="space-y-3 animate-fade-in">
           {paginated.map((property) => {
             const cover = property.images[0]
             const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
