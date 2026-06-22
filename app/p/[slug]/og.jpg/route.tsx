@@ -6,9 +6,6 @@ import { youtubeId, youtubeThumb } from "@/lib/youtube"
 
 export const runtime = "nodejs"
 
-// Served at a clean /p/[slug]/og.jpg URL (real extension, no query string):
-// some WhatsApp clients ignore og:image URLs that don't look like an image
-// file, even when the content-type is correct.
 const size = { width: 1200, height: 630 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -29,18 +26,10 @@ function formatCOP(amount: number): string {
   }).format(amount)
 }
 
-function Wordmark() {
-  return (
-    <div style={{ display: "flex", alignItems: "center", fontSize: 34, fontWeight: 800, color: "#fff", letterSpacing: -1 }}>
-      Conexory
-    </div>
-  )
-}
-
 async function render(node: ReactElement): Promise<Response> {
   const png = Buffer.from(await new ImageResponse(node, size).arrayBuffer())
   try {
-    const jpeg = await sharp(png).jpeg({ quality: 78, mozjpeg: true }).toBuffer()
+    const jpeg = await sharp(png).jpeg({ quality: 85, mozjpeg: true }).toBuffer()
     return new Response(new Uint8Array(jpeg), {
       headers: { "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=86400" },
     })
@@ -58,8 +47,24 @@ export async function GET(
 
   if (!property || !property.published) {
     return render(
-      <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", backgroundColor: "#000" }}>
-        <Wordmark />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#000",
+          gap: 12,
+        }}
+      >
+        <div style={{ display: "flex", fontSize: 56, fontWeight: 900, color: "#fff", letterSpacing: -2 }}>
+          Conexory
+        </div>
+        <div style={{ display: "flex", fontSize: 18, color: "#444", letterSpacing: 3, textTransform: "uppercase" }}>
+          conexory.com
+        </div>
       </div>
     )
   }
@@ -67,56 +72,288 @@ export async function GET(
   const type = TYPE_LABELS[property.type] ?? property.type
   const price = formatCOP(Number(property.price))
   const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
-  const subtitle = `${type}${location ? ` en ${location}` : ""}`
+  const title = property.title.length > 48 ? property.title.slice(0, 48) + "…" : property.title
 
-  const features = [
-    property.bedrooms != null
-      ? `${property.bedrooms} ${property.bedrooms === 1 ? "habitación" : "habitaciones"}`
-      : null,
+  const featureItems = [
+    property.bedrooms != null ? `${property.bedrooms} hab.` : null,
     property.bathrooms != null
       ? `${property.bathrooms} ${property.bathrooms === 1 ? "baño" : "baños"}`
       : null,
     property.area != null ? `${property.area} m²` : null,
-    property.parking != null
-      ? `${property.parking} ${property.parking === 1 ? "parqueadero" : "parqueaderos"}`
-      : null,
-  ]
-    .filter(Boolean)
-    .join("   ·   ")
+    property.parking != null ? `${property.parking} parq.` : null,
+  ].filter(Boolean) as string[]
 
   const videoId = youtubeId(property.videoUrl)
   const cover = property.images[0] ?? (videoId ? youtubeThumb(videoId) : null)
 
   if (cover) {
     return render(
-      <div style={{ display: "flex", position: "relative", width: "100%", height: "100%", backgroundColor: "#000" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-        <div style={{ position: "absolute", inset: 0, display: "flex", background: "linear-gradient(to top, rgba(0,0,0,0.9) 8%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.45))" }} />
-        <div style={{ position: "absolute", top: 50, left: 60, display: "flex" }}>
-          <Wordmark />
+      <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: "#000" }}>
+        {/* Photo — left 57% */}
+        <div style={{ display: "flex", position: "relative", width: "57%", height: "100%" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={cover}
+            alt=""
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+          {/* Fade to black on right edge so the panel blends */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: "25%",
+              background: "linear-gradient(to right, transparent, #000)",
+            }}
+          />
         </div>
-        <div style={{ position: "absolute", left: 60, right: 60, bottom: 54, display: "flex", flexDirection: "column", color: "#fff" }}>
-          <div style={{ display: "flex", fontSize: 30, fontWeight: 600, color: "#e2e2e2" }}>{subtitle}</div>
-          <div style={{ display: "flex", fontSize: 76, fontWeight: 800, letterSpacing: -2, marginTop: 6 }}>{price}</div>
-          <div style={{ display: "flex", fontSize: 38, fontWeight: 600, marginTop: 4 }}>{property.title}</div>
+
+        {/* Info panel — right 43% */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            width: "43%",
+            height: "100%",
+            backgroundColor: "#000",
+            padding: "52px 60px 52px 44px",
+          }}
+        >
+          {/* Wordmark */}
+          <div
+            style={{
+              display: "flex",
+              fontSize: 24,
+              fontWeight: 900,
+              color: "#fff",
+              letterSpacing: -0.5,
+            }}
+          >
+            Conexory
+          </div>
+
+          {/* Main content */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {/* Type label */}
+            <div
+              style={{
+                display: "flex",
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#555",
+                letterSpacing: 3,
+                textTransform: "uppercase",
+                marginBottom: 14,
+              }}
+            >
+              {type}
+            </div>
+
+            {/* Divider */}
+            <div
+              style={{
+                display: "flex",
+                height: 1,
+                backgroundColor: "#222",
+                marginBottom: 20,
+              }}
+            />
+
+            {/* Price */}
+            <div
+              style={{
+                display: "flex",
+                fontSize: 46,
+                fontWeight: 900,
+                color: "#fff",
+                letterSpacing: -2,
+                lineHeight: 1,
+              }}
+            >
+              {price}
+            </div>
+
+            {/* Title */}
+            <div
+              style={{
+                display: "flex",
+                fontSize: 22,
+                fontWeight: 700,
+                color: "#999",
+                marginTop: 14,
+                lineHeight: 1.3,
+              }}
+            >
+              {title}
+            </div>
+
+            {/* Location */}
+            {location && (
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: 17,
+                  color: "#4a4a4a",
+                  marginTop: 6,
+                }}
+              >
+                {location}
+              </div>
+            )}
+
+            {/* Feature chips */}
+            {featureItems.length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 8,
+                  marginTop: 22,
+                }}
+              >
+                {featureItems.map((f) => (
+                  <div
+                    key={f}
+                    style={{
+                      display: "flex",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "#ccc",
+                      backgroundColor: "#111",
+                      border: "1px solid #2a2a2a",
+                      padding: "5px 13px",
+                      borderRadius: 999,
+                    }}
+                  >
+                    {f}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* URL */}
+          <div style={{ display: "flex", fontSize: 13, color: "#333", letterSpacing: 0.5 }}>
+            conexory.com
+          </div>
         </div>
       </div>
     )
   }
 
+  // No-photo fallback — full black, typographic layout
   return render(
-    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", backgroundColor: "#000", padding: 64 }}>
-      <Wordmark />
-      <div style={{ display: "flex", flexDirection: "column", color: "#fff" }}>
-        <div style={{ display: "flex", fontSize: 30, fontWeight: 600, color: "#afafaf" }}>{subtitle}</div>
-        <div style={{ display: "flex", fontSize: 88, fontWeight: 800, letterSpacing: -2, marginTop: 10 }}>{price}</div>
-        <div style={{ display: "flex", fontSize: 42, fontWeight: 600, marginTop: 8 }}>{property.title}</div>
-        {features ? (
-          <div style={{ display: "flex", fontSize: 28, color: "#afafaf", marginTop: 18 }}>{features}</div>
-        ) : null}
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#000",
+        padding: "60px 80px",
+      }}
+    >
+      {/* Wordmark */}
+      <div
+        style={{
+          display: "flex",
+          fontSize: 26,
+          fontWeight: 900,
+          color: "#fff",
+          letterSpacing: -1,
+        }}
+      >
+        Conexory
       </div>
-      <div style={{ display: "flex", fontSize: 24, color: "#5e5e5e" }}>conexory.com</div>
+
+      {/* Main content */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {/* Type + location */}
+        <div
+          style={{
+            display: "flex",
+            fontSize: 13,
+            fontWeight: 700,
+            color: "#444",
+            letterSpacing: 3,
+            textTransform: "uppercase",
+            marginBottom: 20,
+          }}
+        >
+          {type}
+          {location ? `  ·  ${location}` : ""}
+        </div>
+
+        {/* Divider */}
+        <div
+          style={{
+            display: "flex",
+            height: 1,
+            backgroundColor: "#1c1c1c",
+            marginBottom: 26,
+          }}
+        />
+
+        {/* Price */}
+        <div
+          style={{
+            display: "flex",
+            fontSize: 84,
+            fontWeight: 900,
+            color: "#fff",
+            letterSpacing: -4,
+            lineHeight: 0.95,
+          }}
+        >
+          {price}
+        </div>
+
+        {/* Title */}
+        <div
+          style={{
+            display: "flex",
+            fontSize: 32,
+            fontWeight: 700,
+            color: "#666",
+            marginTop: 22,
+            lineHeight: 1.2,
+          }}
+        >
+          {property.title.length > 65 ? property.title.slice(0, 65) + "…" : property.title}
+        </div>
+
+        {/* Feature chips */}
+        {featureItems.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 26 }}>
+            {featureItems.map((f) => (
+              <div
+                key={f}
+                style={{
+                  display: "flex",
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: "#bbb",
+                  backgroundColor: "#111",
+                  border: "1px solid #222",
+                  padding: "7px 18px",
+                  borderRadius: 999,
+                }}
+              >
+                {f}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* URL */}
+      <div style={{ display: "flex", fontSize: 15, color: "#333", letterSpacing: 0.5 }}>
+        conexory.com
+      </div>
     </div>
   )
 }
