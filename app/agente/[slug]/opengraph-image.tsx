@@ -86,7 +86,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        padding: "36px 88px 36px",
+        justifyContent: "space-between",
+        padding: "40px 88px 44px",
         fontFamily: "Inter",
         position: "relative",
       }}
@@ -95,7 +96,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       <div
         style={{
           position: "absolute",
-          top: 32,
+          top: 36,
           right: 88,
           display: "flex",
           alignItems: "center",
@@ -120,13 +121,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         </span>
       </div>
 
-      {/* Central block — avatar + text, vertically centered */}
+      {/* Central block — avatar + text */}
       <div
         style={{
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
-          flex: 1,
           gap: 56,
         }}
       >
