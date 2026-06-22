@@ -14,7 +14,9 @@ const markWhite = `data:image/png;base64,${fs.readFileSync(
   path.join(process.cwd(), "public/mark-white.png")
 ).toString("base64")}`
 
-export default function Image() {
+const PROPERTY_IMAGE = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=680&q=85&fit=crop&crop=center"
+
+export default async function Image() {
   const fontBold = loadFont("inter-bold.woff")
   const fontBlack = loadFont("inter-black.woff")
 
@@ -133,31 +135,28 @@ export default function Image() {
           style={{
             width: "100%",
             height: 200,
-            background: "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             position: "relative",
+            display: "flex",
+            overflow: "hidden",
           }}
         >
-          {/* Fake image grid */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 2, opacity: 0.15 }}>
-            {[0, 1, 2].map((row) => (
-              <div key={row} style={{ display: "flex", gap: 2 }}>
-                {[0, 1, 2, 3].map((col) => (
-                  <div
-                    key={col}
-                    style={{
-                      width: 72,
-                      height: 56,
-                      background: "#fff",
-                      borderRadius: 4,
-                    }}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
+          <img
+            src={PROPERTY_IMAGE}
+            alt=""
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          />
+          {/* Gradient overlay at bottom for price readability */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 80,
+              background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)",
+              display: "flex",
+            }}
+          />
           {/* Price badge */}
           <div
             style={{
