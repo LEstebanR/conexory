@@ -44,7 +44,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     return new ImageResponse(
       <div
         style={{
-          background: "#000",
+          background: "#fff",
           width: "100%",
           height: "100%",
           display: "flex",
@@ -52,7 +52,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           justifyContent: "center",
         }}
       >
-        <span style={{ color: "#fff", fontFamily: "Inter", fontWeight: 900, fontSize: 48 }}>
+        <span style={{ color: "#000", fontFamily: "Inter", fontWeight: 900, fontSize: 48 }}>
           Conexory
         </span>
       </div>,
@@ -81,12 +81,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   return new ImageResponse(
     <div
       style={{
-        background: "#000",
+        background: "#fff",
         width: "100%",
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        padding: "56px 88px 60px",
+        padding: "36px 88px 36px",
         fontFamily: "Inter",
         position: "relative",
       }}
@@ -95,7 +95,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       <div
         style={{
           position: "absolute",
-          top: 52,
+          top: 32,
           right: 88,
           display: "flex",
           alignItems: "center",
@@ -106,16 +106,16 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           style={{
             width: 34,
             height: 34,
-            background: "#fff",
+            background: "#000",
             borderRadius: 9,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <span style={{ color: "#000", fontWeight: 900, fontSize: 16, lineHeight: 1 }}>C</span>
+          <span style={{ color: "#fff", fontWeight: 900, fontSize: 16, lineHeight: 1 }}>C</span>
         </div>
-        <span style={{ color: "#fff", fontWeight: 900, fontSize: 20, letterSpacing: -0.5 }}>
+        <span style={{ color: "#000", fontWeight: 900, fontSize: 20, letterSpacing: -0.5 }}>
           Conexory
         </span>
       </div>
@@ -139,7 +139,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             height={156}
             style={{
               borderRadius: "50%",
-              border: "4px solid #2a2a2a",
+              border: "4px solid #e0e0e0",
               objectFit: "cover",
               flexShrink: 0,
             }}
@@ -150,8 +150,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               width: 156,
               height: 156,
               borderRadius: "50%",
-              background: "#1a1a1a",
-              border: "4px solid #2a2a2a",
+              background: "#000",
+              border: "4px solid #e0e0e0",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -176,7 +176,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           {/* Name */}
           <span
             style={{
-              color: "#fff",
+              color: "#000",
               fontWeight: 900,
               fontSize: 64,
               letterSpacing: -2.5,
@@ -204,7 +204,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           {bio && (
             <span
               style={{
-                color: "#444",
+                color: "#555",
                 fontWeight: 700,
                 fontSize: 20,
                 lineHeight: 1.5,
@@ -224,14 +224,14 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           gap: 20,
         }}
       >
-        <div style={{ width: "100%", height: 1, background: "#1f1f1f" }} />
+        <div style={{ width: "100%", height: 1, background: "#e5e5e5" }} />
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              background: "#111",
-              border: "1px solid #2a2a2a",
+              background: "#f3f3f3",
+              border: "1px solid #e0e0e0",
               borderRadius: 50,
               paddingLeft: 22,
               paddingRight: 22,
@@ -239,13 +239,13 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               paddingBottom: 10,
             }}
           >
-            <span style={{ color: "#fff", fontWeight: 900, fontSize: 18, letterSpacing: -0.3 }}>
+            <span style={{ color: "#000", fontWeight: 900, fontSize: 18, letterSpacing: -0.3 }}>
               {count} {propLabel}
             </span>
           </div>
           <span
             style={{
-              color: "#333",
+              color: "#999",
               fontWeight: 700,
               fontSize: 13,
               letterSpacing: 2,
