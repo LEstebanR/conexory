@@ -239,7 +239,8 @@ export default function PreciosPage() {
           </Reveal>
 
           <Reveal delay={60}>
-            <div className="rounded-3xl overflow-hidden border border-hairline bg-white">
+            <div className="overflow-x-auto -mx-5 sm:mx-0 px-5 sm:px-0">
+            <div className="rounded-3xl overflow-hidden border border-hairline bg-white min-w-[560px]">
               {/* Table header */}
               <div className="grid grid-cols-4 border-b border-hairline">
                 <div className="p-5" />
@@ -328,6 +329,7 @@ export default function PreciosPage() {
                   </Link>
                 </div>
               </div>
+            </div>
             </div>
           </Reveal>
 
