@@ -99,9 +99,8 @@ export async function generateMetadata({
       title,
       description,
       siteName: "Conexory",
-      ...(agent.image && { images: [{ url: agent.image, width: 400, height: 400 }] }),
     },
-    twitter: { card: "summary", title, description },
+    twitter: { card: "summary_large_image", title, description },
   }
 }
 
