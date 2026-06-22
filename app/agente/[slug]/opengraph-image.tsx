@@ -143,7 +143,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             style={{
               color: "#000",
               fontWeight: 900,
-              fontSize: 68,
+              fontSize: 76,
               letterSpacing: -2.5,
               lineHeight: 1.05,
               marginBottom: 16,
@@ -155,7 +155,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             style={{
               color: "#666",
               fontWeight: 700,
-              fontSize: 24,
+              fontSize: 28,
               letterSpacing: -0.3,
               marginBottom: bio ? 28 : 0,
             }}
@@ -167,7 +167,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               style={{
                 color: "#444",
                 fontWeight: 700,
-                fontSize: 22,
+                fontSize: 25,
                 lineHeight: 1.55,
               }}
             >
@@ -194,7 +194,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                   paddingBottom: 12,
                 }}
               >
-                <span style={{ color: "#000", fontWeight: 900, fontSize: 18, letterSpacing: -0.3 }}>
+                <span style={{ color: "#000", fontWeight: 900, fontSize: 20, letterSpacing: -0.3 }}>
                   {count} {propLabel}
                 </span>
               </div>
@@ -226,7 +226,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               >
                 <span style={{ color: "#fff", fontWeight: 900, fontSize: 14, lineHeight: 1 }}>C</span>
               </div>
-              <span style={{ color: "#000", fontWeight: 900, fontSize: 18, letterSpacing: -0.5 }}>
+              <span style={{ color: "#000", fontWeight: 900, fontSize: 20, letterSpacing: -0.5 }}>
                 Conexory
               </span>
             </div>
