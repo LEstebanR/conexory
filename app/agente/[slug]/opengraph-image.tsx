@@ -44,7 +44,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     return new ImageResponse(
       <div
         style={{
-          background: "#000",
+          background: "#fff",
           width: "100%",
           height: "100%",
           display: "flex",
@@ -52,7 +52,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           justifyContent: "center",
         }}
       >
-        <span style={{ color: "#fff", fontFamily: "Inter", fontWeight: 900, fontSize: 48 }}>
+        <span style={{ color: "#000", fontFamily: "Inter", fontWeight: 900, fontSize: 48 }}>
           Conexory
         </span>
       </div>,
@@ -71,169 +71,165 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const propLabel = count === 1 ? "propiedad activa" : "propiedades activas"
 
   const bio = agent.bio
-    ? agent.bio.length > 100
-      ? agent.bio.slice(0, 97) + "…"
+    ? agent.bio.length > 130
+      ? agent.bio.slice(0, 127) + "…"
       : agent.bio
     : null
 
-  const subtitle = [
-    "Asesor inmobiliario",
-    agent.location,
-  ]
-    .filter(Boolean)
-    .join("  ·  ")
+  const subtitle = ["Asesor inmobiliario", agent.location].filter(Boolean).join("  ·  ")
 
   return new ImageResponse(
     <div
       style={{
-        background: "#000",
         width: "100%",
         height: "100%",
         display: "flex",
-        flexDirection: "column",
-        padding: "72px 88px 64px",
+        flexDirection: "row",
         fontFamily: "Inter",
-        position: "relative",
       }}
     >
-      {/* Conexory mark — top right */}
+      {/* Left panel — full-height photo or initials */}
       <div
         style={{
-          position: "absolute",
-          top: 56,
-          right: 88,
+          width: 420,
+          height: 630,
+          background: "#0a0a0a",
           display: "flex",
           alignItems: "center",
-          gap: 10,
+          justifyContent: "center",
+          flexShrink: 0,
+          overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            width: 34,
-            height: 34,
-            background: "#fff",
-            borderRadius: 9,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span style={{ color: "#000", fontWeight: 900, fontSize: 16, lineHeight: 1 }}>
-            C
-          </span>
-        </div>
-        <span style={{ color: "#fff", fontWeight: 900, fontSize: 20, letterSpacing: -0.5 }}>
-          Conexory
-        </span>
-      </div>
-
-      {/* Main content */}
-      <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", gap: 52, flex: 1, marginTop: 8 }}>
-
-        {/* Avatar */}
-        <div style={{ display: "flex", flexShrink: 0, marginTop: 4 }}>
-          {agent.image ? (
-            <img
-              src={agent.image}
-              alt=""
-              width={128}
-              height={128}
-              style={{
-                borderRadius: "50%",
-                border: "3px solid #333",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: 128,
-                height: 128,
-                borderRadius: "50%",
-                background: "#1a1a1a",
-                border: "3px solid #333",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span style={{ color: "#fff", fontWeight: 900, fontSize: 44, lineHeight: 1 }}>
-                {initials}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Text content */}
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 0 }}>
-          {/* Name */}
+        {agent.image ? (
+          <img
+            src={agent.image}
+            alt=""
+            width={420}
+            height={630}
+            style={{ objectFit: "cover" }}
+          />
+        ) : (
           <span
             style={{
               color: "#fff",
               fontWeight: 900,
-              fontSize: 60,
+              fontSize: 140,
+              letterSpacing: -4,
+              opacity: 0.12,
+              lineHeight: 1,
+            }}
+          >
+            {initials}
+          </span>
+        )}
+      </div>
+
+      {/* Right panel — content */}
+      <div
+        style={{
+          flex: 1,
+          height: 630,
+          background: "#fff",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "52px 72px 48px 64px",
+        }}
+      >
+        {/* Top: name + subtitle + bio */}
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span
+            style={{
+              color: "#000",
+              fontWeight: 900,
+              fontSize: 76,
               letterSpacing: -2.5,
               lineHeight: 1.05,
-              marginBottom: 12,
+              marginBottom: 16,
             }}
           >
             {agent.name}
           </span>
-
-          {/* Role + location */}
           <span
             style={{
               color: "#666",
               fontWeight: 700,
-              fontSize: 22,
+              fontSize: 28,
               letterSpacing: -0.3,
-              marginBottom: bio ? 28 : 40,
+              marginBottom: bio ? 28 : 0,
             }}
           >
             {subtitle}
           </span>
-
-          {/* Bio */}
           {bio && (
             <span
               style={{
-                color: "#4a4a4a",
+                color: "#444",
                 fontWeight: 700,
-                fontSize: 20,
-                lineHeight: 1.5,
-                marginBottom: 40,
+                fontSize: 25,
+                lineHeight: 1.55,
               }}
             >
               &ldquo;{bio}&rdquo;
             </span>
           )}
+        </div>
 
-          {/* Divider */}
-          <div style={{ display: "flex", width: "100%", height: 1, background: "#1f1f1f", marginBottom: 28 }} />
-
-          {/* Properties count */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "#111",
-                border: "1px solid #2a2a2a",
-                borderRadius: 50,
-                paddingLeft: 22,
-                paddingRight: 22,
-                paddingTop: 10,
-                paddingBottom: 10,
-              }}
-            >
-              <span style={{ color: "#fff", fontWeight: 900, fontSize: 18, letterSpacing: -0.3 }}>
-                {count} {propLabel}
+        {/* Bottom: divider + stats + Conexory mark */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div style={{ width: "100%", height: 1, background: "#e5e5e5" }} />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  background: "#f3f3f3",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: 50,
+                  paddingLeft: 22,
+                  paddingRight: 22,
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                }}
+              >
+                <span style={{ color: "#000", fontWeight: 900, fontSize: 20, letterSpacing: -0.3 }}>
+                  {count} {propLabel}
+                </span>
+              </div>
+              <span
+                style={{
+                  color: "#999",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  letterSpacing: 2,
+                  textTransform: "uppercase",
+                }}
+              >
+                en Conexory
               </span>
             </div>
-            <span style={{ color: "#333", fontWeight: 700, fontSize: 14, letterSpacing: 2, textTransform: "uppercase" }}>
-              en Conexory
-            </span>
+
+            {/* Conexory mark */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  background: "#000",
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <span style={{ color: "#fff", fontWeight: 900, fontSize: 14, lineHeight: 1 }}>C</span>
+              </div>
+              <span style={{ color: "#000", fontWeight: 900, fontSize: 20, letterSpacing: -0.5 }}>
+                Conexory
+              </span>
+            </div>
           </div>
         </div>
       </div>
