@@ -63,9 +63,11 @@ async function getAgent(slug: string) {
           area: true,
           bedrooms: true,
           bathrooms: true,
+          parking: true,
           shares: true,
           latitude: true,
           longitude: true,
+          createdAt: true,
         },
       },
     },
@@ -154,6 +156,7 @@ export default async function AgentProfilePage({
   const properties: AgentProperty[] = agent.properties.map((p) => ({
     ...p,
     price: Number(p.price),
+    createdAt: p.createdAt.getTime(),
   }))
 
   return (
@@ -211,7 +214,7 @@ export default async function AgentProfilePage({
         <div className="rounded-2xl bg-canvas-soft grid grid-cols-3 divide-x divide-hairline mb-5">
           {[
             { label: "Propiedades", value: agent.properties.length },
-            { label: "Compartidas", value: totalShares },
+            { label: "Links enviados", value: totalShares },
             { label: "Ciudades", value: uniqueCities },
           ].map((stat) => (
             <div key={stat.label} className="flex flex-col items-center py-4 px-2">

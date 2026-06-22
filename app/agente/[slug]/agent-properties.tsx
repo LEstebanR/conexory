@@ -1,9 +1,14 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
-import { Search, MapPin, Building2, ChevronLeft, ChevronRight, SlidersHorizontal, X } from "lucide-react"
+import {
+  Search, MapPin, Building2, ChevronLeft, ChevronRight,
+  SlidersHorizontal, ArrowUpDown,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Slider } from "@/components/ui/slider"
 import type { MapProperty } from "./agent-map"
 
 const AgentMap = dynamic(() => import("./agent-map"), {
@@ -20,16 +25,6 @@ const TYPE_LABELS: Record<string, string> = {
   warehouse: "Bodega",
 }
 
-const TYPE_OPTIONS = [
-  { value: "", label: "Todos los tipos" },
-  { value: "apartment", label: "Apartamento" },
-  { value: "house", label: "Casa" },
-  { value: "office", label: "Oficina" },
-  { value: "commercial", label: "Local comercial" },
-  { value: "lot", label: "Lote" },
-  { value: "warehouse", label: "Bodega" },
-]
-
 export interface AgentProperty {
   id: string
   slug: string
@@ -43,186 +38,273 @@ export interface AgentProperty {
   area: number | null
   bedrooms: number | null
   bathrooms: number | null
+  parking: number | null
   shares: number
   latitude: number | null
   longitude: number | null
+  createdAt: number
 }
 
+type SortKey = "recent" | "price-desc" | "price-asc"
+type Range = [number, number]
+
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "recent", label: "Más recientes" },
+  { key: "price-desc", label: "Precio: mayor a menor" },
+  { key: "price-asc", label: "Precio: menor a mayor" },
+]
+
+const selectClass =
+  "h-9 rounded-full border border-hairline-strong bg-white pl-3.5 pr-8 text-sm font-semibold text-ink cursor-pointer focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors appearance-none bg-[length:16px] bg-[right_0.6rem_center] bg-no-repeat bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23afafaf%22 stroke-width=%222%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 d=%22M19 9l-7 7-7-7%22/></svg>')]"
+
 function formatCOP(amount: number): string {
-  if (amount >= 1_000_000_000) {
-    const b = amount / 1_000_000_000
-    return `$${b.toLocaleString("es-CO", { maximumFractionDigits: 1 })} B`
-  }
-  if (amount >= 1_000_000) {
-    return `$${Math.round(amount / 1_000_000).toLocaleString("es-CO")} M`
-  }
+  if (amount >= 1_000_000_000) return `$${(amount / 1_000_000_000).toLocaleString("es-CO", { maximumFractionDigits: 1 })} B`
+  if (amount >= 1_000_000) return `$${Math.round(amount / 1_000_000).toLocaleString("es-CO")} M`
   return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(amount)
+}
+
+function priceLabel(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`
+  return `$${Math.round(n).toLocaleString("es-CO")}`
+}
+
+function areaLabel(n: number): string { return `${Math.round(n)} m²` }
+
+function niceStep(range: number): number {
+  if (range <= 0) return 1
+  const raw = range / 100
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)))
+  return Math.max(1, Math.round(raw / mag) * mag)
+}
+
+function RangeSlider({ label, bounds, value, onChange, format }: {
+  label: string; bounds: Range; value: Range | null
+  onChange: (v: Range) => void; format: (n: number) => string
+}) {
+  const current = value ?? bounds
+  return (
+    <div className="space-y-2.5">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-semibold text-mute">{label}</label>
+        <span className="text-xs font-bold text-ink tabular-nums">
+          {format(current[0])} – {format(current[1])}
+        </span>
+      </div>
+      <Slider
+        min={bounds[0]} max={bounds[1]}
+        step={niceStep(bounds[1] - bounds[0])}
+        value={current}
+        onValueChange={(v) => onChange([v[0], v[1]])}
+        className="py-1"
+      />
+    </div>
+  )
+}
+
+function MinSelect({ label, value, set }: { label: string; value: string; set: (v: string) => void }) {
+  return (
+    <div className="space-y-1">
+      <span className="text-[11px] text-mute font-medium block">{label}</span>
+      <select value={value} onChange={(e) => set(e.target.value)}
+        aria-label={`${label} mínimo`} className={cn(selectClass, "w-full pl-3 pr-7 text-[13px]")}>
+        <option value="">Cualq.</option>
+        {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}+</option>)}
+      </select>
+    </div>
+  )
 }
 
 const PAGE_SIZE = 5
 
 export default function AgentProperties({ properties }: { properties: AgentProperty[] }) {
   const [query, setQuery] = useState("")
-  const [typeFilter, setTypeFilter] = useState("")
-  const [bedroomsFilter, setBedroomsFilter] = useState("")
-  const [minPrice, setMinPrice] = useState("")
-  const [maxPrice, setMaxPrice] = useState("")
+  const [typeFilter, setTypeFilter] = useState("all")
+  const [sort, setSort] = useState<SortKey>("recent")
+  const [priceRange, setPriceRange] = useState<Range | null>(null)
+  const [areaRange, setAreaRange] = useState<Range | null>(null)
+  const [minBeds, setMinBeds] = useState("")
+  const [minBaths, setMinBaths] = useState("")
+  const [minParking, setMinParking] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
+  const filterRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showFilters) return
+    function onDown(e: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setShowFilters(false)
+    }
+    window.addEventListener("mousedown", onDown)
+    return () => window.removeEventListener("mousedown", onDown)
+  }, [showFilters])
+
+  const types = useMemo(() => {
+    const seen = new Map<string, string>()
+    for (const p of properties) if (!seen.has(p.type)) seen.set(p.type, TYPE_LABELS[p.type] ?? p.type)
+    return [...seen.entries()]
+  }, [properties])
+
+  const priceBounds = useMemo<Range>(() => {
+    const vals = properties.map((p) => p.price)
+    return [Math.min(...vals), Math.max(...vals)]
+  }, [properties])
+
+  const areaBounds = useMemo<Range | null>(() => {
+    const vals = properties.map((p) => p.area).filter((a): a is number => a != null)
+    return vals.length ? [Math.min(...vals), Math.max(...vals)] : null
+  }, [properties])
+
+  const activeFilterCount =
+    (typeFilter !== "all" ? 1 : 0) +
+    (priceRange ? 1 : 0) +
+    (areaRange ? 1 : 0) +
+    (minBeds ? 1 : 0) +
+    (minBaths ? 1 : 0) +
+    (minParking ? 1 : 0)
+
+  function clearAll() {
+    setTypeFilter("all"); setPriceRange(null); setAreaRange(null)
+    setMinBeds(""); setMinBaths(""); setMinParking(""); setPage(1)
+  }
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase().trim()
-    const minP = minPrice ? Number(minPrice.replace(/\D/g, "")) : null
-    const maxP = maxPrice ? Number(maxPrice.replace(/\D/g, "")) : null
-    const beds = bedroomsFilter ? Number(bedroomsFilter) : null
+    const q = query.trim().toLowerCase()
+    const minB = minBeds ? Number(minBeds) : null
+    const minBa = minBaths ? Number(minBaths) : null
+    const minPk = minParking ? Number(minParking) : null
 
-    return properties.filter((p) => {
+    const result = properties.filter((p) => {
+      if (typeFilter !== "all" && p.type !== typeFilter) return false
+      if (priceRange && (p.price < priceRange[0] || p.price > priceRange[1])) return false
+      if (areaRange && (p.area == null || p.area < areaRange[0] || p.area > areaRange[1])) return false
+      if (minB != null && (p.bedrooms == null || p.bedrooms < minB)) return false
+      if (minBa != null && (p.bathrooms == null || p.bathrooms < minBa)) return false
+      if (minPk != null && (p.parking == null || p.parking < minPk)) return false
       if (q && ![p.title, p.city, p.neighborhood ?? "", p.state ?? ""].some((s) => s.toLowerCase().includes(q))) return false
-      if (typeFilter && p.type !== typeFilter) return false
-      if (beds !== null && (p.bedrooms == null || p.bedrooms < beds)) return false
-      if (minP !== null && p.price < minP) return false
-      if (maxP !== null && p.price > maxP) return false
       return true
     })
-  }, [properties, query, typeFilter, bedroomsFilter, minPrice, maxPrice])
+
+    result.sort((a, b) => {
+      if (sort === "price-desc") return b.price - a.price
+      if (sort === "price-asc") return a.price - b.price
+      return b.createdAt - a.createdAt
+    })
+    return result
+  }, [properties, query, typeFilter, sort, priceRange, areaRange, minBeds, minBaths, minParking])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
   const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
-  const hasActiveFilters = typeFilter || bedroomsFilter || minPrice || maxPrice
-
-  function clearFilters() {
-    setTypeFilter("")
-    setBedroomsFilter("")
-    setMinPrice("")
-    setMaxPrice("")
-    setPage(1)
-  }
-
   const mapProperties: MapProperty[] = properties.map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    title: p.title,
-    city: p.city,
-    price: p.price,
-    latitude: p.latitude,
-    longitude: p.longitude,
+    id: p.id, slug: p.slug, title: p.title, city: p.city, price: p.price,
+    latitude: p.latitude, longitude: p.longitude,
   }))
 
   if (properties.length === 0) return null
 
   return (
     <div className="space-y-4">
-      {/* Section header */}
       <div className="flex items-baseline justify-between">
         <h2 className="text-base font-black text-ink">Propiedades disponibles</h2>
         <span className="text-sm font-bold text-mute">{properties.length}</span>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-mute pointer-events-none" />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setPage(1) }}
-          placeholder="Buscar por título, ciudad o zona…"
-          className="w-full h-11 rounded-full border border-hairline bg-white pl-9 pr-4 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-ink"
-        />
-      </div>
+      {/* Search + filters + sort — only useful with 5+ properties */}
+      {properties.length >= 5 && <div className="flex items-center gap-2">
+        {/* Search */}
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-mute" />
+          <input
+            type="search" value={query}
+            onChange={(e) => { setQuery(e.target.value); setPage(1) }}
+            placeholder="Buscar por título o ubicación"
+            className="w-full h-9 pl-10 pr-3 rounded-full border border-hairline-strong bg-white text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
+          />
+        </div>
 
-      {/* Filter toggle */}
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-body hover:text-ink transition-colors"
-        >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
-          Filtros
-          {hasActiveFilters && (
-            <span className="w-4 h-4 rounded-full bg-ink text-white text-[10px] font-black flex items-center justify-center">
-              {[typeFilter, bedroomsFilter, minPrice, maxPrice].filter(Boolean).length}
-            </span>
-          )}
-        </button>
-        {hasActiveFilters && (
+        {/* Filters dropdown */}
+        <div className="relative flex-shrink-0" ref={filterRef}>
           <button
             type="button"
-            onClick={clearFilters}
-            className="flex items-center gap-1 text-xs text-mute hover:text-ink transition-colors"
+            onClick={() => setShowFilters((s) => !s)}
+            aria-label="Filtros"
+            className={cn(
+              "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border text-sm font-semibold transition-colors",
+              showFilters || activeFilterCount > 0
+                ? "border-ink bg-ink text-white"
+                : "border-hairline-strong bg-white text-ink hover:bg-canvas-soft"
+            )}
           >
-            <X className="w-3 h-3" /> Limpiar
+            <SlidersHorizontal className="w-4 h-4" />
+            {activeFilterCount > 0 && (
+              <span className="ml-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-ink text-[10px] font-bold flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
           </button>
-        )}
-      </div>
 
-      {/* Filters panel */}
-      {showFilters && (
-        <div className="rounded-2xl border border-hairline bg-white p-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            {/* Type */}
-            <div className="col-span-2">
-              <label className="block text-xs font-semibold text-ink mb-1.5">Tipo de propiedad</label>
-              <select
-                value={typeFilter}
-                onChange={(e) => { setTypeFilter(e.target.value); setPage(1) }}
-                className="w-full h-10 rounded-lg border border-hairline bg-white px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
-              >
-                {TYPE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
+          {showFilters && (
+            <div className="absolute right-0 mt-2 z-20 w-[min(22rem,calc(100vw-2rem))] bg-white rounded-2xl border border-hairline shadow-xl shadow-black/10 p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold text-ink">Filtros</p>
+                {activeFilterCount > 0 && (
+                  <button type="button" onClick={clearAll} className="text-xs font-semibold text-mute hover:text-ink transition-colors">
+                    Limpiar todo
+                  </button>
+                )}
+              </div>
 
-            {/* Bedrooms */}
-            <div>
-              <label className="block text-xs font-semibold text-ink mb-1.5">Hab. mínimas</label>
-              <select
-                value={bedroomsFilter}
-                onChange={(e) => { setBedroomsFilter(e.target.value); setPage(1) }}
-                className="w-full h-10 rounded-lg border border-hairline bg-white px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
-              >
-                <option value="">Cualquiera</option>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>{n}+</option>
-                ))}
-              </select>
-            </div>
+              {types.length > 1 && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-mute">Tipo</label>
+                  <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1) }} className={cn(selectClass, "w-full")}>
+                    <option value="all">Todos los tipos</option>
+                    {types.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                </div>
+              )}
 
-            {/* Price range */}
-            <div>
-              <label className="block text-xs font-semibold text-ink mb-1.5">Precio mín. (M COP)</label>
-              <input
-                type="number"
-                value={minPrice}
-                onChange={(e) => { setMinPrice(e.target.value); setPage(1) }}
-                placeholder="Ej. 200"
-                className="w-full h-10 rounded-lg border border-hairline bg-white px-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/20"
-              />
-            </div>
+              {priceBounds[0] < priceBounds[1] && (
+                <RangeSlider label="Precio" bounds={priceBounds} value={priceRange}
+                  onChange={(v) => { setPriceRange(v); setPage(1) }} format={priceLabel} />
+              )}
 
-            <div className="col-span-2">
-              <label className="block text-xs font-semibold text-ink mb-1.5">Precio máx. (M COP)</label>
-              <input
-                type="number"
-                value={maxPrice}
-                onChange={(e) => { setMaxPrice(e.target.value); setPage(1) }}
-                placeholder="Ej. 800"
-                className="w-full h-10 rounded-lg border border-hairline bg-white px-3 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/20"
-              />
+              {areaBounds && areaBounds[0] < areaBounds[1] && (
+                <RangeSlider label="Área" bounds={areaBounds} value={areaRange}
+                  onChange={(v) => { setAreaRange(v); setPage(1) }} format={areaLabel} />
+              )}
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-mute">Mínimo</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <MinSelect label="Hab." value={minBeds} set={(v) => { setMinBeds(v); setPage(1) }} />
+                  <MinSelect label="Baños" value={minBaths} set={(v) => { setMinBaths(v); setPage(1) }} />
+                  <MinSelect label="Parq." value={minParking} set={(v) => { setMinParking(v); setPage(1) }} />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
 
-      {/* Results count when filtering */}
-      {(query || hasActiveFilters) && (
+        {/* Sort */}
+        <div className="relative flex-shrink-0">
+          <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-mute pointer-events-none" />
+          <select value={sort} onChange={(e) => { setSort(e.target.value as SortKey); setPage(1) }}
+            aria-label="Ordenar" className={cn(selectClass, "pl-9 hidden sm:block")}>
+            {SORT_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+          </select>
+          <select value={sort} onChange={(e) => { setSort(e.target.value as SortKey); setPage(1) }}
+            aria-label="Ordenar" className={cn(selectClass, "pl-9 sm:hidden")}>
+            {SORT_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+          </select>
+        </div>
+      </div>}
+
+      {/* Results count */}
+      {(query || activeFilterCount > 0) && (
         <p className="text-xs text-mute">
-          {filtered.length === 0
-            ? "Sin resultados"
-            : `${filtered.length} propiedad${filtered.length !== 1 ? "es" : ""} encontrada${filtered.length !== 1 ? "s" : ""}`}
+          {filtered.length === 0 ? "Sin resultados" : `${filtered.length} propiedad${filtered.length !== 1 ? "es" : ""} encontrada${filtered.length !== 1 ? "s" : ""}`}
         </p>
       )}
 
@@ -236,21 +318,13 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
             const hasStats = property.area != null || property.bedrooms != null || property.bathrooms != null
 
             return (
-              <Link
-                key={property.id}
-                href={`/p/${property.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link key={property.id} href={`/p/${property.slug}`} target="_blank" rel="noopener noreferrer"
                 className="group flex gap-3 bg-white rounded-2xl border border-hairline hover:border-hairline-strong overflow-hidden transition-all hover:shadow-sm p-3"
               >
                 <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-canvas-soft flex-shrink-0 relative">
                   {cover ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={cover}
-                      alt={property.title}
-                      className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
-                    />
+                    <img src={cover} alt={property.title} className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Building2 className="w-7 h-7 text-mute" strokeWidth={1.5} />
@@ -260,12 +334,8 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
 
                 <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                   <div>
-                    <span className="inline-block text-[10px] font-bold bg-canvas-soft text-body px-2 py-0.5 rounded-full mb-1.5">
-                      {typeLabel}
-                    </span>
-                    <p className="text-sm font-black text-ink leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">
-                      {property.title}
-                    </p>
+                    <span className="inline-block text-[10px] font-bold bg-canvas-soft text-body px-2 py-0.5 rounded-full mb-1.5">{typeLabel}</span>
+                    <p className="text-sm font-black text-ink leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">{property.title}</p>
                     {location && (
                       <div className="flex items-center gap-1 mt-1">
                         <MapPin className="w-3 h-3 text-mute flex-shrink-0" strokeWidth={2} />
@@ -274,9 +344,7 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
                     )}
                   </div>
                   <div>
-                    <p className="text-base font-black text-ink tracking-tight mt-1.5">
-                      {formatCOP(property.price)}
-                    </p>
+                    <p className="text-base font-black text-ink tracking-tight mt-1.5">{formatCOP(property.price)}</p>
                     {hasStats && (
                       <p className="text-xs text-mute mt-0.5">
                         {[
@@ -301,26 +369,14 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-1">
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1 text-sm font-semibold text-ink disabled:text-mute disabled:cursor-not-allowed hover:text-body transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Anterior
+          <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}
+            className="flex items-center gap-1 text-sm font-semibold text-ink disabled:text-mute disabled:cursor-not-allowed hover:text-body transition-colors">
+            <ChevronLeft className="w-4 h-4" /> Anterior
           </button>
-          <span className="text-xs text-mute font-medium">
-            {currentPage} / {totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1 text-sm font-semibold text-ink disabled:text-mute disabled:cursor-not-allowed hover:text-body transition-colors"
-          >
-            Siguiente
-            <ChevronRight className="w-4 h-4" />
+          <span className="text-xs text-mute font-medium">{currentPage} / {totalPages}</span>
+          <button type="button" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+            className="flex items-center gap-1 text-sm font-semibold text-ink disabled:text-mute disabled:cursor-not-allowed hover:text-body transition-colors">
+            Siguiente <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}
