@@ -139,7 +139,7 @@ export default function Hero() {
       </div>
 
       <div className="max-w-4xl mx-auto px-5 sm:px-6 lg:px-8 text-center">
-        {/* Badge */}
+        {/* Badge — re-enable once we have real user count
         <div
           className="inline-flex max-w-full items-center gap-2 bg-canvas-soft rounded-full px-4 py-1.5 mb-10 animate-fade-up"
           style={{ animationDelay: "0ms" }}
@@ -149,6 +149,7 @@ export default function Hero() {
             +100 agentes ya usan Conexory
           </span>
         </div>
+        */}
 
         {/* Headline */}
         <h1
