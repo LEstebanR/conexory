@@ -38,6 +38,9 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: ["google"],
+      // emailVerified is false by default and we don't enforce verification,
+      // so don't block linking when the local account has emailVerified=false.
+      requireLocalEmailVerified: false,
     },
   },
 
