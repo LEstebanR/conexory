@@ -20,11 +20,8 @@ const TYPE_LABELS: Record<string, string> = {
 
 function formatCompactCOP(amount: number): string {
   if (amount >= 1_000_000) {
-    const millions = amount / 1_000_000
-    const value = Number.isInteger(millions)
-      ? millions.toLocaleString("es-CO")
-      : millions.toLocaleString("es-CO", { maximumFractionDigits: 1 })
-    return `$${value} M`
+    const millions = Math.round(amount / 1_000_000)
+    return `$${millions.toLocaleString("es-CO")} M`
   }
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
