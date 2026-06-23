@@ -55,8 +55,8 @@ export async function generateMetadata({
     .filter(Boolean)
     .join(" · ")
 
-  const description = [property.title, features].filter(Boolean).join(" · ")
-  const ogTitle = `${type}${location ? ` en ${location}` : ""} · ${price}`
+  const description = [price, features].filter(Boolean).join(" · ")
+  const ogTitle = `${type}${location ? ` en ${location}` : ""}`
   const ogImage = {
     url: `/p/${slug}/og.jpg`,
     width: 1200,
