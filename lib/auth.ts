@@ -1,7 +1,10 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { nextCookies } from "better-auth/next-js"
+import { Resend } from "resend"
 import { prisma } from "@/lib/prisma"
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -25,6 +28,30 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     minPasswordLength: 8,
+    sendResetPassword: async ({ user, url }) => {
+      await resend.emails.send({
+        from: "Conexory <noreply@conexory.com>",
+        to: user.email,
+        subject: "Recupera tu contraseña de Conexory",
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px">
+            <div style="margin-bottom:24px">
+              <span style="font-size:20px;font-weight:900;color:#000;letter-spacing:-0.5px">Conexory</span>
+            </div>
+            <h1 style="font-size:22px;font-weight:900;color:#000;margin:0 0 8px">Recupera tu contraseña</h1>
+            <p style="font-size:15px;color:#5e5e5e;margin:0 0 24px">
+              Haz clic en el botón de abajo para crear una nueva contraseña. El enlace expira en 1 hora.
+            </p>
+            <a href="${url}" style="display:inline-block;background:#000;color:#fff;font-size:14px;font-weight:700;padding:12px 24px;border-radius:9999px;text-decoration:none">
+              Restablecer contraseña
+            </a>
+            <p style="font-size:13px;color:#afafaf;margin:24px 0 0">
+              Si no solicitaste este cambio, ignora este correo.
+            </p>
+          </div>
+        `,
+      })
+    },
   },
 
   socialProviders: {
