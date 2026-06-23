@@ -37,7 +37,6 @@ export async function generateMetadata({
   if (!property) return { title: "Propiedad no encontrada" }
 
   const type = TYPE_LABELS[property.type] ?? property.type
-  const price = formatCOP(Number(property.price))
   const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
 
   const features = [
@@ -56,7 +55,7 @@ export async function generateMetadata({
     .join(" · ")
 
   const description = [property.title, features].filter(Boolean).join(" · ")
-  const ogTitle = `${type}${location ? ` en ${location}` : ""} · ${price}`
+  const ogTitle = `${type}${location ? ` en ${location}` : ""}`
   const ogImage = {
     url: `/p/${slug}/og.jpg`,
     width: 1200,
