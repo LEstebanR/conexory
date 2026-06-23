@@ -30,6 +30,11 @@ export default function LoginPage() {
     return r?.startsWith("/") ? r : "/dashboard"
   })
 
+  const [passwordReset] = useState(() => {
+    if (typeof window === "undefined") return false
+    return new URLSearchParams(window.location.search).get("passwordReset") === "true"
+  })
+
   async function handleGoogle() {
     setGoogleLoading(true)
     await signIn.social({ provider: "google", callbackURL: redirectTo })
@@ -68,6 +73,12 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="bg-white border border-hairline rounded-3xl p-7 sm:p-9 shadow-xl shadow-black/5">
+          {passwordReset && (
+            <div className="mb-6 px-4 py-3 rounded-xl bg-canvas-soft border border-hairline text-sm text-ink font-medium text-center">
+              Contraseña actualizada. Ya puedes iniciar sesión.
+            </div>
+          )}
+
           <div className="text-center mb-7">
             <h1 className="text-2xl font-black text-ink tracking-tight mb-1.5">
               Bienvenido de vuelta
