@@ -23,18 +23,31 @@ export default function UpgradeSuccessToast() {
     let attempts = 0
     let active = true
     const MAX = 20 // 20 × 1.5s = 30s max
+    // Keep the loader on screen a beat even when the webhook confirms instantly,
+    // so the user always gets visible "confirming → done" feedback.
+    const startedAt = Date.now()
+    const MIN_DISPLAY = 1200
 
-    async function poll() {
-      if (!active) return
-      attempts++
-      const isPremium = await getIsPremium()
-      if (isPremium) {
+    function finish() {
+      const wait = Math.max(0, MIN_DISPLAY - (Date.now() - startedAt))
+      setTimeout(() => {
+        if (!active) return
         setState("done")
         router.refresh()
         toast.success("¡Plan Pro activado!", {
           description: "Ya puedes publicar hasta 50 propiedades.",
           duration: 6000,
         })
+      }, wait)
+    }
+
+    async function poll() {
+      if (!active) return
+      attempts++
+      const isPremium = await getIsPremium()
+      if (!active) return
+      if (isPremium) {
+        finish()
         return
       }
       if (attempts < MAX) setTimeout(poll, 1500)
