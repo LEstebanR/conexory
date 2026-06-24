@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
+import { Suspense } from "react"
 import { Check, Zap, ShieldCheck, CheckCircle2 } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
-import { startSubscription } from "./actions"
+import { SubscribeWidget } from "./subscribe-widget"
+import { UpgradeErrorToast } from "./upgrade-error-toast"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -127,13 +129,15 @@ export default async function UpgradePage() {
             ))}
           </ul>
 
-          <form action={startSubscription}>
-            <Button size="lg" variant="secondary" className="w-full">
-              <Zap className="w-4 h-4" />
-              Suscribirme — $99.999/mes
-            </Button>
-          </form>
+          <p className="text-xs font-medium text-white/50 mb-3">
+            Se renueva automáticamente cada mes · Cancela cuando quieras
+          </p>
+          <SubscribeWidget publicKey={process.env.WOMPI_PUBLIC_KEY ?? ""} />
         </div>
+
+        <Suspense fallback={null}>
+          <UpgradeErrorToast />
+        </Suspense>
 
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-mute">
           <ShieldCheck className="w-3.5 h-3.5" strokeWidth={1.75} />

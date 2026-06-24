@@ -59,7 +59,7 @@ export async function POST(req: Request) {
   }
 
   if (eventType === "transaction.updated" && transaction?.status === "APPROVED") {
-    await handleApproved(userId, transaction.reference)
+    await handleApproved(userId, transaction)
   } else if (
     eventType === "transaction.updated" &&
     (transaction?.status === "DECLINED" || transaction?.status === "VOIDED")
@@ -72,11 +72,29 @@ export async function POST(req: Request) {
   return new Response(null, { status: 200 })
 }
 
-async function handleApproved(userId: string | null, reference: string) {
+async function handleApproved(userId: string | null, transaction: WompiTransaction) {
   if (!userId) return
 
-  const periodEnd = new Date()
+  const existing = await prisma.subscription.findUnique({
+    where: { userId },
+    select: { currentPeriodEnd: true, status: true },
+  })
+
+  // Extend from the later of now / current period end so renewals charged a few
+  // days early don't lose the remaining days of the running period.
+  const base =
+    existing?.currentPeriodEnd && existing.currentPeriodEnd > new Date()
+      ? existing.currentPeriodEnd
+      : new Date()
+  const periodEnd = new Date(base)
   periodEnd.setDate(periodEnd.getDate() + 30)
+
+  const isRenewal =
+    existing?.status === "active" &&
+    !!existing.currentPeriodEnd &&
+    existing.currentPeriodEnd > new Date()
+
+  const paymentSourceId = transaction.payment_source_id ?? undefined
 
   const [user] = await Promise.all([
     prisma.user.update({
@@ -89,18 +107,30 @@ async function handleApproved(userId: string | null, reference: string) {
       create: {
         userId,
         status: "active",
-        wompiReference: reference,
+        wompiReference: transaction.reference,
+        wompiPaymentSourceId: paymentSourceId,
         currentPeriodEnd: periodEnd,
+        lastChargeAt: new Date(),
       },
       update: {
         status: "active",
-        wompiReference: reference,
+        wompiReference: transaction.reference,
         currentPeriodEnd: periodEnd,
+        pastDueSince: null,
+        renewalReminderSentAt: null,
+        lastChargeAt: new Date(),
+        // Only overwrite the stored payment source when Wompi gives us one, so a
+        // renewal charge that omits it doesn't wipe the token we already hold.
+        ...(paymentSourceId !== undefined
+          ? { wompiPaymentSourceId: paymentSourceId }
+          : {}),
       },
     }),
   ])
 
-  await sendSubscriptionConfirmation(user.email, user.name).catch(() => null)
+  if (!isRenewal) {
+    await sendSubscriptionConfirmation(user.email, user.name).catch(() => null)
+  }
 }
 
 async function handleDeclined(userId: string | null) {
@@ -112,8 +142,10 @@ async function handleDeclined(userId: string | null) {
       select: { email: true, name: true },
     }),
     prisma.subscription.updateMany({
-      where: { userId },
-      data: { status: "past_due" },
+      // Stamp pastDueSince only on the first failure so the grace window is
+      // measured from when the trouble started, not from each retry.
+      where: { userId, pastDueSince: null },
+      data: { status: "past_due", pastDueSince: new Date() },
     }),
   ])
 
@@ -162,6 +194,7 @@ interface WompiTransaction {
   reference: string
   status: string
   amount_in_cents: number
+  payment_source_id?: number | null
 }
 
 interface WompiSubscription {
