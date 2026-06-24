@@ -3,6 +3,7 @@ import {
   chargeRecurringPayment,
   makeSubscriptionReference,
 } from "@/lib/wompi"
+import { downgradeToFree } from "@/lib/subscription"
 import { sendRenewalReminder, sendPaymentFailed } from "@/lib/email"
 
 // Daily billing job (scheduled in vercel.json). Wompi doesn't drive the
@@ -34,13 +35,35 @@ export async function GET(req: Request) {
   }
 
   const now = new Date()
-  const summary = { reminded: 0, charged: 0, pastDue: 0, downgraded: 0 }
+  const summary = { reminded: 0, charged: 0, pastDue: 0, downgraded: 0, canceled: 0 }
 
   await sendReminders(now, summary)
   await chargeRenewals(now, summary)
+  await expireCanceled(now, summary)
   await downgradeExpired(now, summary)
 
   return Response.json({ ok: true, ...summary })
+}
+
+// Plans the user canceled: keep them Pro until the paid period ends, then drop
+// to Free on/after currentPeriodEnd (never before — see the timezone note below).
+async function expireCanceled(
+  now: Date,
+  summary: { canceled: number },
+) {
+  const due = await prisma.subscription.findMany({
+    where: { status: "canceling", currentPeriodEnd: { lt: now } },
+    select: { id: true, userId: true },
+  })
+
+  for (const sub of due) {
+    await downgradeToFree(sub.userId)
+    await prisma.subscription.update({
+      where: { id: sub.id },
+      data: { status: "cancelled" },
+    })
+    summary.canceled++
+  }
 }
 
 async function sendReminders(
@@ -88,6 +111,7 @@ async function chargeRenewals(
       id: true,
       userId: true,
       wompiPaymentSourceId: true,
+      wompiPaymentSourceType: true,
       lastChargeAt: true,
       pastDueSince: true,
       user: { select: { email: true, name: true } },
@@ -119,6 +143,7 @@ async function chargeRenewals(
       paymentSourceId: sub.wompiPaymentSourceId,
       reference: makeSubscriptionReference(sub.userId),
       customerEmail: sub.user.email,
+      type: sub.wompiPaymentSourceType === "NEQUI" ? "NEQUI" : "CARD",
     })
 
     // Stamp the attempt so the next run won't re-charge while the webhook with
@@ -143,21 +168,21 @@ async function downgradeExpired(
     where: {
       status: "past_due",
       pastDueSince: { lte: cutoff },
+      // Never cancel before the paid period has actually ended. Users are in
+      // Colombia (UTC-5, no DST); since GRACE_DAYS (5 days) dwarfs that 5-hour
+      // offset, a user never loses Pro before their local due date — at worst
+      // they get a few extra days, never fewer.
+      currentPeriodEnd: { lt: now },
     },
     select: { id: true, userId: true },
   })
 
   for (const sub of expired) {
-    await Promise.all([
-      prisma.user.update({
-        where: { id: sub.userId },
-        data: { isPremium: false },
-      }),
-      prisma.subscription.update({
-        where: { id: sub.id },
-        data: { status: "expired" },
-      }),
-    ])
+    await downgradeToFree(sub.userId)
+    await prisma.subscription.update({
+      where: { id: sub.id },
+      data: { status: "expired" },
+    })
     summary.downgraded++
   }
 }

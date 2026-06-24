@@ -46,7 +46,8 @@ model Subscription {
   wompiSubId       String?
   wompiReference   String?
   wompiPaymentSourceId  Int?
-  status           String    // incomplete | active | past_due | cancelled | expired
+  wompiPaymentSourceType String?  // CARD | NEQUI
+  status           String    // incomplete | active | past_due | canceling | cancelled | expired
   currentPeriodEnd DateTime?
   pastDueSince     DateTime?
   lastChargeAt     DateTime?

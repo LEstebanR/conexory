@@ -84,6 +84,8 @@ async function fetchAcceptanceTokens(): Promise<{
   return { acceptance, personalAuth }
 }
 
+export type PaymentSourceType = "CARD" | "NEQUI"
+
 export interface PaymentSourceResult {
   ok: boolean
   paymentSourceId?: number
@@ -91,16 +93,19 @@ export interface PaymentSourceResult {
   error?: string
 }
 
-// Turns a single-use card token (produced by Wompi's tokenization widget — our
-// server never sees the PAN) into a reusable payment source we can charge every
-// month. Must run server-side: it uses the private key. The widget already runs
-// 3DS during tokenization, so the source normally comes back AVAILABLE.
+// Turns a single-use token (produced by Wompi's tokenization widget — our server
+// never sees the card/Nequi credentials) into a reusable payment source we can
+// charge every month. Must run server-side: it uses the private key. The widget
+// runs 3DS (card) / approval (Nequi) during tokenization, so the source normally
+// comes back AVAILABLE.
 export async function createPaymentSource({
   token,
   customerEmail,
+  type,
 }: {
   token: string
   customerEmail: string
+  type: PaymentSourceType
 }): Promise<PaymentSourceResult> {
   if (!WOMPI_PRIVATE_KEY) return { ok: false, error: "missing_private_key" }
 
@@ -117,7 +122,7 @@ export async function createPaymentSource({
       Authorization: `Bearer ${WOMPI_PRIVATE_KEY}`,
     },
     body: JSON.stringify({
-      type: "CARD",
+      type,
       token,
       customer_email: customerEmail,
       acceptance_token: tokens.acceptance,
@@ -164,10 +169,12 @@ export async function chargeRecurringPayment({
   paymentSourceId,
   reference,
   customerEmail,
+  type,
 }: {
   paymentSourceId: number
   reference: string
   customerEmail: string
+  type: PaymentSourceType
 }): Promise<RecurringChargeResult> {
   if (!WOMPI_PRIVATE_KEY) return { ok: false, error: "missing_private_key" }
 
@@ -193,8 +200,9 @@ export async function chargeRecurringPayment({
       reference,
       payment_source_id: paymentSourceId,
       recurrent: true,
-      // Card charges require an installment count; a monthly subscription is 1.
-      payment_method: { installments: 1 },
+      // Card charges require an installment count (1 for a monthly sub); Nequi
+      // has no installments and the payment source already implies the method.
+      ...(type === "CARD" ? { payment_method: { installments: 1 } } : {}),
       signature,
     }),
     cache: "no-store",

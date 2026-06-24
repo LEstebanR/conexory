@@ -22,7 +22,13 @@ const PRO_FEATURES = [
 ]
 
 function formatDate(date: Date) {
-  return date.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })
+  // Render in Colombia time (UTC-5) so the date the user sees matches their day.
+  return date.toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "America/Bogota",
+  })
 }
 
 export default async function UpgradePage() {
@@ -32,8 +38,9 @@ export default async function UpgradePage() {
   if (session.user.isPremium) {
     const subscription = await prisma.subscription.findUnique({
       where: { userId: session.user.id },
-      select: { currentPeriodEnd: true, createdAt: true },
+      select: { currentPeriodEnd: true, createdAt: true, status: true },
     })
+    const isCanceling = subscription?.status === "canceling"
 
     return (
       <div className="flex-1 flex items-start justify-center p-6 lg:p-10">
@@ -43,10 +50,12 @@ export default async function UpgradePage() {
               <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2} />
             </div>
             <h1 className="text-2xl font-black text-ink tracking-tighter">
-              Plan Pro activo
+              {isCanceling ? "Suscripción cancelada" : "Plan Pro activo"}
             </h1>
             <p className="text-sm text-body mt-1">
-              Estás disfrutando de todos los beneficios Pro
+              {isCanceling
+                ? "Conservas los beneficios Pro hasta el fin del período"
+                : "Estás disfrutando de todos los beneficios Pro"}
             </p>
           </div>
 
@@ -72,7 +81,9 @@ export default async function UpgradePage() {
 
             {subscription?.currentPeriodEnd && (
               <p className="text-xs text-white/40 mb-6">
-                Próximo cobro: {formatDate(subscription.currentPeriodEnd)}
+                {isCanceling
+                  ? `Activo hasta el ${formatDate(subscription.currentPeriodEnd)} · no se renueva`
+                  : `Próximo cobro: ${formatDate(subscription.currentPeriodEnd)}`}
               </p>
             )}
 
@@ -81,14 +92,16 @@ export default async function UpgradePage() {
             </Button>
           </div>
 
-          <div className="text-center mt-5">
-            <Link
-              href="/dashboard/upgrade/cancel"
-              className="text-xs text-mute hover:text-ink transition-colors"
-            >
-              Cancelar suscripción
-            </Link>
-          </div>
+          {!isCanceling && (
+            <div className="text-center mt-5">
+              <Link
+                href="/dashboard/upgrade/cancel"
+                className="text-xs text-mute hover:text-ink transition-colors"
+              >
+                Cancelar suscripción
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     )

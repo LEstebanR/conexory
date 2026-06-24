@@ -6,36 +6,22 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
+// Cancel = stop future auto-charges but honor the period already paid: the user
+// stays Pro until currentPeriodEnd, then the billing cron downgrades them. We
+// don't touch isPremium, currentPeriodEnd or their properties here.
 export async function cancelSubscription() {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) redirect("/login")
   if (!session.user.isPremium) redirect("/dashboard")
 
-  // Keep the 3 most recent active properties; deactivate the rest
-  const activeProperties = await prisma.property.findMany({
-    where: { userId: session.user.id, published: true },
-    select: { id: true },
-    orderBy: { createdAt: "desc" },
+  await prisma.subscription.updateMany({
+    where: {
+      userId: session.user.id,
+      status: { in: ["active", "past_due"] },
+    },
+    data: { status: "canceling" },
   })
-  const idsToDeactivate = activeProperties.slice(3).map((p) => p.id)
-
-  await Promise.all([
-    prisma.user.update({
-      where: { id: session.user.id },
-      data: { isPremium: false },
-    }),
-    prisma.subscription.updateMany({
-      where: { userId: session.user.id },
-      data: { status: "cancelled", currentPeriodEnd: null },
-    }),
-    idsToDeactivate.length > 0
-      ? prisma.property.updateMany({
-          where: { id: { in: idsToDeactivate } },
-          data: { published: false },
-        })
-      : Promise.resolve(),
-  ])
 
   revalidatePath("/dashboard", "layout")
-  redirect("/dashboard")
+  redirect("/dashboard/upgrade")
 }

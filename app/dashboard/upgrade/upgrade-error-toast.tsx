@@ -5,10 +5,11 @@ import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 
 const MESSAGES: Record<string, string> = {
-  card: "No pudimos registrar tu tarjeta. Verifica los datos e intenta de nuevo.",
+  card: "No pudimos registrar tu método de pago. Verifica los datos e intenta de nuevo.",
   source_failed:
-    "No pudimos registrar tu tarjeta. Verifica los datos e intenta de nuevo.",
-  "3ds": "Tu banco pide autenticación adicional para esta tarjeta. Por ahora usa Nequi, PSE o Bancolombia.",
+    "No pudimos registrar tu método de pago. Verifica los datos e intenta de nuevo.",
+  pending:
+    "Tu método de pago quedó pendiente de confirmación. Intenta de nuevo.",
   charge: "No pudimos procesar el primer cobro. Intenta más tarde.",
   charge_failed: "No pudimos procesar el primer cobro. Intenta más tarde.",
 }
