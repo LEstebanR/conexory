@@ -17,16 +17,40 @@ function wompiApiBase(): string {
     : "https://sandbox.wompi.co/v1"
 }
 
-export function verifyWebhookSignature(_bodyText: string, checksum: string): boolean {
-  if (!WOMPI_EVENTS_SECRET || !checksum) return false
+function resolvePath(obj: unknown, path: string): unknown {
+  return path.split(".").reduce<unknown>((acc, key) => {
+    if (acc && typeof acc === "object") {
+      return (acc as Record<string, unknown>)[key]
+    }
+    return undefined
+  }, obj)
+}
 
-  // Wompi sends the plain events secret in the x-event-secret header.
-  // Hash both sides to a fixed length before comparing to avoid timing leaks.
-  const expected = crypto.createHash("sha256").update(WOMPI_EVENTS_SECRET).digest("hex")
-  const received = crypto.createHash("sha256").update(checksum).digest("hex")
+// Wompi signs each event with a checksum in the body (the secret is never sent in
+// a header): SHA256 of the concatenated values of signature.properties (paths into
+// `data`, in order) + timestamp + events secret.
+export function verifyWompiEvent(event: {
+  data: unknown
+  signature?: { properties: string[]; checksum: string }
+  timestamp?: number
+}): boolean {
+  if (!WOMPI_EVENTS_SECRET) return false
+  const sig = event.signature
+  if (!sig?.properties || !sig.checksum || event.timestamp == null) return false
+
+  const concatenated = sig.properties
+    .map((path) => String(resolvePath(event.data, path) ?? ""))
+    .join("")
+  const computed = crypto
+    .createHash("sha256")
+    .update(`${concatenated}${event.timestamp}${WOMPI_EVENTS_SECRET}`)
+    .digest("hex")
 
   try {
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(received))
+    return crypto.timingSafeEqual(
+      Buffer.from(computed.toLowerCase()),
+      Buffer.from(sig.checksum.toLowerCase()),
+    )
   } catch {
     return false
   }

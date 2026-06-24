@@ -1,25 +1,19 @@
 import { prisma } from "@/lib/prisma"
-import { verifyWebhookSignature } from "@/lib/wompi"
+import { verifyWompiEvent } from "@/lib/wompi"
 import { sendSubscriptionConfirmation, sendPaymentFailed } from "@/lib/email"
 
 export async function POST(req: Request) {
   const bodyText = await req.text()
-  const checksum = req.headers.get("x-event-secret") ?? ""
-
-  const secretEnv = process.env.WOMPI_EVENTS_SECRET ?? ""
-  console.log("[wompi-webhook] secret_set:", secretEnv.length > 0, "secret_len:", secretEnv.length)
-  console.log("[wompi-webhook] checksum_len:", checksum.length, "checksum_prefix:", checksum.slice(0, 12))
-  console.log("[wompi-webhook] headers:", JSON.stringify(Object.fromEntries(req.headers)))
-
-  if (!verifyWebhookSignature(bodyText, checksum)) {
-    return new Response(null, { status: 401 })
-  }
 
   let event: WompiEvent
   try {
     event = JSON.parse(bodyText)
   } catch {
     return new Response("invalid json", { status: 400 })
+  }
+
+  if (!verifyWompiEvent(event)) {
+    return new Response(null, { status: 401 })
   }
 
   const eventType = event.event
@@ -209,4 +203,9 @@ interface WompiEvent {
     transaction?: WompiTransaction
     subscription?: WompiSubscription
   }
+  signature?: {
+    properties: string[]
+    checksum: string
+  }
+  timestamp?: number
 }
