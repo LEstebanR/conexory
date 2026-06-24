@@ -48,9 +48,10 @@ export default async function DashboardPage({
   if (!session) redirect("/login")
 
   const upgrade = sp.upgrade
-  // Wompi always appends ?id=<transactionId>&env=<env> on redirect.
-  // Use either signal to detect a post-payment landing.
-  const isPostPayment = upgrade === "success" || Boolean(sp.id)
+  // Card flow lands on ?upgrade=processing; the legacy Web Checkout appended
+  // ?id=<transactionId>&env=<env>. Either signal means we're waiting on the webhook.
+  const isPostPayment =
+    upgrade === "success" || upgrade === "processing" || Boolean(sp.id)
 
   const agentProfile = await prisma.user.findUnique({
     where: { id: session.user.id },
