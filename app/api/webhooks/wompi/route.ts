@@ -74,6 +74,16 @@ async function handleApproved(userId: string | null, transaction: WompiTransacti
     select: { currentPeriodEnd: true, status: true },
   })
 
+  // A late/stray approval (e.g. a charge that was in flight when the user
+  // canceled) must not resurrect a plan the user already ended. A genuine
+  // re-subscription has already moved the sub back to "incomplete" by this point.
+  if (
+    existing &&
+    ["canceling", "cancelled", "expired"].includes(existing.status)
+  ) {
+    return
+  }
+
   // Extend from the later of now / current period end so renewals charged a few
   // days early don't lose the remaining days of the running period.
   const base =
@@ -151,16 +161,13 @@ async function handleDeclined(userId: string | null) {
 async function handleCancelled(userId: string | null) {
   if (!userId) return
 
-  await Promise.all([
-    prisma.user.update({
-      where: { id: userId },
-      data: { isPremium: false },
-    }),
-    prisma.subscription.updateMany({
-      where: { userId },
-      data: { status: "cancelled", currentPeriodEnd: null },
-    }),
-  ])
+  // Honor the period already paid: stop future charges but keep the user Pro
+  // until currentPeriodEnd, when the billing cron downgrades them — same as a
+  // user-initiated cancel. Don't touch isPremium or currentPeriodEnd here.
+  await prisma.subscription.updateMany({
+    where: { userId, status: { in: ["active", "past_due", "incomplete"] } },
+    data: { status: "canceling" },
+  })
 }
 
 function referenceToUserId(reference: string): string | null {

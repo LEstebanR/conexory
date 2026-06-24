@@ -110,6 +110,8 @@ async function chargeRenewals(
     select: {
       id: true,
       userId: true,
+      status: true,
+      currentPeriodEnd: true,
       wompiPaymentSourceId: true,
       wompiPaymentSourceType: true,
       lastChargeAt: true,
@@ -139,6 +141,19 @@ async function chargeRenewals(
         RECHARGE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000
     if (recentlyAttempted) continue
 
+    // An active sub whose renewal was already attempted this cycle (lastChargeAt
+    // is after the period end) is waiting on the webhook — don't re-charge it, or
+    // a lost webhook would re-bill the card every cooldown window. Only past_due
+    // (a confirmed decline) keeps retrying via the cooldown above.
+    if (
+      sub.status === "active" &&
+      sub.lastChargeAt &&
+      sub.currentPeriodEnd &&
+      sub.lastChargeAt > sub.currentPeriodEnd
+    ) {
+      continue
+    }
+
     const result = await chargeRecurringPayment({
       paymentSourceId: sub.wompiPaymentSourceId,
       reference: makeSubscriptionReference(sub.userId),
@@ -164,15 +179,15 @@ async function downgradeExpired(
   const cutoff = new Date(now)
   cutoff.setDate(cutoff.getDate() - GRACE_DAYS)
 
+  // pastDueSince is stamped at the failed charge, which can only happen at/after
+  // currentPeriodEnd, so the GRACE_DAYS window guarantees we never downgrade
+  // before currentPeriodEnd + 5 days. Users are in Colombia (UTC-5, no DST) and
+  // 5 days dwarfs that 5-hour offset, so nobody loses Pro before their local due
+  // date — at worst a few extra days, never fewer.
   const expired = await prisma.subscription.findMany({
     where: {
       status: "past_due",
       pastDueSince: { lte: cutoff },
-      // Never cancel before the paid period has actually ended. Users are in
-      // Colombia (UTC-5, no DST); since GRACE_DAYS (5 days) dwarfs that 5-hour
-      // offset, a user never loses Pro before their local due date — at worst
-      // they get a few extra days, never fewer.
-      currentPeriodEnd: { lt: now },
     },
     select: { id: true, userId: true },
   })
