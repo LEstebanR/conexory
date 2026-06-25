@@ -8,7 +8,7 @@ import { youtubeId, youtubeThumb } from "@/lib/youtube"
 
 export const runtime = "nodejs"
 
-const markWhite = `data:image/png;base64,${fs.readFileSync(path.join(process.cwd(), "public/mark-white.png")).toString("base64")}`
+const markBlack = `data:image/png;base64,${fs.readFileSync(path.join(process.cwd(), "public/mark-black.png")).toString("base64")}`
 
 const size = { width: 1200, height: 630 }
 
@@ -59,18 +59,18 @@ export async function GET(
           justifyContent: "center",
           width: "100%",
           height: "100%",
-          backgroundColor: "#000",
+          backgroundColor: "#fff",
           gap: 16,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={markWhite} alt="" style={{ width: 64, height: 64 }} />
-          <div style={{ display: "flex", fontSize: 68, fontWeight: 900, color: "#fff", letterSpacing: -2 }}>
+          <img src={markBlack} alt="" style={{ width: 64, height: 64 }} />
+          <div style={{ display: "flex", fontSize: 68, fontWeight: 900, color: "#000", letterSpacing: -2 }}>
             Conexory
           </div>
         </div>
-        <div style={{ display: "flex", fontSize: 20, color: "#444", letterSpacing: 3, textTransform: "uppercase" }}>
+        <div style={{ display: "flex", fontSize: 20, color: "#afafaf", letterSpacing: 3, textTransform: "uppercase" }}>
           conexory.com
         </div>
       </div>
@@ -96,50 +96,37 @@ export async function GET(
 
   if (cover) {
     return render(
-      <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: "#000" }}>
-        {/* Photo — left 57% */}
-        <div style={{ display: "flex", position: "relative", width: "57%", height: "100%" }}>
+      <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: "#fff", padding: 48, gap: 48 }}>
+        {/* Photo — left, framed with padding + radius */}
+        <div style={{ display: "flex", width: "54%", height: "100%", borderRadius: 28, overflow: "hidden" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={cover}
             alt=""
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-          {/* Fade to black on right edge so the panel blends */}
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: "25%",
-              background: "linear-gradient(to right, transparent, #000)",
-            }}
+            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 28 }}
           />
         </div>
 
-        {/* Info panel — right 43% */}
+        {/* Info panel — right */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            width: "43%",
+            flex: 1,
             height: "100%",
-            backgroundColor: "#000",
-            padding: "52px 60px 52px 44px",
           }}
         >
           {/* Wordmark */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={markWhite} alt="" style={{ width: 28, height: 28 }} />
+            <img src={markBlack} alt="" style={{ width: 28, height: 28 }} />
             <div
               style={{
                 display: "flex",
                 fontSize: 28,
                 fontWeight: 900,
-                color: "#fff",
+                color: "#000",
                 letterSpacing: -0.5,
               }}
             >
@@ -155,7 +142,7 @@ export async function GET(
                 display: "flex",
                 fontSize: 14,
                 fontWeight: 700,
-                color: "#555",
+                color: "#afafaf",
                 letterSpacing: 3,
                 textTransform: "uppercase",
                 marginBottom: 14,
@@ -169,7 +156,7 @@ export async function GET(
               style={{
                 display: "flex",
                 height: 1,
-                backgroundColor: "#222",
+                backgroundColor: "#e5e5e5",
                 marginBottom: 20,
               }}
             />
@@ -180,7 +167,7 @@ export async function GET(
                 display: "flex",
                 fontSize: 54,
                 fontWeight: 900,
-                color: "#fff",
+                color: "#000",
                 letterSpacing: -2,
                 lineHeight: 1,
               }}
@@ -194,7 +181,7 @@ export async function GET(
                 display: "flex",
                 fontSize: 26,
                 fontWeight: 700,
-                color: "#999",
+                color: "#5e5e5e",
                 marginTop: 16,
                 lineHeight: 1.3,
               }}
@@ -208,7 +195,7 @@ export async function GET(
                 style={{
                   display: "flex",
                   fontSize: 20,
-                  color: "#4a4a4a",
+                  color: "#afafaf",
                   marginTop: 8,
                 }}
               >
@@ -233,9 +220,9 @@ export async function GET(
                       display: "flex",
                       fontSize: 16,
                       fontWeight: 600,
-                      color: "#ccc",
-                      backgroundColor: "#111",
-                      border: "1px solid #2a2a2a",
+                      color: "#5e5e5e",
+                      backgroundColor: "#efefef",
+                      border: "1px solid #e5e5e5",
                       padding: "6px 15px",
                       borderRadius: 999,
                     }}
@@ -248,7 +235,7 @@ export async function GET(
           </div>
 
           {/* URL */}
-          <div style={{ display: "flex", fontSize: 16, color: "#333", letterSpacing: 0.5 }}>
+          <div style={{ display: "flex", fontSize: 16, color: "#afafaf", letterSpacing: 0.5 }}>
             conexory.com
           </div>
         </div>
@@ -256,7 +243,7 @@ export async function GET(
     )
   }
 
-  // No-photo fallback — full black, typographic layout
+  // No-photo fallback — white, typographic layout
   return render(
     <div
       style={{
@@ -265,20 +252,20 @@ export async function GET(
         justifyContent: "space-between",
         width: "100%",
         height: "100%",
-        backgroundColor: "#000",
+        backgroundColor: "#fff",
         padding: "60px 80px",
       }}
     >
       {/* Wordmark */}
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={markWhite} alt="" style={{ width: 30, height: 30 }} />
+        <img src={markBlack} alt="" style={{ width: 30, height: 30 }} />
         <div
           style={{
             display: "flex",
             fontSize: 30,
             fontWeight: 900,
-            color: "#fff",
+            color: "#000",
             letterSpacing: -1,
           }}
         >
@@ -294,7 +281,7 @@ export async function GET(
             display: "flex",
             fontSize: 16,
             fontWeight: 700,
-            color: "#444",
+            color: "#afafaf",
             letterSpacing: 3,
             textTransform: "uppercase",
             marginBottom: 20,
@@ -309,7 +296,7 @@ export async function GET(
           style={{
             display: "flex",
             height: 1,
-            backgroundColor: "#1c1c1c",
+            backgroundColor: "#e5e5e5",
             marginBottom: 26,
           }}
         />
@@ -320,7 +307,7 @@ export async function GET(
             display: "flex",
             fontSize: 100,
             fontWeight: 900,
-            color: "#fff",
+            color: "#000",
             letterSpacing: -4,
             lineHeight: 0.95,
           }}
@@ -334,7 +321,7 @@ export async function GET(
             display: "flex",
             fontSize: 40,
             fontWeight: 700,
-            color: "#666",
+            color: "#5e5e5e",
             marginTop: 24,
             lineHeight: 1.2,
           }}
@@ -352,9 +339,9 @@ export async function GET(
                   display: "flex",
                   fontSize: 20,
                   fontWeight: 600,
-                  color: "#bbb",
-                  backgroundColor: "#111",
-                  border: "1px solid #222",
+                  color: "#5e5e5e",
+                  backgroundColor: "#efefef",
+                  border: "1px solid #e5e5e5",
                   padding: "8px 20px",
                   borderRadius: 999,
                 }}
@@ -367,7 +354,7 @@ export async function GET(
       </div>
 
       {/* URL */}
-      <div style={{ display: "flex", fontSize: 18, color: "#333", letterSpacing: 0.5 }}>
+      <div style={{ display: "flex", fontSize: 18, color: "#afafaf", letterSpacing: 0.5 }}>
         conexory.com
       </div>
     </div>
