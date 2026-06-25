@@ -2,7 +2,10 @@ import { Resend } from "resend"
 
 // Instantiated lazily inside each function so the build doesn't require
 // RESEND_API_KEY at module-load time (Next.js collects route data during build).
-const FROM = "Conexory <Conexory@gmail.com>"
+// Must be a verified Resend domain — gmail.com can't be verified, so sending
+// from it returns 403. conexory.com is verified; the team still *receives* at
+// the gmail inbox below.
+const FROM = "Conexory <no-reply@conexory.com>"
 const TEAM_INBOX = "Conexory@gmail.com"
 
 function resend() {

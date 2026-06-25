@@ -15,7 +15,7 @@ export function SuggestionModal() {
     async (_prev, formData) => {
       const result = await submitSuggestion(_prev, formData)
       if (result?.success) {
-        toast.success("¡Gracias! Tu sugerencia fue recibida.")
+        toast.success("¡Tu sugerencia se envió! Muchas gracias por ayudarnos a mejorar Conexory.")
         formRef.current?.reset()
         setOpen(false)
       } else if (result?.error) {
