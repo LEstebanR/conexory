@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import PropertiesList, { type PropertyItem } from "./properties-list"
 import UpgradeSuccessToast from "./upgrade-success-toast"
+import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
 
 function formatColombiaDate(date: Date): string {
   return date.toLocaleDateString("es-CO", {
@@ -16,15 +17,6 @@ function formatColombiaDate(date: Date): string {
     year: "numeric",
     timeZone: "America/Bogota",
   })
-}
-
-const TYPE_LABELS: Record<string, string> = {
-  apartment: "Apartamento",
-  house: "Casa",
-  office: "Oficina",
-  commercial: "Local comercial",
-  lot: "Lote",
-  warehouse: "Bodega",
 }
 
 function formatCompactCOP(amount: number): string {
@@ -125,7 +117,7 @@ export default async function DashboardPage({
     slug: p.slug,
     title: p.title,
     type: p.type,
-    typeLabel: TYPE_LABELS[p.type] ?? p.type,
+    typeLabel: PROPERTY_TYPE_LABELS[p.type] ?? p.type,
     published: p.published,
     shares: p.shares,
     price: formatCompactCOP(p.price.toNumber()),

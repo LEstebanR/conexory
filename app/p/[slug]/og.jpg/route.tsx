@@ -5,21 +5,13 @@ import path from "path"
 import type { ReactElement } from "react"
 import { prisma } from "@/lib/prisma"
 import { youtubeId, youtubeThumb } from "@/lib/youtube"
+import { PROPERTY_TYPE_LABELS as TYPE_LABELS } from "@/lib/property-types"
 
 export const runtime = "nodejs"
 
 const markBlack = `data:image/png;base64,${fs.readFileSync(path.join(process.cwd(), "public/mark-black.png")).toString("base64")}`
 
 const size = { width: 1200, height: 630 }
-
-const TYPE_LABELS: Record<string, string> = {
-  apartment: "Apartamento",
-  house: "Casa",
-  office: "Oficina",
-  commercial: "Local comercial",
-  lot: "Lote",
-  warehouse: "Bodega",
-}
 
 function formatCOP(amount: number): string {
   return new Intl.NumberFormat("es-CO", {

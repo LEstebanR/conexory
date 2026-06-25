@@ -2,22 +2,14 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, BedDouble, Bath, Ruler, Car, EyeOff, ArrowUpRight, Phone, Mail, MessageCircle } from "lucide-react"
+import { MapPin, BedDouble, Bath, Ruler, Car, LandPlot, ShieldCheck, EyeOff, ArrowUpRight, Phone, Mail, MessageCircle } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
+import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import PublicGallery from "@/components/public-gallery"
 import Reveal from "@/components/reveal"
 import PropertyMap from "@/components/property-map-client"
-
-const TYPE_LABELS: Record<string, string> = {
-  apartment: "Apartamento",
-  house: "Casa",
-  office: "Oficina",
-  commercial: "Local comercial",
-  lot: "Lote",
-  warehouse: "Bodega",
-}
 
 function formatCOP(amount: number): string {
   return new Intl.NumberFormat("es-CO", {
@@ -156,12 +148,16 @@ export default async function PublicPropertyPage({
   const price = formatCOP(Number(property.price))
   const videoId = youtubeId(property.videoUrl)
   const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
+  const transactionLabel = property.transactionType
+    ? TRANSACTION_TYPE_LABELS[property.transactionType] ?? null
+    : null
 
   const propertyUrl = `${getAppUrl()}/p/${property.slug}`
   const whatsappMessage = `Hola, estoy interesado en esta propiedad: ${property.title}\n${propertyUrl}`
 
   const stats = [
     property.area != null && { icon: Ruler, value: property.area, label: "m²" },
+    property.landArea != null && { icon: LandPlot, value: property.landArea, label: "m² lote" },
     property.bedrooms != null && {
       icon: BedDouble,
       value: property.bedrooms,
@@ -200,7 +196,7 @@ export default async function PublicPropertyPage({
           <div className="space-y-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-mute mb-1.5">
-                {typeLabel}
+                {typeLabel}{transactionLabel ? ` · ${transactionLabel}` : ""}
               </p>
               <h1 className="text-2xl sm:text-3xl font-black text-ink tracking-tight leading-tight">
                 {property.title}
@@ -209,6 +205,12 @@ export default async function PublicPropertyPage({
                 <div className="flex items-center gap-1.5 text-body text-sm mt-2">
                   <MapPin className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
                   <span>{location}</span>
+                </div>
+              )}
+              {property.gatedCommunity && (
+                <div className="inline-flex items-center gap-1.5 mt-3 bg-canvas-soft text-ink text-xs font-semibold px-2.5 py-1 rounded-full">
+                  <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2} />
+                  Unidad cerrada
                 </div>
               )}
             </div>
