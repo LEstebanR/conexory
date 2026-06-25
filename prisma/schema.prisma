@@ -45,8 +45,13 @@ model Subscription {
   userId           String    @unique
   wompiSubId       String?
   wompiReference   String?
-  status           String    // active | cancelled | past_due
+  wompiPaymentSourceId  Int?
+  wompiPaymentSourceType String?  // CARD | NEQUI
+  status           String    // incomplete | active | past_due | canceling | cancelled | expired
   currentPeriodEnd DateTime?
+  pastDueSince     DateTime?
+  lastChargeAt     DateTime?
+  renewalReminderSentAt DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 

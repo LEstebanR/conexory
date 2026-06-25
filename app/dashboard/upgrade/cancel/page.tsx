@@ -33,12 +33,13 @@ export default async function CancelPage() {
             ¿Cancelar el plan Pro?
           </h1>
           <p className="text-sm text-body mt-1">
-            Esta acción es inmediata y no tiene reembolso.
+            Conservas Pro hasta el final del período que ya pagaste; no se hará
+            ningún cobro nuevo.
           </p>
         </div>
 
         <div className="rounded-3xl border border-warning-200 bg-warning-50 p-7 mb-4">
-          <p className="text-sm font-bold text-warning-900 mb-4">Al cancelar perderás acceso a:</p>
+          <p className="text-sm font-bold text-warning-900 mb-4">Cuando termine tu período pagado, volverás a Free:</p>
           <ul className="space-y-3">
             {LOSSES.map((l) => (
               <li key={l} className="flex items-start gap-2.5 text-sm text-warning-800">

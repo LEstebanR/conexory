@@ -3,11 +3,20 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
-import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon, Eye, Share2 } from "lucide-react"
+import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon, Eye, Share2, CalendarClock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import PropertiesList, { type PropertyItem } from "./properties-list"
 import UpgradeSuccessToast from "./upgrade-success-toast"
+
+function formatColombiaDate(date: Date): string {
+  return date.toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "America/Bogota",
+  })
+}
 
 const TYPE_LABELS: Record<string, string> = {
   apartment: "Apartamento",
@@ -48,9 +57,10 @@ export default async function DashboardPage({
   if (!session) redirect("/login")
 
   const upgrade = sp.upgrade
-  // Wompi always appends ?id=<transactionId>&env=<env> on redirect.
-  // Use either signal to detect a post-payment landing.
-  const isPostPayment = upgrade === "success" || Boolean(sp.id)
+  // Card flow lands on ?upgrade=processing; the legacy Web Checkout appended
+  // ?id=<transactionId>&env=<env>. Either signal means we're waiting on the webhook.
+  const isPostPayment =
+    upgrade === "success" || upgrade === "processing" || Boolean(sp.id)
 
   const agentProfile = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -91,6 +101,16 @@ export default async function DashboardPage({
     })
     isPremium = freshUser?.isPremium ?? session.user.isPremium
   }
+
+  let cancelingUntil: Date | null = null
+  if (isPremium) {
+    const sub = await prisma.subscription.findUnique({
+      where: { userId: session.user.id },
+      select: { status: true, currentPeriodEnd: true },
+    })
+    if (sub?.status === "canceling") cancelingUntil = sub.currentPeriodEnd
+  }
+
   const limit = propertyLimit(isPremium)
   const atLimit = activeCount >= limit
   const upgradeHref = isPremium ? "/contacto" : "/dashboard/upgrade"
@@ -128,6 +148,23 @@ export default async function DashboardPage({
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       {isPostPayment && <UpgradeSuccessToast />}
+
+      {cancelingUntil && (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-hairline bg-canvas-soft px-4 py-3">
+          <CalendarClock
+            className="w-4 h-4 text-body flex-shrink-0 mt-0.5"
+            strokeWidth={1.75}
+          />
+          <p className="text-sm text-body">
+            Cancelaste tu plan Pro. Conservas los beneficios hasta el{" "}
+            <span className="font-semibold text-ink">
+              {formatColombiaDate(cancelingUntil)}
+            </span>
+            .
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-end justify-between gap-4 mb-8">
         <div>

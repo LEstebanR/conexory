@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
+import { Suspense } from "react"
 import { Check, Zap, ShieldCheck, CheckCircle2 } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
-import { startSubscription } from "./actions"
+import { SubscribeWidget } from "./subscribe-widget"
+import { UpgradeErrorToast } from "./upgrade-error-toast"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -20,7 +22,13 @@ const PRO_FEATURES = [
 ]
 
 function formatDate(date: Date) {
-  return date.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })
+  // Render in Colombia time (UTC-5) so the date the user sees matches their day.
+  return date.toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "America/Bogota",
+  })
 }
 
 export default async function UpgradePage() {
@@ -30,8 +38,9 @@ export default async function UpgradePage() {
   if (session.user.isPremium) {
     const subscription = await prisma.subscription.findUnique({
       where: { userId: session.user.id },
-      select: { currentPeriodEnd: true, createdAt: true },
+      select: { currentPeriodEnd: true, createdAt: true, status: true },
     })
+    const isCanceling = subscription?.status === "canceling"
 
     return (
       <div className="flex-1 flex items-start justify-center p-6 lg:p-10">
@@ -41,10 +50,12 @@ export default async function UpgradePage() {
               <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2} />
             </div>
             <h1 className="text-2xl font-black text-ink tracking-tighter">
-              Plan Pro activo
+              {isCanceling ? "Suscripción cancelada" : "Plan Pro activo"}
             </h1>
             <p className="text-sm text-body mt-1">
-              Estás disfrutando de todos los beneficios Pro
+              {isCanceling
+                ? "Conservas los beneficios Pro hasta el fin del período"
+                : "Estás disfrutando de todos los beneficios Pro"}
             </p>
           </div>
 
@@ -70,7 +81,9 @@ export default async function UpgradePage() {
 
             {subscription?.currentPeriodEnd && (
               <p className="text-xs text-white/40 mb-6">
-                Próximo cobro: {formatDate(subscription.currentPeriodEnd)}
+                {isCanceling
+                  ? `Activo hasta el ${formatDate(subscription.currentPeriodEnd)} · no se renueva`
+                  : `Próximo cobro: ${formatDate(subscription.currentPeriodEnd)}`}
               </p>
             )}
 
@@ -79,14 +92,16 @@ export default async function UpgradePage() {
             </Button>
           </div>
 
-          <div className="text-center mt-5">
-            <Link
-              href="/dashboard/upgrade/cancel"
-              className="text-xs text-mute hover:text-ink transition-colors"
-            >
-              Cancelar suscripción
-            </Link>
-          </div>
+          {!isCanceling && (
+            <div className="text-center mt-5">
+              <Link
+                href="/dashboard/upgrade/cancel"
+                className="text-xs text-mute hover:text-ink transition-colors"
+              >
+                Cancelar suscripción
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -127,13 +142,15 @@ export default async function UpgradePage() {
             ))}
           </ul>
 
-          <form action={startSubscription}>
-            <Button size="lg" variant="secondary" className="w-full">
-              <Zap className="w-4 h-4" />
-              Suscribirme — $99.999/mes
-            </Button>
-          </form>
+          <p className="text-xs font-medium text-white/50 mb-3">
+            Se renueva automáticamente cada mes · Cancela cuando quieras
+          </p>
+          <SubscribeWidget publicKey={process.env.WOMPI_PUBLIC_KEY ?? ""} />
         </div>
+
+        <Suspense fallback={null}>
+          <UpgradeErrorToast />
+        </Suspense>
 
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-mute">
           <ShieldCheck className="w-3.5 h-3.5" strokeWidth={1.75} />

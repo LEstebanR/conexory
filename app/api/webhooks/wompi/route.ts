@@ -1,25 +1,19 @@
 import { prisma } from "@/lib/prisma"
-import { verifyWebhookSignature } from "@/lib/wompi"
+import { verifyWompiEvent } from "@/lib/wompi"
 import { sendSubscriptionConfirmation, sendPaymentFailed } from "@/lib/email"
 
 export async function POST(req: Request) {
   const bodyText = await req.text()
-  const checksum = req.headers.get("x-event-secret") ?? ""
-
-  const secretEnv = process.env.WOMPI_EVENTS_SECRET ?? ""
-  console.log("[wompi-webhook] secret_set:", secretEnv.length > 0, "secret_len:", secretEnv.length)
-  console.log("[wompi-webhook] checksum_len:", checksum.length, "checksum_prefix:", checksum.slice(0, 12))
-  console.log("[wompi-webhook] headers:", JSON.stringify(Object.fromEntries(req.headers)))
-
-  if (!verifyWebhookSignature(bodyText, checksum)) {
-    return new Response(null, { status: 401 })
-  }
 
   let event: WompiEvent
   try {
     event = JSON.parse(bodyText)
   } catch {
     return new Response("invalid json", { status: 400 })
+  }
+
+  if (!verifyWompiEvent(event)) {
+    return new Response(null, { status: 401 })
   }
 
   const eventType = event.event
@@ -59,7 +53,7 @@ export async function POST(req: Request) {
   }
 
   if (eventType === "transaction.updated" && transaction?.status === "APPROVED") {
-    await handleApproved(userId, transaction.reference)
+    await handleApproved(userId, transaction)
   } else if (
     eventType === "transaction.updated" &&
     (transaction?.status === "DECLINED" || transaction?.status === "VOIDED")
@@ -72,11 +66,39 @@ export async function POST(req: Request) {
   return new Response(null, { status: 200 })
 }
 
-async function handleApproved(userId: string | null, reference: string) {
+async function handleApproved(userId: string | null, transaction: WompiTransaction) {
   if (!userId) return
 
-  const periodEnd = new Date()
+  const existing = await prisma.subscription.findUnique({
+    where: { userId },
+    select: { currentPeriodEnd: true, status: true },
+  })
+
+  // A late/stray approval (e.g. a charge that was in flight when the user
+  // canceled) must not resurrect a plan the user already ended. A genuine
+  // re-subscription has already moved the sub back to "incomplete" by this point.
+  if (
+    existing &&
+    ["canceling", "cancelled", "expired"].includes(existing.status)
+  ) {
+    return
+  }
+
+  // Extend from the later of now / current period end so renewals charged a few
+  // days early don't lose the remaining days of the running period.
+  const base =
+    existing?.currentPeriodEnd && existing.currentPeriodEnd > new Date()
+      ? existing.currentPeriodEnd
+      : new Date()
+  const periodEnd = new Date(base)
   periodEnd.setDate(periodEnd.getDate() + 30)
+
+  const isRenewal =
+    existing?.status === "active" &&
+    !!existing.currentPeriodEnd &&
+    existing.currentPeriodEnd > new Date()
+
+  const paymentSourceId = transaction.payment_source_id ?? undefined
 
   const [user] = await Promise.all([
     prisma.user.update({
@@ -89,18 +111,30 @@ async function handleApproved(userId: string | null, reference: string) {
       create: {
         userId,
         status: "active",
-        wompiReference: reference,
+        wompiReference: transaction.reference,
+        wompiPaymentSourceId: paymentSourceId,
         currentPeriodEnd: periodEnd,
+        lastChargeAt: new Date(),
       },
       update: {
         status: "active",
-        wompiReference: reference,
+        wompiReference: transaction.reference,
         currentPeriodEnd: periodEnd,
+        pastDueSince: null,
+        renewalReminderSentAt: null,
+        lastChargeAt: new Date(),
+        // Only overwrite the stored payment source when Wompi gives us one, so a
+        // renewal charge that omits it doesn't wipe the token we already hold.
+        ...(paymentSourceId !== undefined
+          ? { wompiPaymentSourceId: paymentSourceId }
+          : {}),
       },
     }),
   ])
 
-  await sendSubscriptionConfirmation(user.email, user.name).catch(() => null)
+  if (!isRenewal) {
+    await sendSubscriptionConfirmation(user.email, user.name).catch(() => null)
+  }
 }
 
 async function handleDeclined(userId: string | null) {
@@ -112,8 +146,10 @@ async function handleDeclined(userId: string | null) {
       select: { email: true, name: true },
     }),
     prisma.subscription.updateMany({
-      where: { userId },
-      data: { status: "past_due" },
+      // Stamp pastDueSince only on the first failure so the grace window is
+      // measured from when the trouble started, not from each retry.
+      where: { userId, pastDueSince: null },
+      data: { status: "past_due", pastDueSince: new Date() },
     }),
   ])
 
@@ -125,16 +161,13 @@ async function handleDeclined(userId: string | null) {
 async function handleCancelled(userId: string | null) {
   if (!userId) return
 
-  await Promise.all([
-    prisma.user.update({
-      where: { id: userId },
-      data: { isPremium: false },
-    }),
-    prisma.subscription.updateMany({
-      where: { userId },
-      data: { status: "cancelled", currentPeriodEnd: null },
-    }),
-  ])
+  // Honor the period already paid: stop future charges but keep the user Pro
+  // until currentPeriodEnd, when the billing cron downgrades them — same as a
+  // user-initiated cancel. Don't touch isPremium or currentPeriodEnd here.
+  await prisma.subscription.updateMany({
+    where: { userId, status: { in: ["active", "past_due", "incomplete"] } },
+    data: { status: "canceling" },
+  })
 }
 
 function referenceToUserId(reference: string): string | null {
@@ -162,6 +195,7 @@ interface WompiTransaction {
   reference: string
   status: string
   amount_in_cents: number
+  payment_source_id?: number | null
 }
 
 interface WompiSubscription {
@@ -176,4 +210,9 @@ interface WompiEvent {
     transaction?: WompiTransaction
     subscription?: WompiSubscription
   }
+  signature?: {
+    properties: string[]
+    checksum: string
+  }
+  timestamp?: number
 }
