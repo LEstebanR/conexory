@@ -9,21 +9,13 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
+import { PROPERTY_TYPE_LABELS as TYPE_LABELS } from "@/lib/property-types"
 import type { MapProperty } from "./agent-map"
 
 const AgentMap = dynamic(() => import("./agent-map"), {
   ssr: false,
   loading: () => <div className="w-full h-full bg-canvas-soft animate-pulse rounded-2xl" />,
 })
-
-const TYPE_LABELS: Record<string, string> = {
-  apartment: "Apartamento",
-  house: "Casa",
-  office: "Oficina",
-  commercial: "Local comercial",
-  lot: "Lote",
-  warehouse: "Bodega",
-}
 
 export interface AgentProperty {
   id: string

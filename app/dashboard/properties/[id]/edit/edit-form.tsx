@@ -11,7 +11,10 @@ import {
   ShoppingBag,
   Trees,
   Warehouse,
+  Tractor,
+  Hotel,
   Loader2,
+  type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import dynamic from "next/dynamic"
@@ -20,18 +23,22 @@ import { cn } from "@/lib/utils"
 import ImageUpload from "@/components/image-upload"
 import LocationSelect from "@/components/location-select"
 import { photoLimit } from "@/lib/plans"
+import { PROPERTY_TYPES, TRANSACTION_TYPES } from "@/lib/property-types"
 import { updateProperty } from "./actions"
 
 const MapPicker = dynamic(() => import("@/components/map-picker"), { ssr: false })
 
-const PROPERTY_TYPES = [
-  { id: "apartment", label: "Apartamento", icon: Building2 },
-  { id: "house", label: "Casa", icon: Home },
-  { id: "office", label: "Oficina", icon: Briefcase },
-  { id: "commercial", label: "Local", icon: ShoppingBag },
-  { id: "lot", label: "Lote", icon: Trees },
-  { id: "warehouse", label: "Bodega", icon: Warehouse },
-]
+const TYPE_ICONS: Record<string, LucideIcon> = {
+  apartment: Building2,
+  house: Home,
+  office: Briefcase,
+  commercial: ShoppingBag,
+  lot: Trees,
+  warehouse: Warehouse,
+  house_lot: Home,
+  farm: Tractor,
+  aparta_suite: Hotel,
+}
 
 function formatCOP(digits: string): string {
   if (!digits) return ""
@@ -60,14 +67,17 @@ export type InitialData = {
   id: string
   title: string
   type: string
+  transactionType: string
   price: string
   state: string
   city: string
   neighborhood: string
   area: string
+  landArea: string
   bedrooms: string
   bathrooms: string
   parking: string
+  gatedCommunity: boolean
   description: string
   images: string[]
   videoUrl: string
@@ -78,12 +88,15 @@ export type InitialData = {
 
 export default function EditForm({ initial, isPremium }: { initial: InitialData; isPremium: boolean }) {
   const [type, setType] = useState(initial.type)
+  const [transactionType, setTransactionType] = useState(initial.transactionType)
   const [title, setTitle] = useState(initial.title)
   const [price, setPrice] = useState(initial.price)
   const [state, setState] = useState(initial.state)
   const [city, setCity] = useState(initial.city)
   const [neighborhood, setNeighborhood] = useState(initial.neighborhood)
   const [area, setArea] = useState(initial.area)
+  const [landArea, setLandArea] = useState(initial.landArea)
+  const [gatedCommunity, setGatedCommunity] = useState(initial.gatedCommunity)
   const [bedrooms, setBedrooms] = useState(initial.bedrooms)
   const [bathrooms, setBathrooms] = useState(initial.bathrooms)
   const [parking, setParking] = useState(initial.parking)
@@ -105,8 +118,8 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
 
     startTransition(async () => {
       const result = await updateProperty(initial.id, {
-        title, type, price, state, city, neighborhood,
-        area, bedrooms, bathrooms, parking, description,
+        title, type, transactionType, price, state, city, neighborhood,
+        area, landArea, bedrooms, bathrooms, parking, gatedCommunity, description,
         images: imageUrls,
         videoUrl,
         latitude,
@@ -140,7 +153,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
         <SectionCard title="Tipo de propiedad">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {PROPERTY_TYPES.map((pt) => {
-              const Icon = pt.icon
+              const Icon = TYPE_ICONS[pt.id] ?? Building2
               const isSelected = type === pt.id
               return (
                 <button
@@ -148,7 +161,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
                   type="button"
                   onClick={() => setType(pt.id)}
                   className={cn(
-                    "flex flex-col items-center gap-2 py-4 rounded-xl text-xs font-medium transition-all border-2",
+                    "flex flex-col items-center gap-2 py-4 px-1 text-center rounded-xl text-xs font-medium transition-all border-2",
                     isSelected
                       ? "bg-canvas-soft text-ink border-ink"
                       : "bg-white text-body border-hairline hover:border-hairline-strong hover:bg-canvas-softer"
@@ -159,6 +172,29 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
                     strokeWidth={isSelected ? 2.25 : 1.75}
                   />
                   {pt.label}
+                </button>
+              )
+            })}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Tipo de operación">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {TRANSACTION_TYPES.map((tt) => {
+              const isSelected = transactionType === tt.id
+              return (
+                <button
+                  key={tt.id}
+                  type="button"
+                  onClick={() => setTransactionType(tt.id)}
+                  className={cn(
+                    "py-3 px-2 text-center rounded-xl text-sm font-medium transition-all border-2",
+                    isSelected
+                      ? "bg-canvas-soft text-ink border-ink"
+                      : "bg-white text-body border-hairline hover:border-hairline-strong hover:bg-canvas-softer"
+                  )}
+                >
+                  {tt.label}
                 </button>
               )
             })}
@@ -232,11 +268,18 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
         </SectionCard>
 
         <SectionCard title="Detalles">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <FieldLabel optional>Área (m²)</FieldLabel>
               <Input placeholder="65" value={area} onChange={(e) => setArea(e.target.value)} className="h-11" type="number" inputMode="decimal" min="0" />
             </div>
+            <div className="space-y-1.5">
+              <FieldLabel optional>Terreno (m²)</FieldLabel>
+              <Input placeholder="120" value={landArea} onChange={(e) => setLandArea(e.target.value)} className="h-11" type="number" inputMode="decimal" min="0" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <FieldLabel optional>Habitaciones</FieldLabel>
               <Input placeholder="2" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} className="h-11" type="number" inputMode="numeric" min="0" />
@@ -250,6 +293,27 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               <Input placeholder="1" value={parking} onChange={(e) => setParking(e.target.value)} className="h-11" type="number" inputMode="numeric" min="0" />
             </div>
           </div>
+
+          <label className="flex items-center gap-3 cursor-pointer group select-none pt-2">
+            <div className="relative flex-shrink-0">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={gatedCommunity}
+                onChange={(e) => setGatedCommunity(e.target.checked)}
+              />
+              <div
+                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${gatedCommunity ? "bg-ink border-ink" : "bg-white border-hairline-strong group-hover:border-ink"}`}
+              >
+                {gatedCommunity && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <span className="text-sm font-semibold text-ink">Unidad cerrada</span>
+          </label>
         </SectionCard>
 
         <SectionCard title="Descripción">

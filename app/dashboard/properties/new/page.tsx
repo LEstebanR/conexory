@@ -11,7 +11,10 @@ import {
   ShoppingBag,
   Trees,
   Warehouse,
+  Tractor,
+  Hotel,
   Loader2,
+  type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,17 +25,21 @@ import ImageUpload from "@/components/image-upload"
 import LocationSelect from "@/components/location-select"
 import { useSession } from "@/lib/auth-client"
 import { photoLimit } from "@/lib/plans"
+import { PROPERTY_TYPES, TRANSACTION_TYPES, DEFAULT_TRANSACTION_TYPE } from "@/lib/property-types"
 
 const MapPicker = dynamic(() => import("@/components/map-picker"), { ssr: false })
 
-const PROPERTY_TYPES = [
-  { id: "apartment", label: "Apartamento", icon: Building2 },
-  { id: "house", label: "Casa", icon: Home },
-  { id: "office", label: "Oficina", icon: Briefcase },
-  { id: "commercial", label: "Local", icon: ShoppingBag },
-  { id: "lot", label: "Lote", icon: Trees },
-  { id: "warehouse", label: "Bodega", icon: Warehouse },
-]
+const TYPE_ICONS: Record<string, LucideIcon> = {
+  apartment: Building2,
+  house: Home,
+  office: Briefcase,
+  commercial: ShoppingBag,
+  lot: Trees,
+  warehouse: Warehouse,
+  house_lot: Home,
+  farm: Tractor,
+  aparta_suite: Hotel,
+}
 
 function formatCOP(digits: string): string {
   if (!digits) return ""
@@ -59,12 +66,15 @@ function FieldLabel({ children, optional }: { children: React.ReactNode; optiona
 
 export default function NewPropertyPage() {
   const [type, setType] = useState("")
+  const [transactionType, setTransactionType] = useState(DEFAULT_TRANSACTION_TYPE)
   const [title, setTitle] = useState("")
   const [price, setPrice] = useState("") // dígitos puros sin puntos
   const [state, setState] = useState("")
   const [city, setCity] = useState("")
   const [neighborhood, setNeighborhood] = useState("")
   const [area, setArea] = useState("")
+  const [landArea, setLandArea] = useState("")
+  const [gatedCommunity, setGatedCommunity] = useState(false)
   const [bedrooms, setBedrooms] = useState("")
   const [bathrooms, setBathrooms] = useState("")
   const [parking, setParking] = useState("")
@@ -94,14 +104,17 @@ export default function NewPropertyPage() {
       const result = await createProperty({
         title,
         type,
+        transactionType,
         price,
         state,
         city,
         neighborhood,
         area,
+        landArea,
         bedrooms,
         bathrooms,
         parking,
+        gatedCommunity,
         description,
         images: imageUrls,
         videoUrl,
@@ -138,7 +151,7 @@ export default function NewPropertyPage() {
         <SectionCard title="Tipo de propiedad">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {PROPERTY_TYPES.map((pt) => {
-              const Icon = pt.icon
+              const Icon = TYPE_ICONS[pt.id] ?? Building2
               const isSelected = type === pt.id
               return (
                 <button
@@ -146,7 +159,7 @@ export default function NewPropertyPage() {
                   type="button"
                   onClick={() => setType(pt.id)}
                   className={cn(
-                    "flex flex-col items-center gap-2 py-4 rounded-xl text-xs font-medium transition-all border-2",
+                    "flex flex-col items-center gap-2 py-4 px-1 text-center rounded-xl text-xs font-medium transition-all border-2",
                     isSelected
                       ? "bg-canvas-soft text-ink border-ink"
                       : "bg-white text-body border-hairline hover:border-hairline-strong hover:bg-canvas-softer"
@@ -157,6 +170,30 @@ export default function NewPropertyPage() {
                     strokeWidth={isSelected ? 2.25 : 1.75}
                   />
                   {pt.label}
+                </button>
+              )
+            })}
+          </div>
+        </SectionCard>
+
+        {/* Tipo de operación */}
+        <SectionCard title="Tipo de operación">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {TRANSACTION_TYPES.map((tt) => {
+              const isSelected = transactionType === tt.id
+              return (
+                <button
+                  key={tt.id}
+                  type="button"
+                  onClick={() => setTransactionType(tt.id)}
+                  className={cn(
+                    "py-3 px-2 text-center rounded-xl text-sm font-medium transition-all border-2",
+                    isSelected
+                      ? "bg-canvas-soft text-ink border-ink"
+                      : "bg-white text-body border-hairline hover:border-hairline-strong hover:bg-canvas-softer"
+                  )}
+                >
+                  {tt.label}
                 </button>
               )
             })}
@@ -240,7 +277,7 @@ export default function NewPropertyPage() {
 
         {/* Detalles */}
         <SectionCard title="Detalles">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <FieldLabel optional>Área (m²)</FieldLabel>
               <Input
@@ -253,6 +290,21 @@ export default function NewPropertyPage() {
                 min="0"
               />
             </div>
+            <div className="space-y-1.5">
+              <FieldLabel optional>Terreno (m²)</FieldLabel>
+              <Input
+                placeholder="120"
+                value={landArea}
+                onChange={(e) => setLandArea(e.target.value)}
+                className="h-11"
+                type="number"
+                inputMode="decimal"
+                min="0"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <FieldLabel optional>Habitaciones</FieldLabel>
               <Input
@@ -290,6 +342,27 @@ export default function NewPropertyPage() {
               />
             </div>
           </div>
+
+          <label className="flex items-center gap-3 cursor-pointer group select-none pt-2">
+            <div className="relative flex-shrink-0">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={gatedCommunity}
+                onChange={(e) => setGatedCommunity(e.target.checked)}
+              />
+              <div
+                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${gatedCommunity ? "bg-ink border-ink" : "bg-white border-hairline-strong group-hover:border-ink"}`}
+              >
+                {gatedCommunity && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <span className="text-sm font-semibold text-ink">Unidad cerrada</span>
+          </label>
         </SectionCard>
 
         {/* Descripción */}

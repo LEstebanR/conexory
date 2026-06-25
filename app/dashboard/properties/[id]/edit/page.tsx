@@ -3,6 +3,7 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import EditForm, { type InitialData } from "./edit-form"
+import { DEFAULT_TRANSACTION_TYPE } from "@/lib/property-types"
 
 export default async function EditPropertyPage({
   params,
@@ -24,14 +25,17 @@ export default async function EditPropertyPage({
     id: property.id,
     title: property.title,
     type: property.type,
+    transactionType: property.transactionType ?? DEFAULT_TRANSACTION_TYPE,
     price: Math.round(Number(property.price)).toString(),
     state: property.state ?? "",
     city: property.city,
     neighborhood: property.neighborhood ?? "",
     area: property.area?.toString() ?? "",
+    landArea: property.landArea?.toString() ?? "",
     bedrooms: property.bedrooms?.toString() ?? "",
     bathrooms: property.bathrooms?.toString() ?? "",
     parking: property.parking?.toString() ?? "",
+    gatedCommunity: property.gatedCommunity,
     description: property.description ?? "",
     images: property.images,
     videoUrl: property.videoUrl ?? "",

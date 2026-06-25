@@ -1,24 +1,16 @@
 import { notFound, redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
-import { ArrowLeft, BedDouble, Bath, Ruler, Car, MapPin, EyeOff } from "lucide-react"
+import { ArrowLeft, BedDouble, Bath, Ruler, Car, MapPin, EyeOff, LandPlot, ShieldCheck } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
+import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
 import PropertyMap from "@/components/property-map-client"
-
-const TYPE_LABELS: Record<string, string> = {
-  apartment: "Apartamento",
-  house: "Casa",
-  office: "Oficina",
-  commercial: "Local comercial",
-  lot: "Lote",
-  warehouse: "Bodega",
-}
 
 function formatCOP(amount: number): string {
   return new Intl.NumberFormat("es-CO", {
@@ -46,16 +38,21 @@ export default async function PropertyDetailPage({
   if (!property) notFound()
 
   const publicUrl = `${getAppUrl()}/p/${property.slug}`
-  const typeLabel = TYPE_LABELS[property.type] ?? property.type
+  const typeLabel = PROPERTY_TYPE_LABELS[property.type] ?? property.type
+  const transactionLabel = property.transactionType
+    ? TRANSACTION_TYPE_LABELS[property.transactionType] ?? null
+    : null
   const price = formatCOP(Number(property.price))
   const videoId = youtubeId(property.videoUrl)
   const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
 
   const hasDetails =
     property.area != null ||
+    property.landArea != null ||
     property.bedrooms != null ||
     property.bathrooms != null ||
-    property.parking != null
+    property.parking != null ||
+    property.gatedCommunity
 
   return (
     <div className="flex-1 p-6 lg:p-8 max-w-3xl w-full mx-auto">
@@ -114,7 +111,7 @@ export default async function PropertyDetailPage({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="min-w-0 sm:flex-1">
               <span className="inline-flex items-center bg-canvas-soft text-ink text-xs font-bold px-2.5 py-1 rounded-full mb-3 whitespace-nowrap">
-                {typeLabel} · En venta
+                {typeLabel}{transactionLabel ? ` · ${transactionLabel}` : ""}
               </span>
               <h2 className="text-xl font-black text-ink tracking-tight leading-tight mb-1">
                 {property.title}
@@ -137,6 +134,12 @@ export default async function PropertyDetailPage({
                   <span className="font-semibold">{property.area} m²</span>
                 </div>
               )}
+              {property.landArea != null && (
+                <div className="flex items-center gap-1.5 text-sm text-body">
+                  <LandPlot className="w-4 h-4 text-mute" strokeWidth={1.75} />
+                  <span className="font-semibold">{property.landArea} m² de terreno</span>
+                </div>
+              )}
               {property.bedrooms != null && (
                 <div className="flex items-center gap-1.5 text-sm text-body">
                   <BedDouble className="w-4 h-4 text-mute" strokeWidth={1.75} />
@@ -153,6 +156,12 @@ export default async function PropertyDetailPage({
                 <div className="flex items-center gap-1.5 text-sm text-body">
                   <Car className="w-4 h-4 text-mute" strokeWidth={1.75} />
                   <span className="font-semibold">{property.parking} {property.parking === 1 ? "parqueadero" : "parqueaderos"}</span>
+                </div>
+              )}
+              {property.gatedCommunity && (
+                <div className="flex items-center gap-1.5 text-sm text-body">
+                  <ShieldCheck className="w-4 h-4 text-mute" strokeWidth={1.75} />
+                  <span className="font-semibold">Unidad cerrada</span>
                 </div>
               )}
             </div>

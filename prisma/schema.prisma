@@ -81,14 +81,17 @@ model Property {
   title        String
   slug         String   @unique
   type         String
+  transactionType String?  // sale | rent | rent_furnished | exchange
   price        Decimal  @db.Decimal(15, 2)
   state        String?
   city         String
   neighborhood String?
   area         Float?
+  landArea     Float?
   bedrooms     Int?
   bathrooms    Int?
   parking      Int?
+  gatedCommunity Boolean @default(false)
   description  String?
   images       String[]
   videoUrl     String?

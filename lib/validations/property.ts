@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { PRO_PHOTO_LIMIT } from "@/lib/plans"
+import { PROPERTY_TYPE_IDS, TRANSACTION_TYPE_IDS } from "@/lib/property-types"
 import { isYoutubeUrl } from "@/lib/youtube"
 
 const optionalString = (maxLength: number) =>
@@ -28,8 +29,11 @@ export const PropertySchema = z.object({
     .trim()
     .min(3, "El título debe tener al menos 3 caracteres")
     .max(120, "El título no puede superar 120 caracteres"),
-  type: z.enum(["apartment", "house", "office", "commercial", "lot", "warehouse"], {
+  type: z.enum(PROPERTY_TYPE_IDS, {
     error: "Tipo de propiedad inválido",
+  }),
+  transactionType: z.enum(TRANSACTION_TYPE_IDS, {
+    error: "Tipo de operación inválido",
   }),
   price: z
     .string()
@@ -47,6 +51,7 @@ export const PropertySchema = z.object({
     .max(100, "La ciudad no puede superar 100 caracteres"),
   neighborhood: optionalString(100),
   area: optionalPositiveFloat,
+  landArea: optionalPositiveFloat,
   bedrooms: optionalNonNegativeInt,
   bathrooms: optionalNonNegativeInt,
   parking: optionalNonNegativeInt,
@@ -64,7 +69,11 @@ export const PropertySchema = z.object({
   latitude: z.number().min(-90).max(90).nullable().optional(),
   longitude: z.number().min(-180).max(180).nullable().optional(),
   showContact: z.boolean().optional().default(false),
+  gatedCommunity: z.boolean().optional().default(false),
 })
 
-// type field accepts any string — Zod validates the enum server-side
-export type PropertyInput = Omit<z.input<typeof PropertySchema>, "type"> & { type: string }
+// type/transactionType accept any string in the input — Zod validates the enums server-side
+export type PropertyInput = Omit<z.input<typeof PropertySchema>, "type" | "transactionType"> & {
+  type: string
+  transactionType: string
+}
