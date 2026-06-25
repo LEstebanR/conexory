@@ -148,3 +148,12 @@ model Verification {
 
   @@map("verifications")
 }
+
+model Suggestion {
+  id        String   @id @default(cuid())
+  content   String
+  email     String?
+  createdAt DateTime @default(now())
+
+  @@map("suggestions")
+}

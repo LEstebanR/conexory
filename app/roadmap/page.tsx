@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
-import { Circle, Loader2, CheckCircle2, ArrowRight } from "lucide-react"
+import { Circle, Loader2, CheckCircle2 } from "lucide-react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Reveal from "@/components/reveal"
-import { Button } from "@/components/ui/button"
+import { SuggestionModal } from "./suggestion-modal"
 
 export const metadata: Metadata = {
   title: "Roadmap — Conexory",
@@ -111,11 +111,7 @@ export default function RoadmapPage() {
           <p className="text-mute text-sm leading-relaxed mb-6 max-w-md mx-auto">
             Las funciones de este roadmap vienen de agentes como tú. Cuéntanos qué necesitas.
           </p>
-          <Button variant="secondary" size="lg" asChild>
-            <a href="mailto:Conexory@gmail.com?subject=Sugerencia para Conexory">
-              Enviar sugerencia <ArrowRight className="w-4 h-4" />
-            </a>
-          </Button>
+          <SuggestionModal />
         </div>
       </section>
 

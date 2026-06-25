@@ -189,20 +189,6 @@ export default function LoginPage() {
             Crear cuenta gratis
           </Link>
         </p>
-
-        {/* Social proof */}
-        <div className="flex items-center justify-center gap-3 mt-8">
-          <div className="flex -space-x-2">
-            {["C", "M", "A"].map((l) => (
-              <div key={l} className="w-7 h-7 rounded-full bg-ink border-2 border-white flex items-center justify-center text-white text-[10px] font-bold">
-                {l}
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-body">
-            <span className="font-bold text-ink">+480 agentes</span> ya usan Conexory
-          </p>
-        </div>
       </div>
     </main>
   )
