@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { MapPin, BedDouble, Bath, Ruler, Car, EyeOff, ArrowUpRight, Phone, Mail, MessageCircle } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
 import PublicGallery from "@/components/public-gallery"
 import Reveal from "@/components/reveal"
@@ -156,6 +157,9 @@ export default async function PublicPropertyPage({
   const videoId = youtubeId(property.videoUrl)
   const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
 
+  const propertyUrl = `${getAppUrl()}/p/${property.slug}`
+  const whatsappMessage = `Hola, estoy interesado en esta propiedad: ${property.title}\n${propertyUrl}`
+
   const stats = [
     property.area != null && { icon: Ruler, value: property.area, label: "m²" },
     property.bedrooms != null && {
@@ -303,7 +307,7 @@ export default async function PublicPropertyPage({
                   <>
                     {property.user.phoneIsWhatsapp && (
                       <a
-                        href={`https://wa.me/${property.user.phone.replace(/\D/g, "")}`}
+                        href={`https://wa.me/${property.user.phone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="sm:flex-1 flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity"
