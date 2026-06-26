@@ -7,11 +7,25 @@ import { incrementShares } from "./actions"
 export default function SharePanel({
   url,
   propertyId,
+  title,
+  type,
   price,
+  location,
+  area,
+  bedrooms,
+  bathrooms,
+  parking,
 }: {
   url: string
   propertyId: string
+  title: string
+  type: string
   price: string
+  location?: string
+  area?: number | null
+  bedrooms?: number | null
+  bathrooms?: number | null
+  parking?: number | null
 }) {
   const [copied, setCopied] = useState(false)
 
@@ -21,16 +35,29 @@ export default function SharePanel({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // The link unfurls into a rich preview (photo + title + features), so the
-  // message stays short and only adds the price — the one detail not shown in
-  // that preview. No 👋 emoji: it renders as a broken box on WhatsApp Web.
+  const features = [
+    bedrooms != null ? `${bedrooms} ${bedrooms === 1 ? "habitación" : "habitaciones"}` : null,
+    bathrooms != null ? `${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` : null,
+    area != null ? `${area} m²` : null,
+    parking != null ? `${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
+  ].filter(Boolean).join("  ·  ")
+
+  // No 👋 emoji: it renders as a broken box on WhatsApp Web. Warmth comes from
+  // the tone and *bold*, which work everywhere.
   const message = [
-    `Hola, te comparto esta propiedad por *${price}*.`,
-    "Mira todas las fotos y la información completa aquí:",
-    url,
+    "Hola, quiero mostrarte esta propiedad que te podría interesar:",
     "",
-    "Si quieres más detalles o coordinar una visita, escríbeme con gusto.",
-  ].join("\n")
+    `*${title}*`,
+    `${type}${location ? ` en ${location}` : ""}`,
+    "",
+    `Precio: *${price}*`,
+    features || null,
+    "",
+    "Si quieres más detalles o coordinar una visita, escríbeme cuando gustes y con gusto te atenderé.",
+    "",
+    "También puedes ver todas las fotos e información completa en:",
+    url,
+  ].filter((line) => line !== null).join("\n")
 
   const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
 
