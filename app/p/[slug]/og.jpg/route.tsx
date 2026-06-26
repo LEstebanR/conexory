@@ -5,22 +5,19 @@ import path from "path"
 import type { ReactElement } from "react"
 import { prisma } from "@/lib/prisma"
 import { youtubeId, youtubeThumb } from "@/lib/youtube"
-import { PROPERTY_TYPE_LABELS as TYPE_LABELS } from "@/lib/property-types"
 
 export const runtime = "nodejs"
 
 const markBlack = `data:image/png;base64,${fs.readFileSync(path.join(process.cwd(), "public/mark-black.png")).toString("base64")}`
 
 const size = { width: 1200, height: 630 }
+const PAD = 44
+const BRAND_H = 76
+const MAX_W = size.width - PAD * 2
+const MAX_H = size.height - PAD - BRAND_H
 
-function formatCOP(amount: number): string {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
+// Soft, neutral, monochrome gradient — elegant without competing with the photo.
+const BACKGROUND = "linear-gradient(145deg, #fbfbfb 0%, #efefef 52%, #e2e2e2 100%)"
 
 async function render(node: ReactElement): Promise<Response> {
   const png = Buffer.from(await new ImageResponse(node, size).arrayBuffer())
@@ -34,6 +31,81 @@ async function render(node: ReactElement): Promise<Response> {
   }
 }
 
+// Returns the photo as a base64 JPEG plus its (orientation-corrected) dimensions
+// so the frame can match the photo's aspect ratio exactly — no crop, no letterbox.
+async function loadPhoto(
+  url: string
+): Promise<{ dataUrl: string; width: number; height: number } | null> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const buf = Buffer.from(await res.arrayBuffer())
+    const jpeg = await sharp(buf).rotate().jpeg({ quality: 90 }).toBuffer()
+    const meta = await sharp(jpeg).metadata()
+    if (!meta.width || !meta.height) return null
+    return {
+      dataUrl: `data:image/jpeg;base64,${jpeg.toString("base64")}`,
+      width: meta.width,
+      height: meta.height,
+    }
+  } catch {
+    return null
+  }
+}
+
+function framedPhoto(dataUrl: string, w: number, h: number): ReactElement {
+  return (
+    <div
+      style={{
+        display: "flex",
+        width: w,
+        height: h,
+        borderRadius: 22,
+        border: "5px solid #fff",
+        boxShadow: "0 22px 55px rgba(0,0,0,0.22)",
+        overflow: "hidden",
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={dataUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    </div>
+  )
+}
+
+function wordmark(fontSize: number, gap: number, mark: number): ReactElement {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={markBlack} alt="" style={{ width: mark, height: mark }} />
+      <div style={{ display: "flex", fontSize, fontWeight: 900, color: "#000", letterSpacing: -0.5 }}>
+        Conexory
+      </div>
+    </div>
+  )
+}
+
+function brandCard(): ReactElement {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+        backgroundImage: BACKGROUND,
+        gap: 16,
+      }}
+    >
+      {wordmark(68, 18, 64)}
+      <div style={{ display: "flex", fontSize: 20, color: "#afafaf", letterSpacing: 3, textTransform: "uppercase" }}>
+        conexory.com
+      </div>
+    </div>
+  )
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ slug: string }> }
@@ -42,312 +114,70 @@ export async function GET(
   const property = await prisma.property.findUnique({ where: { slug } })
 
   if (!property || !property.published) {
+    return render(brandCard())
+  }
+
+  const videoId = youtubeId(property.videoUrl)
+  const coverUrl = property.images[0] ?? (videoId ? youtubeThumb(videoId) : null)
+  const photo = coverUrl ? await loadPhoto(coverUrl) : null
+
+  if (!photo) {
+    return render(brandCard())
+  }
+
+  const isPortrait = photo.height > photo.width
+
+  // Portrait: photo centered, with the mark and the wordmark filling the side
+  // gaps (logo left, "Conexory" right) instead of empty space.
+  if (isPortrait) {
+    const availH = size.height - PAD * 2
+    const scale = Math.min(MAX_W / photo.width, availH / photo.height)
+    const frameW = Math.round(photo.width * scale)
+    const frameH = Math.round(photo.height * scale)
+
     return render(
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
           width: "100%",
           height: "100%",
-          backgroundColor: "#fff",
-          gap: 16,
+          alignItems: "center",
+          justifyContent: "space-around",
+          backgroundImage: BACKGROUND,
+          padding: `${PAD}px`,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={markBlack} alt="" style={{ width: 64, height: 64 }} />
-          <div style={{ display: "flex", fontSize: 68, fontWeight: 900, color: "#000", letterSpacing: -2 }}>
-            Conexory
-          </div>
-        </div>
-        <div style={{ display: "flex", fontSize: 20, color: "#afafaf", letterSpacing: 3, textTransform: "uppercase" }}>
-          conexory.com
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={markBlack} alt="" style={{ width: 116, height: 116 }} />
+        {framedPhoto(photo.dataUrl, frameW, frameH)}
+        <div style={{ display: "flex", fontSize: 60, fontWeight: 900, color: "#000", letterSpacing: -1.5 }}>
+          Conexory
         </div>
       </div>
     )
   }
 
-  const type = TYPE_LABELS[property.type] ?? property.type
-  const price = formatCOP(Number(property.price))
-  const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
-  const title = property.title.length > 48 ? property.title.slice(0, 48) + "…" : property.title
+  // Landscape / square: framed photo on the neutral gradient with a brand bar.
+  const scale = Math.min(MAX_W / photo.width, MAX_H / photo.height)
+  const frameW = Math.round(photo.width * scale)
+  const frameH = Math.round(photo.height * scale)
 
-  const featureItems = [
-    property.bedrooms != null ? `${property.bedrooms} hab.` : null,
-    property.bathrooms != null
-      ? `${property.bathrooms} ${property.bathrooms === 1 ? "baño" : "baños"}`
-      : null,
-    property.area != null ? `${property.area} m²` : null,
-    property.parking != null ? `${property.parking} parq.` : null,
-  ].filter(Boolean) as string[]
-
-  const videoId = youtubeId(property.videoUrl)
-  const cover = property.images[0] ?? (videoId ? youtubeThumb(videoId) : null)
-
-  if (cover) {
-    return render(
-      <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: "#fff", padding: 48, gap: 48 }}>
-        {/* Photo — left, framed with padding + radius */}
-        <div style={{ display: "flex", width: "54%", height: "100%", borderRadius: 28, overflow: "hidden" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={cover}
-            alt=""
-            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 28 }}
-          />
-        </div>
-
-        {/* Info panel — right */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            flex: 1,
-            height: "100%",
-          }}
-        >
-          {/* Wordmark */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={markBlack} alt="" style={{ width: 28, height: 28 }} />
-            <div
-              style={{
-                display: "flex",
-                fontSize: 28,
-                fontWeight: 900,
-                color: "#000",
-                letterSpacing: -0.5,
-              }}
-            >
-              Conexory
-            </div>
-          </div>
-
-          {/* Main content */}
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            {/* Type label */}
-            <div
-              style={{
-                display: "flex",
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#afafaf",
-                letterSpacing: 3,
-                textTransform: "uppercase",
-                marginBottom: 14,
-              }}
-            >
-              {type}
-            </div>
-
-            {/* Divider */}
-            <div
-              style={{
-                display: "flex",
-                height: 1,
-                backgroundColor: "#e5e5e5",
-                marginBottom: 20,
-              }}
-            />
-
-            {/* Price */}
-            <div
-              style={{
-                display: "flex",
-                fontSize: 54,
-                fontWeight: 900,
-                color: "#000",
-                letterSpacing: -2,
-                lineHeight: 1,
-              }}
-            >
-              {price}
-            </div>
-
-            {/* Title */}
-            <div
-              style={{
-                display: "flex",
-                fontSize: 26,
-                fontWeight: 700,
-                color: "#5e5e5e",
-                marginTop: 16,
-                lineHeight: 1.3,
-              }}
-            >
-              {title}
-            </div>
-
-            {/* Location */}
-            {location && (
-              <div
-                style={{
-                  display: "flex",
-                  fontSize: 20,
-                  color: "#afafaf",
-                  marginTop: 8,
-                }}
-              >
-                {location}
-              </div>
-            )}
-
-            {/* Feature chips */}
-            {featureItems.length > 0 && (
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 8,
-                  marginTop: 22,
-                }}
-              >
-                {featureItems.map((f) => (
-                  <div
-                    key={f}
-                    style={{
-                      display: "flex",
-                      fontSize: 16,
-                      fontWeight: 600,
-                      color: "#5e5e5e",
-                      backgroundColor: "#efefef",
-                      border: "1px solid #e5e5e5",
-                      padding: "6px 15px",
-                      borderRadius: 999,
-                    }}
-                  >
-                    {f}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* URL */}
-          <div style={{ display: "flex", fontSize: 16, color: "#afafaf", letterSpacing: 0.5 }}>
-            conexory.com
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // No-photo fallback — white, typographic layout
   return render(
     <div
       style={{
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
         width: "100%",
         height: "100%",
-        backgroundColor: "#fff",
-        padding: "60px 80px",
+        backgroundImage: BACKGROUND,
+        padding: `${PAD}px ${PAD}px 0`,
       }}
     >
-      {/* Wordmark */}
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={markBlack} alt="" style={{ width: 30, height: 30 }} />
-        <div
-          style={{
-            display: "flex",
-            fontSize: 30,
-            fontWeight: 900,
-            color: "#000",
-            letterSpacing: -1,
-          }}
-        >
-          Conexory
-        </div>
+      <div style={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "center" }}>
+        {framedPhoto(photo.dataUrl, frameW, frameH)}
       </div>
-
-      {/* Main content */}
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {/* Type + location */}
-        <div
-          style={{
-            display: "flex",
-            fontSize: 16,
-            fontWeight: 700,
-            color: "#afafaf",
-            letterSpacing: 3,
-            textTransform: "uppercase",
-            marginBottom: 20,
-          }}
-        >
-          {type}
-          {location ? `  ·  ${location}` : ""}
-        </div>
-
-        {/* Divider */}
-        <div
-          style={{
-            display: "flex",
-            height: 1,
-            backgroundColor: "#e5e5e5",
-            marginBottom: 26,
-          }}
-        />
-
-        {/* Price */}
-        <div
-          style={{
-            display: "flex",
-            fontSize: 100,
-            fontWeight: 900,
-            color: "#000",
-            letterSpacing: -4,
-            lineHeight: 0.95,
-          }}
-        >
-          {price}
-        </div>
-
-        {/* Title */}
-        <div
-          style={{
-            display: "flex",
-            fontSize: 40,
-            fontWeight: 700,
-            color: "#5e5e5e",
-            marginTop: 24,
-            lineHeight: 1.2,
-          }}
-        >
-          {property.title.length > 55 ? property.title.slice(0, 55) + "…" : property.title}
-        </div>
-
-        {/* Feature chips */}
-        {featureItems.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 28 }}>
-            {featureItems.map((f) => (
-              <div
-                key={f}
-                style={{
-                  display: "flex",
-                  fontSize: 20,
-                  fontWeight: 600,
-                  color: "#5e5e5e",
-                  backgroundColor: "#efefef",
-                  border: "1px solid #e5e5e5",
-                  padding: "8px 20px",
-                  borderRadius: 999,
-                }}
-              >
-                {f}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* URL */}
-      <div style={{ display: "flex", fontSize: 18, color: "#afafaf", letterSpacing: 0.5 }}>
-        conexory.com
+      <div style={{ display: "flex", height: BRAND_H, alignItems: "center", justifyContent: "center" }}>
+        {wordmark(28, 11, 26)}
       </div>
     </div>
   )
