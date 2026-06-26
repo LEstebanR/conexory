@@ -40,7 +40,7 @@ export default function SharePanel({
     bathrooms != null ? `${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` : null,
     area != null ? `${area} m²` : null,
     parking != null ? `${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
-  ].filter(Boolean).join("  ·  ")
+  ].filter(Boolean).join(" - ")
 
   // No 👋 emoji: it renders as a broken box on WhatsApp Web. Warmth comes from
   // the tone and *bold*, which work everywhere.
