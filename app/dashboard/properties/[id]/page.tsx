@@ -87,7 +87,14 @@ export default async function PropertyDetailPage({
         <SharePanel
           url={publicUrl}
           propertyId={property.id}
+          title={property.title}
+          type={typeLabel}
           price={price}
+          location={location || undefined}
+          area={property.area}
+          bedrooms={property.bedrooms}
+          bathrooms={property.bathrooms}
+          parking={property.parking}
         />
 
         {/* Carrusel */}
