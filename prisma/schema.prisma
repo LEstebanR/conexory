@@ -17,6 +17,7 @@ model User {
   emailVerified Boolean   @default(false)
   image         String?
   isPremium        Boolean   @default(false)
+  onboardingCompleted Boolean @default(false)
   agentSlug        String?   @unique
   profilePublished Boolean   @default(false)
   location         String?

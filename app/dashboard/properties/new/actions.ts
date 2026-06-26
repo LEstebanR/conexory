@@ -46,6 +46,13 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
       }
     }
 
+    if (!session.user.onboardingCompleted) {
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { onboardingCompleted: true },
+      })
+    }
+
     const slug = await generateUniqueSlug()
     const property = await prisma.property.create({
       data: {

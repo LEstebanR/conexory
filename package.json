@@ -27,6 +27,7 @@
     "browser-image-compression": "2.0.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "driver.js": "^1.6.0",
     "gray-matter": "4.0.3",
     "leaflet": "1.9.4",
     "lucide-react": "1.17.0",

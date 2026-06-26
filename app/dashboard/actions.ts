@@ -13,3 +13,12 @@ export async function getIsPremium(): Promise<boolean> {
   })
   return user?.isPremium ?? false
 }
+
+export async function completeOnboarding(): Promise<void> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { onboardingCompleted: true },
+  })
+}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { Suspense, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -23,6 +23,7 @@ import dynamic from "next/dynamic"
 import { createProperty } from "./actions"
 import ImageUpload from "@/components/image-upload"
 import LocationSelect from "@/components/location-select"
+import PropertyTour from "./property-tour"
 import { useSession } from "@/lib/auth-client"
 import { photoLimit } from "@/lib/plans"
 import { PROPERTY_TYPES, TRANSACTION_TYPES, DEFAULT_TRANSACTION_TYPE } from "@/lib/property-types"
@@ -46,9 +47,17 @@ function formatCOP(digits: string): string {
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
 }
 
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionCard({
+  title,
+  children,
+  id,
+}: {
+  title: string
+  children: React.ReactNode
+  id?: string
+}) {
   return (
-    <div className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
+    <div id={id} className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
       <h2 className="text-sm font-bold text-ink uppercase tracking-wide">{title}</h2>
       {children}
     </div>
@@ -132,6 +141,10 @@ export default function NewPropertyPage() {
 
   return (
     <div className="flex-1 p-6 lg:p-8 max-w-3xl w-full mx-auto">
+      <Suspense fallback={null}>
+        <PropertyTour />
+      </Suspense>
+
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <Link
@@ -148,7 +161,7 @@ export default function NewPropertyPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Tipo de propiedad */}
-        <SectionCard title="Tipo de propiedad">
+        <SectionCard id="tour-type" title="Tipo de propiedad">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {PROPERTY_TYPES.map((pt) => {
               const Icon = TYPE_ICONS[pt.id] ?? Building2
@@ -201,7 +214,7 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Fotos */}
-        <SectionCard title="Fotos y video">
+        <SectionCard id="tour-photos" title="Fotos y video">
           <ImageUpload
             onUrlsChange={setImageUrls}
             onUploadingChange={setIsUploading}
@@ -223,7 +236,7 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Información básica */}
-        <SectionCard title="Información básica">
+        <SectionCard id="tour-basic" title="Información básica">
           <div className="space-y-1.5">
             <FieldLabel>Título del anuncio</FieldLabel>
             <Input
@@ -431,7 +444,7 @@ export default function NewPropertyPage() {
         )}
 
         {/* Actions */}
-        <div className="flex gap-3 pb-8">
+        <div id="tour-submit" className="flex gap-3 pb-8">
           <Button type="button" variant="outline" className="flex-1" asChild>
             <Link href="/dashboard">Cancelar</Link>
           </Button>

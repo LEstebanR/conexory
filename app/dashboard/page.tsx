@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import PropertiesList, { type PropertyItem } from "./properties-list"
 import UpgradeSuccessToast from "./upgrade-success-toast"
+import WelcomeBanner from "./welcome-banner"
 import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
 
 function formatColombiaDate(date: Date): string {
@@ -141,6 +142,10 @@ export default async function DashboardPage({
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       {isPostPayment && <UpgradeSuccessToast />}
 
+      {!session.user.onboardingCompleted && (
+        <WelcomeBanner name={session.user.name} />
+      )}
+
       {cancelingUntil && (
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-hairline bg-canvas-soft px-4 py-3">
           <CalendarClock
@@ -260,7 +265,7 @@ export default async function DashboardPage({
             Crea tu primera propiedad, obtén tu link único y compártelo por WhatsApp en menos de 60 segundos.
           </p>
           <Button size="default" asChild>
-            <Link href="/dashboard/properties/new">
+            <Link href="/dashboard/properties/new?tour=1">
               <Plus className="w-4 h-4" />
               Crear primera propiedad
             </Link>
