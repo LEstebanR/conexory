@@ -38,6 +38,7 @@ export default async function PropertyDetailPage({
   if (!property) notFound()
 
   const publicUrl = `${getAppUrl()}/p/${property.slug}`
+  const publicUrlNoContact = `${getAppUrl()}/p/${property.slug}?c=0`
   const typeLabel = PROPERTY_TYPE_LABELS[property.type] ?? property.type
   const transactionLabel = property.transactionType
     ? TRANSACTION_TYPE_LABELS[property.transactionType] ?? null
@@ -86,7 +87,9 @@ export default async function PropertyDetailPage({
       <div className="space-y-4">
         <SharePanel
           url={publicUrl}
+          urlNoContact={publicUrlNoContact}
           propertyId={property.id}
+          showContact={property.showContact}
           title={property.title}
           type={typeLabel}
           price={price}

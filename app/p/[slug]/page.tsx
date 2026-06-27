@@ -20,12 +20,60 @@ function formatCOP(amount: number): string {
   }).format(amount)
 }
 
+// ── Social icon SVGs (same as agent page) ─────────────────────────────────
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  )
+}
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.97a8.19 8.19 0 0 0 4.78 1.52V7.03a4.85 4.85 0 0 1-1.01-.34z" />
+    </svg>
+  )
+}
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+      <rect x="2" y="9" width="4" height="12" />
+      <circle cx="4" cy="4" r="2" />
+    </svg>
+  )
+}
+function YouTubeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.96-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+      <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white" />
+    </svg>
+  )
+}
+
+// ── Metadata ───────────────────────────────────────────────────────────────
+
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ c?: string }>
 }): Promise<Metadata> {
   const { slug } = await params
+  const { c } = await searchParams
   const property = await prisma.property.findUnique({ where: { slug } })
   if (!property) return { title: "Propiedad no encontrada" }
 
@@ -56,7 +104,7 @@ export async function generateMetadata({
     alt: "Propiedad en Conexory",
   }
 
-  return {
+  const meta: Metadata = {
     title: `${type}${location ? ` en ${location}` : ""}`,
     description,
     openGraph: {
@@ -74,8 +122,19 @@ export async function generateMetadata({
       images: [`/p/${slug}/og.jpg`],
     },
   }
+
+  if (c === "0") {
+    return {
+      ...meta,
+      robots: { index: false, follow: false },
+      alternates: { canonical: `/p/${slug}` },
+    }
+  }
+
+  return meta
 }
 
+// ── Footer ─────────────────────────────────────────────────────────────────
 
 function PageFooter() {
   return (
@@ -105,18 +164,169 @@ function PageFooter() {
   )
 }
 
+// ── Agent card (mirrors agent profile page design) ─────────────────────────
+
+type AgentUser = {
+  name: string
+  email: string
+  image: string | null
+  location: string | null
+  bio: string | null
+  phone: string | null
+  phoneIsWhatsapp: boolean
+  instagram: string | null
+  facebook: string | null
+  tiktok: string | null
+  linkedin: string | null
+  youtube: string | null
+}
+
+function AgentCard({ user, whatsappMessage }: { user: AgentUser; whatsappMessage: string }) {
+  const initials = user.name
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
+
+  const socialLinks = [
+    { handle: user.instagram, href: `https://instagram.com/${user.instagram}`,   label: "Instagram", Icon: InstagramIcon },
+    { handle: user.tiktok,    href: `https://tiktok.com/@${user.tiktok}`,         label: "TikTok",    Icon: TikTokIcon },
+    { handle: user.facebook,  href: `https://facebook.com/${user.facebook}`,      label: "Facebook",  Icon: FacebookIcon },
+    { handle: user.linkedin,  href: `https://linkedin.com/in/${user.linkedin}`,   label: "LinkedIn",  Icon: LinkedInIcon },
+    { handle: user.youtube,   href: `https://youtube.com/@${user.youtube}`,       label: "YouTube",   Icon: YouTubeIcon },
+  ].filter(({ handle }) => !!handle)
+
+  const hasSocial = socialLinks.length > 0
+
+  return (
+    <div className="bg-white border border-hairline rounded-2xl p-6">
+
+      {/* Avatar */}
+      <div className="flex justify-center mb-4">
+        {user.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={user.image}
+            alt={user.name}
+            className="w-[72px] h-[72px] rounded-full object-cover shadow-sm"
+          />
+        ) : (
+          <div className="w-[72px] h-[72px] rounded-full bg-ink flex items-center justify-center text-white text-lg font-black select-none shadow-sm">
+            {initials}
+          </div>
+        )}
+      </div>
+
+      {/* Name + role + location */}
+      <div className="text-center mb-4">
+        <p className="text-base font-black text-ink tracking-tight leading-tight">{user.name}</p>
+        <p className="text-xs text-mute font-medium mt-0.5">Asesor inmobiliario</p>
+        {user.location && (
+          <div className="flex items-center justify-center gap-1 mt-2">
+            <MapPin className="w-3 h-3 text-mute flex-shrink-0" strokeWidth={2} />
+            <span className="text-xs text-mute">{user.location}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Bio */}
+      {user.bio && (
+        <p className="text-xs text-body leading-relaxed text-center mb-4">{user.bio}</p>
+      )}
+
+      {/* Social icons */}
+      {hasSocial && (
+        <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
+          {socialLinks.map(({ href, label, Icon }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              className="w-8 h-8 rounded-full bg-white border border-hairline-strong flex items-center justify-center text-body hover:text-ink hover:border-ink transition-colors"
+            >
+              <Icon className="w-[15px] h-[15px]" />
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* Divider */}
+      <div className="border-t border-hairline mb-4" />
+
+      {/* Contact buttons — equal width, icon-only, tooltip on hover */}
+      <div className="flex gap-2">
+        {user.phone && user.phoneIsWhatsapp && (
+          <div className="relative group flex-1">
+            <a
+              href={`https://wa.me/${user.phone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
+            >
+              <MessageCircle className="w-[18px] h-[18px]" strokeWidth={2} />
+            </a>
+            <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
+              {user.phone}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-ink" />
+            </div>
+          </div>
+        )}
+        {user.phone && (
+          <div className="relative group flex-1">
+            <a
+              href={`tel:${user.phone}`}
+              className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
+            >
+              <Phone className="w-[18px] h-[18px]" strokeWidth={2} />
+            </a>
+            <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
+              {user.phone}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-ink" />
+            </div>
+          </div>
+        )}
+        <div className="relative group flex-1">
+          <a
+            href={`mailto:${user.email}`}
+            className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
+          >
+            <Mail className="w-[18px] h-[18px]" strokeWidth={2} />
+          </a>
+          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
+            {user.email}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-ink" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────
+
 export default async function PublicPropertyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ c?: string }>
 }) {
   const { slug } = await params
+  const { c } = await searchParams
+  const hideContact = c === "0"
 
   const property = await prisma.property.findUnique({
     where: { slug },
     include: {
       user: {
-        select: { name: true, email: true, image: true, location: true, bio: true, phone: true, phoneIsWhatsapp: true },
+        select: {
+          name: true, email: true, image: true, location: true, bio: true,
+          phone: true, phoneIsWhatsapp: true,
+          instagram: true, facebook: true, tiktok: true, linkedin: true, youtube: true,
+        },
       },
     },
   })
@@ -174,6 +384,8 @@ export default async function PublicPropertyPage({
       label: property.parking === 1 ? "Parqueadero" : "Parqueaderos",
     },
   ].filter(Boolean) as { icon: typeof Ruler; value: number; label: string }[]
+
+  const showContactCard = property.showContact && !hideContact
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
@@ -252,7 +464,7 @@ export default async function PublicPropertyPage({
           </Reveal>
         )}
 
-        {/* Map — only shown when coordinates are set */}
+        {/* Map */}
         {property.latitude != null && property.longitude != null && (
           <Reveal delay={180}>
             <PropertyMap
@@ -263,89 +475,22 @@ export default async function PublicPropertyPage({
           </Reveal>
         )}
 
-        {/* Agent contact — only shown when explicitly enabled per property */}
-        {property.showContact && (
-          <Reveal delay={200}>
-            <div className="bg-canvas-softer rounded-2xl p-5 space-y-5">
-              <h2 className="text-xs font-bold text-mute uppercase tracking-widest">
-                Asesor
-              </h2>
-
-              {/* Identity */}
-              <div className="flex items-center gap-4">
-                {property.user.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={property.user.image}
-                    alt={property.user.name}
-                    className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-ink flex items-center justify-center text-white text-lg font-black flex-shrink-0 select-none">
-                    {property.user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <p className="text-base font-black text-ink tracking-tight leading-tight">
-                    {property.user.name}
-                  </p>
-                  {property.user.location && (
-                    <div className="flex items-center gap-1 mt-1">
-                      <MapPin className="w-3 h-3 text-mute flex-shrink-0" strokeWidth={2} />
-                      <span className="text-xs text-mute truncate">{property.user.location}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Bio */}
-              {property.user.bio && (
-                <p className="text-sm text-body leading-relaxed">{property.user.bio}</p>
-              )}
-
-              {/* CTAs — full-width on mobile, equal-width on desktop */}
-              <div className="flex flex-col sm:flex-row gap-2">
-                {property.user.phone && (
-                  <>
-                    {property.user.phoneIsWhatsapp && (
-                      <a
-                        href={`https://wa.me/${property.user.phone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="sm:flex-1 flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity"
-                      >
-                        <MessageCircle className="w-4 h-4" strokeWidth={2} />
-                        WhatsApp
-                      </a>
-                    )}
-                    <div className="relative group sm:flex-1">
-                      <a
-                        href={`tel:${property.user.phone}`}
-                        className="w-full flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-ink text-white text-sm font-bold hover:bg-elevated transition-colors"
-                      >
-                        <Phone className="w-4 h-4" strokeWidth={2} />
-                        Llamar
-                      </a>
-                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3.5 py-2 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
-                        {property.user.phone}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-ink" />
-                      </div>
-                    </div>
-                  </>
-                )}
-                <a
-                  href={`mailto:${property.user.email}`}
-                  className="sm:flex-1 flex items-center justify-center gap-2 h-11 px-5 rounded-full border border-hairline-strong bg-white text-sm font-semibold text-ink hover:bg-canvas-soft transition-colors"
-                >
-                  <Mail className="w-4 h-4 text-mute" strokeWidth={2} />
-                  Correo
-                </a>
-              </div>
-            </div>
-          </Reveal>
+        {/* Contact card — mobile only; desktop uses the fixed floating card */}
+        {showContactCard && (
+          <div className="xl:hidden">
+            <Reveal delay={200}>
+              <AgentCard user={property.user} whatsappMessage={whatsappMessage} />
+            </Reveal>
+          </div>
         )}
-
       </main>
+
+      {/* Fixed floating card — xl+ only, positioned in the right margin */}
+      {showContactCard && (
+        <div className="hidden xl:block fixed right-10 top-5 w-64 z-10">
+          <AgentCard user={property.user} whatsappMessage={whatsappMessage} />
+        </div>
+      )}
 
       <PageFooter />
     </div>
