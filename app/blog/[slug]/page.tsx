@@ -3,7 +3,8 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Clock, Tag } from "lucide-react"
-import { getAllPosts, getPost } from "@/lib/blog"
+import { getAllPosts, getPost, getRelatedPosts } from "@/lib/blog"
+import { Button } from "@/components/ui/button"
 import { marked } from "marked"
 
 export async function generateStaticParams() {
@@ -21,6 +22,7 @@ export async function generateMetadata({
   return {
     title: `${post.title} — Conexory`,
     description: post.description,
+    alternates: { canonical: `/blog/${slug}` },
     openGraph: {
       type: "article",
       title: post.title,
@@ -48,6 +50,7 @@ export default async function BlogPostPage({
   if (!post) notFound()
 
   const html = await marked(post.content)
+  const related = getRelatedPosts(slug)
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -88,6 +91,36 @@ export default async function BlogPostPage({
           className="prose prose-slate prose-headings:font-black prose-headings:tracking-tight prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-p:text-body prose-p:leading-relaxed prose-strong:text-ink prose-li:text-body prose-code:bg-canvas-soft prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:text-ink prose-pre:bg-canvas-softer prose-pre:border prose-pre:border-hairline-strong prose-pre:rounded-xl max-w-none"
           dangerouslySetInnerHTML={{ __html: html }}
         />
+
+        <div className="mt-12 rounded-2xl bg-ink p-8 text-center">
+          <h2 className="text-2xl font-black text-white tracking-tight">
+            ¿Listo para compartir tus propiedades profesionalmente?
+          </h2>
+          <p className="text-mute mt-2 mb-6">Crea tu cuenta gratis en Conexory.</p>
+          <Button variant="secondary" asChild>
+            <Link href="/register">Crear cuenta gratis</Link>
+          </Button>
+        </div>
+
+        {related.length > 0 && (
+          <section className="mt-12 pt-8 border-t border-hairline">
+            <h2 className="text-sm font-black text-ink uppercase tracking-[0.15em] mb-5">
+              También te puede interesar
+            </h2>
+            <div className="space-y-3">
+              {related.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/blog/${p.slug}`}
+                  className="group block p-5 rounded-2xl border border-hairline hover:border-ink transition-colors"
+                >
+                  <h3 className="text-base font-black text-ink tracking-tight leading-snug mb-1">{p.title}</h3>
+                  <p className="text-sm text-body leading-relaxed line-clamp-2">{p.description}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-12 pt-8 border-t border-hairline">

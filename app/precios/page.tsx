@@ -7,8 +7,9 @@ import Reveal from "@/components/reveal"
 import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
-  title: "Precios — Conexory",
-  description: "Planes y precios de Conexory para asesores inmobiliarios en Colombia.",
+  title: "Planes y precios — Conexory para asesores inmobiliarios",
+  description:
+    "Plan gratuito para siempre con 3 propiedades. Plan Pro a $99.999 COP/mes con hasta 50 propiedades. Sin permanencia, cancela cuando quieras. Diseñado para agentes colombianos.",
 }
 
 const plans = [

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s — Conexory",
   },
   description:
-    "La herramienta más rápida para asesores inmobiliarios en Colombia. Publica tu propiedad en 60 segundos y compártela por WhatsApp con un link único y profesional.",
+    "La herramienta más rápida para asesores inmobiliarios en Colombia. Publica tu propiedad en 60 segundos y compártela por WhatsApp con un link único.",
   keywords: [
     "asesor inmobiliario Colombia",
     "compartir propiedades WhatsApp",
