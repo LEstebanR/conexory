@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { driver, type Config, type DriveStep } from "driver.js"
-import "driver.js/dist/driver.css"
-import "./tour.css"
+import { TOUR_BASE_CONFIG, NON_CLOSEABLE } from "@/lib/tour"
 import WelcomeModal from "./welcome-modal"
 import { completeDashboardTour } from "./actions"
 
@@ -95,18 +94,14 @@ export default function DashboardOnboarding({
       void completeDashboardTour()
     }
 
+    // Track the drawer-choreography timeouts so they can't fire moveNext on a
+    // destroyed driver (and leave the drawer open) after unmount.
+    const navTimers: number[] = []
+
     const config: Config = {
-      showProgress: true,
-      showButtons: ["next", "previous"],
-      allowClose: false,
-      popoverClass: "conexory-tour",
+      ...TOUR_BASE_CONFIG,
+      ...NON_CLOSEABLE,
       disableActiveInteraction: true,
-      overlayColor: "#000",
-      overlayOpacity: 0.6,
-      nextBtnText: "Siguiente",
-      prevBtnText: "Atrás",
-      doneBtnText: "Entendido",
-      progressText: "{{current}} de {{total}}",
       steps,
       onDestroyed: () => {
         if (isMobile) toggleSidebar(false)
@@ -125,7 +120,7 @@ export default function DashboardOnboarding({
         }
         if (i === 0) {
           toggleSidebar(true)
-          window.setTimeout(() => d.moveNext(), 300)
+          navTimers.push(window.setTimeout(() => d.moveNext(), 300))
         } else {
           d.moveNext()
         }
@@ -134,7 +129,7 @@ export default function DashboardOnboarding({
         const i = d.getActiveIndex() ?? 0
         if (i === 1) {
           toggleSidebar(false)
-          window.setTimeout(() => d.movePrevious(), 300)
+          navTimers.push(window.setTimeout(() => d.movePrevious(), 300))
         } else {
           d.movePrevious()
         }
@@ -150,6 +145,7 @@ export default function DashboardOnboarding({
 
     return () => {
       window.clearTimeout(timer)
+      navTimers.forEach((t) => window.clearTimeout(t))
       driverObj.destroy()
     }
   }, [modalDone, dashboardTourCompleted])

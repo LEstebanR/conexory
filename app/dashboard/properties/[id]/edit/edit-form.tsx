@@ -25,6 +25,7 @@ import LocationSelect from "@/components/location-select"
 import { photoLimit } from "@/lib/plans"
 import { PROPERTY_TYPES, TRANSACTION_TYPES } from "@/lib/property-types"
 import { updateProperty } from "./actions"
+import { FieldError, validatePropertyInput } from "../../property-form"
 
 const MapPicker = dynamic(() => import("@/components/map-picker"), { ssr: false })
 
@@ -45,9 +46,9 @@ function formatCOP(digits: string): string {
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
 }
 
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionCard({ title, children, id }: { title: string; children: React.ReactNode; id?: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
+    <div id={id} className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
       <h2 className="text-sm font-bold text-ink uppercase tracking-wide">{title}</h2>
       {children}
     </div>
@@ -108,24 +109,47 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
   const [imageUrls, setImageUrls] = useState<string[]>(initial.images)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState("")
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+
+  function clearError(field: string) {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }
 
   function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     setError("")
-    if (!type) { setError("Selecciona el tipo de propiedad."); return }
+
+    const data = {
+      title, type, transactionType, price, state, city, neighborhood,
+      area, landArea, bedrooms, bathrooms, parking, gatedCommunity, description,
+      images: imageUrls,
+      videoUrl,
+      latitude,
+      longitude,
+      showContact,
+    }
+
+    const validation = validatePropertyInput(data)
+    if (!validation.ok) {
+      setFieldErrors(validation.fieldErrors)
+      setError("Revisa los campos marcados en rojo.")
+      if (validation.sectionId) {
+        document.getElementById(validation.sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }
+      return
+    }
+
+    setFieldErrors({})
 
     startTransition(async () => {
-      const result = await updateProperty(initial.id, {
-        title, type, transactionType, price, state, city, neighborhood,
-        area, landArea, bedrooms, bathrooms, parking, gatedCommunity, description,
-        images: imageUrls,
-        videoUrl,
-        latitude,
-        longitude,
-        showContact,
-      })
+      const result = await updateProperty(initial.id, data)
       if (!result.success) {
         setError(result.error)
         return
@@ -149,8 +173,8 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <SectionCard title="Tipo de propiedad">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        <SectionCard id="tour-type" title="Tipo de propiedad">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {PROPERTY_TYPES.map((pt) => {
               const Icon = TYPE_ICONS[pt.id] ?? Building2
@@ -159,7 +183,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
                 <button
                   key={pt.id}
                   type="button"
-                  onClick={() => setType(pt.id)}
+                  onClick={() => { setType(pt.id); clearError("type") }}
                   className={cn(
                     "flex flex-col items-center gap-2 py-4 px-1 text-center rounded-xl text-xs font-medium transition-all border-2",
                     isSelected
@@ -176,9 +200,10 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               )
             })}
           </div>
+          <FieldError message={fieldErrors.type} />
         </SectionCard>
 
-        <SectionCard title="Tipo de operación">
+        <SectionCard id="tour-transaction" title="Tipo de operación">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {TRANSACTION_TYPES.map((tt) => {
               const isSelected = transactionType === tt.id
@@ -201,7 +226,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           </div>
         </SectionCard>
 
-        <SectionCard title="Fotos y video">
+        <SectionCard id="tour-photos" title="Fotos y video">
           <ImageUpload
             onUrlsChange={setImageUrls}
             onUploadingChange={setIsUploading}
@@ -213,28 +238,30 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
             <Input
               placeholder="https://youtube.com/watch?v=..."
               value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
+              onChange={(e) => { setVideoUrl(e.target.value); clearError("videoUrl") }}
               className="h-11"
               inputMode="url"
             />
             <p className="text-xs text-mute">
               Pega el enlace del video y aparecerá en el carrusel de la propiedad.
             </p>
+            <FieldError message={fieldErrors.videoUrl} />
           </div>
         </SectionCard>
 
-        <SectionCard title="Información básica">
+        <SectionCard id="tour-basic" title="Información básica">
           <div className="space-y-1.5">
             <FieldLabel>Título del anuncio</FieldLabel>
             <Input
               placeholder="Ej: Apartamento moderno con vista al parque"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => { setTitle(e.target.value); clearError("title") }}
               className="h-11"
               required
               maxLength={120}
             />
             <p className="text-xs text-mute text-right">{title.length}/120</p>
+            <FieldError message={fieldErrors.title} />
           </div>
 
           <div className="space-y-1.5">
@@ -246,20 +273,24 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
                 inputMode="numeric"
                 placeholder="2.800.000"
                 value={formatCOP(price)}
-                onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => { setPrice(e.target.value.replace(/\D/g, "")); clearError("price") }}
                 className="w-full h-11 pl-7 rounded-xl border border-hairline-strong text-sm font-medium text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
                 required
               />
             </div>
+            <FieldError message={fieldErrors.price} />
           </div>
 
-          <LocationSelect
-            initialState={initial.state}
-            initialCity={initial.city}
-            onStateChange={setState}
-            onCityChange={setCity}
-            required
-          />
+          <div>
+            <LocationSelect
+              initialState={initial.state}
+              initialCity={initial.city}
+              onStateChange={setState}
+              onCityChange={(c) => { setCity(c); clearError("city") }}
+              required
+            />
+            <FieldError message={fieldErrors.city} />
+          </div>
 
           <div className="space-y-1.5">
             <FieldLabel optional>Barrio / Zona</FieldLabel>
@@ -267,30 +298,35 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           </div>
         </SectionCard>
 
-        <SectionCard title="Detalles">
+        <SectionCard id="tour-details" title="Detalles">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <FieldLabel optional>Área (m²)</FieldLabel>
-              <Input placeholder="65" value={area} onChange={(e) => setArea(e.target.value)} className="h-11" type="number" inputMode="decimal" min="0" />
+              <Input placeholder="65" value={area} onChange={(e) => { setArea(e.target.value); clearError("area") }} className="h-11" type="number" inputMode="decimal" min="0" />
+              <FieldError message={fieldErrors.area} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Terreno (m²)</FieldLabel>
-              <Input placeholder="120" value={landArea} onChange={(e) => setLandArea(e.target.value)} className="h-11" type="number" inputMode="decimal" min="0" />
+              <Input placeholder="120" value={landArea} onChange={(e) => { setLandArea(e.target.value); clearError("landArea") }} className="h-11" type="number" inputMode="decimal" min="0" />
+              <FieldError message={fieldErrors.landArea} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <FieldLabel optional>Habitaciones</FieldLabel>
-              <Input placeholder="2" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} className="h-11" type="number" inputMode="numeric" min="0" />
+              <Input placeholder="2" value={bedrooms} onChange={(e) => { setBedrooms(e.target.value); clearError("bedrooms") }} className="h-11" type="number" inputMode="numeric" min="0" />
+              <FieldError message={fieldErrors.bedrooms} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Baños</FieldLabel>
-              <Input placeholder="1" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} className="h-11" type="number" inputMode="numeric" min="0" />
+              <Input placeholder="1" value={bathrooms} onChange={(e) => { setBathrooms(e.target.value); clearError("bathrooms") }} className="h-11" type="number" inputMode="numeric" min="0" />
+              <FieldError message={fieldErrors.bathrooms} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Parqueaderos</FieldLabel>
-              <Input placeholder="1" value={parking} onChange={(e) => setParking(e.target.value)} className="h-11" type="number" inputMode="numeric" min="0" />
+              <Input placeholder="1" value={parking} onChange={(e) => { setParking(e.target.value); clearError("parking") }} className="h-11" type="number" inputMode="numeric" min="0" />
+              <FieldError message={fieldErrors.parking} />
             </div>
           </div>
 
@@ -316,18 +352,19 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           </label>
         </SectionCard>
 
-        <SectionCard title="Descripción">
+        <SectionCard id="tour-description" title="Descripción">
           <div className="space-y-1.5">
             <FieldLabel optional>Descripción libre</FieldLabel>
             <textarea
               placeholder="Describe la propiedad: características, acabados, ubicación..."
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => { setDescription(e.target.value); clearError("description") }}
               rows={5}
               maxLength={1000}
               className="w-full rounded-xl border border-hairline-strong px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
             />
             <p className="text-xs text-mute text-right">{description.length}/1000</p>
+            <FieldError message={fieldErrors.description} />
           </div>
         </SectionCard>
 

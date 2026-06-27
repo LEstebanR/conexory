@@ -7,7 +7,7 @@ import { del } from "@vercel/blob"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { ensureAgentSlug } from "@/lib/agent-slug"
-import { setSettingsTourCompleted } from "@/lib/onboarding-server"
+import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { parseOnboarding } from "@/lib/onboarding"
 
 export async function isSettingsTourPending(): Promise<boolean> {
@@ -23,7 +23,7 @@ export async function isSettingsTourPending(): Promise<boolean> {
 export async function completeSettingsTour(): Promise<void> {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) return
-  await setSettingsTourCompleted(session.user.id)
+  await setOnboardingFlag(session.user.id, "settingsTourCompleted")
 }
 
 const handle = z.string().trim().max(50).optional().or(z.literal(""))

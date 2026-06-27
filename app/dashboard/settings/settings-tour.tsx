@@ -1,9 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { driver, type DriveStep } from "driver.js"
-import "driver.js/dist/driver.css"
-import "../tour.css"
+import { runTour, NON_CLOSEABLE, type DriveStep } from "@/lib/tour"
 import { isSettingsTourPending, completeSettingsTour } from "./actions"
 
 const STEPS: DriveStep[] = [
@@ -32,42 +30,20 @@ const STEPS: DriveStep[] = [
 export default function SettingsTour() {
   useEffect(() => {
     let cancelled = false
-    let driven = false
-    let timer: number | undefined
-    let driverObj: ReturnType<typeof driver> | null = null
-
-    const start = () => {
-      if (cancelled) return
-      driverObj = driver({
-        showProgress: true,
-        showButtons: ["next", "previous"],
-        allowClose: false,
-        popoverClass: "conexory-tour",
-        overlayColor: "#000",
-        overlayOpacity: 0.55,
-        nextBtnText: "Siguiente",
-        prevBtnText: "Atrás",
-        doneBtnText: "Entendido",
-        progressText: "{{current}} de {{total}}",
-        steps: STEPS,
-        onDestroyed: () => {
-          if (driven) void completeSettingsTour()
-        },
-      })
-      timer = window.setTimeout(() => {
-        driven = true
-        driverObj?.drive()
-      }, 350)
-    }
+    let cleanup: (() => void) | null = null
 
     void isSettingsTourPending().then((pending) => {
-      if (pending) start()
+      if (pending && !cancelled) {
+        cleanup = runTour(STEPS, {
+          onComplete: () => void completeSettingsTour(),
+          config: NON_CLOSEABLE,
+        })
+      }
     })
 
     return () => {
       cancelled = true
-      if (timer) window.clearTimeout(timer)
-      driverObj?.destroy()
+      cleanup?.()
     }
   }, [])
 

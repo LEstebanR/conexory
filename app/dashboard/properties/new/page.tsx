@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 import { createProperty } from "./actions"
-import { PropertySchema } from "@/lib/validations/property"
+import { FieldError, validatePropertyInput } from "../property-form"
 import ImageUpload from "@/components/image-upload"
 import LocationSelect from "@/components/location-select"
 import PropertyTour from "./property-tour"
@@ -74,42 +74,6 @@ function FieldLabel({ children, optional }: { children: React.ReactNode; optiona
   )
 }
 
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null
-  return <p className="text-xs font-medium text-red-500 mt-1">{message}</p>
-}
-
-// Maps a Zod field path to the form section that contains it, so we can scroll
-// the first invalid field into view on a failed submit.
-const FIELD_SECTION: Record<string, string> = {
-  type: "tour-type",
-  transactionType: "tour-transaction",
-  images: "tour-photos",
-  videoUrl: "tour-photos",
-  title: "tour-basic",
-  price: "tour-basic",
-  city: "tour-basic",
-  state: "tour-basic",
-  neighborhood: "tour-basic",
-  area: "tour-details",
-  landArea: "tour-details",
-  bedrooms: "tour-details",
-  bathrooms: "tour-details",
-  parking: "tour-details",
-  description: "tour-description",
-}
-
-// Visual top-to-bottom order of the form sections, used to scroll to the
-// first invalid one (Zod reports issues in schema order, not layout order).
-const SECTION_ORDER = [
-  "tour-type",
-  "tour-transaction",
-  "tour-photos",
-  "tour-basic",
-  "tour-details",
-  "tour-description",
-]
-
 export default function NewPropertyPage() {
   const [type, setType] = useState("")
   const [transactionType, setTransactionType] = useState(DEFAULT_TRANSACTION_TYPE)
@@ -151,9 +115,6 @@ export default function NewPropertyPage() {
     e.preventDefault()
     setError("")
 
-    // Clicking "Publicar" ends the form tour.
-    window.dispatchEvent(new Event("conexory:finish-property-tour"))
-
     const data = {
       title,
       type,
@@ -176,29 +137,20 @@ export default function NewPropertyPage() {
       showContact,
     }
 
-    const parsed = PropertySchema.safeParse(data)
-    if (!parsed.success) {
-      const errors: Record<string, string> = {}
-      for (const issue of parsed.error.issues) {
-        const key = String(issue.path[0] ?? "")
-        if (key && !errors[key]) errors[key] = issue.message
-      }
-      setFieldErrors(errors)
+    const validation = validatePropertyInput(data)
+    if (!validation.ok) {
+      setFieldErrors(validation.fieldErrors)
       setError("Revisa los campos marcados en rojo.")
-
-      const erroredSections = new Set(
-        parsed.error.issues
-          .map((i) => FIELD_SECTION[String(i.path[0] ?? "")])
-          .filter(Boolean)
-      )
-      const sectionId = SECTION_ORDER.find((s) => erroredSections.has(s))
-      if (sectionId) {
-        document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" })
+      if (validation.sectionId) {
+        document.getElementById(validation.sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" })
       }
       return
     }
 
     setFieldErrors({})
+
+    // Validation passed and we're publishing — now it's safe to end the form tour.
+    window.dispatchEvent(new Event("conexory:finish-property-tour"))
 
     startTransition(async () => {
       const result = await createProperty(data)

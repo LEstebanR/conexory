@@ -5,8 +5,8 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { propertyLimit, photoLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
-import { advanceOnboardingStep, setPropertyTourCompleted } from "@/lib/onboarding-server"
-import { ONBOARDING_STEP, parseOnboarding } from "@/lib/onboarding"
+import { setOnboardingFlag } from "@/lib/onboarding-server"
+import { parseOnboarding } from "@/lib/onboarding"
 
 async function generateUniqueSlug(): Promise<string> {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -33,7 +33,7 @@ export async function isPropertyTourPending(): Promise<boolean> {
 export async function completePropertyTour(): Promise<void> {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) return
-  await setPropertyTourCompleted(session.user.id)
+  await setOnboardingFlag(session.user.id, "propertyTourCompleted")
 }
 
 type CreateResult = { success: true; id: string } | { success: false; error: string }
@@ -90,8 +90,6 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
         showContact: parsed.data.showContact,
       },
     })
-
-    await advanceOnboardingStep(session.user.id, ONBOARDING_STEP.createProperty)
 
     return { success: true, id: property.id }
   } catch (err) {

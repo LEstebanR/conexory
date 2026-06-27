@@ -2,9 +2,7 @@
 
 import { useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { driver, type DriveStep } from "driver.js"
-import "driver.js/dist/driver.css"
-import "../../tour.css"
+import { runTour, NON_CLOSEABLE, type DriveStep } from "@/lib/tour"
 import { isPropertyTourPending, completePropertyTour } from "./actions"
 
 const STEPS: DriveStep[] = [
@@ -106,54 +104,40 @@ export default function PropertyTour() {
 
   useEffect(() => {
     let cancelled = false
-    let driven = false
-    let timer: number | undefined
-    let driverObj: ReturnType<typeof driver> | null = null
+    let finished = false
+    let cleanup: (() => void) | null = null
 
-    const start = () => {
-      if (cancelled) return
-      driverObj = driver({
-        showProgress: true,
-        showButtons: ["next", "previous"],
-        allowClose: false,
-        popoverClass: "conexory-tour",
-        overlayColor: "#000",
-        overlayOpacity: 0.55,
-        nextBtnText: "Siguiente",
-        prevBtnText: "Atrás",
-        doneBtnText: "Entendido",
-        progressText: "{{current}} de {{total}}",
-        steps: STEPS,
-        onDestroyed: () => {
-          if (driven) void completePropertyTour()
-        },
+    const begin = () => {
+      if (cancelled || finished || cleanup) return
+      cleanup = runTour(STEPS, {
+        onComplete: () => void completePropertyTour(),
+        config: NON_CLOSEABLE,
       })
-      timer = window.setTimeout(() => {
-        driven = true
-        driverObj?.drive()
-      }, 350)
     }
 
     if (forced) {
       const url = new URL(window.location.href)
       url.searchParams.delete("tour")
       window.history.replaceState(null, "", url.toString())
-      start()
+      begin()
     } else {
       void isPropertyTourPending().then((pending) => {
-        if (pending) start()
+        if (pending) begin()
       })
     }
 
-    // Publishing the property ends the tour (and persists it via onDestroyed).
-    const finish = () => driverObj?.destroy()
+    // Publishing the property ends the tour (and persists it via onComplete).
+    const finish = () => {
+      finished = true
+      cleanup?.()
+      cleanup = null
+    }
     window.addEventListener("conexory:finish-property-tour", finish)
 
     return () => {
       cancelled = true
-      if (timer) window.clearTimeout(timer)
       window.removeEventListener("conexory:finish-property-tour", finish)
-      driverObj?.destroy()
+      cleanup?.()
     }
   }, [forced])
 

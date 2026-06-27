@@ -6,23 +6,36 @@ type Step = {
   n: number
   label: string
   href: string | null
+  done: boolean
 }
 
 export default function OnboardingStepper({
-  step,
+  hasProperty,
+  hasShared,
   firstPropertyId,
 }: {
-  step: number
+  hasProperty: boolean
+  hasShared: boolean
   firstPropertyId: string | null
 }) {
   const steps: Step[] = [
-    { n: 1, label: "Crear mi primera propiedad", href: "/dashboard/properties/new?tour=1" },
+    {
+      n: 1,
+      label: "Crear mi primera propiedad",
+      href: "/dashboard/properties/new?tour=1",
+      done: hasProperty,
+    },
     {
       n: 2,
       label: "Compartir mi primera propiedad",
       href: firstPropertyId ? `/dashboard/properties/${firstPropertyId}` : null,
+      done: hasShared,
     },
   ]
+
+  // The current step is the first incomplete one; earlier-but-undone steps after
+  // it (or steps without a destination yet) are locked.
+  const currentIndex = steps.findIndex((s) => !s.done)
 
   return (
     <div className="mb-8">
@@ -31,11 +44,11 @@ export default function OnboardingStepper({
       </h2>
       <ol className="flex items-start">
       {steps.map((s, i) => {
-        const isDone = step > s.n
-        const isCurrent = step === s.n
-        const isLocked = step < s.n || !s.href
+        const isDone = s.done
+        const isCurrent = !s.done && i === currentIndex
+        const isLocked = !s.done && !isCurrent
         const isInteractive = isCurrent && !!s.href
-        const connectorFilled = step >= s.n
+        const connectorFilled = isDone || isCurrent
 
         const node = (
           <>
