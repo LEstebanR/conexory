@@ -6,6 +6,7 @@ import { incrementShares } from "./actions"
 
 export default function SharePanel({
   url,
+  urlNoContact,
   propertyId,
   title,
   type,
@@ -17,6 +18,7 @@ export default function SharePanel({
   parking,
 }: {
   url: string
+  urlNoContact: string
   propertyId: string
   title: string
   type: string
@@ -28,11 +30,18 @@ export default function SharePanel({
   parking?: number | null
 }) {
   const [copied, setCopied] = useState(false)
+  const [copiedNoContact, setCopiedNoContact] = useState(false)
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleCopyNoContact() {
+    await navigator.clipboard.writeText(urlNoContact)
+    setCopiedNoContact(true)
+    setTimeout(() => setCopiedNoContact(false), 2000)
   }
 
   const features = [
@@ -66,55 +75,102 @@ export default function SharePanel({
   }
 
   return (
-    <div className="bg-ink rounded-2xl p-6 space-y-4">
-      <div>
-        <p className="text-xs font-bold text-white uppercase tracking-widest mb-1.5">
-          Link público
-        </p>
-        <p className="text-sm text-mute leading-relaxed">
-          Comparte este link con tus clientes. Funciona en cualquier dispositivo, sin que necesiten crear cuenta.
-        </p>
+    <div className="bg-ink rounded-2xl p-6 space-y-5">
+      {/* Enlace con tus datos */}
+      <div className="space-y-3">
+        <div>
+          <p className="text-xs font-bold text-white uppercase tracking-widest mb-0.5">
+            Enlace con tus datos
+          </p>
+          <p className="text-xs text-mute leading-relaxed">
+            Muestra tu nombre y contacto al cliente.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+          <span className="flex-1 text-sm text-white font-mono truncate min-w-0">{url}</span>
+          <button
+            onClick={handleCopy}
+            className="flex-shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all bg-white/10 hover:bg-white/20 text-white"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-ink" />
+                <span className="text-ink">Copiado</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5" />
+                Copiar
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleWhatsApp}
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-bold transition-colors"
+          >
+            <MessageCircle className="w-4 h-4 flex-shrink-0" />
+            Compartir por WhatsApp
+          </a>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold transition-colors"
+          >
+            <ExternalLink className="w-4 h-4 flex-shrink-0" />
+            Ver
+          </a>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-        <span className="flex-1 text-sm text-white font-mono truncate min-w-0">{url}</span>
-        <button
-          onClick={handleCopy}
-          className="flex-shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all bg-white/10 hover:bg-white/20 text-white"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-ink" />
-              <span className="text-ink">Copiado</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              Copiar
-            </>
-          )}
-        </button>
-      </div>
+      <div className="border-t border-white/10" />
 
-      <div className="flex flex-col gap-2 sm:flex-row">
+      {/* Enlace de vitrina */}
+      <div className="space-y-3">
+        <div>
+          <p className="text-xs font-bold text-white uppercase tracking-widest mb-0.5">
+            Enlace de vitrina
+          </p>
+          <p className="text-xs text-mute leading-relaxed">
+            Sin tus datos de contacto. Ideal para portales y redes sociales.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+          <span className="flex-1 text-sm text-white font-mono truncate min-w-0">{urlNoContact}</span>
+          <button
+            onClick={handleCopyNoContact}
+            className="flex-shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all bg-white/10 hover:bg-white/20 text-white"
+          >
+            {copiedNoContact ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-ink" />
+                <span className="text-ink">Copiado</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5" />
+                Copiar
+              </>
+            )}
+          </button>
+        </div>
+
         <a
-          href={waUrl}
+          href={urlNoContact}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={handleWhatsApp}
-          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-bold transition-colors"
-        >
-          <MessageCircle className="w-4 h-4 flex-shrink-0" />
-          Compartir por WhatsApp
-        </a>
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold transition-colors"
+          className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold transition-colors w-full sm:w-auto"
         >
           <ExternalLink className="w-4 h-4 flex-shrink-0" />
-          Ver
+          Ver sin contacto
         </a>
       </div>
     </div>

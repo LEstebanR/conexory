@@ -22,10 +22,13 @@ function formatCOP(amount: number): string {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ c?: string }>
 }): Promise<Metadata> {
   const { slug } = await params
+  const { c } = await searchParams
   const property = await prisma.property.findUnique({ where: { slug } })
   if (!property) return { title: "Propiedad no encontrada" }
 
@@ -56,7 +59,7 @@ export async function generateMetadata({
     alt: "Propiedad en Conexory",
   }
 
-  return {
+  const meta: Metadata = {
     title: `${type}${location ? ` en ${location}` : ""}`,
     description,
     openGraph: {
@@ -74,6 +77,16 @@ export async function generateMetadata({
       images: [`/p/${slug}/og.jpg`],
     },
   }
+
+  if (c === "0") {
+    return {
+      ...meta,
+      robots: { index: false, follow: false },
+      alternates: { canonical: `/p/${slug}` },
+    }
+  }
+
+  return meta
 }
 
 
@@ -107,10 +120,14 @@ function PageFooter() {
 
 export default async function PublicPropertyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ c?: string }>
 }) {
   const { slug } = await params
+  const { c } = await searchParams
+  const hideContact = c === "0"
 
   const property = await prisma.property.findUnique({
     where: { slug },
@@ -263,8 +280,8 @@ export default async function PublicPropertyPage({
           </Reveal>
         )}
 
-        {/* Agent contact — only shown when explicitly enabled per property */}
-        {property.showContact && (
+        {/* Agent contact — shown when enabled per property and not suppressed by ?c=0 */}
+        {property.showContact && !hideContact && (
           <Reveal delay={200}>
             <div className="bg-canvas-softer rounded-2xl p-5 space-y-5">
               <h2 className="text-xs font-bold text-mute uppercase tracking-widest">
