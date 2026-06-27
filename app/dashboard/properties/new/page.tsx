@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 import { createProperty } from "./actions"
+import { PropertySchema } from "@/lib/validations/property"
 import ImageUpload from "@/components/image-upload"
 import LocationSelect from "@/components/location-select"
 import PropertyTour from "./property-tour"
@@ -73,6 +74,42 @@ function FieldLabel({ children, optional }: { children: React.ReactNode; optiona
   )
 }
 
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-xs font-medium text-red-500 mt-1">{message}</p>
+}
+
+// Maps a Zod field path to the form section that contains it, so we can scroll
+// the first invalid field into view on a failed submit.
+const FIELD_SECTION: Record<string, string> = {
+  type: "tour-type",
+  transactionType: "tour-transaction",
+  images: "tour-photos",
+  videoUrl: "tour-photos",
+  title: "tour-basic",
+  price: "tour-basic",
+  city: "tour-basic",
+  state: "tour-basic",
+  neighborhood: "tour-basic",
+  area: "tour-details",
+  landArea: "tour-details",
+  bedrooms: "tour-details",
+  bathrooms: "tour-details",
+  parking: "tour-details",
+  description: "tour-description",
+}
+
+// Visual top-to-bottom order of the form sections, used to scroll to the
+// first invalid one (Zod reports issues in schema order, not layout order).
+const SECTION_ORDER = [
+  "tour-type",
+  "tour-transaction",
+  "tour-photos",
+  "tour-basic",
+  "tour-details",
+  "tour-description",
+]
+
 export default function NewPropertyPage() {
   const [type, setType] = useState("")
   const [transactionType, setTransactionType] = useState(DEFAULT_TRANSACTION_TYPE)
@@ -95,42 +132,76 @@ export default function NewPropertyPage() {
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState("")
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const { data: session } = useSession()
   const maxImages = photoLimit(Boolean(session?.user.isPremium))
 
+  function clearError(field: string) {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }
+
   function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     setError("")
 
-    if (!type) {
-      setError("Selecciona el tipo de propiedad.")
+    // Clicking "Publicar" ends the form tour.
+    window.dispatchEvent(new Event("conexory:finish-property-tour"))
+
+    const data = {
+      title,
+      type,
+      transactionType,
+      price,
+      state,
+      city,
+      neighborhood,
+      area,
+      landArea,
+      bedrooms,
+      bathrooms,
+      parking,
+      gatedCommunity,
+      description,
+      images: imageUrls,
+      videoUrl,
+      latitude,
+      longitude,
+      showContact,
+    }
+
+    const parsed = PropertySchema.safeParse(data)
+    if (!parsed.success) {
+      const errors: Record<string, string> = {}
+      for (const issue of parsed.error.issues) {
+        const key = String(issue.path[0] ?? "")
+        if (key && !errors[key]) errors[key] = issue.message
+      }
+      setFieldErrors(errors)
+      setError("Revisa los campos marcados en rojo.")
+
+      const erroredSections = new Set(
+        parsed.error.issues
+          .map((i) => FIELD_SECTION[String(i.path[0] ?? "")])
+          .filter(Boolean)
+      )
+      const sectionId = SECTION_ORDER.find((s) => erroredSections.has(s))
+      if (sectionId) {
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }
       return
     }
 
+    setFieldErrors({})
+
     startTransition(async () => {
-      const result = await createProperty({
-        title,
-        type,
-        transactionType,
-        price,
-        state,
-        city,
-        neighborhood,
-        area,
-        landArea,
-        bedrooms,
-        bathrooms,
-        parking,
-        gatedCommunity,
-        description,
-        images: imageUrls,
-        videoUrl,
-        latitude,
-        longitude,
-        showContact,
-      })
+      const result = await createProperty(data)
       if (!result.success) {
         setError(result.error)
         return
@@ -159,7 +230,7 @@ export default function NewPropertyPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         {/* Tipo de propiedad */}
         <SectionCard id="tour-type" title="Tipo de propiedad">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
@@ -170,7 +241,7 @@ export default function NewPropertyPage() {
                 <button
                   key={pt.id}
                   type="button"
-                  onClick={() => setType(pt.id)}
+                  onClick={() => { setType(pt.id); clearError("type") }}
                   className={cn(
                     "flex flex-col items-center gap-2 py-4 px-1 text-center rounded-xl text-xs font-medium transition-all border-2",
                     isSelected
@@ -187,10 +258,11 @@ export default function NewPropertyPage() {
               )
             })}
           </div>
+          <FieldError message={fieldErrors.type} />
         </SectionCard>
 
         {/* Tipo de operación */}
-        <SectionCard title="Tipo de operación">
+        <SectionCard id="tour-transaction" title="Tipo de operación">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {TRANSACTION_TYPES.map((tt) => {
               const isSelected = transactionType === tt.id
@@ -225,13 +297,14 @@ export default function NewPropertyPage() {
             <Input
               placeholder="https://youtube.com/watch?v=..."
               value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
+              onChange={(e) => { setVideoUrl(e.target.value); clearError("videoUrl") }}
               className="h-11"
               inputMode="url"
             />
             <p className="text-xs text-mute">
               Pega el enlace del video y aparecerá en el carrusel de la propiedad.
             </p>
+            <FieldError message={fieldErrors.videoUrl} />
           </div>
         </SectionCard>
 
@@ -242,12 +315,13 @@ export default function NewPropertyPage() {
             <Input
               placeholder="Ej: Apartamento moderno con vista al parque"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => { setTitle(e.target.value); clearError("title") }}
               className="h-11"
               required
               maxLength={120}
             />
             <p className="text-xs text-mute text-right">{title.length}/120</p>
+            <FieldError message={fieldErrors.title} />
           </div>
 
           <div className="space-y-1.5">
@@ -264,18 +338,23 @@ export default function NewPropertyPage() {
                 onChange={(e) => {
                   const digits = e.target.value.replace(/\D/g, "")
                   setPrice(digits)
+                  clearError("price")
                 }}
                 className="w-full h-11 pl-7 pr-16 rounded-xl border border-hairline-strong text-sm font-medium text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
                 required
               />
             </div>
+            <FieldError message={fieldErrors.price} />
           </div>
 
-          <LocationSelect
-            onStateChange={setState}
-            onCityChange={setCity}
-            required
-          />
+          <div>
+            <LocationSelect
+              onStateChange={setState}
+              onCityChange={(c) => { setCity(c); clearError("city") }}
+              required
+            />
+            <FieldError message={fieldErrors.city} />
+          </div>
 
           <div className="space-y-1.5">
             <FieldLabel optional>Barrio / Zona</FieldLabel>
@@ -289,31 +368,33 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Detalles */}
-        <SectionCard title="Detalles">
+        <SectionCard id="tour-details" title="Detalles">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <FieldLabel optional>Área (m²)</FieldLabel>
               <Input
                 placeholder="65"
                 value={area}
-                onChange={(e) => setArea(e.target.value)}
+                onChange={(e) => { setArea(e.target.value); clearError("area") }}
                 className="h-11"
                 type="number"
                 inputMode="decimal"
                 min="0"
               />
+              <FieldError message={fieldErrors.area} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Terreno (m²)</FieldLabel>
               <Input
                 placeholder="120"
                 value={landArea}
-                onChange={(e) => setLandArea(e.target.value)}
+                onChange={(e) => { setLandArea(e.target.value); clearError("landArea") }}
                 className="h-11"
                 type="number"
                 inputMode="decimal"
                 min="0"
               />
+              <FieldError message={fieldErrors.landArea} />
             </div>
           </div>
 
@@ -323,36 +404,39 @@ export default function NewPropertyPage() {
               <Input
                 placeholder="2"
                 value={bedrooms}
-                onChange={(e) => setBedrooms(e.target.value)}
+                onChange={(e) => { setBedrooms(e.target.value); clearError("bedrooms") }}
                 className="h-11"
                 type="number"
                 inputMode="numeric"
                 min="0"
               />
+              <FieldError message={fieldErrors.bedrooms} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Baños</FieldLabel>
               <Input
                 placeholder="1"
                 value={bathrooms}
-                onChange={(e) => setBathrooms(e.target.value)}
+                onChange={(e) => { setBathrooms(e.target.value); clearError("bathrooms") }}
                 className="h-11"
                 type="number"
                 inputMode="numeric"
                 min="0"
               />
+              <FieldError message={fieldErrors.bathrooms} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel optional>Parqueaderos</FieldLabel>
               <Input
                 placeholder="1"
                 value={parking}
-                onChange={(e) => setParking(e.target.value)}
+                onChange={(e) => { setParking(e.target.value); clearError("parking") }}
                 className="h-11"
                 type="number"
                 inputMode="numeric"
                 min="0"
               />
+              <FieldError message={fieldErrors.parking} />
             </div>
           </div>
 
@@ -379,23 +463,24 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Descripción */}
-        <SectionCard title="Descripción">
+        <SectionCard id="tour-description" title="Descripción">
           <div className="space-y-1.5">
             <FieldLabel optional>Descripción libre</FieldLabel>
             <textarea
               placeholder="Describe la propiedad: características, acabados, ubicación, puntos de interés cercanos..."
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => { setDescription(e.target.value); clearError("description") }}
               rows={5}
               maxLength={1000}
               className="w-full rounded-xl border border-hairline-strong px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
             />
             <p className="text-xs text-mute text-right">{description.length}/1000</p>
+            <FieldError message={fieldErrors.description} />
           </div>
         </SectionCard>
 
         {/* Ubicación en mapa */}
-        <SectionCard title="Ubicación en mapa">
+        <SectionCard id="tour-map" title="Ubicación en mapa">
           <p className="text-xs text-mute -mt-1">
             Opcional. Permite mostrar la ubicación exacta en la ficha pública.
           </p>
@@ -408,7 +493,7 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Datos de contacto */}
-        <SectionCard title="Datos de contacto">
+        <SectionCard id="tour-contact" title="Datos de contacto">
           <label className="flex items-start gap-3 cursor-pointer group select-none">
             <div className="relative flex-shrink-0 mt-0.5">
               <input

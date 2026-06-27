@@ -17,7 +17,7 @@ model User {
   emailVerified Boolean   @default(false)
   image         String?
   isPremium        Boolean   @default(false)
-  onboardingCompleted Boolean @default(false)
+  onboarding       Json      @default("{\"step\": 1, \"welcomeModalSeen\": false, \"dashboardTourCompleted\": false, \"propertyTourCompleted\": false, \"settingsTourCompleted\": false}")
   agentSlug        String?   @unique
   profilePublished Boolean   @default(false)
   location         String?

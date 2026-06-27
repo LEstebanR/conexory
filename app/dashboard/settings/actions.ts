@@ -7,6 +7,24 @@ import { del } from "@vercel/blob"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { ensureAgentSlug } from "@/lib/agent-slug"
+import { setSettingsTourCompleted } from "@/lib/onboarding-server"
+import { parseOnboarding } from "@/lib/onboarding"
+
+export async function isSettingsTourPending(): Promise<boolean> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return false
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { onboarding: true },
+  })
+  return !parseOnboarding(user?.onboarding).settingsTourCompleted
+}
+
+export async function completeSettingsTour(): Promise<void> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return
+  await setSettingsTourCompleted(session.user.id)
+}
 
 const handle = z.string().trim().max(50).optional().or(z.literal(""))
 

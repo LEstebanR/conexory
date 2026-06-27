@@ -1,12 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutGrid,
-  Plus,
   LogOut,
   Menu,
   X,
@@ -83,6 +82,7 @@ function NavLink({
   exact = false,
   soon = false,
   onClick,
+  id,
 }: {
   href: string
   icon: React.ElementType
@@ -90,6 +90,7 @@ function NavLink({
   exact?: boolean
   soon?: boolean
   onClick?: () => void
+  id?: string
 }) {
   const pathname = usePathname()
   const isActive = exact ? pathname === href : pathname.startsWith(href)
@@ -106,6 +107,7 @@ function NavLink({
 
   return (
     <Link
+      id={id}
       href={href}
       onClick={onClick}
       className={cn(
@@ -127,8 +129,17 @@ function NavLink({
   )
 }
 
-function SidebarContent({ user, onClose }: { user: User; onClose?: () => void }) {
+function SidebarContent({
+  user,
+  onClose,
+  variant = "desktop",
+}: {
+  user: User
+  onClose?: () => void
+  variant?: "desktop" | "mobile"
+}) {
   const router = useRouter()
+  const tourSuffix = variant === "mobile" ? "-mobile" : ""
 
   async function handleSignOut() {
     await signOut({
@@ -160,18 +171,13 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
 
       {/* Nav */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        {/* Nueva propiedad CTA */}
-        <Link
-          href="/dashboard/properties/new"
-          onClick={onClose}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-ink text-white hover:bg-elevated transition-colors mb-3"
-        >
-          <Plus className="w-4.5 h-4.5 flex-shrink-0" strokeWidth={2.5} />
-          <span className="text-sm font-bold">Nueva propiedad</span>
-        </Link>
-
         {navItems.map((item) => (
-          <NavLink key={item.href} {...item} onClick={onClose} />
+          <NavLink
+            key={item.href}
+            {...item}
+            id={`tour-properties${tourSuffix}`}
+            onClick={onClose}
+          />
         ))}
       </div>
 
@@ -182,6 +188,7 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
           icon={Settings}
           label="Configuración"
           onClick={onClose}
+          id={`tour-settings${tourSuffix}`}
         />
       </div>
 
@@ -216,11 +223,19 @@ function SidebarContent({ user, onClose }: { user: User; onClose?: () => void })
 export default function Sidebar({ user }: { user: User }) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setMobileOpen((e as CustomEvent<boolean>).detail)
+    }
+    window.addEventListener("conexory:toggle-sidebar", handler)
+    return () => window.removeEventListener("conexory:toggle-sidebar", handler)
+  }, [])
+
   return (
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col fixed top-0 left-0 bottom-0 w-60 bg-white border-r border-hairline-strong z-30">
-        <SidebarContent user={user} />
+        <SidebarContent user={user} variant="desktop" />
       </aside>
 
       {/* Mobile header */}
@@ -255,7 +270,7 @@ export default function Sidebar({ user }: { user: User }) {
           />
           {/* Drawer */}
           <div className="lg:hidden fixed top-0 left-0 bottom-0 w-72 bg-white z-50 shadow-2xl">
-            <SidebarContent user={user} onClose={() => setMobileOpen(false)} />
+            <SidebarContent user={user} onClose={() => setMobileOpen(false)} variant="mobile" />
           </div>
         </>
       )}
