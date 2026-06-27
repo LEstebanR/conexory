@@ -276,9 +276,9 @@ export default async function PublicPropertyPage({
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
 
-      {/* Gallery — edge-to-edge on mobile, wider container on desktop when sidebar is shown */}
+      {/* Gallery — edge-to-edge on mobile */}
       {(property.images.length > 0 || videoId) && (
-        <div className={`w-full sm:mx-auto sm:px-4 sm:pt-5 ${showContactCard ? "sm:max-w-5xl" : "sm:max-w-2xl"}`}>
+        <div className="w-full sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5">
           <PublicGallery
             images={property.images}
             title={property.title}
@@ -288,106 +288,95 @@ export default async function PublicPropertyPage({
         </div>
       )}
 
-      <main className={`flex-1 w-full mx-auto px-4 pt-5 pb-8 ${showContactCard ? "max-w-5xl" : "max-w-2xl"}`}>
-        <div className="lg:flex lg:items-start lg:gap-8">
-
-          {/* Left column: property info */}
-          <div className="flex-1 min-w-0 space-y-6">
-
-            {/* Headline + price */}
-            <Reveal>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-mute mb-1.5">
-                    {typeLabel}{transactionLabel ? ` · ${transactionLabel}` : ""}
-                  </p>
-                  <h1 className="text-2xl sm:text-3xl font-black text-ink tracking-tight leading-tight">
-                    {property.title}
-                  </h1>
-                  {location && (
-                    <div className="flex items-center gap-1.5 text-body text-sm mt-2">
-                      <MapPin className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
-                      <span>{location}</span>
-                    </div>
-                  )}
-                  {property.gatedCommunity && (
-                    <div className="inline-flex items-center gap-1.5 mt-3 bg-canvas-soft text-ink text-xs font-semibold px-2.5 py-1 rounded-full">
-                      <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2} />
-                      Unidad cerrada
-                    </div>
-                  )}
+      <main className="flex-1 max-w-2xl mx-auto w-full px-4 pt-5 pb-8 space-y-6">
+        {/* Headline + price */}
+        <Reveal>
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-mute mb-1.5">
+                {typeLabel}{transactionLabel ? ` · ${transactionLabel}` : ""}
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-black text-ink tracking-tight leading-tight">
+                {property.title}
+              </h1>
+              {location && (
+                <div className="flex items-center gap-1.5 text-body text-sm mt-2">
+                  <MapPin className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
+                  <span>{location}</span>
                 </div>
-                <p className="text-4xl sm:text-5xl font-black text-ink tracking-tighter">
-                  {price}
-                </p>
-              </div>
-            </Reveal>
-
-            {/* Stats — horizontal row */}
-            {stats.length > 0 && (
-              <Reveal delay={80}>
-                <div className="flex items-center divide-x divide-hairline border-y border-hairline -mx-4 sm:mx-0 sm:rounded-2xl sm:border">
-                  {stats.map(({ icon: Icon, value, label }) => (
-                    <div
-                      key={label}
-                      className="flex-1 flex flex-col items-center py-4 gap-1 min-w-0"
-                    >
-                      <Icon className="w-4 h-4 text-mute" strokeWidth={1.75} />
-                      <p className="text-lg font-black text-ink leading-none">{value}</p>
-                      <p className="text-[11px] text-mute font-medium truncate px-1">{label}</p>
-                    </div>
-                  ))}
+              )}
+              {property.gatedCommunity && (
+                <div className="inline-flex items-center gap-1.5 mt-3 bg-canvas-soft text-ink text-xs font-semibold px-2.5 py-1 rounded-full">
+                  <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2} />
+                  Unidad cerrada
                 </div>
-              </Reveal>
-            )}
-
-            {/* Description */}
-            {property.description && (
-              <Reveal delay={140}>
-                <div>
-                  <h2 className="text-xs font-bold text-mute uppercase tracking-widest mb-3">
-                    Descripción
-                  </h2>
-                  <p className="text-[15px] text-body leading-relaxed whitespace-pre-wrap">
-                    {property.description}
-                  </p>
-                </div>
-              </Reveal>
-            )}
-
-            {/* Map */}
-            {property.latitude != null && property.longitude != null && (
-              <Reveal delay={180}>
-                <PropertyMap
-                  latitude={property.latitude}
-                  longitude={property.longitude}
-                  label={location || undefined}
-                />
-              </Reveal>
-            )}
-
-            {/* Contact card — mobile only (below all content) */}
-            {showContactCard && (
-              <div className="lg:hidden">
-                <Reveal delay={200}>
-                  <AgentCard user={property.user} whatsappMessage={whatsappMessage} />
-                </Reveal>
-              </div>
-            )}
-
+              )}
+            </div>
+            <p className="text-4xl sm:text-5xl font-black text-ink tracking-tighter">
+              {price}
+            </p>
           </div>
+        </Reveal>
 
-          {/* Right sidebar: contact card — desktop only, sticky */}
-          {showContactCard && (
-            <aside className="hidden lg:block w-72 flex-shrink-0">
-              <div className="sticky top-6">
-                <AgentCard user={property.user} whatsappMessage={whatsappMessage} />
-              </div>
-            </aside>
-          )}
+        {/* Stats — horizontal row */}
+        {stats.length > 0 && (
+          <Reveal delay={80}>
+            <div className="flex items-center divide-x divide-hairline border-y border-hairline -mx-4 sm:mx-0 sm:rounded-2xl sm:border">
+              {stats.map(({ icon: Icon, value, label }) => (
+                <div
+                  key={label}
+                  className="flex-1 flex flex-col items-center py-4 gap-1 min-w-0"
+                >
+                  <Icon className="w-4 h-4 text-mute" strokeWidth={1.75} />
+                  <p className="text-lg font-black text-ink leading-none">{value}</p>
+                  <p className="text-[11px] text-mute font-medium truncate px-1">{label}</p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        )}
 
-        </div>
+        {/* Description */}
+        {property.description && (
+          <Reveal delay={140}>
+            <div>
+              <h2 className="text-xs font-bold text-mute uppercase tracking-widest mb-3">
+                Descripción
+              </h2>
+              <p className="text-[15px] text-body leading-relaxed whitespace-pre-wrap">
+                {property.description}
+              </p>
+            </div>
+          </Reveal>
+        )}
+
+        {/* Map */}
+        {property.latitude != null && property.longitude != null && (
+          <Reveal delay={180}>
+            <PropertyMap
+              latitude={property.latitude}
+              longitude={property.longitude}
+              label={location || undefined}
+            />
+          </Reveal>
+        )}
+
+        {/* Contact card — mobile only; desktop shows the fixed floating card */}
+        {showContactCard && (
+          <div className="xl:hidden">
+            <Reveal delay={200}>
+              <AgentCard user={property.user} whatsappMessage={whatsappMessage} />
+            </Reveal>
+          </div>
+        )}
       </main>
+
+      {/* Fixed floating card — xl+ only, positioned in the right margin */}
+      {showContactCard && (
+        <div className="hidden xl:block fixed right-6 top-24 w-72 z-10">
+          <AgentCard user={property.user} whatsappMessage={whatsappMessage} />
+        </div>
+      )}
 
       <PageFooter />
     </div>
