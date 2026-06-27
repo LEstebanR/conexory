@@ -44,6 +44,26 @@ export function getAllPosts(): PostMeta[] {
     .sort((a, b) => (a.date < b.date ? 1 : -1))
 }
 
+export function getRelatedPosts(slug: string, limit = 3): PostMeta[] {
+  const all = getAllPosts()
+  const current = all.find((p) => p.slug === slug)
+  if (!current) return []
+
+  const others = all.filter((p) => p.slug !== slug)
+  const scored = others
+    .map((p) => ({
+      post: p,
+      shared: p.tags.filter((t) => current.tags.includes(t)).length,
+    }))
+    .sort((a, b) => b.shared - a.shared)
+
+  const related = scored.filter((s) => s.shared > 0).map((s) => s.post)
+  if (related.length >= limit) return related.slice(0, limit)
+
+  const fill = others.filter((p) => !related.includes(p))
+  return [...related, ...fill].slice(0, limit)
+}
+
 export function getPost(slug: string): Post | null {
   const filepath = path.join(BLOG_DIR, `${slug}.md`)
   if (!fs.existsSync(filepath)) return null
