@@ -90,11 +90,10 @@ export default async function DashboardPage({
   const count = properties.length
   const totalShares = properties.reduce((sum: number, p: P) => sum + p.shares, 0)
 
-  // Onboarding "Primeros pasos" is derived from real data (not a stored counter),
-  // so deleting a property or losing a write never leaves the stepper out of sync.
+  // Onboarding "Primeros pasos" progress is persisted on the create/share events
+  // (onboarding.firstProperty*), so deleting every property never re-shows it.
   const hasProperty = count > 0
-  const hasShared = totalShares > 0
-  const onboardingComplete = hasProperty && hasShared
+  const onboardingComplete = onboarding.firstPropertyCreated && onboarding.firstPropertyShared
   const firstPropertyId = hasProperty
     ? properties.reduce((earliest: P, p: P) => (p.createdAt < earliest.createdAt ? p : earliest)).id
     : null
@@ -165,8 +164,8 @@ export default async function DashboardPage({
 
       {!onboardingComplete && (
         <OnboardingStepper
-          hasProperty={hasProperty}
-          hasShared={hasShared}
+          firstPropertyCreated={onboarding.firstPropertyCreated}
+          firstPropertyShared={onboarding.firstPropertyShared}
           firstPropertyId={firstPropertyId}
         />
       )}

@@ -4,6 +4,7 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { del } from "@vercel/blob"
+import { setOnboardingFlag } from "@/lib/onboarding-server"
 
 export async function togglePublished(propertyId: string, published: boolean) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -29,10 +30,13 @@ export async function incrementShares(propertyId: string) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) return
   // Scope to the owner so the counter can't be inflated for someone else's property.
-  await prisma.property.updateMany({
+  const { count } = await prisma.property.updateMany({
     where: { id: propertyId, userId: session.user.id },
     data: { shares: { increment: 1 } },
   })
+  if (count > 0) {
+    await setOnboardingFlag(session.user.id, "firstPropertyShared").catch(() => {})
+  }
 }
 
 export async function deleteProperty(propertyId: string) {

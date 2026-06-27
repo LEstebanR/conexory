@@ -10,12 +10,12 @@ type Step = {
 }
 
 export default function OnboardingStepper({
-  hasProperty,
-  hasShared,
+  firstPropertyCreated,
+  firstPropertyShared,
   firstPropertyId,
 }: {
-  hasProperty: boolean
-  hasShared: boolean
+  firstPropertyCreated: boolean
+  firstPropertyShared: boolean
   firstPropertyId: string | null
 }) {
   const steps: Step[] = [
@@ -23,13 +23,13 @@ export default function OnboardingStepper({
       n: 1,
       label: "Crear mi primera propiedad",
       href: "/dashboard/properties/new?tour=1",
-      done: hasProperty,
+      done: firstPropertyCreated,
     },
     {
       n: 2,
       label: "Compartir mi primera propiedad",
       href: firstPropertyId ? `/dashboard/properties/${firstPropertyId}` : null,
-      done: hasShared,
+      done: firstPropertyShared,
     },
   ]
 

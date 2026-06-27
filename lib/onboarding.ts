@@ -3,6 +3,10 @@ export type OnboardingState = {
   dashboardTourCompleted: boolean
   propertyTourCompleted: boolean
   settingsTourCompleted: boolean
+  // "Primeros pasos" progress — persisted on the create/share events (not derived
+  // from current data) so deleting properties never re-shows the stepper.
+  firstPropertyCreated: boolean
+  firstPropertyShared: boolean
 }
 
 export type OnboardingFlag = keyof OnboardingState
@@ -12,6 +16,8 @@ export const DEFAULT_ONBOARDING: OnboardingState = {
   dashboardTourCompleted: false,
   propertyTourCompleted: false,
   settingsTourCompleted: false,
+  firstPropertyCreated: false,
+  firstPropertyShared: false,
 }
 
 export function parseOnboarding(value: unknown): OnboardingState {

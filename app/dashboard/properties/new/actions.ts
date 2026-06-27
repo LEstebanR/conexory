@@ -91,6 +91,9 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
       },
     })
 
+    // Best-effort: a flag-write failure must not fail the (already committed) create.
+    await setOnboardingFlag(session.user.id, "firstPropertyCreated").catch(() => {})
+
     return { success: true, id: property.id }
   } catch (err) {
     console.error("createProperty failed:", err)
