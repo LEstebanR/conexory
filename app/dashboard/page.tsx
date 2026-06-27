@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button"
 import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import PropertiesList, { type PropertyItem } from "./properties-list"
 import UpgradeSuccessToast from "./upgrade-success-toast"
+import OnboardingStepper from "./onboarding-stepper"
+import DashboardOnboarding from "./dashboard-onboarding"
+import { parseOnboarding } from "@/lib/onboarding"
 import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
 
 function formatColombiaDate(date: Date): string {
@@ -56,8 +59,9 @@ export default async function DashboardPage({
 
   const agentProfile = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { agentSlug: true, profilePublished: true },
+    select: { agentSlug: true, profilePublished: true, onboarding: true },
   })
+  const onboarding = parseOnboarding(agentProfile?.onboarding)
 
   const properties = await prisma.property.findMany({
     where: { userId: session.user.id },
@@ -85,6 +89,16 @@ export default async function DashboardPage({
   const activeCount = properties.filter((p: P) => p.published).length
   const count = properties.length
   const totalShares = properties.reduce((sum: number, p: P) => sum + p.shares, 0)
+
+  // Onboarding "Primeros pasos" is derived from real data (not a stored counter),
+  // so deleting a property or losing a write never leaves the stepper out of sync.
+  const hasProperty = count > 0
+  const hasShared = totalShares > 0
+  const onboardingComplete = hasProperty && hasShared
+  const firstPropertyId = hasProperty
+    ? properties.reduce((earliest: P, p: P) => (p.createdAt < earliest.createdAt ? p : earliest)).id
+    : null
+
   let isPremium = session.user.isPremium
   if (isPostPayment) {
     const freshUser = await prisma.user.findUnique({
@@ -141,6 +155,22 @@ export default async function DashboardPage({
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       {isPostPayment && <UpgradeSuccessToast />}
 
+      {(!onboarding.welcomeModalSeen || !onboarding.dashboardTourCompleted) && (
+        <DashboardOnboarding
+          name={session.user.name}
+          welcomeModalSeen={onboarding.welcomeModalSeen}
+          dashboardTourCompleted={onboarding.dashboardTourCompleted}
+        />
+      )}
+
+      {!onboardingComplete && (
+        <OnboardingStepper
+          hasProperty={hasProperty}
+          hasShared={hasShared}
+          firstPropertyId={firstPropertyId}
+        />
+      )}
+
       {cancelingUntil && (
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-hairline bg-canvas-soft px-4 py-3">
           <CalendarClock
@@ -185,7 +215,7 @@ export default async function DashboardPage({
           )}
           {!atLimit && (
             <Button size="sm" asChild>
-              <Link href="/dashboard/properties/new">
+              <Link id="tour-new-property" href="/dashboard/properties/new">
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">Nueva propiedad</span>
                 <span className="sm:hidden">Nueva</span>
@@ -195,20 +225,24 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      {/* Stats band */}
-      <div className="rounded-2xl bg-elevated grid grid-cols-3 divide-x divide-white/10 mb-6">
-        {stats.map((stat) => (
-          <div key={stat.label} className="min-w-0 px-3 py-6 sm:px-7 sm:py-7">
-            <span className="inline-flex w-8 h-8 rounded-lg bg-white/10 items-center justify-center mb-4">
-              <stat.icon className="w-4 h-4 text-white" strokeWidth={2} />
-            </span>
-            <p className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none tabular-nums">
-              {stat.value}
-            </p>
-            <p className="text-xs sm:text-sm text-mute font-medium mt-2">{stat.label}</p>
-          </div>
-        ))}
-      </div>
+      {/* Stats band — hidden until the initial dashboard tour is completed.
+          Also shown once the agent has any property, so a dropped tour-complete
+          write can never hide stats forever. */}
+      {(onboarding.dashboardTourCompleted || hasProperty) && (
+        <div className="rounded-2xl bg-elevated grid grid-cols-3 divide-x divide-white/10 mb-6">
+          {stats.map((stat) => (
+            <div key={stat.label} className="min-w-0 px-3 py-6 sm:px-7 sm:py-7">
+              <span className="inline-flex w-8 h-8 rounded-lg bg-white/10 items-center justify-center mb-4">
+                <stat.icon className="w-4 h-4 text-white" strokeWidth={2} />
+              </span>
+              <p className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none tabular-nums">
+                {stat.value}
+              </p>
+              <p className="text-xs sm:text-sm text-mute font-medium mt-2">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Pro upsell — always visible for free users */}
       {!isPremium && !atLimit && (
@@ -260,7 +294,7 @@ export default async function DashboardPage({
             Crea tu primera propiedad, obtén tu link único y compártelo por WhatsApp en menos de 60 segundos.
           </p>
           <Button size="default" asChild>
-            <Link href="/dashboard/properties/new">
+            <Link href="/dashboard/properties/new?tour=1">
               <Plus className="w-4 h-4" />
               Crear primera propiedad
             </Link>

@@ -26,8 +26,11 @@ export async function toggleShowContact(propertyId: string, showContact: boolean
 }
 
 export async function incrementShares(propertyId: string) {
-  await prisma.property.update({
-    where: { id: propertyId },
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return
+  // Scope to the owner so the counter can't be inflated for someone else's property.
+  await prisma.property.updateMany({
+    where: { id: propertyId, userId: session.user.id },
     data: { shares: { increment: 1 } },
   })
 }

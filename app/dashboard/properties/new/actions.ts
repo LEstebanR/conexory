@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { propertyLimit, photoLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
+import { setOnboardingFlag } from "@/lib/onboarding-server"
+import { parseOnboarding } from "@/lib/onboarding"
 
 async function generateUniqueSlug(): Promise<string> {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -16,6 +18,22 @@ async function generateUniqueSlug(): Promise<string> {
     if (!existing) return slug
   }
   throw new Error("No se pudo generar un slug único")
+}
+
+export async function isPropertyTourPending(): Promise<boolean> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return false
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { onboarding: true },
+  })
+  return !parseOnboarding(user?.onboarding).propertyTourCompleted
+}
+
+export async function completePropertyTour(): Promise<void> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return
+  await setOnboardingFlag(session.user.id, "propertyTourCompleted")
 }
 
 type CreateResult = { success: true; id: string } | { success: false; error: string }

@@ -9,46 +9,46 @@ const optionalString = (maxLength: number) =>
 const optionalNonNegativeInt = z
   .string()
   .refine((v) => v === "" || /^\d+$/.test(v), {
-    message: "Debe ser un número entero no negativo",
+    message: "Usa solo números enteros (por ejemplo: 2).",
   })
   .transform((v) => (v === "" ? null : parseInt(v, 10)))
 
 const optionalPositiveFloat = z
   .string()
   .refine((v) => v === "" || /^\d+(\.\d+)?$/.test(v), {
-    message: "Debe ser un número positivo",
+    message: "Escribe solo números (por ejemplo: 65).",
   })
   .transform((v) => (v === "" ? null : parseFloat(v)))
   .refine((n) => n === null || n > 0, {
-    message: "Debe ser un número positivo",
+    message: "El valor debe ser mayor a 0.",
   })
 
 export const PropertySchema = z.object({
   title: z
     .string()
     .trim()
-    .min(3, "El título debe tener al menos 3 caracteres")
-    .max(120, "El título no puede superar 120 caracteres"),
+    .min(3, "Escríbele un título a tu propiedad (mínimo 3 caracteres).")
+    .max(120, "El título quedó muy largo, déjalo en máximo 120 caracteres."),
   type: z.enum(PROPERTY_TYPE_IDS, {
-    error: "Tipo de propiedad inválido",
+    error: "Elige el tipo de propiedad.",
   }),
   transactionType: z.enum(TRANSACTION_TYPE_IDS, {
-    error: "Tipo de operación inválido",
+    error: "Elige el tipo de operación.",
   }),
   price: z
     .string()
-    .regex(/^\d+$/, "El precio debe ser un número entero")
+    .regex(/^\d+$/, "Escribe el precio solo con números, sin puntos ni símbolos.")
     .transform(Number)
-    .refine((n) => n > 0, { message: "El precio debe ser mayor a 0" })
+    .refine((n) => n > 0, { message: "Ingresa un precio mayor a $0." })
     .refine((n) => n <= 9_999_999_999_999, {
-      message: "El precio es demasiado alto",
+      message: "Ese precio parece demasiado alto, revísalo.",
     }),
   state: optionalString(100),
   city: z
     .string()
     .trim()
-    .min(2, "La ciudad debe tener al menos 2 caracteres")
-    .max(100, "La ciudad no puede superar 100 caracteres"),
+    .min(2, "Selecciona la ciudad de la propiedad.")
+    .max(100, "El nombre de la ciudad quedó muy largo."),
   neighborhood: optionalString(100),
   area: optionalPositiveFloat,
   landArea: optionalPositiveFloat,
@@ -57,13 +57,13 @@ export const PropertySchema = z.object({
   parking: optionalNonNegativeInt,
   description: optionalString(1000),
   // Techo absoluto (plan Pro). El límite por plan (10 free / 20 pro) lo aplican las actions.
-  images: z.array(z.string()).max(PRO_PHOTO_LIMIT, `Máximo ${PRO_PHOTO_LIMIT} fotos por propiedad`),
+  images: z.array(z.string()).max(PRO_PHOTO_LIMIT, `Puedes subir máximo ${PRO_PHOTO_LIMIT} fotos por propiedad.`),
   videoUrl: z
     .string()
     .trim()
     .max(300)
     .refine((v) => v === "" || isYoutubeUrl(v), {
-      message: "Pega un enlace válido de YouTube",
+      message: "Ese enlace no parece de YouTube. Revisa que sea el link de un video.",
     })
     .transform((v) => (v === "" ? null : v)),
   latitude: z.number().min(-90).max(90).nullable().optional(),
