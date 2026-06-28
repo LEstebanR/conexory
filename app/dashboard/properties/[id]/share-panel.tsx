@@ -4,6 +4,62 @@ import { useState } from "react"
 import { Copy, Check, MessageCircle, ExternalLink, AlertCircle } from "lucide-react"
 import { incrementShares } from "./actions"
 
+type TemplateId = "intro" | "followup" | "price_drop"
+
+const TEMPLATES: { id: TemplateId; label: string }[] = [
+  { id: "intro", label: "Presentación" },
+  { id: "followup", label: "Seguimiento" },
+  { id: "price_drop", label: "Precio reducido" },
+]
+
+function buildMessage(
+  templateId: TemplateId,
+  ctx: { title: string; type: string; location?: string; price: string; features: string },
+  url: string
+): string {
+  const detailLines = [
+    `*${ctx.title}*`,
+    `${ctx.type}${ctx.location ? ` en ${ctx.location}` : ""}`,
+    "",
+    `${templateId === "price_drop" ? "Nuevo precio" : "Precio"}: *${ctx.price}*`,
+    ctx.features || null,
+  ].filter((l): l is string => l !== null)
+
+  switch (templateId) {
+    case "intro":
+      return [
+        "Hola, quiero mostrarte esta propiedad que te podría interesar:",
+        "",
+        ...detailLines,
+        "",
+        "Si quieres más detalles o coordinar una visita, escríbeme cuando gustes y con gusto te atenderé.",
+        "",
+        "También puedes ver todas las fotos e información completa en:",
+        url,
+      ].join("\n")
+
+    case "followup":
+      return [
+        "Hola, quería saber si tuviste oportunidad de ver la propiedad que te compartí:",
+        "",
+        ...detailLines,
+        "",
+        "Te comparto el enlace nuevamente por si necesitas:",
+        url,
+      ].join("\n")
+
+    case "price_drop":
+      return [
+        "Buenas noticias — bajamos el precio de esta propiedad que te habíamos mostrado:",
+        "",
+        ...detailLines,
+        "",
+        "Ver los detalles actualizados en:",
+        url,
+      ].join("\n")
+  }
+}
+
 export default function SharePanel({
   url,
   urlNoContact,
@@ -33,6 +89,7 @@ export default function SharePanel({
 }) {
   const [copied, setCopied] = useState(false)
   const [copiedNoContact, setCopiedNoContact] = useState(false)
+  const [template, setTemplate] = useState<TemplateId>("intro")
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url)
@@ -53,35 +110,9 @@ export default function SharePanel({
     parking != null ? `${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
   ].filter(Boolean).join(" - ")
 
-  // No 👋 emoji: it renders as a broken box on WhatsApp Web. Warmth comes from
-  // the tone and *bold*, which work everywhere.
-  const message = [
-    "Hola, quiero mostrarte esta propiedad que te podría interesar:",
-    "",
-    `*${title}*`,
-    `${type}${location ? ` en ${location}` : ""}`,
-    "",
-    `Precio: *${price}*`,
-    features || null,
-    "",
-    "Si quieres más detalles o coordinar una visita, escríbeme cuando gustes y con gusto te atenderé.",
-    "",
-    "También puedes ver todas las fotos e información completa en:",
-    url,
-  ].filter((line) => line !== null).join("\n")
-
-  const messageNoContact = [
-    "Te comparto esta propiedad que podría interesarte:",
-    "",
-    `*${title}*`,
-    `${type}${location ? ` en ${location}` : ""}`,
-    "",
-    `Precio: *${price}*`,
-    features || null,
-    "",
-    "Puedes ver todas las fotos e información completa en:",
-    urlNoContact,
-  ].filter((line) => line !== null).join("\n")
+  const ctx = { title, type, location, price, features }
+  const message = buildMessage(template, ctx, url)
+  const messageNoContact = buildMessage(template, ctx, urlNoContact)
 
   const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
   const waUrlNoContact = `https://wa.me/?text=${encodeURIComponent(messageNoContact)}`
@@ -185,6 +216,31 @@ export default function SharePanel({
             {copiedNoContact ? <Check className="w-3.5 h-3.5 text-[#4ade80]" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
+      </div>
+
+      <div className="border-t border-white/10" />
+
+      {/* Plantillas de mensaje */}
+      <div className="space-y-2.5">
+        <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Plantilla de mensaje</p>
+        <div className="flex flex-wrap gap-2">
+          {TEMPLATES.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTemplate(t.id)}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
+                template === t.id
+                  ? "bg-white text-ink"
+                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-mute leading-relaxed">
+          Elige una plantilla para personalizar el mensaje que se abre en WhatsApp.
+        </p>
       </div>
 
     </div>
