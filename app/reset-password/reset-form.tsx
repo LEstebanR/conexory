@@ -24,7 +24,7 @@ export default function ResetForm({ token }: { token: string }) {
         <p className="text-body text-sm">Elige una contraseña segura de al menos 8 caracteres.</p>
       </div>
 
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} noValidate className="space-y-4">
         <input type="hidden" name="token" value={token} />
 
         <div className="space-y-1.5">
@@ -39,8 +39,6 @@ export default function ResetForm({ token }: { token: string }) {
               placeholder="Mínimo 8 caracteres"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
               autoComplete="new-password"
               className="h-12 pr-12"
             />
@@ -68,6 +66,9 @@ export default function ResetForm({ token }: { token: string }) {
               ))}
             </div>
           )}
+          {state.errors?.password && (
+            <p className="text-xs font-medium text-red-500">{state.errors.password}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -82,7 +83,6 @@ export default function ResetForm({ token }: { token: string }) {
               placeholder="Repite tu contraseña"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              required
               autoComplete="new-password"
               className={cn(
                 "h-12 pr-12",
@@ -100,6 +100,9 @@ export default function ResetForm({ token }: { token: string }) {
           </div>
           {!passwordsMatch && (
             <p className="text-xs text-red-500 font-medium">Las contraseñas no coinciden</p>
+          )}
+          {state.errors?.confirmPassword && (
+            <p className="text-xs font-medium text-red-500">{state.errors.confirmPassword}</p>
           )}
         </div>
 

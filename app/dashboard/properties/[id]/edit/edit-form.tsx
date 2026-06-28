@@ -257,7 +257,6 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               value={title}
               onChange={(e) => { setTitle(e.target.value); clearError("title") }}
               className="h-11"
-              required
               maxLength={120}
             />
             <p className="text-xs text-mute text-right">{title.length}/120</p>
@@ -275,7 +274,6 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
                 value={formatCOP(price)}
                 onChange={(e) => { setPrice(e.target.value.replace(/\D/g, "")); clearError("price") }}
                 className="w-full h-11 pl-7 rounded-xl border border-hairline-strong text-sm font-medium text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
-                required
               />
             </div>
             <FieldError message={fieldErrors.price} />

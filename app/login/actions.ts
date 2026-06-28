@@ -2,9 +2,9 @@
 
 import { redirect } from "next/navigation"
 import { headers } from "next/headers"
-import { z } from "zod"
 import { APIError } from "better-auth/api"
 import { auth } from "@/lib/auth"
+import { loginSchema, type LoginErrors } from "@/lib/schemas/auth.schema"
 
 const AUTH_ERRORS: Record<string, string> = {
   INVALID_EMAIL_OR_PASSWORD: "Email o contraseña incorrectos.",
@@ -12,12 +12,7 @@ const AUTH_ERRORS: Record<string, string> = {
   TOO_MANY_REQUESTS: "Demasiados intentos. Espera unos minutos.",
 }
 
-const loginSchema = z.object({
-  email: z.email("El correo electrónico no es válido."),
-  password: z.string().min(1, "Ingresa tu contraseña."),
-})
-
-export type LoginState = { error?: string }
+export type LoginState = { error?: string; errors?: LoginErrors }
 
 export async function loginAction(
   _prev: LoginState,
@@ -29,7 +24,12 @@ export async function loginAction(
   })
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." }
+    const errors: LoginErrors = {}
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? "") as keyof LoginErrors
+      if (key && !errors[key]) errors[key] = issue.message
+    }
+    return { errors }
   }
 
   try {

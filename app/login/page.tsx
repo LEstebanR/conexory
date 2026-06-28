@@ -114,7 +114,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <form action={formAction} className="space-y-4">
+          <form action={formAction} noValidate className="space-y-4">
             <input type="hidden" name="redirect" value={redirectTo} />
             <div className="space-y-1.5">
               <label htmlFor="email" className="block text-sm font-semibold text-ink">
@@ -125,10 +125,12 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 placeholder="tu@email.com"
-                required
                 autoComplete="email"
                 className="h-12"
               />
+              {state.errors?.email && (
+                <p className="text-xs font-medium text-red-500">{state.errors.email}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -146,7 +148,6 @@ export default function LoginPage() {
                   name="password"
                   type={showPass ? "text" : "password"}
                   placeholder="••••••••"
-                  required
                   autoComplete="current-password"
                   className="h-12 pr-12"
                 />
@@ -159,6 +160,9 @@ export default function LoginPage() {
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {state.errors?.password && (
+                <p className="text-xs font-medium text-red-500">{state.errors.password}</p>
+              )}
             </div>
 
             {state.error && (

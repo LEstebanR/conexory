@@ -2,11 +2,11 @@
 
 import { redirect } from "next/navigation"
 import { headers } from "next/headers"
-import { z } from "zod"
 import { APIError } from "better-auth/api"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateAgentSlug } from "@/lib/agent-slug"
+import { registerSchema, type RegisterErrors } from "@/lib/schemas/auth.schema"
 
 const AUTH_ERRORS: Record<string, string> = {
   EMAIL_ALREADY_EXISTS: "Ya existe una cuenta con este email. ¿Quieres iniciar sesión?",
@@ -16,20 +16,7 @@ const AUTH_ERRORS: Record<string, string> = {
   INVALID_EMAIL: "El correo electrónico no es válido.",
 }
 
-const registerSchema = z
-  .object({
-    name: z.string().trim().min(1, "Ingresa tu nombre completo."),
-    email: z.email("El correo electrónico no es válido."),
-    password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres."),
-    confirmPassword: z.string(),
-    terms: z.literal("on", { message: "Debes aceptar los términos para continuar." }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden.",
-    path: ["confirmPassword"],
-  })
-
-export type RegisterState = { error?: string }
+export type RegisterState = { error?: string; errors?: RegisterErrors }
 
 export async function registerAction(
   _prev: RegisterState,
@@ -44,7 +31,12 @@ export async function registerAction(
   })
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." }
+    const errors: RegisterErrors = {}
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? "") as keyof RegisterErrors
+      if (key && !errors[key]) errors[key] = issue.message
+    }
+    return { errors }
   }
 
   const { name, email, password } = parsed.data
