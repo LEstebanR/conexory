@@ -95,8 +95,16 @@ export async function generateMetadata({
     .filter(Boolean)
     .join(" · ")
 
-  const description = features || "Mira las fotos y la información completa."
-  const ogTitle = `${type}${location ? ` en ${location}` : ""}`
+  const price = formatCOP(Number(property.price))
+  const descParts = [
+    `${type}${location ? ` en ${location}` : ""}`,
+    price,
+    features || null,
+    "Contacta al asesor directamente por WhatsApp.",
+  ].filter(Boolean)
+  const description = descParts.join(". ")
+
+  const ogTitle = `${type}${location ? ` en ${location}` : ""} — ${price}`
   const ogImage = {
     url: `/p/${slug}/og.jpg`,
     width: 1200,
@@ -105,8 +113,9 @@ export async function generateMetadata({
   }
 
   const meta: Metadata = {
-    title: `${type}${location ? ` en ${location}` : ""}`,
+    title: `${type}${location ? ` en ${location}` : ""} — ${price}`,
     description,
+    alternates: { canonical: `/p/${slug}` },
     openGraph: {
       type: "website",
       url: `/p/${slug}`,
@@ -124,11 +133,7 @@ export async function generateMetadata({
   }
 
   if (c === "0") {
-    return {
-      ...meta,
-      robots: { index: false, follow: false },
-      alternates: { canonical: `/p/${slug}` },
-    }
+    return { ...meta, robots: { index: false, follow: false } }
   }
 
   return meta
@@ -365,6 +370,36 @@ export default async function PublicPropertyPage({
   const propertyUrl = `${getAppUrl()}/p/${property.slug}`
   const whatsappMessage = `Hola, estoy interesado en esta propiedad: ${property.title}\n${propertyUrl}`
 
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: property.title,
+    description: property.description ?? undefined,
+    url: propertyUrl,
+    datePosted: property.createdAt.toISOString(),
+    ...(property.images.length > 0 && { image: property.images }),
+    offers: {
+      "@type": "Offer",
+      price: Number(property.price),
+      priceCurrency: "COP",
+      availability: "https://schema.org/InStock",
+    },
+    address: {
+      "@type": "PostalAddress",
+      ...(property.city && { addressLocality: property.city }),
+      ...(property.state && { addressRegion: property.state }),
+      addressCountry: "CO",
+    },
+    ...(property.bedrooms != null && { numberOfRooms: property.bedrooms }),
+    ...(property.area != null && {
+      floorSize: {
+        "@type": "QuantitativeValue",
+        value: property.area,
+        unitCode: "MTK",
+      },
+    }),
+  }
+
   const stats = [
     property.area != null && { icon: Ruler, value: property.area, label: "m²" },
     property.landArea != null && { icon: LandPlot, value: property.landArea, label: "m² lote" },
@@ -389,6 +424,10 @@ export default async function PublicPropertyPage({
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Gallery — edge-to-edge on mobile */}
       {(property.images.length > 0 || videoId) && (
