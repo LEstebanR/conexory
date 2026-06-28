@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
                 </p>
               </div>
 
-              <form action={formAction} className="space-y-4">
+              <form action={formAction} noValidate className="space-y-4">
                 <div className="space-y-1.5">
                   <label htmlFor="email" className="block text-sm font-semibold text-ink">
                     Correo electrónico
@@ -78,10 +78,12 @@ export default function ForgotPasswordPage() {
                     name="email"
                     type="email"
                     placeholder="tu@email.com"
-                    required
                     autoComplete="email"
                     className="h-12"
                   />
+                  {state.errors?.email && (
+                    <p className="text-xs font-medium text-red-500">{state.errors.email}</p>
+                  )}
                 </div>
 
                 {state.error && (

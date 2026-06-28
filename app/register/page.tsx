@@ -108,7 +108,7 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <form action={formAction} className="space-y-4">
+          <form action={formAction} noValidate className="space-y-4">
             <input type="hidden" name="redirect" value={redirectTo} />
             <div className="space-y-1.5">
               <label htmlFor="name" className="block text-sm font-semibold text-ink">
@@ -119,10 +119,12 @@ export default function RegisterPage() {
                 name="name"
                 type="text"
                 placeholder="Carlos Rodríguez"
-                required
                 autoComplete="name"
                 className="h-12"
               />
+              {state.errors?.name && (
+                <p className="text-xs font-medium text-red-500">{state.errors.name}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -134,10 +136,12 @@ export default function RegisterPage() {
                 name="email"
                 type="email"
                 placeholder="tu@email.com"
-                required
                 autoComplete="email"
                 className="h-12"
               />
+              {state.errors?.email && (
+                <p className="text-xs font-medium text-red-500">{state.errors.email}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -152,8 +156,6 @@ export default function RegisterPage() {
                   placeholder="Mínimo 8 caracteres"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
                   autoComplete="new-password"
                   className="h-12 pr-12"
                 />
@@ -181,6 +183,9 @@ export default function RegisterPage() {
                   ))}
                 </div>
               )}
+              {state.errors?.password && (
+                <p className="text-xs font-medium text-red-500">{state.errors.password}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -195,7 +200,6 @@ export default function RegisterPage() {
                   placeholder="Repite tu contraseña"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
                   autoComplete="new-password"
                   className={cn(
                     "h-12 pr-12",
@@ -214,11 +218,15 @@ export default function RegisterPage() {
               {!passwordsMatch && (
                 <p className="text-xs text-red-500 font-medium">Las contraseñas no coinciden</p>
               )}
+              {state.errors?.confirmPassword && (
+                <p className="text-xs font-medium text-red-500">{state.errors.confirmPassword}</p>
+              )}
             </div>
 
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <div className="relative mt-0.5 flex-shrink-0">
-                <input type="checkbox" name="terms" checked={terms} onChange={(e) => setTerms(e.target.checked)} required className="sr-only" />
+            <div>
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative mt-0.5 flex-shrink-0">
+                  <input type="checkbox" name="terms" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="sr-only" />
                 <div className={cn(
                   "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200",
                   terms ? "bg-ink border-ink" : "bg-white border-hairline-strong group-hover:border-ink"
@@ -236,7 +244,11 @@ export default function RegisterPage() {
                 {" "}y la{" "}
                 <Link href="/privacy" className="text-ink font-semibold hover:underline">política de privacidad</Link>
               </span>
-            </label>
+              </label>
+              {state.errors?.terms && (
+                <p className="text-xs font-medium text-red-500 mt-1">{state.errors.terms}</p>
+              )}
+            </div>
 
             {state.error && (
               <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">

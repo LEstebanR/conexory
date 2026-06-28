@@ -1,22 +1,18 @@
 "use server"
 
 import { headers } from "next/headers"
-import { z } from "zod"
 import { auth } from "@/lib/auth"
+import { forgotPasswordSchema, type ForgotPasswordErrors } from "@/lib/schemas/auth.schema"
 
-const schema = z.object({
-  email: z.email("El correo electrónico no es válido."),
-})
-
-export type ForgotPasswordState = { error?: string; success?: boolean }
+export type ForgotPasswordState = { error?: string; errors?: ForgotPasswordErrors; success?: boolean }
 
 export async function forgotPasswordAction(
   _prev: ForgotPasswordState,
   formData: FormData
 ): Promise<ForgotPasswordState> {
-  const parsed = schema.safeParse({ email: formData.get("email") })
+  const parsed = forgotPasswordSchema.safeParse({ email: formData.get("email") })
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." }
+    return { errors: { email: parsed.error.issues[0]?.message ?? "Correo inválido." } }
   }
 
   try {
