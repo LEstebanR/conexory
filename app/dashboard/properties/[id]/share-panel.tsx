@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Copy, Check, MessageCircle, ExternalLink, AlertCircle } from "lucide-react"
+import { Copy, Check, ExternalLink, AlertCircle } from "lucide-react"
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
 import { incrementShares } from "./actions"
 
 type TemplateId = "intro" | "followup" | "price_drop"
@@ -196,10 +197,10 @@ export default function SharePanel({
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleWhatsApp}
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
             title="Compartir por WhatsApp"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
+            <WhatsAppIcon className="w-6 h-6" />
           </a>
           <button
             onClick={handleCopy}
@@ -239,10 +240,10 @@ export default function SharePanel({
             href={waUrlNoContact}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
             title="Compartir por WhatsApp"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
+            <WhatsAppIcon className="w-6 h-6" />
           </a>
           <button
             onClick={handleCopyNoContact}

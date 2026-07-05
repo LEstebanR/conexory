@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Copy, Check, MessageCircle, ExternalLink } from "lucide-react"
+import { Copy, Check, ExternalLink } from "lucide-react"
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
 
 export default function PortfolioPanel({ url, name }: { url: string; name: string }) {
   const [copied, setCopied] = useState(false)
@@ -34,6 +35,15 @@ export default function PortfolioPanel({ url, name }: { url: string; name: strin
         >
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
+          title="Compartir por WhatsApp"
+        >
+          <WhatsAppIcon className="w-6 h-6" />
+        </a>
         <button
           onClick={handleCopy}
           className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-hairline text-body hover:text-ink transition-colors"
@@ -42,16 +52,6 @@ export default function PortfolioPanel({ url, name }: { url: string; name: strin
           {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
         </button>
       </div>
-
-      <a
-        href={waUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 w-full h-10 rounded-full bg-ink text-white text-sm font-semibold hover:bg-elevated transition-colors"
-      >
-        <MessageCircle className="w-4 h-4" strokeWidth={2} />
-        Compartir mi portafolio por WhatsApp
-      </a>
     </div>
   )
 }
