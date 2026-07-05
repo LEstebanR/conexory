@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Política de Privacidad — Conexory",
   description:
     "Política de tratamiento de datos personales de Conexory, en cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013.",
+  robots: { index: false, follow: true },
 }
 
 const sections = [
