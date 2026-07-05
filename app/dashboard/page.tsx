@@ -12,6 +12,8 @@ import OnboardingStepper from "./onboarding-stepper"
 import DashboardOnboarding from "./dashboard-onboarding"
 import { parseOnboarding } from "@/lib/onboarding"
 import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
+import PortfolioPanel from "./portfolio-panel"
+import { getAppUrl } from "@/lib/urls"
 
 function formatColombiaDate(date: Date): string {
   return date.toLocaleDateString("es-CO", {
@@ -240,6 +242,16 @@ export default async function DashboardPage({
               <p className="text-xs sm:text-sm text-mute font-medium mt-2">{stat.label}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Portfolio panel — only for agents with a published profile */}
+      {agentProfile?.profilePublished && agentProfile.agentSlug && (
+        <div className="mb-6">
+          <PortfolioPanel
+            url={`${getAppUrl()}/agente/${agentProfile.agentSlug}`}
+            name={session.user.name}
+          />
         </div>
       )}
 

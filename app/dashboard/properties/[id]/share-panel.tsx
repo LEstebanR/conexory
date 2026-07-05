@@ -1,8 +1,61 @@
 "use client"
 
 import { useState } from "react"
-import { Copy, Check, MessageCircle, ExternalLink, AlertCircle } from "lucide-react"
+import { Copy, Check, ExternalLink, AlertCircle } from "lucide-react"
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
 import { incrementShares } from "./actions"
+
+type TemplateId = "intro" | "followup" | "price_drop"
+
+const TEMPLATES: { id: TemplateId; label: string }[] = [
+  { id: "intro", label: "Presentación" },
+  { id: "followup", label: "Seguimiento" },
+  { id: "price_drop", label: "Precio reducido" },
+]
+
+function buildBody(
+  templateId: TemplateId,
+  ctx: { title: string; type: string; location?: string; price: string; features: string }
+): string {
+  const detailLines = [
+    `*${ctx.title}*`,
+    `${ctx.type}${ctx.location ? ` en ${ctx.location}` : ""}`,
+    "",
+    `${templateId === "price_drop" ? "Nuevo precio" : "Precio"}: *${ctx.price}*`,
+    ctx.features || null,
+  ].filter((l): l is string => l !== null)
+
+  switch (templateId) {
+    case "intro":
+      return [
+        "Hola, quiero mostrarte esta propiedad que te podría interesar:",
+        "",
+        ...detailLines,
+        "",
+        "Si quieres más detalles o coordinar una visita, escríbeme cuando gustes y con gusto te atenderé.",
+        "",
+        "También puedes ver todas las fotos e información completa en:",
+      ].join("\n")
+
+    case "followup":
+      return [
+        "Hola, quería saber si tuviste oportunidad de ver la propiedad que te compartí:",
+        "",
+        ...detailLines,
+        "",
+        "Te comparto el enlace nuevamente por si necesitas:",
+      ].join("\n")
+
+    case "price_drop":
+      return [
+        "Buenas noticias — bajamos el precio de esta propiedad que te habíamos mostrado:",
+        "",
+        ...detailLines,
+        "",
+        "Ver los detalles actualizados en:",
+      ].join("\n")
+  }
+}
 
 export default function SharePanel({
   url,
@@ -33,6 +86,26 @@ export default function SharePanel({
 }) {
   const [copied, setCopied] = useState(false)
   const [copiedNoContact, setCopiedNoContact] = useState(false)
+  const [template, setTemplate] = useState<TemplateId>("intro")
+
+  const features = [
+    bedrooms != null ? `${bedrooms} ${bedrooms === 1 ? "habitación" : "habitaciones"}` : null,
+    bathrooms != null ? `${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` : null,
+    area != null ? `${area} m²` : null,
+    parking != null ? `${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
+  ].filter(Boolean).join(" - ")
+
+  const ctx = { title, type, location, price, features }
+
+  const [body, setBody] = useState(() => buildBody("intro", ctx))
+
+  function handleTemplateChange(id: TemplateId) {
+    setTemplate(id)
+    setBody(buildBody(id, ctx))
+  }
+
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(body + "\n" + url)}`
+  const waUrlNoContact = `https://wa.me/?text=${encodeURIComponent(body + "\n" + urlNoContact)}`
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url)
@@ -46,52 +119,47 @@ export default function SharePanel({
     setTimeout(() => setCopiedNoContact(false), 2000)
   }
 
-  const features = [
-    bedrooms != null ? `${bedrooms} ${bedrooms === 1 ? "habitación" : "habitaciones"}` : null,
-    bathrooms != null ? `${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` : null,
-    area != null ? `${area} m²` : null,
-    parking != null ? `${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
-  ].filter(Boolean).join(" - ")
-
-  // No 👋 emoji: it renders as a broken box on WhatsApp Web. Warmth comes from
-  // the tone and *bold*, which work everywhere.
-  const message = [
-    "Hola, quiero mostrarte esta propiedad que te podría interesar:",
-    "",
-    `*${title}*`,
-    `${type}${location ? ` en ${location}` : ""}`,
-    "",
-    `Precio: *${price}*`,
-    features || null,
-    "",
-    "Si quieres más detalles o coordinar una visita, escríbeme cuando gustes y con gusto te atenderé.",
-    "",
-    "También puedes ver todas las fotos e información completa en:",
-    url,
-  ].filter((line) => line !== null).join("\n")
-
-  const messageNoContact = [
-    "Te comparto esta propiedad que podría interesarte:",
-    "",
-    `*${title}*`,
-    `${type}${location ? ` en ${location}` : ""}`,
-    "",
-    `Precio: *${price}*`,
-    features || null,
-    "",
-    "Puedes ver todas las fotos e información completa en:",
-    urlNoContact,
-  ].filter((line) => line !== null).join("\n")
-
-  const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
-  const waUrlNoContact = `https://wa.me/?text=${encodeURIComponent(messageNoContact)}`
-
   function handleWhatsApp() {
     incrementShares(propertyId).catch(() => {})
   }
 
   return (
     <div className="bg-ink rounded-2xl p-6 space-y-5">
+
+      {/* Mensaje */}
+      <div className="space-y-3">
+        <p className="text-xs font-bold text-white uppercase tracking-widest">Mensaje</p>
+
+        {/* Template chips */}
+        <div className="flex flex-wrap gap-2">
+          {TEMPLATES.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => handleTemplateChange(t.id)}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
+                template === t.id
+                  ? "bg-white text-ink"
+                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Editable body */}
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          rows={8}
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 placeholder:text-white/30 resize-none focus:outline-none focus:ring-1 focus:ring-white/30 transition-colors leading-relaxed"
+        />
+        <p className="text-xs text-white/30 leading-relaxed -mt-1">
+          El enlace de la propiedad se añade automáticamente al final según el botón que uses.
+        </p>
+      </div>
+
+      <div className="border-t border-white/10" />
 
       {/* Enlace con tus datos */}
       <div className="space-y-2.5">
@@ -129,15 +197,15 @@ export default function SharePanel({
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleWhatsApp}
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
             title="Compartir por WhatsApp"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
+            <WhatsAppIcon className="w-6 h-6" />
           </a>
           <button
             onClick={handleCopy}
             className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-            title="Copiar"
+            title="Copiar enlace"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#4ade80]" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
@@ -146,7 +214,7 @@ export default function SharePanel({
 
       <div className="border-t border-white/10" />
 
-      {/* Enlace de vitrina */}
+      {/* Sin mis datos */}
       <div className="space-y-2.5">
         <div>
           <p className="text-xs font-bold text-white uppercase tracking-widest mb-0.5">
@@ -172,15 +240,15 @@ export default function SharePanel({
             href={waUrlNoContact}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
             title="Compartir por WhatsApp"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
+            <WhatsAppIcon className="w-6 h-6" />
           </a>
           <button
             onClick={handleCopyNoContact}
             className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-            title="Copiar"
+            title="Copiar enlace"
           >
             {copiedNoContact ? <Check className="w-3.5 h-3.5 text-[#4ade80]" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
