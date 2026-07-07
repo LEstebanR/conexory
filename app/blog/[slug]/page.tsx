@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Clock, Tag } from "lucide-react"
 import { getAllPosts, getPost, getRelatedPosts } from "@/lib/blog"
+import { getAppUrl } from "@/lib/urls"
 import { Button } from "@/components/ui/button"
 import { marked } from "marked"
 
@@ -25,9 +26,16 @@ export async function generateMetadata({
     alternates: { canonical: `/blog/${slug}` },
     openGraph: {
       type: "article",
+      url: `/blog/${slug}`,
       title: post.title,
       description: post.description,
+      publishedTime: post.date,
       siteName: "Conexory",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
     },
   }
 }
@@ -51,9 +59,38 @@ export default async function BlogPostPage({
 
   const html = await marked(post.content)
   const related = getRelatedPosts(slug)
+  const appUrl = getAppUrl()
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.date,
+    author: {
+      "@type": "Organization",
+      name: "Conexory",
+      url: appUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Conexory",
+      logo: {
+        "@type": "ImageObject",
+        url: `${appUrl}/mark-white.png`,
+      },
+    },
+    image: `${appUrl}/blog/${slug}/opengraph-image`,
+    mainEntityOfPage: `${appUrl}/blog/${slug}`,
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-hairline">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
