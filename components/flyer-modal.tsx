@@ -19,13 +19,11 @@ export default function FlyerModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
 
-  async function load(regen: boolean) {
+  async function load() {
     setLoading(true)
     setError(false)
     try {
-      const res = await fetch(
-        `/api/properties/${propertyId}/flyer.jpg${regen ? "?regen=1" : ""}`
-      )
+      const res = await fetch(`/api/properties/${propertyId}/flyer.jpg`)
       if (!res.ok) throw new Error("flyer request failed")
       const blob = await res.blob()
       setImageUrl((prev) => {
@@ -41,7 +39,7 @@ export default function FlyerModal({
 
   function handleOpenChange(next: boolean) {
     setOpen(next)
-    if (next && !imageUrl && !loading) void load(false)
+    if (next && !imageUrl && !loading) void load()
   }
 
   return (
@@ -81,7 +79,7 @@ export default function FlyerModal({
                 <p className="text-sm text-body">
                   No pudimos generar el flyer. Inténtalo de nuevo.
                 </p>
-                <Button variant="secondary" size="sm" onClick={() => load(false)}>
+                <Button variant="secondary" size="sm" onClick={() => load()}>
                   Reintentar
                 </Button>
               </div>
@@ -105,16 +103,14 @@ export default function FlyerModal({
                 Descargar
               </Button>
             )}
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-11 w-11 flex-shrink-0"
-              onClick={() => load(true)}
-              disabled={loading}
-              title="Generar de nuevo"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </Button>
+            <div className="relative group flex-shrink-0">
+              <Button variant="secondary" size="icon" className="h-11 w-11" disabled>
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+              <div className="pointer-events-none absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity w-max max-w-[230px] text-center shadow-lg z-10">
+                Se genera un nuevo flyer cuando modificas la propiedad
+              </div>
+            </div>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
