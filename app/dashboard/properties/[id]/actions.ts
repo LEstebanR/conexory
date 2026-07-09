@@ -6,10 +6,8 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
-import {
-  SHARE_MESSAGE_KINDS,
-  generateShareMessage as generateShareMessageWithAI,
-} from "@/lib/share-message"
+import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-message"
+import { SHARE_INFO_IDS, SHARE_MESSAGE_KINDS } from "@/lib/share-message-options"
 
 export async function togglePublished(propertyId: string, published: boolean) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -47,11 +45,13 @@ export async function incrementShares(propertyId: string) {
 const GenerateMessageSchema = z.object({
   propertyId: z.string().min(1),
   kind: z.enum(SHARE_MESSAGE_KINDS),
+  include: z.array(z.enum(SHARE_INFO_IDS)).max(SHARE_INFO_IDS.length).default([...SHARE_INFO_IDS]),
 })
 
 export async function generateShareMessage(input: {
   propertyId: string
   kind: string
+  include?: string[]
 }): Promise<{ message: string } | { error: string }> {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) return { error: "No autenticado" }
@@ -64,7 +64,7 @@ export async function generateShareMessage(input: {
   })
   if (!property) return { error: "Propiedad no encontrada" }
 
-  const message = await generateShareMessageWithAI(property, parsed.data.kind)
+  const message = await generateShareMessageWithAI(property, parsed.data.kind, parsed.data.include)
   if (!message) return { error: "No pudimos generar el mensaje. Inténtalo de nuevo." }
 
   return { message }
