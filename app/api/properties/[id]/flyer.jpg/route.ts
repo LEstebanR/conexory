@@ -5,14 +5,12 @@ import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateFlyerJpeg } from "@/lib/flyer"
-import { FLYER_INFO_IDS, FLYER_STYLE_IDS, type FlyerInfo } from "@/lib/flyer-options"
+import { FLYER_INFO_IDS, FLYER_TEMPLATE_IDS, type FlyerInfo } from "@/lib/flyer-options"
 
 export const runtime = "nodejs"
-// AI image generation takes ~15-30 s; the default function timeout is too low.
-export const maxDuration = 60
 
 const QuerySchema = z.object({
-  style: z.enum(FLYER_STYLE_IDS).catch("premium"),
+  template: z.enum(FLYER_TEMPLATE_IDS).catch("clasica"),
   highlight: z
     .string()
     .trim()
@@ -47,7 +45,7 @@ export async function GET(
   const url = new URL(req.url)
   const query = QuerySchema.parse(Object.fromEntries(url.searchParams))
   const options = {
-    style: query.style,
+    template: query.template,
     highlight: query.highlight || undefined,
     include: query.include,
   }

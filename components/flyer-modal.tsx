@@ -8,10 +8,10 @@ import {
   DEFAULT_FLYER_OPTIONS,
   FLYER_INFO_IDS,
   FLYER_INFO_LABELS,
-  FLYER_STYLE_IDS,
-  FLYER_STYLE_LABELS,
+  FLYER_TEMPLATE_IDS,
+  FLYER_TEMPLATE_LABELS,
   type FlyerInfo,
-  type FlyerStyle,
+  type FlyerTemplate,
 } from "@/lib/flyer-options"
 
 export default function FlyerModal({
@@ -25,7 +25,7 @@ export default function FlyerModal({
 }) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<"options" | "preview">("options")
-  const [style, setStyle] = useState<FlyerStyle>(DEFAULT_FLYER_OPTIONS.style)
+  const [template, setTemplate] = useState<FlyerTemplate>(DEFAULT_FLYER_OPTIONS.template)
   const [highlight, setHighlight] = useState("")
   const [include, setInclude] = useState<FlyerInfo[]>(DEFAULT_FLYER_OPTIONS.include)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
@@ -43,7 +43,7 @@ export default function FlyerModal({
     setLoading(true)
     setError(false)
     try {
-      const params = new URLSearchParams({ style, include: include.join(",") })
+      const params = new URLSearchParams({ template, include: include.join(",") })
       if (highlight.trim()) params.set("highlight", highlight.trim().slice(0, 120))
       const res = await fetch(`/api/properties/${propertyId}/flyer.jpg?${params}`)
       if (!res.ok) throw new Error("flyer request failed")
@@ -94,19 +94,19 @@ export default function FlyerModal({
           {step === "options" ? (
             <div className="space-y-5">
               <div className="space-y-2">
-                <p className="text-xs font-bold text-ink uppercase tracking-widest">Estilo</p>
+                <p className="text-xs font-bold text-ink uppercase tracking-widest">Plantilla</p>
                 <div className="flex flex-wrap gap-2">
-                  {FLYER_STYLE_IDS.map((id) => (
+                  {FLYER_TEMPLATE_IDS.map((id) => (
                     <button
                       key={id}
-                      onClick={() => setStyle(id)}
+                      onClick={() => setTemplate(id)}
                       className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                        style === id
+                        template === id
                           ? "bg-ink text-white"
                           : "bg-canvas-soft text-body hover:bg-surface-pressed hover:text-ink"
                       }`}
                     >
-                      {FLYER_STYLE_LABELS[id]}
+                      {FLYER_TEMPLATE_LABELS[id]}
                     </button>
                   ))}
                 </div>
@@ -159,11 +159,7 @@ export default function FlyerModal({
                 {loading ? (
                   <div className="flex flex-col items-center gap-3 px-8 text-center text-mute">
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    <p className="text-xs font-medium leading-relaxed">
-                      Diseñando tu flyer con IA…
-                      <br />
-                      Puede tardar hasta 30 segundos.
-                    </p>
+                    <p className="text-xs font-medium leading-relaxed">Generando tu flyer…</p>
                   </div>
                 ) : error ? (
                   <div className="flex flex-col items-center gap-3 px-8 text-center">
