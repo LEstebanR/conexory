@@ -57,8 +57,10 @@ async function generateCopy(
 
   try {
     const ai = new GoogleGenAI({ apiKey })
+    // gemini-2.0-flash (from the original spec) no longer has free-tier
+    // quota; 2.5-flash does. Thinking is disabled to keep latency ~1-2 s.
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: `Eres copywriter inmobiliario colombiano. Escribe exactamente dos líneas de texto para un afiche de venta:
 LÍNEA 1 (tagline, máx 8 palabras, impactante, orientada a vender): describe el mayor atractivo de esta propiedad.
 LÍNEA 2 (detalle, máx 14 palabras): contexto de ubicación o característica diferencial.
@@ -73,7 +75,10 @@ Propiedad:
 - Baños: ${property.bathrooms ?? "N/A"}
 - Área: ${property.area ? property.area + " m²" : "N/A"}
 - Descripción del agente: ${property.description ?? "Sin descripción"}`,
-      config: { abortSignal: AbortSignal.timeout(GEMINI_TIMEOUT_MS) },
+      config: {
+        abortSignal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
+        thinkingConfig: { thinkingBudget: 0 },
+      },
     })
 
     const lines = (response.text ?? "")
