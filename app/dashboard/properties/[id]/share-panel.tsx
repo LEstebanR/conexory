@@ -271,7 +271,7 @@ export default function SharePanel({
           </p>
         </div>
 
-        <FlyerModal propertyId={propertyId} slug={slug}>
+        <FlyerModal propertyId={propertyId} slug={slug} showContact={showContact}>
           <button className="flex items-center justify-center gap-2 w-full bg-ink text-white text-sm font-semibold px-4 py-2.5 rounded-full hover:bg-elevated transition-colors">
             <ImageIcon className="w-4 h-4" />
             Generar flyer

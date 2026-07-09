@@ -4,8 +4,8 @@ import { list, put } from "@vercel/blob"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { generateFlyerJpeg } from "@/lib/flyer"
-import { FLYER_INFO_IDS, FLYER_TEMPLATE_IDS, type FlyerInfo } from "@/lib/flyer-options"
+import { generateFlyerJpeg, FLYER_RENDER_VERSION } from "@/lib/flyer"
+import { FLYER_INFO_IDS, FLYER_TEMPLATE_IDS, FLYER_HIGHLIGHT_MAX_LENGTH, type FlyerInfo } from "@/lib/flyer-options"
 
 export const runtime = "nodejs"
 
@@ -14,7 +14,7 @@ const QuerySchema = z.object({
   highlight: z
     .string()
     .trim()
-    .max(120)
+    .max(FLYER_HIGHLIGHT_MAX_LENGTH)
     .optional()
     .catch(undefined),
   include: z
@@ -25,7 +25,6 @@ const QuerySchema = z.object({
         (csv?.split(",").filter((v): v is FlyerInfo => (FLYER_INFO_IDS as readonly string[]).includes(v)) ??
           [...FLYER_INFO_IDS])
     ),
-  regen: z.string().optional(),
 })
 
 export async function GET(
@@ -44,19 +43,33 @@ export async function GET(
 
   const url = new URL(req.url)
   const query = QuerySchema.parse(Object.fromEntries(url.searchParams))
+  // Never include contact info the agent has hidden for this property, no
+  // matter what the client sends — the "contacto" chip is only a UI hint.
+  const include = property.showContact
+    ? query.include
+    : query.include.filter((v) => v !== "contacto")
   const options = {
     template: query.template,
     highlight: query.highlight || undefined,
-    include: query.include,
+    include,
   }
 
-  const optionsHash = createHash("md5").update(JSON.stringify(options)).digest("hex").slice(0, 8)
+  // Hash everything that affects the rendered image, not just `options`:
+  // agent name/phone (shown in the footer) and the render code version (so a
+  // deploy that changes template rendering busts old cached JPEGs even when
+  // neither the property nor the options changed).
+  const cacheInput = {
+    ...options,
+    include: [...options.include].sort(),
+    agentName: property.user.name,
+    agentPhone: property.user.phone,
+    renderVersion: FLYER_RENDER_VERSION,
+  }
+  const optionsHash = createHash("md5").update(JSON.stringify(cacheInput)).digest("hex").slice(0, 8)
   const cacheKey = `flyer/${property.id}-${property.updatedAt.getTime()}-${optionsHash}.jpg`
 
-  if (query.regen !== "1") {
-    const { blobs } = await list({ prefix: cacheKey, limit: 1 }).catch(() => ({ blobs: [] }))
-    if (blobs[0]) return Response.redirect(blobs[0].url, 302)
-  }
+  const { blobs } = await list({ prefix: cacheKey, limit: 1 }).catch(() => ({ blobs: [] }))
+  if (blobs[0]) return Response.redirect(blobs[0].url, 302)
 
   const jpeg = await generateFlyerJpeg(property, property.user, options)
 

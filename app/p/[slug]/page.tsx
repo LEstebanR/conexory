@@ -7,18 +7,10 @@ import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
 import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
+import { formatCOP } from "@/lib/format"
 import PublicGallery from "@/components/public-gallery"
 import Reveal from "@/components/reveal"
 import PropertyMap from "@/components/property-map-client"
-
-function formatCOP(amount: number): string {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
 
 // ── Social icon SVGs (same as agent page) ─────────────────────────────────
 

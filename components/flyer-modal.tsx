@@ -6,6 +6,7 @@ import { Download, Loader2, X, AlertCircle, ArrowLeft, Sparkles } from "lucide-r
 import { Button } from "@/components/ui/button"
 import {
   DEFAULT_FLYER_OPTIONS,
+  FLYER_HIGHLIGHT_MAX_LENGTH,
   FLYER_INFO_IDS,
   FLYER_INFO_LABELS,
   FLYER_TEMPLATE_IDS,
@@ -17,22 +18,27 @@ import {
 export default function FlyerModal({
   propertyId,
   slug,
+  showContact,
   children,
 }: {
   propertyId: string
   slug: string
+  showContact: boolean
   children: ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<"options" | "preview">("options")
   const [template, setTemplate] = useState<FlyerTemplate>(DEFAULT_FLYER_OPTIONS.template)
   const [highlight, setHighlight] = useState("")
-  const [include, setInclude] = useState<FlyerInfo[]>(DEFAULT_FLYER_OPTIONS.include)
+  const [include, setInclude] = useState<FlyerInfo[]>(() =>
+    showContact ? DEFAULT_FLYER_OPTIONS.include : DEFAULT_FLYER_OPTIONS.include.filter((i) => i !== "contacto")
+  )
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
 
   function toggleInclude(info: FlyerInfo) {
+    if (info === "contacto" && !showContact) return
     setInclude((prev) =>
       prev.includes(info) ? prev.filter((i) => i !== info) : [...prev, info]
     )
@@ -44,7 +50,7 @@ export default function FlyerModal({
     setError(false)
     try {
       const params = new URLSearchParams({ template, include: include.join(",") })
-      if (highlight.trim()) params.set("highlight", highlight.trim().slice(0, 120))
+      if (highlight.trim()) params.set("highlight", highlight.trim().slice(0, FLYER_HIGHLIGHT_MAX_LENGTH))
       const res = await fetch(`/api/properties/${propertyId}/flyer.jpg?${params}`)
       if (!res.ok) throw new Error("flyer request failed")
       const blob = await res.blob()
@@ -117,20 +123,36 @@ export default function FlyerModal({
                   Información a incluir
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {FLYER_INFO_IDS.map((id) => (
-                    <button
-                      key={id}
-                      onClick={() => toggleInclude(id)}
-                      className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                        include.includes(id)
-                          ? "bg-ink text-white"
-                          : "bg-canvas-soft text-body hover:bg-surface-pressed hover:text-ink"
-                      }`}
-                    >
-                      {FLYER_INFO_LABELS[id]}
-                    </button>
-                  ))}
+                  {FLYER_INFO_IDS.map((id) => {
+                    const disabled = id === "contacto" && !showContact
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => toggleInclude(id)}
+                        disabled={disabled}
+                        title={disabled ? "Activa la tarjeta de contacto en esta propiedad para incluir tus datos" : undefined}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
+                          disabled
+                            ? "bg-canvas-soft text-mute opacity-50 cursor-not-allowed"
+                            : include.includes(id)
+                              ? "bg-ink text-white"
+                              : "bg-canvas-soft text-body hover:bg-surface-pressed hover:text-ink"
+                        }`}
+                      >
+                        {FLYER_INFO_LABELS[id]}
+                      </button>
+                    )
+                  })}
                 </div>
+                {!showContact && (
+                  <div className="flex items-start gap-2 bg-canvas-softer border border-hairline rounded-xl px-3.5 py-2.5">
+                    <AlertCircle className="w-3.5 h-3.5 text-mute flex-shrink-0 mt-px" />
+                    <p className="text-xs text-mute leading-relaxed">
+                      Tus datos de contacto están ocultos en esta propiedad, así que no se incluirán en el flyer.
+                      Actívalos en &quot;Enlace con tus datos&quot; para poder agregarlos.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -142,7 +164,7 @@ export default function FlyerModal({
                   type="text"
                   value={highlight}
                   onChange={(e) => setHighlight(e.target.value)}
-                  maxLength={120}
+                  maxLength={FLYER_HIGHLIGHT_MAX_LENGTH}
                   placeholder="Ej: recién remodelado, vista a la ciudad, piscina…"
                   className="w-full bg-canvas-softer border border-hairline rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-1 focus:ring-ink/30 transition-colors"
                 />

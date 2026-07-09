@@ -13,6 +13,8 @@ export const FLYER_TEMPLATE_LABELS: Record<FlyerTemplate, string> = {
 export const FLYER_INFO_IDS = ["precio", "caracteristicas", "descripcion", "contacto"] as const
 export type FlyerInfo = (typeof FLYER_INFO_IDS)[number]
 
+export const FLYER_HIGHLIGHT_MAX_LENGTH = 120
+
 export const FLYER_INFO_LABELS: Record<FlyerInfo, string> = {
   precio: "Precio",
   caracteristicas: "Características",
