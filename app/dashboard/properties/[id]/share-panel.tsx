@@ -4,18 +4,19 @@ import { useState } from "react"
 import { Copy, Check, ExternalLink, AlertCircle, Sparkles, Undo2, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
-import { incrementShares, improveShareMessage } from "./actions"
+import type { ShareMessageKind } from "@/lib/share-message"
+import { incrementShares, generateShareMessage } from "./actions"
 
-type TemplateId = "intro" | "followup" | "price_drop"
-
-const TEMPLATES: { id: TemplateId; label: string }[] = [
+const TEMPLATES: { id: ShareMessageKind; label: string }[] = [
   { id: "intro", label: "Presentación" },
   { id: "followup", label: "Seguimiento" },
   { id: "price_drop", label: "Precio reducido" },
 ]
 
+// Static templates: the default message per kind; the AI version is only
+// generated on demand.
 function buildBody(
-  templateId: TemplateId,
+  templateId: ShareMessageKind,
   ctx: { title: string; type: string; location?: string; price: string; features: string }
 ): string {
   const detailLines = [
@@ -87,7 +88,7 @@ export default function SharePanel({
 }) {
   const [copied, setCopied] = useState(false)
   const [copiedNoContact, setCopiedNoContact] = useState(false)
-  const [template, setTemplate] = useState<TemplateId>("intro")
+  const [template, setTemplate] = useState<ShareMessageKind>("intro")
 
   const features = [
     bedrooms != null ? `${bedrooms} ${bedrooms === 1 ? "habitación" : "habitaciones"}` : null,
@@ -99,20 +100,20 @@ export default function SharePanel({
   const ctx = { title, type, location, price, features }
 
   const [body, setBody] = useState(() => buildBody("intro", ctx))
-  const [improving, setImproving] = useState(false)
+  const [generating, setGenerating] = useState(false)
   const [previousBody, setPreviousBody] = useState<string | null>(null)
 
-  function handleTemplateChange(id: TemplateId) {
-    setTemplate(id)
-    setBody(buildBody(id, ctx))
+  function handleTemplateChange(kind: ShareMessageKind) {
+    setTemplate(kind)
     setPreviousBody(null)
+    setBody(buildBody(kind, ctx))
   }
 
-  async function handleImprove() {
-    if (improving || !body.trim()) return
-    setImproving(true)
+  async function handleGenerate() {
+    if (generating) return
+    setGenerating(true)
     try {
-      const result = await improveShareMessage({ propertyId, message: body })
+      const result = await generateShareMessage({ propertyId, kind: template })
       if ("error" in result) {
         toast.error(result.error)
         return
@@ -120,13 +121,13 @@ export default function SharePanel({
       setPreviousBody(body)
       setBody(result.message)
     } catch {
-      toast.error("No pudimos mejorar el mensaje. Inténtalo de nuevo.")
+      toast.error("No pudimos generar el mensaje. Inténtalo de nuevo.")
     } finally {
-      setImproving(false)
+      setGenerating(false)
     }
   }
 
-  function handleUndoImprove() {
+  function handleUndoGenerate() {
     if (previousBody === null) return
     setBody(previousBody)
     setPreviousBody(null)
@@ -164,7 +165,8 @@ export default function SharePanel({
             <button
               key={t.id}
               onClick={() => handleTemplateChange(t.id)}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
+              disabled={generating}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:pointer-events-none ${
                 template === t.id
                   ? "bg-white text-ink"
                   : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
@@ -184,20 +186,20 @@ export default function SharePanel({
         />
         <div className="flex items-center gap-2">
           <button
-            onClick={handleImprove}
-            disabled={improving || !body.trim()}
+            onClick={handleGenerate}
+            disabled={generating}
             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-50 disabled:pointer-events-none"
           >
-            {improving ? (
+            {generating ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <Sparkles className="w-3.5 h-3.5" />
             )}
-            {improving ? "Mejorando…" : "Mejorar con IA"}
+            {generating ? "Generando…" : "Generar con IA"}
           </button>
-          {previousBody !== null && !improving && (
+          {previousBody !== null && !generating && (
             <button
-              onClick={handleUndoImprove}
+              onClick={handleUndoGenerate}
               className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full text-white/60 hover:bg-white/10 hover:text-white transition-colors"
             >
               <Undo2 className="w-3.5 h-3.5" />
