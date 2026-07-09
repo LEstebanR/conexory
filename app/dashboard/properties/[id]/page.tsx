@@ -7,19 +7,11 @@ import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
 import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
+import { formatCOP } from "@/lib/format"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
 import PropertyMap from "@/components/property-map-client"
-
-function formatCOP(amount: number): string {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
 
 export default async function PropertyDetailPage({
   params,
@@ -89,6 +81,7 @@ export default async function PropertyDetailPage({
           url={publicUrl}
           urlNoContact={publicUrlNoContact}
           propertyId={property.id}
+          slug={property.slug}
           showContact={property.showContact}
           title={property.title}
           type={typeLabel}
