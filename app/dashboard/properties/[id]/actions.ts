@@ -1,10 +1,12 @@
 "use server"
 
 import { headers } from "next/headers"
+import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
+import { improveMessageWithAI } from "@/lib/share-message"
 
 export async function togglePublished(propertyId: string, published: boolean) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -37,6 +39,32 @@ export async function incrementShares(propertyId: string) {
   if (count > 0) {
     await setOnboardingFlag(session.user.id, "firstPropertyShared").catch(() => {})
   }
+}
+
+const ImproveMessageSchema = z.object({
+  propertyId: z.string().min(1),
+  message: z.string().trim().min(1).max(2000),
+})
+
+export async function improveShareMessage(input: {
+  propertyId: string
+  message: string
+}): Promise<{ message: string } | { error: string }> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return { error: "No autenticado" }
+
+  const parsed = ImproveMessageSchema.safeParse(input)
+  if (!parsed.success) return { error: "Mensaje inválido" }
+
+  const property = await prisma.property.findUnique({
+    where: { id: parsed.data.propertyId, userId: session.user.id },
+  })
+  if (!property) return { error: "Propiedad no encontrada" }
+
+  const improved = await improveMessageWithAI(property, parsed.data.message)
+  if (!improved) return { error: "No pudimos mejorar el mensaje. Inténtalo de nuevo." }
+
+  return { message: improved }
 }
 
 export async function deleteProperty(propertyId: string) {

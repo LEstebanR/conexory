@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Copy, Check, ExternalLink, AlertCircle } from "lucide-react"
+import { Copy, Check, ExternalLink, AlertCircle, Sparkles, Undo2, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
-import { incrementShares } from "./actions"
+import { incrementShares, improveShareMessage } from "./actions"
 
 type TemplateId = "intro" | "followup" | "price_drop"
 
@@ -98,10 +99,37 @@ export default function SharePanel({
   const ctx = { title, type, location, price, features }
 
   const [body, setBody] = useState(() => buildBody("intro", ctx))
+  const [improving, setImproving] = useState(false)
+  const [previousBody, setPreviousBody] = useState<string | null>(null)
 
   function handleTemplateChange(id: TemplateId) {
     setTemplate(id)
     setBody(buildBody(id, ctx))
+    setPreviousBody(null)
+  }
+
+  async function handleImprove() {
+    if (improving || !body.trim()) return
+    setImproving(true)
+    try {
+      const result = await improveShareMessage({ propertyId, message: body })
+      if ("error" in result) {
+        toast.error(result.error)
+        return
+      }
+      setPreviousBody(body)
+      setBody(result.message)
+    } catch {
+      toast.error("No pudimos mejorar el mensaje. Inténtalo de nuevo.")
+    } finally {
+      setImproving(false)
+    }
+  }
+
+  function handleUndoImprove() {
+    if (previousBody === null) return
+    setBody(previousBody)
+    setPreviousBody(null)
   }
 
   const waUrl = `https://wa.me/?text=${encodeURIComponent(body + "\n" + url)}`
@@ -154,6 +182,29 @@ export default function SharePanel({
           rows={8}
           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 placeholder:text-white/30 resize-none focus:outline-none focus:ring-1 focus:ring-white/30 transition-colors leading-relaxed"
         />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleImprove}
+            disabled={improving || !body.trim()}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {improving ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5" />
+            )}
+            {improving ? "Mejorando…" : "Mejorar con IA"}
+          </button>
+          {previousBody !== null && !improving && (
+            <button
+              onClick={handleUndoImprove}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+              Deshacer
+            </button>
+          )}
+        </div>
         <p className="text-xs text-white/30 leading-relaxed -mt-1">
           El enlace de la propiedad se añade automáticamente al final según el botón que uses.
         </p>
