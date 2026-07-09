@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Copy, Check, ExternalLink, AlertCircle } from "lucide-react"
+import { Copy, Check, ExternalLink, AlertCircle, ImageIcon } from "lucide-react"
 import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
+import FlyerModal from "@/components/flyer-modal"
 import { incrementShares } from "./actions"
 
 type TemplateId = "intro" | "followup" | "price_drop"
@@ -61,6 +62,7 @@ export default function SharePanel({
   url,
   urlNoContact,
   propertyId,
+  slug,
   showContact,
   title,
   type,
@@ -74,6 +76,7 @@ export default function SharePanel({
   url: string
   urlNoContact: string
   propertyId: string
+  slug: string
   showContact: boolean
   title: string
   type: string
@@ -124,11 +127,11 @@ export default function SharePanel({
   }
 
   return (
-    <div className="bg-ink rounded-2xl p-6 space-y-5">
+    <div className="bg-white rounded-2xl border border-hairline p-6 space-y-5">
 
       {/* Mensaje */}
       <div className="space-y-3">
-        <p className="text-xs font-bold text-white uppercase tracking-widest">Mensaje</p>
+        <p className="text-xs font-bold text-ink uppercase tracking-widest">Mensaje</p>
 
         {/* Template chips */}
         <div className="flex flex-wrap gap-2">
@@ -138,8 +141,8 @@ export default function SharePanel({
               onClick={() => handleTemplateChange(t.id)}
               className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
                 template === t.id
-                  ? "bg-white text-ink"
-                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+                  ? "bg-ink text-white"
+                  : "bg-canvas-soft text-body hover:bg-surface-pressed hover:text-ink"
               }`}
             >
               {t.label}
@@ -152,19 +155,19 @@ export default function SharePanel({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={8}
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 placeholder:text-white/30 resize-none focus:outline-none focus:ring-1 focus:ring-white/30 transition-colors leading-relaxed"
+          className="w-full bg-canvas-softer border border-hairline rounded-xl px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-1 focus:ring-ink/30 transition-colors leading-relaxed"
         />
-        <p className="text-xs text-white/30 leading-relaxed -mt-1">
+        <p className="text-xs text-mute leading-relaxed -mt-1">
           El enlace de la propiedad se añade automáticamente al final según el botón que uses.
         </p>
       </div>
 
-      <div className="border-t border-white/10" />
+      <div className="border-t border-hairline" />
 
       {/* Enlace con tus datos */}
       <div className="space-y-2.5">
         <div>
-          <p className={`text-xs font-bold uppercase tracking-widest mb-0.5 ${showContact ? "text-white" : "text-white/40"}`}>
+          <p className={`text-xs font-bold uppercase tracking-widest mb-0.5 ${showContact ? "text-ink" : "text-mute"}`}>
             Enlace con tus datos
           </p>
           <p className="text-xs text-mute leading-relaxed">
@@ -173,7 +176,7 @@ export default function SharePanel({
         </div>
 
         {!showContact && (
-          <div className="flex items-start gap-2 bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5">
+          <div className="flex items-start gap-2 bg-canvas-softer border border-hairline rounded-xl px-3.5 py-2.5">
             <AlertCircle className="w-3.5 h-3.5 text-mute flex-shrink-0 mt-px" />
             <p className="text-xs text-mute leading-relaxed">
               Activa la tarjeta de contacto en esta propiedad para que tus datos aparezcan en este enlace.
@@ -181,13 +184,13 @@ export default function SharePanel({
           </div>
         )}
 
-        <div className={`flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 ${!showContact ? "opacity-40 pointer-events-none" : ""}`}>
-          <span className="flex-1 text-sm text-white/60 font-mono truncate min-w-0">{url}</span>
+        <div className={`flex items-center gap-1.5 bg-canvas-softer border border-hairline rounded-xl px-4 py-2.5 ${!showContact ? "opacity-40 pointer-events-none" : ""}`}>
+          <span className="flex-1 text-sm text-body font-mono truncate min-w-0">{url}</span>
           <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors"
             title="Ver"
           >
             <ExternalLink className="w-3.5 h-3.5" />
@@ -204,20 +207,20 @@ export default function SharePanel({
           </a>
           <button
             onClick={handleCopy}
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors"
             title="Copiar enlace"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-[#4ade80]" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-ink" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>
 
-      <div className="border-t border-white/10" />
+      <div className="border-t border-hairline" />
 
       {/* Sin mis datos */}
       <div className="space-y-2.5">
         <div>
-          <p className="text-xs font-bold text-white uppercase tracking-widest mb-0.5">
+          <p className="text-xs font-bold text-ink uppercase tracking-widest mb-0.5">
             Sin mis datos
           </p>
           <p className="text-xs text-mute leading-relaxed">
@@ -225,13 +228,13 @@ export default function SharePanel({
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5">
-          <span className="flex-1 text-sm text-white/60 font-mono truncate min-w-0">{urlNoContact}</span>
+        <div className="flex items-center gap-1.5 bg-canvas-softer border border-hairline rounded-xl px-4 py-2.5">
+          <span className="flex-1 text-sm text-body font-mono truncate min-w-0">{urlNoContact}</span>
           <a
             href={urlNoContact}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors"
             title="Ver"
           >
             <ExternalLink className="w-3.5 h-3.5" />
@@ -247,12 +250,33 @@ export default function SharePanel({
           </a>
           <button
             onClick={handleCopyNoContact}
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors"
             title="Copiar enlace"
           >
-            {copiedNoContact ? <Check className="w-3.5 h-3.5 text-[#4ade80]" /> : <Copy className="w-3.5 h-3.5" />}
+            {copiedNoContact ? <Check className="w-3.5 h-3.5 text-ink" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
+      </div>
+
+      <div className="border-t border-hairline" />
+
+      {/* Flyer */}
+      <div className="space-y-2.5">
+        <div>
+          <p className="text-xs font-bold text-ink uppercase tracking-widest mb-0.5">
+            Flyer
+          </p>
+          <p className="text-xs text-mute leading-relaxed">
+            Imagen lista para descargar y compartir en WhatsApp o Instagram.
+          </p>
+        </div>
+
+        <FlyerModal propertyId={propertyId} slug={slug}>
+          <button className="flex items-center justify-center gap-2 w-full bg-ink text-white text-sm font-semibold px-4 py-2.5 rounded-full hover:bg-elevated transition-colors">
+            <ImageIcon className="w-4 h-4" />
+            Generar flyer
+          </button>
+        </FlyerModal>
       </div>
 
     </div>
