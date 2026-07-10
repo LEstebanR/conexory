@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Copy, Check, ExternalLink, AlertCircle, Sparkles, Undo2, Loader2 } from "lucide-react"
+import { Copy, Check, ExternalLink, AlertCircle, Sparkles, Undo2, Loader2, ImageIcon } from "lucide-react"
 import { toast } from "sonner"
 import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
+import FlyerModal from "@/components/flyer-modal"
 import {
   SHARE_INFO_IDS,
   SHARE_INFO_LABELS,
@@ -125,6 +126,7 @@ export default function SharePanel({
   url,
   urlNoContact,
   propertyId,
+  slug,
   showContact,
   title,
   type,
@@ -141,6 +143,7 @@ export default function SharePanel({
   url: string
   urlNoContact: string
   propertyId: string
+  slug: string
   showContact: boolean
   title: string
   type: string
@@ -461,6 +464,27 @@ export default function SharePanel({
             {copiedNoContact ? <Check className="w-3.5 h-3.5 text-ink" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
+      </div>
+
+      <div className="border-t border-hairline" />
+
+      {/* Flyer */}
+      <div className="space-y-2.5">
+        <div>
+          <p className="text-xs font-bold text-ink uppercase tracking-widest mb-0.5">
+            Flyer
+          </p>
+          <p className="text-xs text-mute leading-relaxed">
+            Imagen lista para descargar y compartir en WhatsApp o Instagram.
+          </p>
+        </div>
+
+        <FlyerModal propertyId={propertyId} slug={slug} showContact={showContact}>
+          <button className="flex items-center justify-center gap-2 w-full bg-ink text-white text-sm font-semibold px-4 py-2.5 rounded-full hover:bg-elevated transition-colors">
+            <ImageIcon className="w-4 h-4" />
+            Generar flyer
+          </button>
+        </FlyerModal>
       </div>
 
     </div>

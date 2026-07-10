@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import L from "leaflet"
 import Link from "next/link"
 import "leaflet/dist/leaflet.css"
+import { formatCOP as formatCOPFull, formatCOPMillions } from "@/lib/format"
 
 function FitBounds({ positions }: { positions: [number, number][] }) {
   const map = useMap()
@@ -82,8 +83,7 @@ export interface MapProperty {
 }
 
 function formatCOP(n: number): string {
-  if (n >= 1_000_000) return `$${Math.round(n / 1_000_000).toLocaleString("es-CO")} M`
-  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(n)
+  return n >= 1_000_000 ? formatCOPMillions(n) : formatCOPFull(n)
 }
 
 export default function AgentMap({ properties }: { properties: MapProperty[] }) {
