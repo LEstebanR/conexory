@@ -1,10 +1,13 @@
 "use server"
 
 import { headers } from "next/headers"
+import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
+import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-message"
+import { SHARE_INFO_IDS, SHARE_MESSAGE_KINDS } from "@/lib/share-message-options"
 
 export async function togglePublished(propertyId: string, published: boolean) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -37,6 +40,34 @@ export async function incrementShares(propertyId: string) {
   if (count > 0) {
     await setOnboardingFlag(session.user.id, "firstPropertyShared").catch(() => {})
   }
+}
+
+const GenerateMessageSchema = z.object({
+  propertyId: z.string().min(1),
+  kind: z.enum(SHARE_MESSAGE_KINDS),
+  include: z.array(z.enum(SHARE_INFO_IDS)).max(SHARE_INFO_IDS.length).default([...SHARE_INFO_IDS]),
+})
+
+export async function generateShareMessage(input: {
+  propertyId: string
+  kind: string
+  include?: string[]
+}): Promise<{ message: string } | { error: string }> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return { error: "No autenticado" }
+
+  const parsed = GenerateMessageSchema.safeParse(input)
+  if (!parsed.success) return { error: "Solicitud inválida" }
+
+  const property = await prisma.property.findUnique({
+    where: { id: parsed.data.propertyId, userId: session.user.id },
+  })
+  if (!property) return { error: "Propiedad no encontrada" }
+
+  const message = await generateShareMessageWithAI(property, parsed.data.kind, parsed.data.include)
+  if (!message) return { error: "No pudimos generar el mensaje. Inténtalo de nuevo." }
+
+  return { message }
 }
 
 export async function deleteProperty(propertyId: string) {

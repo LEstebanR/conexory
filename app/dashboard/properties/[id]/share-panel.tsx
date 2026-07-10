@@ -1,29 +1,62 @@
 "use client"
 
-import { useState } from "react"
-import { Copy, Check, ExternalLink, AlertCircle, ImageIcon } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { Copy, Check, ExternalLink, AlertCircle, Sparkles, Undo2, Loader2, ImageIcon } from "lucide-react"
+import { toast } from "sonner"
 import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
 import FlyerModal from "@/components/flyer-modal"
-import { incrementShares } from "./actions"
+import {
+  SHARE_INFO_IDS,
+  SHARE_INFO_LABELS,
+  SHARE_MESSAGE_KINDS,
+  SHARE_MESSAGE_KIND_LABELS,
+  type ShareInfo,
+  type ShareMessageKind,
+} from "@/lib/share-message-options"
+import { incrementShares, generateShareMessage } from "./actions"
 
-type TemplateId = "intro" | "followup" | "price_drop"
+type TemplateCtx = {
+  title: string
+  type: string
+  location?: string
+  price: string
+  bedrooms?: number | null
+  bathrooms?: number | null
+  area?: number | null
+  landArea?: number | null
+  parking?: number | null
+  gatedCommunity?: boolean
+  description?: string | null
+  include: ShareInfo[]
+}
 
-const TEMPLATES: { id: TemplateId; label: string }[] = [
-  { id: "intro", label: "Presentación" },
-  { id: "followup", label: "Seguimiento" },
-  { id: "price_drop", label: "Precio reducido" },
-]
+// Static templates: only used as fallback when the AI call fails.
+function buildBody(templateId: ShareMessageKind, ctx: TemplateCtx): string {
+  const has = (info: ShareInfo) => ctx.include.includes(info)
+  const featureParts = [
+    has("habitaciones") && ctx.bedrooms != null
+      ? `${ctx.bedrooms} ${ctx.bedrooms === 1 ? "habitación" : "habitaciones"}`
+      : null,
+    has("banos") && ctx.bathrooms != null
+      ? `${ctx.bathrooms} ${ctx.bathrooms === 1 ? "baño" : "baños"}`
+      : null,
+    has("area") && ctx.area != null ? `${ctx.area} m²` : null,
+    has("terreno") && ctx.landArea != null ? `${ctx.landArea} m² de terreno` : null,
+    has("parqueaderos") && ctx.parking != null
+      ? `${ctx.parking} ${ctx.parking === 1 ? "parqueadero" : "parqueaderos"}`
+      : null,
+    has("cerrada") && ctx.gatedCommunity ? "unidad cerrada" : null,
+  ].filter((l): l is string => l !== null)
 
-function buildBody(
-  templateId: TemplateId,
-  ctx: { title: string; type: string; location?: string; price: string; features: string }
-): string {
   const detailLines = [
     `*${ctx.title}*`,
-    `${ctx.type}${ctx.location ? ` en ${ctx.location}` : ""}`,
+    `${ctx.type}${has("ubicacion") && ctx.location ? ` en ${ctx.location}` : ""}`,
     "",
-    `${templateId === "price_drop" ? "Nuevo precio" : "Precio"}: *${ctx.price}*`,
-    ctx.features || null,
+    has("precio")
+      ? `${templateId === "price_drop" ? "Nuevo precio" : "Precio"}: *${ctx.price}*`
+      : null,
+    featureParts.length > 0 ? featureParts.join(" - ") : null,
+    has("descripcion") && ctx.description ? ctx.description : null,
   ].filter((l): l is string => l !== null)
 
   switch (templateId) {
@@ -55,6 +88,39 @@ function buildBody(
         "",
         "Ver los detalles actualizados en:",
       ].join("\n")
+
+    case "visit":
+      return [
+        "Hola, me encantaría mostrarte esta propiedad en persona:",
+        "",
+        ...detailLines,
+        "",
+        "¿Qué día y hora te quedan bien para una visita? Me ajusto a tu agenda.",
+        "",
+        "Mientras tanto puedes ver todas las fotos aquí:",
+      ].join("\n")
+
+    case "opportunity":
+      return [
+        "Hola, te comparto una oportunidad que vale la pena mirar:",
+        "",
+        ...detailLines,
+        "",
+        "Si te interesa, escríbeme y te cuento todos los detalles.",
+        "",
+        "Mira todas las fotos aquí:",
+      ].join("\n")
+
+    case "investor":
+      return [
+        "Hola, te comparto una propiedad interesante como inversión:",
+        "",
+        ...detailLines,
+        "",
+        "Si quieres, revisamos juntos los números y coordinamos una visita.",
+        "",
+        "Toda la información completa aquí:",
+      ].join("\n")
   }
 }
 
@@ -69,9 +135,12 @@ export default function SharePanel({
   price,
   location,
   area,
+  landArea,
   bedrooms,
   bathrooms,
   parking,
+  gatedCommunity,
+  description,
 }: {
   url: string
   urlNoContact: string
@@ -83,30 +152,125 @@ export default function SharePanel({
   price: string
   location?: string
   area?: number | null
+  landArea?: number | null
   bedrooms?: number | null
   bathrooms?: number | null
   parking?: number | null
+  gatedCommunity?: boolean
+  description?: string | null
 }) {
   const [copied, setCopied] = useState(false)
   const [copiedNoContact, setCopiedNoContact] = useState(false)
-  const [template, setTemplate] = useState<TemplateId>("intro")
+  const [template, setTemplate] = useState<ShareMessageKind>("intro")
 
-  const features = [
-    bedrooms != null ? `${bedrooms} ${bedrooms === 1 ? "habitación" : "habitaciones"}` : null,
-    bathrooms != null ? `${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` : null,
-    area != null ? `${area} m²` : null,
-    parking != null ? `${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
-  ].filter(Boolean).join(" - ")
+  // Only offer toggles for data the property actually has.
+  const infoAvailability: Record<ShareInfo, boolean> = {
+    precio: true,
+    habitaciones: bedrooms != null,
+    banos: bathrooms != null,
+    parqueaderos: parking != null,
+    area: area != null,
+    terreno: landArea != null,
+    cerrada: !!gatedCommunity,
+    ubicacion: !!location,
+    descripcion: !!description,
+  }
+  const availableInfo = SHARE_INFO_IDS.filter((info) => infoAvailability[info])
 
-  const ctx = { title, type, location, price, features }
+  const [include, setInclude] = useState<ShareInfo[]>(availableInfo)
 
-  const [body, setBody] = useState(() => buildBody("intro", ctx))
-
-  function handleTemplateChange(id: TemplateId) {
-    setTemplate(id)
-    setBody(buildBody(id, ctx))
+  const ctx = {
+    title,
+    type,
+    location,
+    price,
+    bedrooms,
+    bathrooms,
+    area,
+    landArea,
+    parking,
+    gatedCommunity,
+    description,
+    include,
   }
 
+  const [body, setBody] = useState("")
+  const [generating, setGenerating] = useState(false)
+  const [typing, setTyping] = useState(false)
+  const [previousBody, setPreviousBody] = useState<string | null>(null)
+  const typingTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (typingTimer.current !== null) window.clearTimeout(typingTimer.current)
+    }
+  }, [])
+
+  function typeOut(full: string) {
+    if (typingTimer.current !== null) window.clearTimeout(typingTimer.current)
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setBody(full)
+      return
+    }
+    setTyping(true)
+    setBody("")
+    let shown = 0
+    const step = () => {
+      shown = Math.min(full.length, shown + 3)
+      setBody(full.slice(0, shown))
+      if (shown < full.length) {
+        typingTimer.current = window.setTimeout(step, 12)
+      } else {
+        typingTimer.current = null
+        setTyping(false)
+      }
+    }
+    step()
+  }
+
+  function toggleInclude(info: ShareInfo) {
+    setInclude((prev) =>
+      prev.includes(info) ? prev.filter((i) => i !== info) : [...prev, info]
+    )
+  }
+
+  function handleTemplateChange(kind: ShareMessageKind) {
+    setTemplate(kind)
+    setPreviousBody(body.trim() ? body : null)
+    setBody("")
+  }
+
+  async function handleGenerate() {
+    if (generating || typing) return
+    setGenerating(true)
+    const current = body
+    try {
+      const result = await generateShareMessage({ propertyId, kind: template, include })
+      if ("error" in result) {
+        // Fallback: the static template appears only when the AI call fails.
+        setPreviousBody(current.trim() ? current : null)
+        typeOut(buildBody(template, ctx))
+        toast.error("No pudimos generar con IA — te dejamos una plantilla base.")
+        return
+      }
+      setPreviousBody(current.trim() ? current : null)
+      typeOut(result.message)
+    } catch {
+      setPreviousBody(current.trim() ? current : null)
+      typeOut(buildBody(template, ctx))
+      toast.error("No pudimos generar con IA — te dejamos una plantilla base.")
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  function handleUndoGenerate() {
+    if (previousBody === null) return
+    setBody(previousBody)
+    setPreviousBody(null)
+  }
+
+  const canShare = body.trim().length > 0 && !typing
   const waUrl = `https://wa.me/?text=${encodeURIComponent(body + "\n" + url)}`
   const waUrlNoContact = `https://wa.me/?text=${encodeURIComponent(body + "\n" + urlNoContact)}`
 
@@ -134,20 +298,45 @@ export default function SharePanel({
         <p className="text-xs font-bold text-ink uppercase tracking-widest">Mensaje</p>
 
         {/* Template chips */}
-        <div className="flex flex-wrap gap-2">
-          {TEMPLATES.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => handleTemplateChange(t.id)}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                template === t.id
-                  ? "bg-ink text-white"
-                  : "bg-canvas-soft text-body hover:bg-surface-pressed hover:text-ink"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+        <div className="space-y-1.5">
+          <span className="text-xs text-mute font-medium">Tipo:</span>
+          <div className="flex flex-wrap gap-2">
+            {SHARE_MESSAGE_KINDS.map((kind) => (
+              <button
+                key={kind}
+                onClick={() => handleTemplateChange(kind)}
+                disabled={generating || typing}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:pointer-events-none ${
+                  template === kind
+                    ? "bg-ink text-white"
+                    : "bg-canvas-soft text-body hover:bg-surface-pressed hover:text-ink"
+                }`}
+              >
+                {SHARE_MESSAGE_KIND_LABELS[kind]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Info toggles */}
+        <div className="space-y-1.5">
+          <span className="text-xs text-mute font-medium">Incluir:</span>
+          <div className="flex flex-wrap gap-2">
+            {availableInfo.map((info) => (
+              <button
+                key={info}
+                onClick={() => toggleInclude(info)}
+                disabled={generating || typing}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:pointer-events-none ${
+                  include.includes(info)
+                    ? "bg-ink text-white"
+                    : "bg-canvas-soft text-mute hover:bg-surface-pressed hover:text-ink"
+                }`}
+              >
+                {SHARE_INFO_LABELS[info]}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Editable body */}
@@ -155,8 +344,33 @@ export default function SharePanel({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={8}
+          readOnly={typing || generating}
+          placeholder={generating ? "Generando mensaje…" : "Elige el tipo de mensaje y pulsa Generar con IA."}
           className="w-full bg-canvas-softer border border-hairline rounded-xl px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-1 focus:ring-ink/30 transition-colors leading-relaxed"
         />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleGenerate}
+            disabled={generating || typing}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-full bg-ink text-white hover:bg-elevated transition-colors disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {generating ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5" />
+            )}
+            {generating ? "Generando…" : "Generar con IA"}
+          </button>
+          {previousBody !== null && !generating && !typing && (
+            <button
+              onClick={handleUndoGenerate}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full text-body hover:bg-canvas-soft hover:text-ink transition-colors"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+              Deshacer
+            </button>
+          )}
+        </div>
         <p className="text-xs text-mute leading-relaxed -mt-1">
           El enlace de la propiedad se añade automáticamente al final según el botón que uses.
         </p>
@@ -195,16 +409,24 @@ export default function SharePanel({
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleWhatsApp}
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
-            title="Compartir por WhatsApp"
-          >
-            <WhatsAppIcon className="w-6 h-6" />
-          </a>
+          <div className="relative group flex-shrink-0">
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleWhatsApp}
+              className={`w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity ${!canShare ? "opacity-40 pointer-events-none" : ""}`}
+              title="Compartir por WhatsApp"
+            >
+              <WhatsAppIcon className="w-6 h-6" />
+            </a>
+            {!canShare && (
+              <div className="pointer-events-none absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
+                Escribe o genera un mensaje primero
+                <div className="absolute top-full right-2.5 border-[4px] border-transparent border-t-ink" />
+              </div>
+            )}
+          </div>
           <button
             onClick={handleCopy}
             className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors"
@@ -239,15 +461,23 @@ export default function SharePanel({
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
-          <a
-            href={waUrlNoContact}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
-            title="Compartir por WhatsApp"
-          >
-            <WhatsAppIcon className="w-6 h-6" />
-          </a>
+          <div className="relative group flex-shrink-0">
+            <a
+              href={waUrlNoContact}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity ${!canShare ? "opacity-40 pointer-events-none" : ""}`}
+              title="Compartir por WhatsApp"
+            >
+              <WhatsAppIcon className="w-6 h-6" />
+            </a>
+            {!canShare && (
+              <div className="pointer-events-none absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
+                Escribe o genera un mensaje primero
+                <div className="absolute top-full right-2.5 border-[4px] border-transparent border-t-ink" />
+              </div>
+            )}
+          </div>
           <button
             onClick={handleCopyNoContact}
             className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors"
