@@ -206,11 +206,12 @@ export default function SharePanel({
   const [generating, setGenerating] = useState(false)
   const [typing, setTyping] = useState(false)
   const [previousBody, setPreviousBody] = useState<string | null>(null)
-  const [isDesktop, setIsDesktop] = useState(false)
+  const [isDesktop] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches
+  )
   const typingTimer = useRef<number | null>(null)
 
   useEffect(() => {
-    setIsDesktop(window.matchMedia("(pointer: fine)").matches)
     return () => {
       if (typingTimer.current !== null) window.clearTimeout(typingTimer.current)
     }
