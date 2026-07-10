@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai"
 import type { Property } from "@prisma/client"
+import { formatCOP } from "@/lib/format"
 import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import { SHARE_INFO_IDS, type ShareInfo, type ShareMessageKind } from "@/lib/share-message-options"
 
@@ -29,15 +30,6 @@ const MESSAGE_RULES = `Reglas estrictas:
 - Máximo 2 emojis, sin mayúsculas sostenidas.
 - Máximo 12 líneas.
 - Responde SOLO con el mensaje, sin explicaciones ni comillas alrededor.`
-
-function formatCOP(amount: number): string {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
 
 function propertyFacts(property: Property, include: readonly ShareInfo[]): string {
   const has = (info: ShareInfo) => include.includes(info)
@@ -97,7 +89,8 @@ ${propertyFacts(property, include)}`,
       },
     })
     return response.text?.trim() || null
-  } catch {
+  } catch (error) {
+    console.error("[share-message] Gemini generation failed:", error)
     return null
   }
 }

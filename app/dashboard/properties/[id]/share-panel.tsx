@@ -26,6 +26,7 @@ type TemplateCtx = {
   landArea?: number | null
   parking?: number | null
   gatedCommunity?: boolean
+  description?: string | null
   include: ShareInfo[]
 }
 
@@ -55,6 +56,7 @@ function buildBody(templateId: ShareMessageKind, ctx: TemplateCtx): string {
       ? `${templateId === "price_drop" ? "Nuevo precio" : "Precio"}: *${ctx.price}*`
       : null,
     featureParts.length > 0 ? featureParts.join(" - ") : null,
+    has("descripcion") && ctx.description ? ctx.description : null,
   ].filter((l): l is string => l !== null)
 
   switch (templateId) {
@@ -188,6 +190,7 @@ export default function SharePanel({
     landArea,
     parking,
     gatedCommunity,
+    description,
     include,
   }
 
@@ -233,7 +236,7 @@ export default function SharePanel({
 
   function handleTemplateChange(kind: ShareMessageKind) {
     setTemplate(kind)
-    setPreviousBody(null)
+    setPreviousBody(body.trim() ? body : null)
     setBody("")
   }
 
@@ -245,6 +248,7 @@ export default function SharePanel({
       const result = await generateShareMessage({ propertyId, kind: template, include })
       if ("error" in result) {
         // Fallback: the static template appears only when the AI call fails.
+        setPreviousBody(current.trim() ? current : null)
         typeOut(buildBody(template, ctx))
         toast.error("No pudimos generar con IA — te dejamos una plantilla base.")
         return
@@ -252,6 +256,7 @@ export default function SharePanel({
       setPreviousBody(current.trim() ? current : null)
       typeOut(result.message)
     } catch {
+      setPreviousBody(current.trim() ? current : null)
       typeOut(buildBody(template, ctx))
       toast.error("No pudimos generar con IA — te dejamos una plantilla base.")
     } finally {
@@ -265,6 +270,7 @@ export default function SharePanel({
     setPreviousBody(null)
   }
 
+  const canShare = body.trim().length > 0 && !typing
   const waUrl = `https://wa.me/?text=${encodeURIComponent(body + "\n" + url)}`
   const waUrlNoContact = `https://wa.me/?text=${encodeURIComponent(body + "\n" + urlNoContact)}`
 
@@ -338,7 +344,7 @@ export default function SharePanel({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={8}
-          readOnly={typing}
+          readOnly={typing || generating}
           placeholder={generating ? "Generando mensaje…" : "Elige el tipo de mensaje y pulsa Generar con IA."}
           className="w-full bg-canvas-softer border border-hairline rounded-xl px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-1 focus:ring-ink/30 transition-colors leading-relaxed"
         />
@@ -403,16 +409,24 @@ export default function SharePanel({
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleWhatsApp}
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
-            title="Compartir por WhatsApp"
-          >
-            <WhatsAppIcon className="w-6 h-6" />
-          </a>
+          <div className="relative group flex-shrink-0">
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleWhatsApp}
+              className={`w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity ${!canShare ? "opacity-40 pointer-events-none" : ""}`}
+              title="Compartir por WhatsApp"
+            >
+              <WhatsAppIcon className="w-6 h-6" />
+            </a>
+            {!canShare && (
+              <div className="pointer-events-none absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
+                Escribe o genera un mensaje primero
+                <div className="absolute top-full right-2.5 border-[4px] border-transparent border-t-ink" />
+              </div>
+            )}
+          </div>
           <button
             onClick={handleCopy}
             className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors"
@@ -447,15 +461,23 @@ export default function SharePanel({
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
-          <a
-            href={waUrlNoContact}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
-            title="Compartir por WhatsApp"
-          >
-            <WhatsAppIcon className="w-6 h-6" />
-          </a>
+          <div className="relative group flex-shrink-0">
+            <a
+              href={waUrlNoContact}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity ${!canShare ? "opacity-40 pointer-events-none" : ""}`}
+              title="Compartir por WhatsApp"
+            >
+              <WhatsAppIcon className="w-6 h-6" />
+            </a>
+            {!canShare && (
+              <div className="pointer-events-none absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
+                Escribe o genera un mensaje primero
+                <div className="absolute top-full right-2.5 border-[4px] border-transparent border-t-ink" />
+              </div>
+            )}
+          </div>
           <button
             onClick={handleCopyNoContact}
             className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors"
