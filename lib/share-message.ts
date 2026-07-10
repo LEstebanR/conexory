@@ -54,16 +54,12 @@ function propertyFacts(property: Property, include: readonly ShareInfo[]): strin
     `- Título: ${property.title}`,
     has("ubicacion") ? `- Ubicación: ${location}` : null,
     has("precio") ? `- Precio: ${formatCOP(Number(property.price))}` : null,
-    ...(has("caracteristicas")
-      ? [
-          property.bedrooms != null ? `- Habitaciones: ${property.bedrooms}` : null,
-          property.bathrooms != null ? `- Baños: ${property.bathrooms}` : null,
-          property.parking != null ? `- Parqueaderos: ${property.parking}` : null,
-          property.area != null ? `- Área: ${property.area} m²` : null,
-          property.landArea != null ? `- Área de terreno: ${property.landArea} m²` : null,
-          property.gatedCommunity ? "- En unidad cerrada" : null,
-        ]
-      : []),
+    has("habitaciones") && property.bedrooms != null ? `- Habitaciones: ${property.bedrooms}` : null,
+    has("banos") && property.bathrooms != null ? `- Baños: ${property.bathrooms}` : null,
+    has("parqueaderos") && property.parking != null ? `- Parqueaderos: ${property.parking}` : null,
+    has("area") && property.area != null ? `- Área: ${property.area} m²` : null,
+    has("terreno") && property.landArea != null ? `- Área de terreno: ${property.landArea} m²` : null,
+    has("cerrada") && property.gatedCommunity ? "- En unidad cerrada" : null,
     has("descripcion") && property.description
       ? `- Descripción del agente: ${property.description}`
       : null,

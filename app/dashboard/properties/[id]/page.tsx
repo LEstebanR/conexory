@@ -95,9 +95,12 @@ export default async function PropertyDetailPage({
           price={price}
           location={location || undefined}
           area={property.area}
+          landArea={property.landArea}
           bedrooms={property.bedrooms}
           bathrooms={property.bathrooms}
           parking={property.parking}
+          gatedCommunity={property.gatedCommunity}
+          description={property.description}
         />
 
         {/* Carrusel */}

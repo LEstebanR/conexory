@@ -20,12 +20,27 @@ export const SHARE_MESSAGE_KIND_LABELS: Record<ShareMessageKind, string> = {
   investor: "Inversión",
 }
 
-export const SHARE_INFO_IDS = ["precio", "caracteristicas", "ubicacion", "descripcion"] as const
+export const SHARE_INFO_IDS = [
+  "ubicacion",
+  "precio",
+  "descripcion",
+  "habitaciones",
+  "banos",
+  "parqueaderos",
+  "area",
+  "terreno",
+  "cerrada",
+] as const
 export type ShareInfo = (typeof SHARE_INFO_IDS)[number]
 
 export const SHARE_INFO_LABELS: Record<ShareInfo, string> = {
   precio: "Precio",
-  caracteristicas: "Características",
+  habitaciones: "Habitaciones",
+  banos: "Baños",
+  parqueaderos: "Parqueaderos",
+  area: "Área",
+  terreno: "Área de terreno",
+  cerrada: "Unidad cerrada",
   ubicacion: "Ubicación",
   descripcion: "Descripción",
 }

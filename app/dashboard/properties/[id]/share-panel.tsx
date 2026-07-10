@@ -19,13 +19,33 @@ type TemplateCtx = {
   type: string
   location?: string
   price: string
-  features: string
+  bedrooms?: number | null
+  bathrooms?: number | null
+  area?: number | null
+  landArea?: number | null
+  parking?: number | null
+  gatedCommunity?: boolean
   include: ShareInfo[]
 }
 
 // Static templates: only used as fallback when the AI call fails.
 function buildBody(templateId: ShareMessageKind, ctx: TemplateCtx): string {
   const has = (info: ShareInfo) => ctx.include.includes(info)
+  const featureParts = [
+    has("habitaciones") && ctx.bedrooms != null
+      ? `${ctx.bedrooms} ${ctx.bedrooms === 1 ? "habitación" : "habitaciones"}`
+      : null,
+    has("banos") && ctx.bathrooms != null
+      ? `${ctx.bathrooms} ${ctx.bathrooms === 1 ? "baño" : "baños"}`
+      : null,
+    has("area") && ctx.area != null ? `${ctx.area} m²` : null,
+    has("terreno") && ctx.landArea != null ? `${ctx.landArea} m² de terreno` : null,
+    has("parqueaderos") && ctx.parking != null
+      ? `${ctx.parking} ${ctx.parking === 1 ? "parqueadero" : "parqueaderos"}`
+      : null,
+    has("cerrada") && ctx.gatedCommunity ? "unidad cerrada" : null,
+  ].filter((l): l is string => l !== null)
+
   const detailLines = [
     `*${ctx.title}*`,
     `${ctx.type}${has("ubicacion") && ctx.location ? ` en ${ctx.location}` : ""}`,
@@ -33,7 +53,7 @@ function buildBody(templateId: ShareMessageKind, ctx: TemplateCtx): string {
     has("precio")
       ? `${templateId === "price_drop" ? "Nuevo precio" : "Precio"}: *${ctx.price}*`
       : null,
-    has("caracteristicas") && ctx.features ? ctx.features : null,
+    featureParts.length > 0 ? featureParts.join(" - ") : null,
   ].filter((l): l is string => l !== null)
 
   switch (templateId) {
@@ -111,9 +131,12 @@ export default function SharePanel({
   price,
   location,
   area,
+  landArea,
   bedrooms,
   bathrooms,
   parking,
+  gatedCommunity,
+  description,
 }: {
   url: string
   urlNoContact: string
@@ -124,23 +147,46 @@ export default function SharePanel({
   price: string
   location?: string
   area?: number | null
+  landArea?: number | null
   bedrooms?: number | null
   bathrooms?: number | null
   parking?: number | null
+  gatedCommunity?: boolean
+  description?: string | null
 }) {
   const [copied, setCopied] = useState(false)
   const [copiedNoContact, setCopiedNoContact] = useState(false)
   const [template, setTemplate] = useState<ShareMessageKind>("intro")
-  const [include, setInclude] = useState<ShareInfo[]>([...SHARE_INFO_IDS])
 
-  const features = [
-    bedrooms != null ? `${bedrooms} ${bedrooms === 1 ? "habitación" : "habitaciones"}` : null,
-    bathrooms != null ? `${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` : null,
-    area != null ? `${area} m²` : null,
-    parking != null ? `${parking} ${parking === 1 ? "parqueadero" : "parqueaderos"}` : null,
-  ].filter(Boolean).join(" - ")
+  // Only offer toggles for data the property actually has.
+  const infoAvailability: Record<ShareInfo, boolean> = {
+    precio: true,
+    habitaciones: bedrooms != null,
+    banos: bathrooms != null,
+    parqueaderos: parking != null,
+    area: area != null,
+    terreno: landArea != null,
+    cerrada: !!gatedCommunity,
+    ubicacion: !!location,
+    descripcion: !!description,
+  }
+  const availableInfo = SHARE_INFO_IDS.filter((info) => infoAvailability[info])
 
-  const ctx = { title, type, location, price, features, include }
+  const [include, setInclude] = useState<ShareInfo[]>(availableInfo)
+
+  const ctx = {
+    title,
+    type,
+    location,
+    price,
+    bedrooms,
+    bathrooms,
+    area,
+    landArea,
+    parking,
+    gatedCommunity,
+    include,
+  }
 
   const [body, setBody] = useState("")
   const [generating, setGenerating] = useState(false)
@@ -243,40 +289,45 @@ export default function SharePanel({
         <p className="text-xs font-bold text-ink uppercase tracking-widest">Mensaje</p>
 
         {/* Template chips */}
-        <div className="flex flex-wrap gap-2">
-          {SHARE_MESSAGE_KINDS.map((kind) => (
-            <button
-              key={kind}
-              onClick={() => handleTemplateChange(kind)}
-              disabled={generating || typing}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:pointer-events-none ${
-                template === kind
-                  ? "bg-ink text-white"
-                  : "bg-canvas-soft text-body hover:bg-surface-pressed hover:text-ink"
-              }`}
-            >
-              {SHARE_MESSAGE_KIND_LABELS[kind]}
-            </button>
-          ))}
+        <div className="space-y-1.5">
+          <span className="text-xs text-mute font-medium">Tipo:</span>
+          <div className="flex flex-wrap gap-2">
+            {SHARE_MESSAGE_KINDS.map((kind) => (
+              <button
+                key={kind}
+                onClick={() => handleTemplateChange(kind)}
+                disabled={generating || typing}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:pointer-events-none ${
+                  template === kind
+                    ? "bg-ink text-white"
+                    : "bg-canvas-soft text-body hover:bg-surface-pressed hover:text-ink"
+                }`}
+              >
+                {SHARE_MESSAGE_KIND_LABELS[kind]}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Info toggles */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="space-y-1.5">
           <span className="text-xs text-mute font-medium">Incluir:</span>
-          {SHARE_INFO_IDS.map((info) => (
-            <button
-              key={info}
-              onClick={() => toggleInclude(info)}
-              disabled={generating || typing}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:pointer-events-none ${
-                include.includes(info)
-                  ? "bg-ink text-white"
-                  : "bg-canvas-soft text-mute hover:bg-surface-pressed hover:text-ink"
-              }`}
-            >
-              {SHARE_INFO_LABELS[info]}
-            </button>
-          ))}
+          <div className="flex flex-wrap gap-2">
+            {availableInfo.map((info) => (
+              <button
+                key={info}
+                onClick={() => toggleInclude(info)}
+                disabled={generating || typing}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:pointer-events-none ${
+                  include.includes(info)
+                    ? "bg-ink text-white"
+                    : "bg-canvas-soft text-mute hover:bg-surface-pressed hover:text-ink"
+                }`}
+              >
+                {SHARE_INFO_LABELS[info]}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Editable body */}
