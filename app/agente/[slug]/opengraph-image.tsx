@@ -23,6 +23,18 @@ async function getAgent(slug: string) {
   })
 }
 
+// Google profile photo URLs (lh3.googleusercontent.com/...=s96-c) embed a
+// pixel size in the URL — the default is tiny, so bump it before rendering
+// at AVATAR_SIZE or the circle upscales a 96px thumbnail into a blur.
+function highResAvatar(url: string): string {
+  try {
+    if (new URL(url).hostname !== "lh3.googleusercontent.com") return url
+  } catch {
+    return url
+  }
+  return url.replace(/=s\d+-c/, "=s600-c")
+}
+
 const AVATAR_SIZE = 560
 const avatarFrame = {
   display: "flex" as const,
@@ -78,7 +90,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       {agent.image ? (
         <div style={{ ...avatarFrame, overflow: "hidden" }}>
           <img
-            src={agent.image}
+            src={highResAvatar(agent.image)}
             alt=""
             style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: AVATAR_SIZE / 2 }}
           />
