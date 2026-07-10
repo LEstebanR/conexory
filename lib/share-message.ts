@@ -23,7 +23,8 @@ const KIND_INSTRUCTIONS: Record<ShareMessageKind, string> = {
 
 const MESSAGE_RULES = `Reglas estrictas:
 - Usa ÚNICAMENTE los datos reales de la propiedad listados abajo; no inventes características, cifras ni beneficios.
-- No inventes nada sobre el cliente: ni su nombre, ni lo que dijo, ni lo que le interesa. Nada de placeholders tipo [Nombre]; el mensaje debe quedar listo para enviar tal cual.
+- No inventes nada sobre el cliente: ni su nombre, ni lo que dijo, ni lo que le interesa. Nada de placeholders tipo [Nombre] o [Tu Inmobiliaria]; el mensaje debe quedar listo para enviar tal cual.
+- Si necesitas firmar el mensaje, usa el nombre del agente que se indica más abajo; si no aplica no lo incluyas.
 - Formato de WhatsApp: *asteriscos* para negrita y líneas cortas. Para listas usa guiones (-), nunca asteriscos como viñeta. Nada de Markdown de otro tipo.
 - No incluyas ningún enlace ni texto tipo "aquí va el link": el enlace de la propiedad se añade automáticamente después del mensaje.
 - Cierra con una línea corta que dé pie al enlace que irá justo debajo (por ejemplo: "Mira todas las fotos aquí:").
@@ -63,7 +64,8 @@ function propertyFacts(property: Property, include: readonly ShareInfo[]): strin
 export async function generateShareMessage(
   property: Property,
   kind: ShareMessageKind,
-  include: readonly ShareInfo[] = SHARE_INFO_IDS
+  include: readonly ShareInfo[] = SHARE_INFO_IDS,
+  agentName?: string | null
 ): Promise<string | null> {
   const apiKey = process.env.GOOGLE_AI_API_KEY
   if (!apiKey) return null
@@ -81,6 +83,8 @@ ${KIND_INSTRUCTIONS[kind]}
 
 ${MESSAGE_RULES}
 
+Nombre del agente: ${agentName ?? "no disponible"}
+
 Datos reales de la propiedad (menciona solo lo que está aquí):
 ${propertyFacts(property, include)}`,
       config: {
@@ -88,7 +92,10 @@ ${propertyFacts(property, include)}`,
         thinkingConfig: { thinkingBudget: 0 },
       },
     })
-    return response.text?.trim() || null
+    const text = response.text?.trim()
+    if (!text) return null
+    // Replace any leftover bracket placeholders the model may have emitted.
+    return text.replace(/\[[^\]]{1,40}\]/g, agentName ?? "").replace(/\s{2,}/g, " ").trim()
   } catch (error) {
     console.error("[share-message] Gemini generation failed:", error)
     return null

@@ -64,7 +64,7 @@ export async function generateShareMessage(input: {
   })
   if (!property) return { error: "Propiedad no encontrada" }
 
-  const message = await generateShareMessageWithAI(property, parsed.data.kind, parsed.data.include)
+  const message = await generateShareMessageWithAI(property, parsed.data.kind, parsed.data.include, session.user.name)
   if (!message) return { error: "No pudimos generar el mensaje. Inténtalo de nuevo." }
 
   return { message }

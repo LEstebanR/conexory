@@ -30,6 +30,14 @@ type TemplateCtx = {
   include: ShareInfo[]
 }
 
+function stripEmojis(text: string): string {
+  return text
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .replace(/[ \t]+\n/gm, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+}
+
 // Static templates: only used as fallback when the AI call fails.
 function buildBody(templateId: ShareMessageKind, ctx: TemplateCtx): string {
   const has = (info: ShareInfo) => ctx.include.includes(info)
@@ -198,9 +206,11 @@ export default function SharePanel({
   const [generating, setGenerating] = useState(false)
   const [typing, setTyping] = useState(false)
   const [previousBody, setPreviousBody] = useState<string | null>(null)
+  const [isDesktop, setIsDesktop] = useState(false)
   const typingTimer = useRef<number | null>(null)
 
   useEffect(() => {
+    setIsDesktop(window.matchMedia("(pointer: fine)").matches)
     return () => {
       if (typingTimer.current !== null) window.clearTimeout(typingTimer.current)
     }
@@ -208,17 +218,18 @@ export default function SharePanel({
 
   function typeOut(full: string) {
     if (typingTimer.current !== null) window.clearTimeout(typingTimer.current)
+    const text = isDesktop ? stripEmojis(full) : full
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setBody(full)
+      setBody(text)
       return
     }
     setTyping(true)
     setBody("")
     let shown = 0
     const step = () => {
-      shown = Math.min(full.length, shown + 3)
-      setBody(full.slice(0, shown))
-      if (shown < full.length) {
+      shown = Math.min(text.length, shown + 3)
+      setBody(text.slice(0, shown))
+      if (shown < text.length) {
         typingTimer.current = window.setTimeout(step, 12)
       } else {
         typingTimer.current = null
@@ -271,8 +282,9 @@ export default function SharePanel({
   }
 
   const canShare = body.trim().length > 0 && !typing
-  const waUrl = `https://wa.me/?text=${encodeURIComponent(body + "\n" + url)}`
-  const waUrlNoContact = `https://wa.me/?text=${encodeURIComponent(body + "\n" + urlNoContact)}`
+  const shareBody = isDesktop ? stripEmojis(body) : body
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(shareBody + "\n" + url)}`
+  const waUrlNoContact = `https://wa.me/?text=${encodeURIComponent(shareBody + "\n" + urlNoContact)}`
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url)
