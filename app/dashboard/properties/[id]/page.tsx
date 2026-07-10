@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
-import { ArrowLeft, BedDouble, Bath, Ruler, Car, MapPin, EyeOff, LandPlot, ShieldCheck } from "lucide-react"
+import { ArrowLeft, BedDouble, Bath, Ruler, Car, MapPin, EyeOff, LandPlot, ShieldCheck, Eye, MessageCircle, Share2, TrendingUp, TrendingDown } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
@@ -23,11 +23,22 @@ export default async function PropertyDetailPage({
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) redirect("/login")
 
-  const property = await prisma.property.findUnique({
-    where: { id, userId: session.user.id },
-  })
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+
+  const [property, totalVisits, visitsThisWeek, visitsPrevWeek, totalWhatsapp] = await Promise.all([
+    prisma.property.findUnique({ where: { id, userId: session.user.id } }),
+    prisma.propertyVisit.count({ where: { propertyId: id } }),
+    prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: weekAgo } } }),
+    prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
+    prisma.propertyEvent.count({ where: { propertyId: id, type: "whatsapp_click" } }),
+  ])
 
   if (!property) notFound()
+
+  const isPremium = session.user.isPremium
+  const weekDelta = visitsThisWeek - visitsPrevWeek
+  const conversionRate = totalVisits > 0 ? Math.round((totalWhatsapp / totalVisits) * 100) : 0
 
   const publicUrl = `${getAppUrl()}/p/${property.slug}`
   const publicUrlNoContact = `${getAppUrl()}/p/${property.slug}?c=0`
@@ -95,6 +106,74 @@ export default async function PropertyDetailPage({
           gatedCommunity={property.gatedCommunity}
           description={property.description}
         />
+
+        {/* Analytics — Rendimiento */}
+        <div className="bg-white rounded-2xl border border-hairline p-6">
+          <p className="text-xs font-bold text-mute uppercase tracking-wide mb-5">Rendimiento</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {/* Total visits */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-mute">
+                <Eye className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span className="text-xs font-medium">Visitas totales</span>
+              </div>
+              <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{totalVisits}</p>
+            </div>
+
+            {/* Visits this week */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-mute">
+                <Eye className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span className="text-xs font-medium">Esta semana</span>
+              </div>
+              <div className="flex items-end gap-1.5">
+                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{visitsThisWeek}</p>
+                {weekDelta !== 0 && (
+                  <span className={`flex items-center gap-0.5 text-xs font-bold mb-1 ${weekDelta > 0 ? "text-ink" : "text-mute"}`}>
+                    {weekDelta > 0
+                      ? <TrendingUp className="w-3.5 h-3.5" strokeWidth={2} />
+                      : <TrendingDown className="w-3.5 h-3.5" strokeWidth={2} />
+                    }
+                    {weekDelta > 0 ? "+" : ""}{weekDelta}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* WhatsApp clicks — Pro only */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-mute">
+                <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span className="text-xs font-medium">Clics WhatsApp</span>
+              </div>
+              {isPremium ? (
+                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{totalWhatsapp}</p>
+              ) : (
+                <p className="text-xl font-black text-mute tracking-tight">Pro</p>
+              )}
+            </div>
+
+            {/* Conversion rate — Pro only */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-mute">
+                <Share2 className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span className="text-xs font-medium">Conversión</span>
+              </div>
+              {isPremium ? (
+                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{conversionRate}%</p>
+              ) : (
+                <p className="text-xl font-black text-mute tracking-tight">Pro</p>
+              )}
+            </div>
+          </div>
+
+          {!isPremium && (
+            <p className="text-xs text-mute mt-4 pt-4 border-t border-hairline">
+              <Link href="/dashboard/upgrade" className="font-semibold text-ink hover:opacity-70 transition-opacity">Activa Pro</Link>
+              {" "}para ver clics en WhatsApp y tasa de conversión.
+            </p>
+          )}
+        </div>
 
         {/* Carrusel */}
         {(property.images.length > 0 || videoId) && (

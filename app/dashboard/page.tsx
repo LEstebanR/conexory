@@ -65,27 +65,45 @@ export default async function DashboardPage({
   })
   const onboarding = parseOnboarding(agentProfile?.onboarding)
 
-  const properties = await prisma.property.findMany({
-    where: { userId: session.user.id },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      type: true,
-      published: true,
-      shares: true,
-      price: true,
-      city: true,
-      neighborhood: true,
-      area: true,
-      bedrooms: true,
-      bathrooms: true,
-      parking: true,
-      images: true,
-      createdAt: true,
-    },
-    orderBy: [{ published: "desc" }, { createdAt: "desc" }],
-  })
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+
+  const [properties, visitTotals, visitWeekly, whatsappClicks] = await Promise.all([
+    prisma.property.findMany({
+      where: { userId: session.user.id },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        type: true,
+        published: true,
+        shares: true,
+        price: true,
+        city: true,
+        neighborhood: true,
+        area: true,
+        bedrooms: true,
+        bathrooms: true,
+        parking: true,
+        images: true,
+        createdAt: true,
+      },
+      orderBy: [{ published: "desc" }, { createdAt: "desc" }],
+    }),
+    prisma.propertyVisit.groupBy({
+      by: ["propertyId"],
+      _count: { id: true },
+    }),
+    prisma.propertyVisit.groupBy({
+      by: ["propertyId"],
+      _count: { id: true },
+      where: { createdAt: { gte: weekAgo } },
+    }),
+    prisma.propertyEvent.groupBy({
+      by: ["propertyId"],
+      _count: { id: true },
+      where: { type: "whatsapp_click" },
+    }),
+  ])
 
   type P = (typeof properties)[number]
   const activeCount = properties.filter((p: P) => p.published).length
@@ -127,6 +145,10 @@ export default async function DashboardPage({
     ? `Tienes ${activeCount} propiedades activas, el máximo de tu plan Pro. Contáctanos para un plan personalizado.`
     : `Tienes ${activeCount} propiedades activas. Actualiza a Pro para publicar hasta ${PRO_PROPERTY_LIMIT} propiedades.`
 
+  const visitTotalMap = new Map(visitTotals.map((r) => [r.propertyId, r._count.id]))
+  const visitWeekMap = new Map(visitWeekly.map((r) => [r.propertyId, r._count.id]))
+  const whatsappMap = new Map(whatsappClicks.map((r) => [r.propertyId, r._count.id]))
+
   const items: PropertyItem[] = properties.map((p: P) => ({
     id: p.id,
     slug: p.slug,
@@ -144,6 +166,10 @@ export default async function DashboardPage({
     parking: p.parking,
     image: p.images[0] ?? null,
     createdAt: p.createdAt.getTime(),
+    visits: visitTotalMap.get(p.id) ?? 0,
+    visitsThisWeek: visitWeekMap.get(p.id) ?? 0,
+    whatsappClicks: whatsappMap.get(p.id) ?? 0,
+    isPremium,
   }))
 
   const stats = [
