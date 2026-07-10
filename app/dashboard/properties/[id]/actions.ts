@@ -53,21 +53,25 @@ export async function generateShareMessage(input: {
   kind: string
   include?: string[]
 }): Promise<{ message: string } | { error: string }> {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) return { error: "No autenticado" }
+  try {
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (!session) return { error: "No autenticado" }
 
-  const parsed = GenerateMessageSchema.safeParse(input)
-  if (!parsed.success) return { error: "Solicitud inválida" }
+    const parsed = GenerateMessageSchema.safeParse(input)
+    if (!parsed.success) return { error: "Solicitud inválida" }
 
-  const property = await prisma.property.findUnique({
-    where: { id: parsed.data.propertyId, userId: session.user.id },
-  })
-  if (!property) return { error: "Propiedad no encontrada" }
+    const property = await prisma.property.findUnique({
+      where: { id: parsed.data.propertyId, userId: session.user.id },
+    })
+    if (!property) return { error: "Propiedad no encontrada" }
 
-  const message = await generateShareMessageWithAI(property, parsed.data.kind, parsed.data.include)
-  if (!message) return { error: "No pudimos generar el mensaje. Inténtalo de nuevo." }
+    const message = await generateShareMessageWithAI(property, parsed.data.kind, parsed.data.include, session.user.name)
+    if (!message) return { error: "No pudimos generar el mensaje. Inténtalo de nuevo." }
 
-  return { message }
+    return { message }
+  } catch {
+    return { error: "No pudimos generar el mensaje. Inténtalo de nuevo." }
+  }
 }
 
 export async function deleteProperty(propertyId: string) {
