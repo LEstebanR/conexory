@@ -8,6 +8,7 @@ import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
 import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import { formatCOP } from "@/lib/format"
+import { daysAgo } from "@/lib/dates"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
@@ -23,8 +24,8 @@ export default async function PropertyDetailPage({
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) redirect("/login")
 
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+  const weekAgo = daysAgo(7)
+  const twoWeeksAgo = daysAgo(14)
 
   const [property, totalVisits, visitsThisWeek, visitsPrevWeek, totalWhatsapp] = await Promise.all([
     prisma.property.findUnique({ where: { id, userId: session.user.id } }),
@@ -88,28 +89,9 @@ export default async function PropertyDetailPage({
       )}
 
       <div className="space-y-4">
-        <SharePanel
-          url={publicUrl}
-          urlNoContact={publicUrlNoContact}
-          propertyId={property.id}
-          slug={property.slug}
-          showContact={property.showContact}
-          title={property.title}
-          type={typeLabel}
-          price={price}
-          location={location || undefined}
-          area={property.area}
-          landArea={property.landArea}
-          bedrooms={property.bedrooms}
-          bathrooms={property.bathrooms}
-          parking={property.parking}
-          gatedCommunity={property.gatedCommunity}
-          description={property.description}
-        />
-
-        {/* Analytics — Rendimiento */}
+        {/* Analytics — Estadísticas */}
         <div className="bg-white rounded-2xl border border-hairline p-6">
-          <p className="text-xs font-bold text-mute uppercase tracking-wide mb-5">Rendimiento</p>
+          <p className="text-xs font-bold text-mute uppercase tracking-wide mb-5">Estadísticas</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {/* Total visits */}
             <div className="space-y-1">
@@ -174,6 +156,25 @@ export default async function PropertyDetailPage({
             </p>
           )}
         </div>
+
+        <SharePanel
+          url={publicUrl}
+          urlNoContact={publicUrlNoContact}
+          propertyId={property.id}
+          slug={property.slug}
+          showContact={property.showContact}
+          title={property.title}
+          type={typeLabel}
+          price={price}
+          location={location || undefined}
+          area={property.area}
+          landArea={property.landArea}
+          bedrooms={property.bedrooms}
+          bathrooms={property.bathrooms}
+          parking={property.parking}
+          gatedCommunity={property.gatedCommunity}
+          description={property.description}
+        />
 
         {/* Carrusel */}
         {(property.images.length > 0 || videoId) && (

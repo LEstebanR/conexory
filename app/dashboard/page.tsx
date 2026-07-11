@@ -14,6 +14,7 @@ import { parseOnboarding } from "@/lib/onboarding"
 import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
 import PortfolioPanel from "./portfolio-panel"
 import { getAppUrl } from "@/lib/urls"
+import { daysAgo } from "@/lib/dates"
 
 function formatColombiaDate(date: Date): string {
   return date.toLocaleDateString("es-CO", {
@@ -65,7 +66,7 @@ export default async function DashboardPage({
   })
   const onboarding = parseOnboarding(agentProfile?.onboarding)
 
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const weekAgo = daysAgo(7)
 
   const [properties, visitTotals, visitWeekly, whatsappClicks] = await Promise.all([
     prisma.property.findMany({
