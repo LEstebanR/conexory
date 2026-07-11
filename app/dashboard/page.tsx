@@ -12,6 +12,7 @@ import OnboardingStepper from "./onboarding-stepper"
 import DashboardOnboarding from "./dashboard-onboarding"
 import { parseOnboarding } from "@/lib/onboarding"
 import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
+import { readMetrics } from "@/lib/property-metrics"
 import PortfolioPanel from "./portfolio-panel"
 import { getAppUrl } from "@/lib/urls"
 import { daysAgo } from "@/lib/dates"
@@ -68,7 +69,7 @@ export default async function DashboardPage({
 
   const weekAgo = daysAgo(7)
 
-  const [properties, visitTotals, visitWeekly, whatsappClicks] = await Promise.all([
+  const [properties, visitTotals, visitWeekly] = await Promise.all([
     prisma.property.findMany({
       where: { userId: session.user.id },
       select: {
@@ -87,6 +88,7 @@ export default async function DashboardPage({
         parking: true,
         images: true,
         createdAt: true,
+        metrics: true,
       },
       orderBy: [{ published: "desc" }, { createdAt: "desc" }],
     }),
@@ -98,11 +100,6 @@ export default async function DashboardPage({
       by: ["propertyId"],
       _count: { id: true },
       where: { createdAt: { gte: weekAgo } },
-    }),
-    prisma.propertyEvent.groupBy({
-      by: ["propertyId"],
-      _count: { id: true },
-      where: { type: "whatsapp_click" },
     }),
   ])
 
@@ -148,7 +145,6 @@ export default async function DashboardPage({
 
   const visitTotalMap = new Map(visitTotals.map((r) => [r.propertyId, r._count.id]))
   const visitWeekMap = new Map(visitWeekly.map((r) => [r.propertyId, r._count.id]))
-  const whatsappMap = new Map(whatsappClicks.map((r) => [r.propertyId, r._count.id]))
 
   const items: PropertyItem[] = properties.map((p: P) => ({
     id: p.id,
@@ -169,7 +165,7 @@ export default async function DashboardPage({
     createdAt: p.createdAt.getTime(),
     visits: visitTotalMap.get(p.id) ?? 0,
     visitsThisWeek: visitWeekMap.get(p.id) ?? 0,
-    whatsappClicks: whatsappMap.get(p.id) ?? 0,
+    whatsappClicks: readMetrics(p.metrics).whatsapp,
     isPremium,
   }))
 
