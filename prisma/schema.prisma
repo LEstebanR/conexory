@@ -107,7 +107,6 @@ model Property {
 
   user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   visits PropertyVisit[]
-  events PropertyEvent[]
 
   @@map("properties")
 }
@@ -119,16 +118,6 @@ model PropertyVisit {
   createdAt  DateTime @default(now())
 
   @@map("property_visits")
-}
-
-model PropertyEvent {
-  id         String   @id @default(cuid())
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  type       String
-  createdAt  DateTime @default(now())
-
-  @@map("property_events")
 }
 
 model Session {
