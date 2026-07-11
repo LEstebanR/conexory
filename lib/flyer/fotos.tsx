@@ -41,15 +41,16 @@ export function templateFotos(d: FlyerData): ReactElement {
               position: "absolute",
               top: 28,
               left: 28,
+              maxWidth: 640,
               background: "#fff",
-              borderRadius: 50,
+              borderRadius: 28,
               padding: "13px 26px",
               boxShadow: PANEL_SHADOW,
             }}
           >
-            {icon("tag", 24, INK)}
-            <span style={{ fontSize: 20, fontWeight: 900, color: INK, letterSpacing: 1.5, textTransform: "uppercase" }}>
-              {truncate(badge, 30)}
+            <div style={{ display: "flex", flexShrink: 0 }}>{icon("tag", 24, INK)}</div>
+            <span style={{ fontSize: 20, fontWeight: 900, color: INK, letterSpacing: 1.5, textTransform: "uppercase", lineHeight: 1.3 }}>
+              {truncate(badge, 100)}
             </span>
           </div>
         )}

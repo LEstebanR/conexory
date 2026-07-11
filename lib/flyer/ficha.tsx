@@ -29,7 +29,7 @@ import {
 export function templateFicha(d: FlyerData): ReactElement {
   const thumbs = d.photos.slice(1, 3)
   const features = has(d, "caracteristicas") ? featureList(d.property).slice(0, 6) : []
-  const badge = highlightBadge(d, 18)
+  const badge = highlightBadge(d, 18, 330)
   const description = descriptionText(d, 400, 21)
   const colGap = 26
   const rightW = 330
