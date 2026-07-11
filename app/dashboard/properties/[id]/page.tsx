@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
-import { ArrowLeft, BedDouble, Bath, Ruler, Car, MapPin, EyeOff, LandPlot, ShieldCheck, Eye, MessageCircle, Share2, TrendingUp, TrendingDown } from "lucide-react"
+import { ArrowLeft, BedDouble, Bath, Ruler, Car, MapPin, EyeOff, LandPlot, ShieldCheck, Eye, MessageCircle, TrendingUp, TrendingDown, Users, Contact } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
@@ -9,6 +9,7 @@ import { youtubeId } from "@/lib/youtube"
 import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import { formatCOP } from "@/lib/format"
 import { daysAgo } from "@/lib/dates"
+import { readMetrics, socialTotal, contactTotal } from "@/lib/property-metrics"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
@@ -27,19 +28,21 @@ export default async function PropertyDetailPage({
   const weekAgo = daysAgo(7)
   const twoWeeksAgo = daysAgo(14)
 
-  const [property, totalVisits, visitsThisWeek, visitsPrevWeek, totalWhatsapp] = await Promise.all([
+  const [property, totalVisits, visitsThisWeek, visitsPrevWeek] = await Promise.all([
     prisma.property.findUnique({ where: { id, userId: session.user.id } }),
     prisma.propertyVisit.count({ where: { propertyId: id } }),
     prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: weekAgo } } }),
     prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
-    prisma.propertyEvent.count({ where: { propertyId: id, type: "whatsapp_click" } }),
   ])
 
   if (!property) notFound()
 
   const isPremium = session.user.isPremium
   const weekDelta = visitsThisWeek - visitsPrevWeek
-  const conversionRate = totalVisits > 0 ? Math.round((totalWhatsapp / totalVisits) * 100) : 0
+  const metrics = readMetrics(property.metrics)
+  const totalWhatsapp = metrics.whatsapp
+  const totalSocial = socialTotal(metrics)
+  const totalContact = contactTotal(metrics)
 
   const publicUrl = `${getAppUrl()}/p/${property.slug}`
   const publicUrlNoContact = `${getAppUrl()}/p/${property.slug}?c=0`
@@ -92,7 +95,7 @@ export default async function PropertyDetailPage({
         {/* Analytics — Estadísticas */}
         <div className="bg-white rounded-2xl border border-hairline p-6">
           <p className="text-xs font-bold text-mute uppercase tracking-wide mb-5">Estadísticas</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {/* Total visits */}
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-mute">
@@ -135,14 +138,27 @@ export default async function PropertyDetailPage({
               )}
             </div>
 
-            {/* Conversion rate — Pro only */}
+            {/* Social clicks — Pro only */}
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-mute">
-                <Share2 className="w-3.5 h-3.5" strokeWidth={1.75} />
-                <span className="text-xs font-medium">Conversión</span>
+                <Users className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span className="text-xs font-medium">Redes</span>
               </div>
               {isPremium ? (
-                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{conversionRate}%</p>
+                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{totalSocial}</p>
+              ) : (
+                <p className="text-xl font-black text-mute tracking-tight">Pro</p>
+              )}
+            </div>
+
+            {/* Contact clicks — Pro only */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-mute">
+                <Contact className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span className="text-xs font-medium">Contacto</span>
+              </div>
+              {isPremium ? (
+                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{totalContact}</p>
               ) : (
                 <p className="text-xl font-black text-mute tracking-tight">Pro</p>
               )}
@@ -152,7 +168,7 @@ export default async function PropertyDetailPage({
           {!isPremium && (
             <p className="text-xs text-mute mt-4 pt-4 border-t border-hairline">
               <Link href="/dashboard/upgrade" className="font-semibold text-ink hover:opacity-70 transition-opacity">Activa Pro</Link>
-              {" "}para ver clics en WhatsApp y tasa de conversión.
+              {" "}para ver clics en WhatsApp, redes y contacto.
             </p>
           )}
         </div>
