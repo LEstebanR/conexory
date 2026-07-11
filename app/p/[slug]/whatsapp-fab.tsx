@@ -1,0 +1,30 @@
+"use client"
+
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
+import { trackPropertyEvent } from "@/lib/track-property-event"
+
+type Props = {
+  propertyId: string
+  phone: string | null
+  phoneIsWhatsapp: boolean
+  whatsappMessage: string
+}
+
+export default function WhatsAppFab({ propertyId, phone, phoneIsWhatsapp, whatsappMessage }: Props) {
+  if (!phone || !phoneIsWhatsapp) return null
+
+  const href = `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => trackPropertyEvent(propertyId, "whatsapp_click")}
+      aria-label="Contactar por WhatsApp"
+      className="fixed bottom-5 right-5 z-30 w-14 h-14 rounded-full shadow-lg hover:scale-105 transition-transform"
+    >
+      <WhatsAppIcon className="w-full h-full" />
+    </a>
+  )
+}

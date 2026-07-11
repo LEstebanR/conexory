@@ -1,6 +1,7 @@
 "use client"
 
 import { Phone, Mail, MessageCircle } from "lucide-react"
+import { trackPropertyEvent } from "@/lib/track-property-event"
 
 type Props = {
   propertyId: string
@@ -8,15 +9,6 @@ type Props = {
   phoneIsWhatsapp: boolean
   email: string
   whatsappMessage: string
-}
-
-function trackEvent(propertyId: string, type: string) {
-  const url = `/api/properties/${propertyId}/event`
-  if (typeof navigator !== "undefined" && navigator.sendBeacon) {
-    navigator.sendBeacon(url, JSON.stringify({ type }))
-  } else {
-    fetch(url, { method: "POST", body: JSON.stringify({ type }), keepalive: true }).catch(() => {})
-  }
 }
 
 export default function ContactButtons({ propertyId, phone, phoneIsWhatsapp, email, whatsappMessage }: Props) {
@@ -28,7 +20,7 @@ export default function ContactButtons({ propertyId, phone, phoneIsWhatsapp, ema
             href={`https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => trackEvent(propertyId, "whatsapp_click")}
+            onClick={() => trackPropertyEvent(propertyId, "contact_whatsapp_click")}
             className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
           >
             <MessageCircle className="w-[18px] h-[18px]" strokeWidth={2} />
@@ -43,7 +35,7 @@ export default function ContactButtons({ propertyId, phone, phoneIsWhatsapp, ema
         <div className="relative group flex-1">
           <a
             href={`tel:${phone}`}
-            onClick={() => trackEvent(propertyId, "phone_click")}
+            onClick={() => trackPropertyEvent(propertyId, "contact_phone_click")}
             className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
           >
             <Phone className="w-[18px] h-[18px]" strokeWidth={2} />
@@ -57,7 +49,7 @@ export default function ContactButtons({ propertyId, phone, phoneIsWhatsapp, ema
       <div className="relative group flex-1">
         <a
           href={`mailto:${email}`}
-          onClick={() => trackEvent(propertyId, "email_click")}
+          onClick={() => trackPropertyEvent(propertyId, "contact_email_click")}
           className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
         >
           <Mail className="w-[18px] h-[18px]" strokeWidth={2} />
