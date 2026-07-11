@@ -56,6 +56,7 @@ export async function generateShareMessage(input: {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { error: "No autenticado" }
+    if (!session.user.isPremium) return { error: "Generar con IA es una función Pro" }
 
     const parsed = GenerateMessageSchema.safeParse(input)
     if (!parsed.success) return { error: "Solicitud inválida" }

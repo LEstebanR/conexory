@@ -190,6 +190,7 @@ export default async function PropertyDetailPage({
           parking={property.parking}
           gatedCommunity={property.gatedCommunity}
           description={property.description}
+          isPremium={isPremium}
         />
 
         {/* Carrusel */}
