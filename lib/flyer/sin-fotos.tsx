@@ -44,7 +44,7 @@ export function templateSinFotos(d: FlyerData): ReactElement {
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 16 }}>
             {brandRow(false)}
-            {highlightBadge(d)}
+            {highlightBadge(d, 18, 320)}
           </div>
         </div>
 

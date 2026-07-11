@@ -291,8 +291,11 @@ export function brandRow(dark: boolean, size = 26): ReactElement {
   )
 }
 
-export function highlightBadge(d: FlyerData, fontSize = 20): ReactElement | null {
+// maxWidth bounds the pill so long highlights wrap onto a second line
+// instead of overflowing the canvas or getting cut off after ~30 chars.
+export function highlightBadge(d: FlyerData, fontSize = 20, maxWidth = 460): ReactElement | null {
   if (!d.options.highlight) return null
+  const maxChars = Math.round((maxWidth / (fontSize * 0.62)) * 2)
   return (
     <div
       style={{
@@ -301,17 +304,24 @@ export function highlightBadge(d: FlyerData, fontSize = 20): ReactElement | null
         gap: 10,
         background: INK,
         color: "#fff",
-        borderRadius: 50,
+        borderRadius: 28,
         padding: "13px 26px",
-        fontSize,
-        fontWeight: 900,
-        letterSpacing: 1.5,
-        textTransform: "uppercase",
+        maxWidth,
         boxShadow: DARK_SHADOW,
       }}
     >
-      {icon("tag", fontSize + 4, "#fff")}
-      {truncate(d.options.highlight, 30)}
+      <div style={{ display: "flex", flexShrink: 0 }}>{icon("tag", fontSize + 4, "#fff")}</div>
+      <span
+        style={{
+          fontSize,
+          fontWeight: 900,
+          letterSpacing: 1.5,
+          textTransform: "uppercase",
+          lineHeight: 1.3,
+        }}
+      >
+        {truncate(d.options.highlight, maxChars)}
+      </span>
     </div>
   )
 }

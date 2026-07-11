@@ -101,12 +101,12 @@ model Property {
   showContact  Boolean  @default(false)
   shares       Int      @default(0)
   published    Boolean  @default(true)
+  metrics      Json     @default("{\"whatsapp\":0,\"social\":{\"instagram\":0,\"facebook\":0,\"tiktok\":0,\"linkedin\":0,\"youtube\":0},\"contact\":{\"phone\":0,\"email\":0,\"whatsapp\":0}}")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   visits PropertyVisit[]
-  events PropertyEvent[]
 
   @@map("properties")
 }
@@ -118,16 +118,6 @@ model PropertyVisit {
   createdAt  DateTime @default(now())
 
   @@map("property_visits")
-}
-
-model PropertyEvent {
-  id         String   @id @default(cuid())
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  type       String
-  createdAt  DateTime @default(now())
-
-  @@map("property_events")
 }
 
 model Session {

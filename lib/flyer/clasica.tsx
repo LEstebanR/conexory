@@ -27,7 +27,7 @@ export function templateClasica(d: FlyerData): ReactElement {
   const thumbs = d.photos.slice(1, 4)
   const features = has(d, "caracteristicas") ? featureList(d.property).slice(0, 6) : []
   const description = descriptionText(d, 300, 21)
-  const badge = highlightBadge(d, 19)
+  const badge = highlightBadge(d, 19, 460)
   const priceOverlap = has(d, "precio")
 
   return (

@@ -13,6 +13,8 @@ import PublicGallery from "@/components/public-gallery"
 import Reveal from "@/components/reveal"
 import PropertyMap from "@/components/property-map-client"
 import ContactButtons from "./contact-buttons"
+import SocialLinkButton from "./social-link-button"
+import WhatsAppFab from "./whatsapp-fab"
 
 // ── Social icon SVGs (same as agent page) ─────────────────────────────────
 
@@ -189,11 +191,11 @@ function AgentCard({ propertyId, user, whatsappMessage }: { propertyId: string; 
     .slice(0, 2)
 
   const socialLinks = [
-    { handle: user.instagram, href: `https://instagram.com/${user.instagram}`,   label: "Instagram", Icon: InstagramIcon },
-    { handle: user.tiktok,    href: `https://tiktok.com/@${user.tiktok}`,         label: "TikTok",    Icon: TikTokIcon },
-    { handle: user.facebook,  href: `https://facebook.com/${user.facebook}`,      label: "Facebook",  Icon: FacebookIcon },
-    { handle: user.linkedin,  href: `https://linkedin.com/in/${user.linkedin}`,   label: "LinkedIn",  Icon: LinkedInIcon },
-    { handle: user.youtube,   href: `https://youtube.com/@${user.youtube}`,       label: "YouTube",   Icon: YouTubeIcon },
+    { handle: user.instagram, href: `https://instagram.com/${user.instagram}`,   label: "Instagram", Icon: InstagramIcon, eventType: "social_instagram_click" },
+    { handle: user.tiktok,    href: `https://tiktok.com/@${user.tiktok}`,         label: "TikTok",    Icon: TikTokIcon,    eventType: "social_tiktok_click" },
+    { handle: user.facebook,  href: `https://facebook.com/${user.facebook}`,      label: "Facebook",  Icon: FacebookIcon,  eventType: "social_facebook_click" },
+    { handle: user.linkedin,  href: `https://linkedin.com/in/${user.linkedin}`,   label: "LinkedIn",  Icon: LinkedInIcon,  eventType: "social_linkedin_click" },
+    { handle: user.youtube,   href: `https://youtube.com/@${user.youtube}`,       label: "YouTube",   Icon: YouTubeIcon,   eventType: "social_youtube_click" },
   ].filter(({ handle }) => !!handle)
 
   const hasSocial = socialLinks.length > 0
@@ -237,17 +239,10 @@ function AgentCard({ propertyId, user, whatsappMessage }: { propertyId: string; 
       {/* Social icons */}
       {hasSocial && (
         <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
-          {socialLinks.map(({ href, label, Icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={label}
-              className="w-8 h-8 rounded-full bg-white border border-hairline-strong flex items-center justify-center text-body hover:text-ink hover:border-ink transition-colors"
-            >
+          {socialLinks.map(({ href, label, Icon, eventType }) => (
+            <SocialLinkButton key={label} propertyId={propertyId} href={href} label={label} eventType={eventType}>
               <Icon className="w-[15px] h-[15px]" />
-            </a>
+            </SocialLinkButton>
           ))}
         </div>
       )}
@@ -492,6 +487,13 @@ export default async function PublicPropertyPage({
           <AgentCard propertyId={property.id} user={property.user} whatsappMessage={whatsappMessage} />
         </div>
       )}
+
+      <WhatsAppFab
+        propertyId={property.id}
+        phone={property.user.phone}
+        phoneIsWhatsapp={property.user.phoneIsWhatsapp}
+        whatsappMessage={whatsappMessage}
+      />
 
       <PageFooter />
     </div>

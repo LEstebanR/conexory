@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 import { Copy, Check, ExternalLink, AlertCircle, Sparkles, Undo2, Loader2, ImageIcon } from "lucide-react"
 import { toast } from "sonner"
 import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
@@ -149,6 +150,7 @@ export default function SharePanel({
   parking,
   gatedCommunity,
   description,
+  isPremium,
 }: {
   url: string
   urlNoContact: string
@@ -166,6 +168,7 @@ export default function SharePanel({
   parking?: number | null
   gatedCommunity?: boolean
   description?: string | null
+  isPremium: boolean
 }) {
   const [copied, setCopied] = useState(false)
   const [copiedNoContact, setCopiedNoContact] = useState(false)
@@ -254,8 +257,16 @@ export default function SharePanel({
 
   async function handleGenerate() {
     if (generating || typing) return
-    setGenerating(true)
     const current = body
+
+    // Free plan: no AI call, just fill in the static template instantly.
+    if (!isPremium) {
+      setPreviousBody(current.trim() ? current : null)
+      typeOut(buildBody(template, ctx))
+      return
+    }
+
+    setGenerating(true)
     try {
       const result = await generateShareMessage({ propertyId, kind: template, include })
       if ("error" in result) {
@@ -358,7 +369,13 @@ export default function SharePanel({
           onChange={(e) => setBody(e.target.value)}
           rows={8}
           readOnly={typing || generating}
-          placeholder={generating ? "Generando mensaje…" : "Elige el tipo de mensaje y pulsa Generar con IA."}
+          placeholder={
+            generating
+              ? "Generando mensaje…"
+              : isPremium
+                ? "Elige el tipo de mensaje y pulsa Generar con IA."
+                : "Elige el tipo de mensaje y pulsa Usar plantilla."
+          }
           className="w-full bg-canvas-softer border border-hairline rounded-xl px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-1 focus:ring-ink/30 transition-colors leading-relaxed"
         />
         <div className="flex items-center gap-2">
@@ -372,7 +389,7 @@ export default function SharePanel({
             ) : (
               <Sparkles className="w-3.5 h-3.5" />
             )}
-            {generating ? "Generando…" : "Generar con IA"}
+            {generating ? "Generando…" : isPremium ? "Generar con IA" : "Usar plantilla"}
           </button>
           {previousBody !== null && !generating && !typing && (
             <button
@@ -384,9 +401,16 @@ export default function SharePanel({
             </button>
           )}
         </div>
-        <p className="text-xs text-mute leading-relaxed -mt-1">
-          El enlace de la propiedad se añade automáticamente al final según el botón que uses.
-        </p>
+        {isPremium ? (
+          <p className="text-xs text-mute leading-relaxed -mt-1">
+            El enlace de la propiedad se añade automáticamente al final según el botón que uses.
+          </p>
+        ) : (
+          <p className="text-xs text-mute leading-relaxed -mt-1">
+            <Link href="/dashboard/upgrade" className="font-semibold text-ink hover:opacity-70 transition-opacity">Activa Pro</Link>
+            {" "}para generar mensajes personalizados con IA. El enlace de la propiedad se añade automáticamente al final.
+          </p>
+        )}
       </div>
 
       <div className="border-t border-hairline" />
