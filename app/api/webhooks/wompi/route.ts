@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { verifyWompiEvent } from "@/lib/wompi"
-import { sendSubscriptionConfirmation, sendPaymentFailed } from "@/lib/email"
+import { sendSubscriptionConfirmation } from "@/lib/email"
 
 export async function POST(req: Request) {
   const bodyText = await req.text()
@@ -140,22 +140,13 @@ async function handleApproved(userId: string | null, transaction: WompiTransacti
 async function handleDeclined(userId: string | null) {
   if (!userId) return
 
-  const [user] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true, name: true },
-    }),
-    prisma.subscription.updateMany({
-      // Stamp pastDueSince only on the first failure so the grace window is
-      // measured from when the trouble started, not from each retry.
-      where: { userId, pastDueSince: null },
-      data: { status: "past_due", pastDueSince: new Date() },
-    }),
-  ])
-
-  if (user) {
-    await sendPaymentFailed(user.email, user.name).catch(() => null)
-  }
+  // Stamp pastDueSince only on the first failure so it reflects when the trouble
+  // started. No retries: the next billing cron run downgrades this sub to Free
+  // and emails the user then (see downgradeExpired in app/api/cron/billing).
+  await prisma.subscription.updateMany({
+    where: { userId, pastDueSince: null },
+    data: { status: "past_due", pastDueSince: new Date() },
+  })
 }
 
 async function handleCancelled(userId: string | null) {

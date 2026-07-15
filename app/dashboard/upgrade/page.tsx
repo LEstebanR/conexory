@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
 import { Suspense } from "react"
-import { Check, Zap, ShieldCheck, CheckCircle2 } from "lucide-react"
+import { Check, Zap, ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
@@ -42,19 +42,28 @@ export default async function UpgradePage() {
       select: { currentPeriodEnd: true, createdAt: true, status: true },
     })
     const isCanceling = subscription?.status === "canceling"
+    const isPastDue = subscription?.status === "past_due"
 
     return (
       <div className="flex-1 flex items-start justify-center p-6 lg:p-10">
         <div className="w-full max-w-sm">
           <div className="mb-6 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-ink mb-4">
-              <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2} />
+            <div
+              className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-4 ${isPastDue ? "bg-warning-100" : "bg-ink"}`}
+            >
+              {isPastDue ? (
+                <AlertTriangle className="w-5 h-5 text-warning-600" strokeWidth={2} />
+              ) : (
+                <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2} />
+              )}
             </div>
             <h1 className="text-2xl font-black text-ink tracking-tighter">
-              {isCanceling ? "Suscripción cancelada" : "Plan Pro activo"}
+              {isPastDue ? "No pudimos procesar tu pago" : isCanceling ? "Suscripción cancelada" : "Plan Pro activo"}
             </h1>
             <p className="text-sm text-body mt-1">
-              {isCanceling
+              {isPastDue
+                ? "Tu plan Pro pasará a Free automáticamente"
+                : isCanceling
                 ? "Conservas los beneficios Pro hasta el fin del período"
                 : "Estás disfrutando de todos los beneficios Pro"}
             </p>
@@ -82,7 +91,9 @@ export default async function UpgradePage() {
 
             {subscription?.currentPeriodEnd && (
               <p className="text-xs text-white/40 mb-6">
-                {isCanceling
+                {isPastDue
+                  ? `Se cancela el ${formatDate(subscription.currentPeriodEnd)}`
+                  : isCanceling
                   ? `Activo hasta el ${formatDate(subscription.currentPeriodEnd)} · no se renueva`
                   : `Próximo cobro: ${formatDate(subscription.currentPeriodEnd)}`}
               </p>
@@ -93,7 +104,7 @@ export default async function UpgradePage() {
             </Button>
           </div>
 
-          {!isCanceling && subscription && (
+          {!isCanceling && !isPastDue && subscription && (
             <div className="text-center mt-5">
               <Link
                 href="/dashboard/upgrade/cancel"

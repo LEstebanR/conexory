@@ -109,25 +109,26 @@ export async function sendRenewalReminder(
   })
 }
 
-export async function sendPaymentFailed(email: string, name: string) {
+export async function sendSubscriptionCancelled(email: string, name: string) {
   const firstName = name.split(" ")[0]
   await resend().emails.send({
     from: FROM,
     to: email,
-    subject: "Problema con tu pago de Conexory Pro",
+    subject: "Tu plan Pro de Conexory fue cancelado",
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#000">
         <h1 style="font-size:28px;font-weight:900;margin-bottom:8px">
           Hola, ${firstName}
         </h1>
         <p style="color:#5e5e5e;margin-bottom:24px">
-          No pudimos procesar el cobro mensual de tu plan Pro.
-          Por favor actualiza tu método de pago para no perder el acceso.
+          No pudimos procesar el cobro de tu plan Pro, así que tu suscripción
+          fue cancelada y tu cuenta ya está en el plan Free. Si tenías más de
+          3 propiedades activas, dejamos publicadas las más recientes.
         </p>
         <a href="https://conexory.com/dashboard/upgrade"
            style="display:inline-block;background:#000;color:#fff;padding:12px 24px;
                   border-radius:999px;text-decoration:none;font-weight:700">
-          Renovar plan Pro
+          Reactivar plan Pro
         </a>
         <p style="color:#afafaf;font-size:12px;margin-top:32px">
           Conexory · Colombia · Si tienes dudas escríbenos a Conexory@gmail.com
