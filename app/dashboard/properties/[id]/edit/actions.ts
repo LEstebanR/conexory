@@ -5,7 +5,7 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
-import { photoLimit } from "@/lib/plans"
+import { photoLimit, hasProAccess } from "@/lib/plans"
 
 type UpdateResult = { success: true } | { success: false; error: string }
 
@@ -20,7 +20,7 @@ export async function updateProperty(
     const parsed = PropertySchema.safeParse(data)
     if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
 
-    const maxPhotos = photoLimit(session.user.isPremium)
+    const maxPhotos = photoLimit(hasProAccess(session.user))
     if (parsed.data.images.length > maxPhotos) {
       return { success: false, error: `Tu plan permite máximo ${maxPhotos} fotos por propiedad.` }
     }

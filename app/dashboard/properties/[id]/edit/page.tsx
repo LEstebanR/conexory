@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import EditForm, { type InitialData } from "./edit-form"
 import { DEFAULT_TRANSACTION_TYPE } from "@/lib/property-types"
+import { hasProAccess } from "@/lib/plans"
 
 export default async function EditPropertyPage({
   params,
@@ -44,5 +45,5 @@ export default async function EditPropertyPage({
     showContact: property.showContact,
   }
 
-  return <EditForm initial={initial} isPremium={session.user.isPremium} />
+  return <EditForm initial={initial} isPremium={hasProAccess(session.user)} />
 }

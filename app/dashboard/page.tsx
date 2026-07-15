@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon, Eye, Share2, CalendarClock } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { propertyLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
+import { propertyLimit, hasProAccess, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import PropertiesList, { type PropertyItem } from "./properties-list"
 import UpgradeSuccessToast from "./upgrade-success-toast"
 import OnboardingStepper from "./onboarding-stepper"
@@ -116,17 +116,20 @@ export default async function DashboardPage({
     ? properties.reduce((earliest: P, p: P) => (p.createdAt < earliest.createdAt ? p : earliest)).id
     : null
 
-  let isPremium = session.user.isPremium
+  let rawIsPremium = session.user.isPremium
   if (isPostPayment) {
     const freshUser = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { isPremium: true },
     })
-    isPremium = freshUser?.isPremium ?? session.user.isPremium
+    rawIsPremium = freshUser?.isPremium ?? session.user.isPremium
   }
+  // Admins get full Pro access without a real subscription — gate features on
+  // this, but keep billing facts (below) tied to the raw isPremium flag.
+  const isPremium = hasProAccess({ isPremium: rawIsPremium, role: session.user.role })
 
   let cancelingUntil: Date | null = null
-  if (isPremium) {
+  if (rawIsPremium) {
     const sub = await prisma.subscription.findUnique({
       where: { userId: session.user.id },
       select: { status: true, currentPeriodEnd: true },

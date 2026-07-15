@@ -26,7 +26,7 @@ import ImageUpload from "@/components/image-upload"
 import LocationSelect from "@/components/location-select"
 import PropertyTour from "./property-tour"
 import { useSession } from "@/lib/auth-client"
-import { photoLimit } from "@/lib/plans"
+import { photoLimit, hasProAccess } from "@/lib/plans"
 import { PROPERTY_TYPES, TRANSACTION_TYPES, DEFAULT_TRANSACTION_TYPE } from "@/lib/property-types"
 
 const MapPicker = dynamic(() => import("@/components/map-picker"), { ssr: false })
@@ -100,7 +100,9 @@ export default function NewPropertyPage() {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const { data: session } = useSession()
-  const maxImages = photoLimit(Boolean(session?.user.isPremium))
+  const maxImages = photoLimit(
+    session ? hasProAccess(session.user) : false
+  )
 
   function clearError(field: string) {
     setFieldErrors((prev) => {

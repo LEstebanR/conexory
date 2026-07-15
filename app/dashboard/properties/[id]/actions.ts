@@ -8,7 +8,7 @@ import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-message"
 import { SHARE_INFO_IDS, SHARE_MESSAGE_KINDS } from "@/lib/share-message-options"
-import { propertyLimit } from "@/lib/plans"
+import { propertyLimit, hasProAccess } from "@/lib/plans"
 
 export async function togglePublished(
   propertyId: string,
@@ -18,14 +18,15 @@ export async function togglePublished(
   if (!session) return { success: false, error: "Sesión expirada. Vuelve a iniciar sesión." }
 
   if (published) {
-    const limit = propertyLimit(session.user.isPremium)
+    const proAccess = hasProAccess(session.user)
+    const limit = propertyLimit(proAccess)
     const activeCount = await prisma.property.count({
       where: { userId: session.user.id, published: true, id: { not: propertyId } },
     })
     if (activeCount >= limit) {
       return {
         success: false,
-        error: session.user.isPremium
+        error: proAccess
           ? `Has alcanzado el máximo de ${limit} propiedades activas de tu plan Pro. Contáctanos para un plan personalizado.`
           : `Has alcanzado el límite de ${limit} propiedades activas del plan gratuito. Actualiza a Pro para activar más.`,
       }
@@ -77,7 +78,7 @@ export async function generateShareMessage(input: {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { error: "No autenticado" }
-    if (!session.user.isPremium) return { error: "Generar con IA es una función Pro" }
+    if (!hasProAccess(session.user)) return { error: "Generar con IA es una función Pro" }
 
     const parsed = GenerateMessageSchema.safeParse(input)
     if (!parsed.success) return { error: "Solicitud inválida" }

@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import { SubscribeWidget } from "./subscribe-widget"
 import { UpgradeErrorToast } from "./upgrade-error-toast"
+import { hasProAccess } from "@/lib/plans"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -35,7 +36,7 @@ export default async function UpgradePage() {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) redirect("/login")
 
-  if (session.user.isPremium) {
+  if (hasProAccess(session.user)) {
     const subscription = await prisma.subscription.findUnique({
       where: { userId: session.user.id },
       select: { currentPeriodEnd: true, createdAt: true, status: true },
@@ -92,7 +93,7 @@ export default async function UpgradePage() {
             </Button>
           </div>
 
-          {!isCanceling && (
+          {!isCanceling && subscription && (
             <div className="text-center mt-5">
               <Link
                 href="/dashboard/upgrade/cancel"

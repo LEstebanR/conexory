@@ -7,8 +7,10 @@ import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import SettingsForm from "./settings-form"
 import SettingsTour from "./settings-tour"
+import ReferralLinkCard from "./referral-link-card"
 import { toggleProfilePublished } from "./actions"
 import { getAppUrl } from "@/lib/urls"
+import { hasProAccess } from "@/lib/plans"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -26,6 +28,7 @@ export default async function SettingsPage() {
       email: true,
       image: true,
       isPremium: true,
+      role: true,
       location: true,
       bio: true,
       phone: true,
@@ -43,6 +46,8 @@ export default async function SettingsPage() {
 
   const appUrl = getAppUrl()
   const profileUrl = user.agentSlug ? `${appUrl}/agente/${user.agentSlug}` : null
+  const referralUrl = user.agentSlug ? `${appUrl}/register?ref=${user.agentSlug}` : null
+  const proAccess = hasProAccess(user)
 
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
@@ -119,7 +124,7 @@ export default async function SettingsPage() {
           <div className="bg-white rounded-2xl border border-hairline p-6">
             <h2 className="text-base font-bold text-ink mb-1">Plan actual</h2>
             <div className="flex items-center gap-2 mt-3 mb-5">
-              {user.isPremium ? (
+              {proAccess ? (
                 <span className="text-xs font-black uppercase tracking-wider bg-ink text-white px-2.5 py-1 rounded-full">
                   Pro
                 </span>
@@ -129,7 +134,7 @@ export default async function SettingsPage() {
                 </span>
               )}
             </div>
-            {user.isPremium ? (
+            {proAccess ? (
               <>
                 <p className="text-xs text-mute leading-relaxed mb-5">
                   50 propiedades activas · 20 fotos por propiedad
@@ -152,6 +157,9 @@ export default async function SettingsPage() {
               </>
             )}
           </div>
+
+          {/* Referidos */}
+          {referralUrl && <ReferralLinkCard url={referralUrl} />}
         </div>
       </div>
     </div>

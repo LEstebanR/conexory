@@ -5,10 +5,10 @@ import { auth } from "@/lib/auth"
 import Sidebar from "@/components/dashboard/sidebar"
 
 export const metadata: Metadata = {
-  title: "Dashboard — Conexory",
+  title: "Admin — Conexory",
 }
 
-export default async function DashboardLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
@@ -18,6 +18,7 @@ export default async function DashboardLayout({
   })
 
   if (!session) redirect("/login")
+  if (session.user.role !== "admin") redirect("/dashboard")
 
   const user = {
     name: session.user.name,
@@ -31,7 +32,6 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-canvas-softer">
       <Sidebar user={user} />
 
-      {/* Content — offset sidebar on desktop, add top padding on mobile */}
       <div className="lg:pl-60 pt-14 lg:pt-0 min-h-screen flex flex-col">
         {children}
       </div>

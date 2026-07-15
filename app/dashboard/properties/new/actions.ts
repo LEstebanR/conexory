@@ -5,7 +5,7 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
-import { propertyLimit, photoLimit, PRO_PROPERTY_LIMIT } from "@/lib/plans"
+import { propertyLimit, photoLimit, hasProAccess, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { parseOnboarding } from "@/lib/onboarding"
 
@@ -47,19 +47,20 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
     const parsed = PropertySchema.safeParse(data)
     if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
 
-    const maxPhotos = photoLimit(session.user.isPremium)
+    const proAccess = hasProAccess(session.user)
+    const maxPhotos = photoLimit(proAccess)
     if (parsed.data.images.length > maxPhotos) {
       return { success: false, error: `Tu plan permite máximo ${maxPhotos} fotos por propiedad.` }
     }
 
-    const limit = propertyLimit(session.user.isPremium)
+    const limit = propertyLimit(proAccess)
     const activeCount = await prisma.property.count({
       where: { userId: session.user.id, published: true },
     })
     if (activeCount >= limit) {
       return {
         success: false,
-        error: session.user.isPremium
+        error: proAccess
           ? `Has alcanzado el máximo de ${limit} propiedades activas de tu plan Pro. Contáctanos para un plan personalizado.`
           : `Has alcanzado el límite de ${limit} propiedades activas del plan gratuito. Actualiza a Pro para publicar hasta ${PRO_PROPERTY_LIMIT} propiedades.`,
       }

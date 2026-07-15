@@ -16,6 +16,7 @@ model User {
   email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
+  role             String    @default("user")
   isPremium        Boolean   @default(false)
   onboarding       Json      @default("{\"welcomeModalSeen\": false, \"dashboardTourCompleted\": false, \"propertyTourCompleted\": false, \"settingsTourCompleted\": false, \"firstPropertyCreated\": false, \"firstPropertyShared\": false}")
   agentSlug        String?   @unique
@@ -29,6 +30,7 @@ model User {
   tiktok          String?
   linkedin        String?
   youtube         String?
+  referredById    String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -37,6 +39,8 @@ model User {
   properties            Property[]
   subscription          Subscription?
   paymentEvents         PaymentEvent[]
+  referredBy            User?          @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals             User[]         @relation("UserReferrals")
 
   @@map("users")
 }
