@@ -29,7 +29,11 @@ export default function PropertyActions({
   async function handleToggle() {
     setLoading(true)
     try {
-      await togglePublished(propertyId, !published)
+      const result = await togglePublished(propertyId, !published)
+      if (!result.success) {
+        toast.error(result.error)
+        return
+      }
       setPublished((p) => !p)
       router.refresh()
     } finally {

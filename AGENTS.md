@@ -229,6 +229,7 @@ Ver `.env.example` para la lista completa. Las críticas:
 | `BETTER_AUTH_URL` | Opcional — base de auth; si falta, se deriva del request / `VERCEL_URL` |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth Google |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob (el SDK la lee solo) |
+| `GOOGLE_AI_API_KEY` | Google AI Studio (Gemini Flash, free tier) para mejorar con IA el mensaje de WhatsApp; si falta, la acción devuelve error amable |
 
 > La URL pública de la app **no** se configura por env var: se deriva en runtime con `getAppUrl()` desde las variables que Vercel inyecta (`VERCEL_PROJECT_PRODUCTION_URL` / `VERCEL_URL`). `APP_URL` solo se usa como override para un dominio propio.
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { MapPin, BedDouble, Bath, Square, Share2, ChevronRight, EyeOff, Building2, Search, SlidersHorizontal, ArrowUpDown } from "lucide-react"
+import { MapPin, BedDouble, Bath, Square, Share2, ChevronRight, EyeOff, Building2, Search, SlidersHorizontal, ArrowUpDown, Eye, MessageCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
 
@@ -24,6 +24,10 @@ export type PropertyItem = {
   parking: number | null
   image: string | null
   createdAt: number
+  visits: number
+  visitsThisWeek: number
+  whatsappClicks: number
+  isPremium: boolean
 }
 
 type Filter = "all" | "active" | "inactive"
@@ -160,6 +164,16 @@ function Row({ item }: { item: PropertyItem }) {
           {item.bathrooms != null && (
             <span className="hidden sm:flex items-center gap-1">
               <Bath className="w-3 h-3" /> {item.bathrooms}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3 mt-1 text-xs text-mute">
+          <span className="flex items-center gap-1">
+            <Eye className="w-3 h-3" /> {item.visits} {item.visits === 1 ? "visita" : "visitas"}
+          </span>
+          {item.isPremium && (
+            <span className="flex items-center gap-1">
+              <MessageCircle className="w-3 h-3" /> {item.whatsappClicks} WhatsApp
             </span>
           )}
           {item.shares > 0 && (

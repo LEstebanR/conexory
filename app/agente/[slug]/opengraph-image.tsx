@@ -17,30 +17,42 @@ async function getAgent(slug: string) {
   return prisma.user.findUnique({
     where: { agentSlug: slug },
     select: {
-      name: true,
       image: true,
-      location: true,
-      bio: true,
       profilePublished: true,
-      properties: {
-        where: { published: true },
-        select: { id: true },
-      },
     },
   })
+}
+
+// Google profile photo URLs (lh3.googleusercontent.com/...=s96-c) embed a
+// pixel size in the URL — the default is tiny, so bump it before rendering
+// at AVATAR_SIZE or the circle upscales a 96px thumbnail into a blur.
+function highResAvatar(url: string): string {
+  try {
+    if (new URL(url).hostname !== "lh3.googleusercontent.com") return url
+  } catch {
+    return url
+  }
+  return url.replace(/=s\d+-c/, "=s600-c")
+}
+
+const AVATAR_SIZE = 560
+const avatarFrame = {
+  display: "flex" as const,
+  width: AVATAR_SIZE,
+  height: AVATAR_SIZE,
+  borderRadius: AVATAR_SIZE / 2,
+  alignItems: "center" as const,
+  justifyContent: "center" as const,
+  border: "1px solid rgba(0,0,0,0.08)",
+  boxShadow: "0 10px 28px rgba(0,0,0,0.10)",
 }
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const agent = await getAgent(slug)
 
-  const fontBold = loadFont("inter-bold.woff")
   const fontBlack = loadFont("inter-black.woff")
-
-  const fonts = [
-    { name: "Inter", data: fontBold, weight: 700 as const, style: "normal" as const },
-    { name: "Inter", data: fontBlack, weight: 900 as const, style: "normal" as const },
-  ]
+  const fonts = [{ name: "Inter", data: fontBlack, weight: 900 as const, style: "normal" as const }]
 
   if (!agent || !agent.profilePublished) {
     return new ImageResponse(
@@ -64,179 +76,30 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     )
   }
 
-  const initials = agent.name
-    .split(" ")
-    .map((n: string) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
-
-  const count = agent.properties.length
-  const propLabel = count === 1 ? "propiedad activa" : "propiedades activas"
-
-  const bio = agent.bio
-    ? agent.bio.length > 130
-      ? agent.bio.slice(0, 127) + "…"
-      : agent.bio
-    : null
-
-  const subtitle = ["Asesor inmobiliario", agent.location].filter(Boolean).join("  ·  ")
-
   return new ImageResponse(
     <div
       style={{
         width: "100%",
         height: "100%",
+        background: "#fff",
         display: "flex",
-        flexDirection: "row",
-        fontFamily: "Inter",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      {/* Left panel — framed photo or initials */}
-      <div
-        style={{
-          width: 460,
-          height: 630,
-          background: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-          padding: 44,
-        }}
-      >
-        {agent.image ? (
-          <div style={{ display: "flex", width: "100%", height: "100%", borderRadius: 28, overflow: "hidden" }}>
-            <img
-              src={agent.image}
-              alt=""
-              style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 28 }}
-            />
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              width: "100%",
-              height: "100%",
-              borderRadius: 28,
-              background: "#efefef",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                color: "#000",
-                fontWeight: 900,
-                fontSize: 140,
-                letterSpacing: -4,
-                opacity: 0.14,
-                lineHeight: 1,
-              }}
-            >
-              {initials}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Right panel — content */}
-      <div
-        style={{
-          flex: 1,
-          height: 630,
-          background: "#fff",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: "52px 72px 48px 28px",
-        }}
-      >
-        {/* Top: name + subtitle + bio */}
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span
-            style={{
-              color: "#000",
-              fontWeight: 900,
-              fontSize: 76,
-              letterSpacing: -2.5,
-              lineHeight: 1.05,
-              marginBottom: 16,
-            }}
-          >
-            {agent.name}
-          </span>
-          <span
-            style={{
-              color: "#afafaf",
-              fontWeight: 700,
-              fontSize: 28,
-              letterSpacing: -0.3,
-              marginBottom: bio ? 28 : 0,
-            }}
-          >
-            {subtitle}
-          </span>
-          {bio && (
-            <span
-              style={{
-                color: "#5e5e5e",
-                fontWeight: 700,
-                fontSize: 25,
-                lineHeight: 1.55,
-              }}
-            >
-              &ldquo;{bio}&rdquo;
-            </span>
-          )}
+      {agent.image ? (
+        <div style={{ ...avatarFrame, overflow: "hidden" }}>
+          <img
+            src={highResAvatar(agent.image)}
+            alt=""
+            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: AVATAR_SIZE / 2 }}
+          />
         </div>
-
-        {/* Bottom: divider + stats + Conexory mark */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div style={{ width: "100%", height: 1, background: "#e5e5e5" }} />
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  background: "#efefef",
-                  border: "1px solid #e5e5e5",
-                  borderRadius: 50,
-                  paddingLeft: 22,
-                  paddingRight: 22,
-                  paddingTop: 12,
-                  paddingBottom: 12,
-                }}
-              >
-                <span style={{ color: "#5e5e5e", fontWeight: 900, fontSize: 20, letterSpacing: -0.3 }}>
-                  {count} {propLabel}
-                </span>
-              </div>
-              <span
-                style={{
-                  color: "#afafaf",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                }}
-              >
-                en Conexory
-              </span>
-            </div>
-
-            {/* Conexory mark */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <img src={markBlack} alt="" style={{ width: 26, height: 26 }} />
-              <span style={{ color: "#000", fontWeight: 900, fontSize: 22, letterSpacing: -0.5 }}>
-                Conexory
-              </span>
-            </div>
-          </div>
+      ) : (
+        <div style={avatarFrame}>
+          <img src={markBlack} alt="" style={{ width: 240, height: 240 }} />
         </div>
-      </div>
+      )}
     </div>,
     { width: 1200, height: 630, fonts }
   )

@@ -1,24 +1,20 @@
 import { notFound } from "next/navigation"
+import { after } from "next/server"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, BedDouble, Bath, Ruler, Car, LandPlot, ShieldCheck, EyeOff, ArrowUpRight, Phone, Mail, MessageCircle } from "lucide-react"
+import { MapPin, BedDouble, Bath, Ruler, Car, LandPlot, ShieldCheck, EyeOff, ArrowUpRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
 import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
+import { formatCOP } from "@/lib/format"
 import PublicGallery from "@/components/public-gallery"
 import Reveal from "@/components/reveal"
 import PropertyMap from "@/components/property-map-client"
-
-function formatCOP(amount: number): string {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
+import ContactButtons from "./contact-buttons"
+import SocialLinkButton from "./social-link-button"
+import WhatsAppFab from "./whatsapp-fab"
 
 // ── Social icon SVGs (same as agent page) ─────────────────────────────────
 
@@ -186,7 +182,7 @@ type AgentUser = {
   youtube: string | null
 }
 
-function AgentCard({ user, whatsappMessage }: { user: AgentUser; whatsappMessage: string }) {
+function AgentCard({ propertyId, user, whatsappMessage }: { propertyId: string; user: AgentUser; whatsappMessage: string }) {
   const initials = user.name
     .split(" ")
     .map((n: string) => n[0])
@@ -195,11 +191,11 @@ function AgentCard({ user, whatsappMessage }: { user: AgentUser; whatsappMessage
     .slice(0, 2)
 
   const socialLinks = [
-    { handle: user.instagram, href: `https://instagram.com/${user.instagram}`,   label: "Instagram", Icon: InstagramIcon },
-    { handle: user.tiktok,    href: `https://tiktok.com/@${user.tiktok}`,         label: "TikTok",    Icon: TikTokIcon },
-    { handle: user.facebook,  href: `https://facebook.com/${user.facebook}`,      label: "Facebook",  Icon: FacebookIcon },
-    { handle: user.linkedin,  href: `https://linkedin.com/in/${user.linkedin}`,   label: "LinkedIn",  Icon: LinkedInIcon },
-    { handle: user.youtube,   href: `https://youtube.com/@${user.youtube}`,       label: "YouTube",   Icon: YouTubeIcon },
+    { handle: user.instagram, href: `https://instagram.com/${user.instagram}`,   label: "Instagram", Icon: InstagramIcon, eventType: "social_instagram_click" },
+    { handle: user.tiktok,    href: `https://tiktok.com/@${user.tiktok}`,         label: "TikTok",    Icon: TikTokIcon,    eventType: "social_tiktok_click" },
+    { handle: user.facebook,  href: `https://facebook.com/${user.facebook}`,      label: "Facebook",  Icon: FacebookIcon,  eventType: "social_facebook_click" },
+    { handle: user.linkedin,  href: `https://linkedin.com/in/${user.linkedin}`,   label: "LinkedIn",  Icon: LinkedInIcon,  eventType: "social_linkedin_click" },
+    { handle: user.youtube,   href: `https://youtube.com/@${user.youtube}`,       label: "YouTube",   Icon: YouTubeIcon,   eventType: "social_youtube_click" },
   ].filter(({ handle }) => !!handle)
 
   const hasSocial = socialLinks.length > 0
@@ -243,17 +239,10 @@ function AgentCard({ user, whatsappMessage }: { user: AgentUser; whatsappMessage
       {/* Social icons */}
       {hasSocial && (
         <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
-          {socialLinks.map(({ href, label, Icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={label}
-              className="w-8 h-8 rounded-full bg-white border border-hairline-strong flex items-center justify-center text-body hover:text-ink hover:border-ink transition-colors"
-            >
+          {socialLinks.map(({ href, label, Icon, eventType }) => (
+            <SocialLinkButton key={label} propertyId={propertyId} href={href} label={label} eventType={eventType}>
               <Icon className="w-[15px] h-[15px]" />
-            </a>
+            </SocialLinkButton>
           ))}
         </div>
       )}
@@ -262,50 +251,13 @@ function AgentCard({ user, whatsappMessage }: { user: AgentUser; whatsappMessage
       <div className="border-t border-hairline mb-4" />
 
       {/* Contact buttons — equal width, icon-only, tooltip on hover */}
-      <div className="flex gap-2">
-        {user.phone && user.phoneIsWhatsapp && (
-          <div className="relative group flex-1">
-            <a
-              href={`https://wa.me/${user.phone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
-            >
-              <MessageCircle className="w-[18px] h-[18px]" strokeWidth={2} />
-            </a>
-            <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
-              {user.phone}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-ink" />
-            </div>
-          </div>
-        )}
-        {user.phone && (
-          <div className="relative group flex-1">
-            <a
-              href={`tel:${user.phone}`}
-              className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
-            >
-              <Phone className="w-[18px] h-[18px]" strokeWidth={2} />
-            </a>
-            <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
-              {user.phone}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-ink" />
-            </div>
-          </div>
-        )}
-        <div className="relative group flex-1">
-          <a
-            href={`mailto:${user.email}`}
-            className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
-          >
-            <Mail className="w-[18px] h-[18px]" strokeWidth={2} />
-          </a>
-          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
-            {user.email}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-ink" />
-          </div>
-        </div>
-      </div>
+      <ContactButtons
+        propertyId={propertyId}
+        phone={user.phone}
+        phoneIsWhatsapp={user.phoneIsWhatsapp}
+        email={user.email}
+        whatsappMessage={whatsappMessage}
+      />
     </div>
   )
 }
@@ -337,6 +289,11 @@ export default async function PublicPropertyPage({
   })
 
   if (!property) notFound()
+
+  // Track visit fire-and-forget after response is sent
+  if (property.published) {
+    after(() => prisma.propertyVisit.create({ data: { propertyId: property.id } }))
+  }
 
   const typeLabel = TYPE_LABELS[property.type] ?? property.type
 
@@ -518,7 +475,7 @@ export default async function PublicPropertyPage({
         {showContactCard && (
           <div className="xl:hidden">
             <Reveal delay={200}>
-              <AgentCard user={property.user} whatsappMessage={whatsappMessage} />
+              <AgentCard propertyId={property.id} user={property.user} whatsappMessage={whatsappMessage} />
             </Reveal>
           </div>
         )}
@@ -527,9 +484,16 @@ export default async function PublicPropertyPage({
       {/* Fixed floating card — xl+ only, positioned in the right margin */}
       {showContactCard && (
         <div className="hidden xl:block fixed right-10 top-5 w-64 z-10">
-          <AgentCard user={property.user} whatsappMessage={whatsappMessage} />
+          <AgentCard propertyId={property.id} user={property.user} whatsappMessage={whatsappMessage} />
         </div>
       )}
+
+      <WhatsAppFab
+        propertyId={property.id}
+        phone={property.user.phone}
+        phoneIsWhatsapp={property.user.phoneIsWhatsapp}
+        whatsappMessage={whatsappMessage}
+      />
 
       <PageFooter />
     </div>
