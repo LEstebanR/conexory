@@ -1,5 +1,6 @@
 "use server"
 
+import * as Sentry from "@sentry/nextjs"
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -51,6 +52,7 @@ export async function updateProperty(
 
     return { success: true }
   } catch (err) {
+    Sentry.captureException(err, { tags: { action: "updateProperty" } })
     console.error("updateProperty failed:", err)
     return {
       success: false,

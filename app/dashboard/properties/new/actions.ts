@@ -1,5 +1,6 @@
 "use server"
 
+import * as Sentry from "@sentry/nextjs"
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -96,6 +97,7 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
 
     return { success: true, id: property.id }
   } catch (err) {
+    Sentry.captureException(err, { tags: { action: "createProperty" } })
     console.error("createProperty failed:", err)
     return {
       success: false,
