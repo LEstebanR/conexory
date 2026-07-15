@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
+import { hasProAccess } from "@/lib/plans"
 import AdminNav from "../admin-nav"
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default async function AdminReferralsPage() {
       name: true,
       email: true,
       isPremium: true,
+      role: true,
       createdAt: true,
       referredBy: { select: { name: true, email: true } },
     },
@@ -64,12 +66,12 @@ export default async function AdminReferralsPage() {
                   <td className="px-5 py-3">
                     <span
                       className={
-                        r.isPremium
+                        hasProAccess(r)
                           ? "text-xs font-black uppercase tracking-wider bg-ink text-white px-2 py-0.5 rounded-full"
                           : "text-xs font-bold uppercase tracking-wider bg-canvas-soft text-mute px-2 py-0.5 rounded-full"
                       }
                     >
-                      {r.isPremium ? "Pro" : "Free"}
+                      {hasProAccess(r) ? "Pro" : "Free"}
                     </span>
                   </td>
                   <td className="px-5 py-3 text-body whitespace-nowrap">{formatDate(r.createdAt)}</td>

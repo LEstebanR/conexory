@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { ExternalLink } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { hasProAccess } from "@/lib/plans"
 import AdminNav from "../admin-nav"
 import PremiumToggle from "./premium-toggle"
 
@@ -10,10 +11,6 @@ export const metadata: Metadata = {
 }
 
 const PAGE_SIZE = 20
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })
-}
 
 export default async function AdminUsersPage({
   searchParams,
@@ -41,9 +38,9 @@ export default async function AdminUsersPage({
         name: true,
         email: true,
         isPremium: true,
+        role: true,
         agentSlug: true,
         profilePublished: true,
-        createdAt: true,
         _count: { select: { properties: { where: { published: true } } } },
       },
       orderBy: { createdAt: "desc" },
@@ -89,14 +86,13 @@ export default async function AdminUsersPage({
               <th className="px-5 py-3">Email</th>
               <th className="px-5 py-3">Plan</th>
               <th className="px-5 py-3">Propiedades activas</th>
-              <th className="px-5 py-3">Registro</th>
               <th className="px-5 py-3"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-hairline">
             {users.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-8 text-center text-mute">
+                <td colSpan={5} className="px-5 py-8 text-center text-mute">
                   Sin resultados.
                 </td>
               </tr>
@@ -121,17 +117,16 @@ export default async function AdminUsersPage({
                   <td className="px-5 py-3">
                     <span
                       className={
-                        u.isPremium
+                        hasProAccess(u)
                           ? "text-xs font-black uppercase tracking-wider bg-ink text-white px-2 py-0.5 rounded-full"
                           : "text-xs font-bold uppercase tracking-wider bg-canvas-soft text-mute px-2 py-0.5 rounded-full"
                       }
                     >
-                      {u.isPremium ? "Pro" : "Free"}
+                      {hasProAccess(u) ? "Pro" : "Free"}
                     </span>
                   </td>
                   <td className="px-5 py-3 tabular-nums text-body">{u._count.properties}</td>
-                  <td className="px-5 py-3 text-body whitespace-nowrap">{formatDate(u.createdAt)}</td>
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3 whitespace-nowrap">
                     <PremiumToggle userId={u.id} userName={u.name} initialIsPremium={u.isPremium} />
                   </td>
                 </tr>

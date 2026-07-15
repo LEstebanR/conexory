@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { Users, Building2, Zap, TrendingUp, Layers, ListChecks } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { daysAgo } from "@/lib/dates"
@@ -117,8 +118,10 @@ export default async function AdminPage() {
     prisma.user.count(),
     prisma.user.count({ where: { createdAt: { gte: week } } }),
     prisma.user.count({ where: { createdAt: { gte: month } } }),
-    prisma.user.count({ where: { isPremium: false } }),
-    prisma.user.count({ where: { isPremium: true } }),
+    // Admins get functional Pro access (hasProAccess), so they're counted as
+    // Pro everywhere here even if isPremium is false on their billing record.
+    prisma.user.count({ where: { isPremium: false, role: { not: "admin" } } }),
+    prisma.user.count({ where: { OR: [{ isPremium: true }, { role: "admin" }] } }),
     prisma.user.count({ where: { properties: { some: { published: true } } } }),
     prisma.property.count(),
     prisma.property.count({ where: { published: true } }),
@@ -126,14 +129,14 @@ export default async function AdminPage() {
     prisma.property.findMany({
       orderBy: { shares: "desc" },
       take: 10,
-      select: { id: true, title: true, shares: true, city: true },
+      select: { id: true, slug: true, title: true, shares: true, city: true },
     }),
   ])
 
   // Filtered relation counts aren't directly comparable in a single query, so
-  // fetch active-property counts for free users and filter in memory.
+  // fetch active-property counts for free (non-admin) users and filter in memory.
   const freeUsersWithCounts = await prisma.user.findMany({
-    where: { isPremium: false },
+    where: { isPremium: false, role: { not: "admin" } },
     select: { id: true, _count: { select: { properties: { where: { published: true } } } } },
   })
   const freeUsersAtLimit = freeUsersWithCounts.filter(
@@ -224,7 +227,12 @@ export default async function AdminPage() {
             <p className="text-sm text-mute p-5">Sin datos todavía.</p>
           ) : (
             topSharedProperties.map((p, i) => (
-              <div key={p.id} className="flex items-center gap-4 px-5 py-3">
+              <Link
+                key={p.id}
+                href={`/p/${p.slug}`}
+                target="_blank"
+                className="flex items-center gap-4 px-5 py-3 hover:bg-canvas-softer transition-colors"
+              >
                 <span
                   className={
                     i === 0
@@ -241,7 +249,7 @@ export default async function AdminPage() {
                 <span className="text-sm font-bold text-ink tabular-nums flex-shrink-0">
                   {p.shares}
                 </span>
-              </div>
+              </Link>
             ))
           )}
         </div>
