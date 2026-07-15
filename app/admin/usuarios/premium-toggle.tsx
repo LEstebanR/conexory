@@ -43,7 +43,7 @@ export default function PremiumToggle({
         type="button"
         onClick={() => setConfirmOpen(true)}
         disabled={loading}
-        className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-hairline-strong hover:bg-canvas-soft transition-colors disabled:opacity-50"
+        className="inline-flex items-center justify-center gap-1 w-28 flex-shrink-0 whitespace-nowrap text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-hairline-strong hover:bg-canvas-soft transition-colors disabled:opacity-50"
       >
         {loading ? (
           <Loader2 className="w-3 h-3 animate-spin" />
