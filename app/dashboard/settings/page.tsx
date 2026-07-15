@@ -17,6 +17,16 @@ export const metadata: Metadata = {
   title: "Configuración — Conexory",
 }
 
+function formatDate(date: Date) {
+  // Render in Colombia time (UTC-5) so the date the user sees matches their day.
+  return date.toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "America/Bogota",
+  })
+}
+
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) redirect("/login")
@@ -48,6 +58,14 @@ export default async function SettingsPage() {
   const profileUrl = user.agentSlug ? `${appUrl}/agente/${user.agentSlug}` : null
   const referralUrl = user.agentSlug ? `${appUrl}/register?ref=${user.agentSlug}` : null
   const proAccess = hasProAccess(user)
+  const subscription = proAccess
+    ? await prisma.subscription.findUnique({
+        where: { userId: session.user.id },
+        select: { currentPeriodEnd: true, status: true },
+      })
+    : null
+  const isCanceling = subscription?.status === "canceling"
+  const isPastDue = subscription?.status === "past_due"
 
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
@@ -139,6 +157,19 @@ export default async function SettingsPage() {
                 <p className="text-xs text-mute leading-relaxed mb-5">
                   50 propiedades activas · 20 fotos por propiedad
                 </p>
+                {isPastDue && subscription?.currentPeriodEnd && (
+                  <div className="bg-warning-50 border border-warning-200 rounded-xl px-3 py-2.5 mb-5">
+                    <p className="text-xs font-bold text-warning-900">No pudimos procesar tu pago</p>
+                    <p className="text-xs text-warning-700 mt-0.5">
+                      Tu plan pasará a Free el {formatDate(subscription.currentPeriodEnd)}.
+                    </p>
+                  </div>
+                )}
+                {isCanceling && subscription?.currentPeriodEnd && (
+                  <p className="text-xs text-mute leading-relaxed mb-5">
+                    Activo hasta el {formatDate(subscription.currentPeriodEnd)} · no se renueva
+                  </p>
+                )}
                 <Button variant="outline" size="sm" className="w-full" asChild>
                   <Link href="/dashboard/upgrade">Gestionar suscripción</Link>
                 </Button>

@@ -4,18 +4,16 @@ import {
   makeSubscriptionReference,
 } from "@/lib/wompi"
 import { downgradeToFree } from "@/lib/subscription"
-import { sendRenewalReminder, sendPaymentFailed } from "@/lib/email"
+import { sendRenewalReminder, sendSubscriptionCancelled } from "@/lib/email"
 
 // Daily billing job (scheduled in vercel.json). Wompi doesn't drive the
 // recurrence for us, so this route is the heartbeat that charges renewals,
-// reminds users beforehand, and downgrades accounts whose grace window ran out.
+// reminds users beforehand, and downgrades accounts whose payment failed —
+// no grace window and no retries, so a failed renewal drops to Free on the
+// next run.
 export const dynamic = "force-dynamic"
 
 const REMINDER_DAYS = 3
-const GRACE_DAYS = 5
-// A charge starts PENDING and resolves via webhook; don't re-attempt while one is
-// still in flight from a recent run.
-const RECHARGE_COOLDOWN_DAYS = 2
 
 function isAuthorized(req: Request): boolean {
   const secret = process.env.CRON_SECRET ?? ""
@@ -104,13 +102,12 @@ async function chargeRenewals(
 ) {
   const due = await prisma.subscription.findMany({
     where: {
-      status: { in: ["active", "past_due"] },
+      status: "active",
       currentPeriodEnd: { lte: now },
     },
     select: {
       id: true,
       userId: true,
-      status: true,
       currentPeriodEnd: true,
       wompiPaymentSourceId: true,
       wompiPaymentSourceType: true,
@@ -122,35 +119,24 @@ async function chargeRenewals(
 
   for (const sub of due) {
     // No saved card (a half-finished activation or legacy sub): nothing to
-    // auto-charge. Open the grace window and nudge them to subscribe again.
+    // auto-charge. Mark past_due so the next run's downgradeExpired drops it —
+    // no retries.
     if (!sub.wompiPaymentSourceId) {
       if (!sub.pastDueSince) {
         await prisma.subscription.update({
           where: { id: sub.id },
           data: { status: "past_due", pastDueSince: now },
         })
-        await sendPaymentFailed(sub.user.email, sub.user.name).catch(() => null)
         summary.pastDue++
       }
       continue
     }
 
-    const recentlyAttempted =
-      sub.lastChargeAt &&
-      now.getTime() - sub.lastChargeAt.getTime() <
-        RECHARGE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000
-    if (recentlyAttempted) continue
-
-    // An active sub whose renewal was already attempted this cycle (lastChargeAt
-    // is after the period end) is waiting on the webhook — don't re-charge it, or
-    // a lost webhook would re-bill the card every cooldown window. Only past_due
-    // (a confirmed decline) keeps retrying via the cooldown above.
-    if (
-      sub.status === "active" &&
-      sub.lastChargeAt &&
-      sub.currentPeriodEnd &&
-      sub.lastChargeAt > sub.currentPeriodEnd
-    ) {
+    // A renewal already attempted this cycle (lastChargeAt is after the period
+    // end) is waiting on the webhook — don't re-charge it, or a lost webhook
+    // would re-bill the card on every run. There's no retry after a decline:
+    // the webhook flips the sub to past_due and the cron downgrades it.
+    if (sub.lastChargeAt && sub.currentPeriodEnd && sub.lastChargeAt > sub.currentPeriodEnd) {
       continue
     }
 
@@ -176,20 +162,15 @@ async function downgradeExpired(
   now: Date,
   summary: { downgraded: number },
 ) {
-  const cutoff = new Date(now)
-  cutoff.setDate(cutoff.getDate() - GRACE_DAYS)
-
-  // pastDueSince is stamped at the failed charge, which can only happen at/after
-  // currentPeriodEnd, so the GRACE_DAYS window guarantees we never downgrade
-  // before currentPeriodEnd + 5 days. Users are in Colombia (UTC-5, no DST) and
-  // 5 days dwarfs that 5-hour offset, so nobody loses Pro before their local due
-  // date — at worst a few extra days, never fewer.
+  // No grace window: pastDueSince is stamped at the failed renewal charge (at/after
+  // currentPeriodEnd), so any past_due sub is downgraded on this very run — or, for
+  // a decline that arrived via webhook after this run started, on the next one.
   const expired = await prisma.subscription.findMany({
     where: {
       status: "past_due",
-      pastDueSince: { lte: cutoff },
+      pastDueSince: { lte: now },
     },
-    select: { id: true, userId: true },
+    select: { id: true, userId: true, user: { select: { email: true, name: true } } },
   })
 
   for (const sub of expired) {
@@ -198,6 +179,7 @@ async function downgradeExpired(
       where: { id: sub.id },
       data: { status: "expired" },
     })
+    await sendSubscriptionCancelled(sub.user.email, sub.user.name).catch(() => null)
     summary.downgraded++
   }
 }
