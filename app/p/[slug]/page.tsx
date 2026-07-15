@@ -488,12 +488,14 @@ export default async function PublicPropertyPage({
         </div>
       )}
 
-      <WhatsAppFab
-        propertyId={property.id}
-        phone={property.user.phone}
-        phoneIsWhatsapp={property.user.phoneIsWhatsapp}
-        whatsappMessage={whatsappMessage}
-      />
+      {showContactCard && (
+        <WhatsAppFab
+          propertyId={property.id}
+          phone={property.user.phone}
+          phoneIsWhatsapp={property.user.phoneIsWhatsapp}
+          whatsappMessage={whatsappMessage}
+        />
+      )}
 
       <PageFooter />
     </div>
