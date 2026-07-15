@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { verifyWompiEvent } from "@/lib/wompi"
-import { sendSubscriptionConfirmation } from "@/lib/email"
+import { sendPaymentFailed, sendSubscriptionConfirmation } from "@/lib/email"
 
 export async function POST(req: Request) {
   const bodyText = await req.text()
@@ -143,10 +143,21 @@ async function handleDeclined(userId: string | null) {
   // Stamp pastDueSince only on the first failure so it reflects when the trouble
   // started. No retries: the next billing cron run downgrades this sub to Free
   // and emails the user then (see downgradeExpired in app/api/cron/billing).
-  await prisma.subscription.updateMany({
+  const { count } = await prisma.subscription.updateMany({
     where: { userId, pastDueSince: null },
     data: { status: "past_due", pastDueSince: new Date() },
   })
+
+  // count === 0 means this sub was already past_due (a second declined
+  // transaction in the same cycle) — the "your payment failed" email already
+  // went out for the first one, so don't resend it.
+  if (count === 0) return
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true },
+  })
+  if (user) await sendPaymentFailed(user.email, user.name).catch(() => null)
 }
 
 async function handleCancelled(userId: string | null) {

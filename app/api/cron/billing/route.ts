@@ -77,6 +77,7 @@ async function sendReminders(
     select: {
       id: true,
       currentPeriodEnd: true,
+      wompiPaymentSourceId: true,
       user: { select: { email: true, name: true } },
     },
   })
@@ -87,6 +88,7 @@ async function sendReminders(
       sub.user.email,
       sub.user.name,
       sub.currentPeriodEnd,
+      !!sub.wompiPaymentSourceId,
     ).catch(() => null)
     await prisma.subscription.update({
       where: { id: sub.id },
