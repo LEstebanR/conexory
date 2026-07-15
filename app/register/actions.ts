@@ -50,7 +50,18 @@ export async function registerAction(
     const newUser = await prisma.user.findUnique({ where: { email }, select: { id: true } })
     if (newUser) {
       const slug = await generateAgentSlug(name, prisma)
-      await prisma.user.update({ where: { id: newUser.id }, data: { agentSlug: slug } })
+      const data: { agentSlug: string; referredById?: string } = { agentSlug: slug }
+
+      const ref = formData.get("ref")
+      if (typeof ref === "string" && ref.trim()) {
+        const referrer = await prisma.user.findUnique({
+          where: { agentSlug: ref.trim() },
+          select: { id: true },
+        })
+        if (referrer) data.referredById = referrer.id
+      }
+
+      await prisma.user.update({ where: { id: newUser.id }, data })
     }
   } catch (error) {
     if (error instanceof APIError) {

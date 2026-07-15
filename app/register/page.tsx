@@ -34,6 +34,10 @@ export default function RegisterPage() {
     const r = new URLSearchParams(window.location.search).get("redirect")
     return r?.startsWith("/") ? r : "/dashboard"
   })
+  const [ref] = useState(() => {
+    if (typeof window === "undefined") return ""
+    return new URLSearchParams(window.location.search).get("ref") ?? ""
+  })
 
   const passwordsMatch = confirmPassword === "" || password === confirmPassword
 
@@ -110,6 +114,7 @@ export default function RegisterPage() {
 
           <form action={formAction} noValidate className="space-y-4">
             <input type="hidden" name="redirect" value={redirectTo} />
+            <input type="hidden" name="ref" value={ref} />
             <div className="space-y-1.5">
               <label htmlFor="name" className="block text-sm font-semibold text-ink">
                 Nombre completo

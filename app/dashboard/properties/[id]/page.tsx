@@ -10,6 +10,7 @@ import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-ty
 import { formatCOP } from "@/lib/format"
 import { daysAgo } from "@/lib/dates"
 import { readMetrics, socialTotal, contactTotal } from "@/lib/property-metrics"
+import { hasProAccess } from "@/lib/plans"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
@@ -37,7 +38,7 @@ export default async function PropertyDetailPage({
 
   if (!property) notFound()
 
-  const isPremium = session.user.isPremium
+  const isPremium = hasProAccess(session.user)
   const weekDelta = visitsThisWeek - visitsPrevWeek
   const metrics = readMetrics(property.metrics)
   const totalWhatsapp = metrics.whatsapp

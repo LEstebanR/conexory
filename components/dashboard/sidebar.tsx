@@ -11,15 +11,19 @@ import {
   X,
   ChevronRight,
   Settings,
+  Shield,
+  Loader2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { signOut } from "@/lib/auth-client"
+import { hasProAccess } from "@/lib/plans"
 
 interface User {
   name: string
   email: string
   image: string | null
   isPremium: boolean
+  role: string
 }
 
 function UserAvatar({ name, image, size = 32 }: { name: string; image: string | null; size?: number }) {
@@ -73,6 +77,12 @@ const navItems = [
     exact: true,
   },
 ]
+
+const adminNavItem = {
+  icon: Shield,
+  label: "Admin",
+  href: "/admin",
+}
 
 
 function NavLink({
@@ -140,14 +150,17 @@ function SidebarContent({
 }) {
   const router = useRouter()
   const tourSuffix = variant === "mobile" ? "-mobile" : ""
+  const [signingOut, setSigningOut] = useState(false)
 
   async function handleSignOut() {
+    setSigningOut(true)
     await signOut({
       fetchOptions: {
         onSuccess: () => {
           router.push("/")
           router.refresh()
         },
+        onError: () => setSigningOut(false),
       },
     })
   }
@@ -181,8 +194,11 @@ function SidebarContent({
         ))}
       </div>
 
-      {/* Configuración — encima del separador */}
-      <div className="flex-shrink-0 px-3 pb-2">
+      {/* Admin + Configuración — encima del separador */}
+      <div className="flex-shrink-0 px-3 pb-2 space-y-1">
+        {user.role === "admin" && (
+          <NavLink key={adminNavItem.href} {...adminNavItem} onClick={onClose} />
+        )}
         <NavLink
           href="/dashboard/settings"
           icon={Settings}
@@ -199,7 +215,7 @@ function SidebarContent({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <p className="text-sm font-bold text-ink truncate">{user.name}</p>
-              {user.isPremium && (
+              {hasProAccess(user) && (
                 <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-wider bg-ink text-white px-1.5 py-0.5 rounded-full leading-none">
                   Pro
                 </span>
@@ -210,10 +226,15 @@ function SidebarContent({
         </div>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium cursor-pointer"
+          disabled={signingOut}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          <LogOut className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
-          Cerrar sesión
+          {signingOut ? (
+            <Loader2 className="w-4 h-4 flex-shrink-0 animate-spin" strokeWidth={1.75} />
+          ) : (
+            <LogOut className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+          )}
+          {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
         </button>
       </div>
     </div>
