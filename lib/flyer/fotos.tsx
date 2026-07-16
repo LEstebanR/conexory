@@ -9,7 +9,6 @@ import {
   has,
   icon,
   bigTitle,
-  brandRow,
   priceBox,
   featureList,
   locationLine,
@@ -49,25 +48,11 @@ export function templateFotos(d: FlyerData): ReactElement {
             }}
           >
             <div style={{ display: "flex", flexShrink: 0 }}>{icon("tag", 24, INK)}</div>
-            <span style={{ fontSize: 20, fontWeight: 900, color: INK, letterSpacing: 1.5, textTransform: "uppercase", lineHeight: 1.3 }}>
+            <span style={{ fontSize: 20, fontWeight: 900, color: d.accentTextColor, letterSpacing: 1.5, textTransform: "uppercase", lineHeight: 1.3 }}>
               {truncate(badge, 100)}
             </span>
           </div>
         )}
-        <div
-          style={{
-            display: "flex",
-            position: "absolute",
-            top: 28,
-            right: 28,
-            background: "#fff",
-            borderRadius: 50,
-            padding: "12px 24px",
-            boxShadow: PANEL_SHADOW,
-          }}
-        >
-          {brandRow(false, 22)}
-        </div>
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 26, padding: `30px ${PAD}px 34px` }}>

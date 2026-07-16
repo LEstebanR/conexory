@@ -30,6 +30,8 @@ model User {
   tiktok          String?
   linkedin        String?
   youtube         String?
+  brandColor      String    @default("#0a0a0a")
+  secondaryColor  String    @default("#0a0a0a")
   referredById    String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

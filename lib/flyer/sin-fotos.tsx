@@ -7,7 +7,6 @@ import {
   dots,
   bigTitle,
   locationChip,
-  brandRow,
   highlightBadge,
   priceBox,
   featureRow,
@@ -43,7 +42,6 @@ export function templateSinFotos(d: FlyerData): ReactElement {
             {locationChip(d, 26)}
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 16 }}>
-            {brandRow(false)}
             {highlightBadge(d, 18, 320)}
           </div>
         </div>

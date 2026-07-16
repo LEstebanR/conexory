@@ -5,7 +5,13 @@ import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateFlyerJpeg, FLYER_RENDER_VERSION } from "@/lib/flyer"
-import { FLYER_INFO_IDS, FLYER_TEMPLATE_IDS, FLYER_HIGHLIGHT_MAX_LENGTH, type FlyerInfo } from "@/lib/flyer-options"
+import {
+  FLYER_INFO_IDS,
+  FLYER_TEMPLATE_IDS,
+  FLYER_HIGHLIGHT_MAX_LENGTH,
+  HEX_COLOR_REGEX,
+  type FlyerInfo,
+} from "@/lib/flyer-options"
 
 export const runtime = "nodejs"
 
@@ -25,6 +31,8 @@ const QuerySchema = z.object({
         (csv?.split(",").filter((v): v is FlyerInfo => (FLYER_INFO_IDS as readonly string[]).includes(v)) ??
           [...FLYER_INFO_IDS])
     ),
+  accentColor: z.string().regex(HEX_COLOR_REGEX).optional().catch(undefined),
+  secondaryColor: z.string().regex(HEX_COLOR_REGEX).optional().catch(undefined),
 })
 
 export async function GET(
@@ -37,7 +45,7 @@ export async function GET(
   const { id } = await params
   const property = await prisma.property.findUnique({
     where: { id, userId: session.user.id },
-    include: { user: { select: { name: true, image: true, phone: true } } },
+    include: { user: { select: { name: true, image: true, phone: true, brandColor: true, secondaryColor: true } } },
   })
   if (!property) return new Response("Not found", { status: 404 })
 
@@ -52,6 +60,8 @@ export async function GET(
     template: query.template,
     highlight: query.highlight || undefined,
     include,
+    accentColor: query.accentColor || property.user.brandColor,
+    secondaryColor: query.secondaryColor || property.user.secondaryColor,
   }
 
   // Hash everything that affects the rendered image, not just `options`:

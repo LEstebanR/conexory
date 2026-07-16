@@ -4,7 +4,20 @@ import type { Property } from "@prisma/client"
 import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import { DEFAULT_FLYER_OPTIONS, type FlyerOptions } from "@/lib/flyer-options"
 import { getAppUrl } from "@/lib/urls"
-import { W, H, type Agent, type FlyerData, loadFont, photoAsDataUrl, FLYER_RENDER_VERSION } from "./shared"
+import {
+  W,
+  H,
+  INK,
+  readableOn,
+  ensureTextContrast,
+  ensureContrastAgainst,
+  relativeLuminance,
+  type Agent,
+  type FlyerData,
+  loadFont,
+  photoAsDataUrl,
+  FLYER_RENDER_VERSION,
+} from "./shared"
 import { templateClasica } from "./clasica"
 import { templateFicha } from "./ficha"
 import { templateFotos } from "./fotos"
@@ -34,6 +47,11 @@ export async function generateFlyerJpeg(
     )
   ).filter((p): p is string => p !== null)
 
+  const accentColor = options.accentColor || INK
+  // Falls back to accentColor (auto-darkened if needed) when the agent
+  // hasn't picked a secondary — keeps old callers / cached options working.
+  const secondaryColor = options.secondaryColor || accentColor
+
   const data: FlyerData = {
     property,
     agent,
@@ -42,6 +60,11 @@ export async function generateFlyerJpeg(
     transactionLabel,
     publicPath,
     photos,
+    accentColor,
+    accentOnColor: readableOn(accentColor),
+    primaryTextColor: ensureTextContrast(accentColor),
+    accentTextColor: ensureTextContrast(secondaryColor),
+    secondaryOnAccentColor: ensureContrastAgainst(secondaryColor, relativeLuminance(accentColor)),
   }
 
   const node =
