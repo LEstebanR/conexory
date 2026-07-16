@@ -17,7 +17,17 @@ import { formatCOP, formatCOPMillionsValue } from "@/lib/format"
 // v5: "Precio"/"Contáctame"/"Mira la propiedad..." labels use the secondary
 // color (contrast-adjusted against the accent bg) instead of fixed gray;
 // every icon is always black, regardless of the chosen colors.
-export const FLYER_RENDER_VERSION = 5
+// v6: icons sitting on an accent-colored fill (location chip, highlight
+// badge, footer) go back to adaptive contrast instead of fixed black —
+// only icons on the light canvas/white panels (features, fotos badge) stay
+// fixed black.
+// v7: back to a single brand color — the secondary color picker is gone.
+// Titles/subtitles derive their text color from accentColor itself
+// (contrast-adjusted); "Precio"/"Contáctame"/"Mira la propiedad..." labels
+// derive from the neutral MUTE gray, adjusted against accentColor instead.
+// v8: the "M" suffix on abbreviated prices ($12.5 M) matches the price
+// value's own color instead of a fixed gray.
+export const FLYER_RENDER_VERSION = 8
 
 // Above this amount the full peso figure ("$ 12.500.000.000") no longer fits
 // the price boxes, so every template switches to the compact "$ 12.500 M"
@@ -49,24 +59,20 @@ export type FlyerData = {
   transactionLabel: string | null
   publicPath: string
   photos: string[]
-  // The color the agent picked, used as-is for solid fills (chips, price box,
-  // footer bar) — paired with accentOnColor for whatever text/icon sits on
-  // top of those fills.
+  // The single color the agent picked, used as-is for solid fills (chips,
+  // price box, footer bar) — paired with accentOnColor for whatever
+  // text/icon sits on top of those fills.
   accentColor: string
   accentOnColor: string
-  // accentColor itself, darkened just enough to stay legible when drawn as
-  // the big headline text directly on the light canvas.
+  // accentColor itself, darkened or lightened just enough to stay legible
+  // when drawn as text directly on the light canvas or a white panel
+  // (titles, subtitles, section headings).
   primaryTextColor: string
-  // The agent's secondary color (or accentColor if they didn't set one),
-  // darkened if needed — used for subtitle-level text/icons on the light
-  // canvas or a white panel (transaction label, card subtitles, section
-  // headings, feature icons).
-  accentTextColor: string
-  // Secondary color again, but nudged (lighter or darker) to stay legible
-  // against accentColor itself — for the small uppercase labels ("Precio",
-  // "Contáctame", "Mira la propiedad completa en") that sit on the
-  // accent-colored price box / footer bar rather than the light canvas.
-  secondaryOnAccentColor: string
+  // The neutral "MUTE" label gray, nudged to stay legible against
+  // accentColor — for the small uppercase labels ("Precio", "Contáctame",
+  // "Mira la propiedad completa en") that sit on the accent-colored price
+  // box / footer bar rather than the light canvas.
+  mutedOnAccentColor: string
 }
 
 // ---------------------------------------------------------------------------
@@ -383,7 +389,7 @@ export function locationChip(d: FlyerData, size = 23): ReactElement | null {
         padding: "12px 26px 12px 20px",
       }}
     >
-      {icon("pin", size + 3, INK)}
+      {icon("pin", size + 3, d.accentOnColor)}
       <span style={{ fontSize: size, fontWeight: 700, color: d.accentOnColor }}>
         {truncate(location, 44)}
       </span>
@@ -425,7 +431,7 @@ export function highlightBadge(d: FlyerData, fontSize = 20, maxWidth = 460): Rea
         boxShadow: DARK_SHADOW,
       }}
     >
-      <div style={{ display: "flex", flexShrink: 0 }}>{icon("tag", fontSize + 4, INK)}</div>
+      <div style={{ display: "flex", flexShrink: 0 }}>{icon("tag", fontSize + 4, d.accentOnColor)}</div>
       <span
         style={{
           fontSize,
@@ -450,8 +456,7 @@ export function highlightBadge(d: FlyerData, fontSize = 20, maxWidth = 460): Rea
 function priceValueNode(
   d: FlyerData,
   size: number,
-  color: string,
-  suffixColor: string
+  color: string
 ): ReactElement {
   const amount = Math.round(Number(d.property.price))
   if (amount >= PRICE_ABBREVIATION_THRESHOLD) {
@@ -464,7 +469,7 @@ function priceValueNode(
           style={{
             fontSize: Math.round(size * 0.46),
             fontWeight: 900,
-            color: suffixColor,
+            color,
             marginLeft: 6,
             paddingBottom: Math.round(size * 0.06),
           }}
@@ -494,10 +499,10 @@ export function priceBox(d: FlyerData, valueSize = 52): ReactElement | null {
         boxShadow: DARK_SHADOW,
       }}
     >
-      <span style={{ fontSize: 19, fontWeight: 900, color: d.secondaryOnAccentColor, letterSpacing: 4, textTransform: "uppercase" }}>
+      <span style={{ fontSize: 19, fontWeight: 900, color: d.mutedOnAccentColor, letterSpacing: 4, textTransform: "uppercase" }}>
         Precio
       </span>
-      {priceValueNode(d, valueSize, d.accentOnColor, MUTE)}
+      {priceValueNode(d, valueSize, d.accentOnColor)}
     </div>
   )
 }
@@ -505,7 +510,7 @@ export function priceBox(d: FlyerData, valueSize = 52): ReactElement | null {
 // Ficha técnica's price panel is white-on-black text instead of a black box,
 // so it needs the same value logic with different colors.
 export function priceValuePanelNode(d: FlyerData, size: number): ReactElement {
-  return priceValueNode(d, size, d.accentTextColor, BODY)
+  return priceValueNode(d, size, d.primaryTextColor)
 }
 
 export function sectionChip(text: string, bg: string, onColor: string): ReactElement {
@@ -611,7 +616,7 @@ function footerGroup(
           flexShrink: 0,
         }}
       >
-        {icon(iconName, 26, INK)}
+        {icon(iconName, 26, onColor)}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <div style={{ display: "flex" }}>
@@ -633,7 +638,7 @@ export function footerBar(d: FlyerData): ReactElement {
   // to the brandRow, same as the "no contact" case below.
   const showContactBlock = has(d, "contacto") && !!d.agent.phone
   const onColor = d.accentOnColor
-  const labelColor = d.secondaryOnAccentColor
+  const labelColor = d.mutedOnAccentColor
   return (
     <div
       style={{

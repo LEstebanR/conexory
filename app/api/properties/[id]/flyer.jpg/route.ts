@@ -32,7 +32,6 @@ const QuerySchema = z.object({
           [...FLYER_INFO_IDS])
     ),
   accentColor: z.string().regex(HEX_COLOR_REGEX).optional().catch(undefined),
-  secondaryColor: z.string().regex(HEX_COLOR_REGEX).optional().catch(undefined),
 })
 
 export async function GET(
@@ -45,7 +44,7 @@ export async function GET(
   const { id } = await params
   const property = await prisma.property.findUnique({
     where: { id, userId: session.user.id },
-    include: { user: { select: { name: true, image: true, phone: true, brandColor: true, secondaryColor: true } } },
+    include: { user: { select: { name: true, image: true, phone: true, brandColor: true } } },
   })
   if (!property) return new Response("Not found", { status: 404 })
 
@@ -61,7 +60,6 @@ export async function GET(
     highlight: query.highlight || undefined,
     include,
     accentColor: query.accentColor || property.user.brandColor,
-    secondaryColor: query.secondaryColor || property.user.secondaryColor,
   }
 
   // Hash everything that affects the rendered image, not just `options`:

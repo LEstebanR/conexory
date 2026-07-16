@@ -27,10 +27,6 @@ export type FlyerOptions = {
   highlight?: string
   include: FlyerInfo[]
   accentColor?: string
-  // Used for titles/icons drawn directly on the light canvas or white
-  // panels — kept separate from accentColor so an agent whose brand color
-  // is light isn't stuck with an auto-darkened gray for those.
-  secondaryColor?: string
 }
 
 export const DEFAULT_FLYER_OPTIONS: FlyerOptions = {

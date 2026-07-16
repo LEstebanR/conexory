@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog"
 import { Download, Loader2, X, AlertCircle, ArrowLeft, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ColorInput } from "@/components/ui/color-input"
+import { updateBrandColor } from "@/app/dashboard/settings/actions"
 import {
   DEFAULT_FLYER_OPTIONS,
   FLYER_HIGHLIGHT_MAX_LENGTH,
@@ -21,14 +22,12 @@ export default function FlyerModal({
   slug,
   showContact,
   agentBrandColor,
-  agentSecondaryColor,
   children,
 }: {
   propertyId: string
   slug: string
   showContact: boolean
   agentBrandColor: string
-  agentSecondaryColor: string
   children: ReactNode
 }) {
   const [open, setOpen] = useState(false)
@@ -39,7 +38,6 @@ export default function FlyerModal({
     showContact ? DEFAULT_FLYER_OPTIONS.include : DEFAULT_FLYER_OPTIONS.include.filter((i) => i !== "contacto")
   )
   const [accentColor, setAccentColor] = useState(agentBrandColor)
-  const [secondaryColor, setSecondaryColor] = useState(agentSecondaryColor)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -56,7 +54,7 @@ export default function FlyerModal({
     setLoading(true)
     setError(false)
     try {
-      const params = new URLSearchParams({ template, include: include.join(","), accentColor, secondaryColor })
+      const params = new URLSearchParams({ template, include: include.join(","), accentColor })
       if (highlight.trim()) params.set("highlight", highlight.trim().slice(0, FLYER_HIGHLIGHT_MAX_LENGTH))
       const res = await fetch(`/api/properties/${propertyId}/flyer.jpg?${params}`)
       if (!res.ok) throw new Error("flyer request failed")
@@ -65,6 +63,7 @@ export default function FlyerModal({
         if (prev) URL.revokeObjectURL(prev)
         return URL.createObjectURL(blob)
       })
+      if (accentColor !== agentBrandColor) updateBrandColor(accentColor)
     } catch {
       setError(true)
     } finally {
@@ -162,15 +161,9 @@ export default function FlyerModal({
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-4">
-                <div className="space-y-2">
-                  <p className="text-xs font-bold text-ink uppercase tracking-widest">Color de marca</p>
-                  <ColorInput value={accentColor} onChange={setAccentColor} />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-xs font-bold text-ink uppercase tracking-widest">Color secundario</p>
-                  <ColorInput value={secondaryColor} onChange={setSecondaryColor} />
-                </div>
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-ink uppercase tracking-widest">Color de marca</p>
+                <ColorInput value={accentColor} onChange={setAccentColor} />
               </div>
 
               <div className="space-y-2">
