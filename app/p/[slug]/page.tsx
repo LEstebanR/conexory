@@ -10,6 +10,7 @@ import { youtubeId } from "@/lib/youtube"
 import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import { formatCOP } from "@/lib/format"
 import PublicGallery from "@/components/public-gallery"
+import PropertyVideo from "@/components/property-video"
 import Reveal from "@/components/reveal"
 import PropertyMap from "@/components/property-map-client"
 import ContactButtons from "./contact-buttons"
@@ -387,12 +388,11 @@ export default async function PublicPropertyPage({
       />
 
       {/* Gallery — edge-to-edge on mobile */}
-      {(property.images.length > 0 || videoId) && (
+      {property.images.length > 0 && (
         <div className="w-full sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5">
           <PublicGallery
             images={property.images}
             title={property.title}
-            videoId={videoId}
             className="sm:rounded-2xl"
           />
         </div>
@@ -468,6 +468,13 @@ export default async function PublicPropertyPage({
               longitude={property.longitude}
               label={location || undefined}
             />
+          </Reveal>
+        )}
+
+        {/* Video — separate from the photo gallery, near the end of the sheet */}
+        {videoId && (
+          <Reveal delay={190}>
+            <PropertyVideo videoId={videoId} title={property.title} />
           </Reveal>
         )}
 

@@ -5,32 +5,21 @@ import { createPortal } from "react-dom"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { youtubeEmbedUrl } from "@/lib/youtube"
-
-type Slide =
-  | { kind: "video"; id: string }
-  | { kind: "image"; url: string }
 
 export default function PublicGallery({
   images,
   title,
-  videoId,
   className,
 }: {
   images: string[]
   title: string
-  videoId?: string | null
   className?: string
 }) {
   const [index, setIndex] = useState(0)
   const [lightbox, setLightbox] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
 
-  const slides: Slide[] = [
-    ...images.map((url) => ({ kind: "image", url }) as const),
-    ...(videoId ? [{ kind: "video", id: videoId } as const] : []),
-  ]
-  const total = slides.length
+  const total = images.length
 
   const go = useCallback(
     (dir: number) => setIndex((i) => (i + dir + total) % total),
@@ -54,8 +43,6 @@ export default function PublicGallery({
 
   if (total === 0) return null
 
-  const active = slides[index]
-
   function onTouchStart(e: React.TouchEvent) {
     setTouchStartX(e.targetTouches[0].clientX)
   }
@@ -76,64 +63,48 @@ export default function PublicGallery({
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          {slides.map((slide, i) => (
+          {images.map((url, i) => (
             <div
-              key={slide.kind === "video" ? `v-${slide.id}` : slide.url}
+              key={url}
               className={cn(
                 "absolute inset-0 transition-opacity duration-300",
                 i === index ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
-              {slide.kind === "video" ? (
-                <div className="w-full h-full bg-black">
-                  {i === index && (
-                    <iframe
-                      src={youtubeEmbedUrl(slide.id)}
-                      title={title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
-                  )}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setLightbox(true)}
-                  aria-label="Ampliar imágenes"
-                  className="relative block w-full h-full cursor-zoom-in"
-                >
-                  <Image
-                    fill
-                    src={slide.url}
-                    alt=""
-                    aria-hidden
-                    priority={i === 0}
-                    className="object-cover scale-110 blur-2xl opacity-50"
-                    sizes="(max-width: 768px) 100vw, 768px"
-                  />
-                  <Image
-                    fill
-                    src={slide.url}
-                    alt={i === 0 ? title : ""}
-                    priority={i === 0}
-                    className="object-contain"
-                    draggable={false}
-                    sizes="(max-width: 768px) 100vw, 768px"
-                  />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setLightbox(true)}
+                aria-label="Ampliar imágenes"
+                className="relative block w-full h-full cursor-zoom-in"
+              >
+                <Image
+                  fill
+                  src={url}
+                  alt=""
+                  aria-hidden
+                  priority={i === 0}
+                  className="object-cover scale-110 blur-2xl opacity-50"
+                  sizes="(max-width: 768px) 100vw, 768px"
+                />
+                <Image
+                  fill
+                  src={url}
+                  alt={i === 0 ? title : ""}
+                  priority={i === 0}
+                  className="object-contain"
+                  draggable={false}
+                  sizes="(max-width: 768px) 100vw, 768px"
+                />
+              </button>
             </div>
           ))}
         </div>
 
-        {/* Expand hint — only on image slides */}
-        {active.kind === "image" && (
-          <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/55 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full">
-            <Expand className="w-3.5 h-3.5" strokeWidth={2.5} />
-            Ver fotos
-          </div>
-        )}
+        {/* Expand hint */}
+        <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/55 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full">
+          <Expand className="w-3.5 h-3.5" strokeWidth={2.5} />
+          Ver fotos
+        </div>
 
         {/* Counter */}
         {total > 1 && (
@@ -168,7 +139,7 @@ export default function PublicGallery({
       {/* Dot indicators */}
       {total > 1 && (
         <div className="flex items-center justify-center gap-1.5 py-3">
-          {slides.map((_, i) => (
+          {images.map((_, i) => (
             <button
               key={i}
               type="button"
@@ -199,25 +170,15 @@ export default function PublicGallery({
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           >
-            {active.kind === "video" ? (
-              <iframe
-                src={youtubeEmbedUrl(active.id)}
-                title={title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="w-full h-full rounded-xl"
-              />
-            ) : (
-              <Image
-                key={active.url}
-                fill
-                src={active.url}
-                alt={title}
-                className="object-contain drop-shadow-2xl"
-                sizes="100vw"
-                priority
-              />
-            )}
+            <Image
+              key={images[index]}
+              fill
+              src={images[index]}
+              alt={title}
+              className="object-contain drop-shadow-2xl"
+              sizes="100vw"
+              priority
+            />
           </div>
 
           <span className="absolute top-4 left-4 text-sm font-bold text-white tabular-nums bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-full">
