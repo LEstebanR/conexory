@@ -25,7 +25,9 @@ import { formatCOP, formatCOPMillionsValue } from "@/lib/format"
 // Titles/subtitles derive their text color from accentColor itself
 // (contrast-adjusted); "Precio"/"Contáctame"/"Mira la propiedad..." labels
 // derive from the neutral MUTE gray, adjusted against accentColor instead.
-export const FLYER_RENDER_VERSION = 7
+// v8: the "M" suffix on abbreviated prices ($12.5 M) matches the price
+// value's own color instead of a fixed gray.
+export const FLYER_RENDER_VERSION = 8
 
 // Above this amount the full peso figure ("$ 12.500.000.000") no longer fits
 // the price boxes, so every template switches to the compact "$ 12.500 M"
@@ -454,8 +456,7 @@ export function highlightBadge(d: FlyerData, fontSize = 20, maxWidth = 460): Rea
 function priceValueNode(
   d: FlyerData,
   size: number,
-  color: string,
-  suffixColor: string
+  color: string
 ): ReactElement {
   const amount = Math.round(Number(d.property.price))
   if (amount >= PRICE_ABBREVIATION_THRESHOLD) {
@@ -468,7 +469,7 @@ function priceValueNode(
           style={{
             fontSize: Math.round(size * 0.46),
             fontWeight: 900,
-            color: suffixColor,
+            color,
             marginLeft: 6,
             paddingBottom: Math.round(size * 0.06),
           }}
@@ -501,7 +502,7 @@ export function priceBox(d: FlyerData, valueSize = 52): ReactElement | null {
       <span style={{ fontSize: 19, fontWeight: 900, color: d.mutedOnAccentColor, letterSpacing: 4, textTransform: "uppercase" }}>
         Precio
       </span>
-      {priceValueNode(d, valueSize, d.accentOnColor, MUTE)}
+      {priceValueNode(d, valueSize, d.accentOnColor)}
     </div>
   )
 }
@@ -509,7 +510,7 @@ export function priceBox(d: FlyerData, valueSize = 52): ReactElement | null {
 // Ficha técnica's price panel is white-on-black text instead of a black box,
 // so it needs the same value logic with different colors.
 export function priceValuePanelNode(d: FlyerData, size: number): ReactElement {
-  return priceValueNode(d, size, d.primaryTextColor, BODY)
+  return priceValueNode(d, size, d.primaryTextColor)
 }
 
 export function sectionChip(text: string, bg: string, onColor: string): ReactElement {
