@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { nextCookies } from "better-auth/next-js"
 import { prisma } from "@/lib/prisma"
-import { sendResetPasswordEmail, sendWelcome } from "@/lib/email"
+import { sendResetPasswordEmail, sendVerificationEmail, sendWelcome } from "@/lib/email"
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -29,6 +29,17 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url }) => {
       await sendResetPasswordEmail(user.email, user.name, url)
     },
+  },
+
+  // requireEmailVerification stays off: sign-up keeps autoSignIn so the
+  // "under 60 seconds" flow isn't blocked at auth. Verification is enforced
+  // one layer up, in app/dashboard/layout.tsx.
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerificationEmail(user.email, user.name, url)
+    },
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
   },
 
   socialProviders: {
