@@ -179,6 +179,7 @@ export default async function PropertyDetailPage({
           urlNoContact={publicUrlNoContact}
           propertyId={property.id}
           slug={property.slug}
+          published={property.published}
           showContact={property.showContact}
           title={property.title}
           type={typeLabel}

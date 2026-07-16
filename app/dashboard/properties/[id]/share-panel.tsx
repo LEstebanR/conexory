@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { Copy, Check, ExternalLink, AlertCircle, Sparkles, Undo2, Loader2, ImageIcon } from "lucide-react"
+import { Copy, Check, ExternalLink, AlertCircle, EyeOff, Sparkles, Undo2, Loader2, ImageIcon } from "lucide-react"
 import { toast } from "sonner"
 import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
 import FlyerModal from "@/components/flyer-modal"
@@ -138,6 +138,7 @@ export default function SharePanel({
   urlNoContact,
   propertyId,
   slug,
+  published,
   showContact,
   title,
   type,
@@ -156,6 +157,7 @@ export default function SharePanel({
   urlNoContact: string
   propertyId: string
   slug: string
+  published: boolean
   showContact: boolean
   title: string
   type: string
@@ -415,6 +417,15 @@ export default function SharePanel({
 
       <div className="border-t border-hairline" />
 
+      {!published && (
+        <div className="flex items-start gap-2 bg-warning-50 border border-warning-200 rounded-xl px-3.5 py-2.5">
+          <EyeOff className="w-3.5 h-3.5 text-warning-600 flex-shrink-0 mt-px" />
+          <p className="text-xs text-warning-700 leading-relaxed">
+            Reactiva la propiedad para que estos enlaces y el flyer vuelvan a funcionar.
+          </p>
+        </div>
+      )}
+
       {/* Enlace con tus datos */}
       <div className="space-y-2.5">
         <div>
@@ -426,7 +437,7 @@ export default function SharePanel({
           </p>
         </div>
 
-        {!showContact && (
+        {published && !showContact && (
           <div className="flex items-start gap-2 bg-canvas-softer border border-hairline rounded-xl px-3.5 py-2.5">
             <AlertCircle className="w-3.5 h-3.5 text-mute flex-shrink-0 mt-px" />
             <p className="text-xs text-mute leading-relaxed">
@@ -435,7 +446,7 @@ export default function SharePanel({
           </div>
         )}
 
-        <div className={`flex items-center gap-1.5 bg-canvas-softer border border-hairline rounded-xl px-4 py-2.5 ${!showContact ? "opacity-40 pointer-events-none" : ""}`}>
+        <div className={`flex items-center gap-1.5 bg-canvas-softer border border-hairline rounded-xl px-4 py-2.5 ${!published || !showContact ? "opacity-40 pointer-events-none" : ""}`}>
           <span className="flex-1 text-sm text-body font-mono truncate min-w-0">{url}</span>
           <a
             href={url}
@@ -487,7 +498,7 @@ export default function SharePanel({
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-canvas-softer border border-hairline rounded-xl px-4 py-2.5">
+        <div className={`flex items-center gap-1.5 bg-canvas-softer border border-hairline rounded-xl px-4 py-2.5 ${!published ? "opacity-40 pointer-events-none" : ""}`}>
           <span className="flex-1 text-sm text-body font-mono truncate min-w-0">{urlNoContact}</span>
           <a
             href={urlNoContact}
@@ -539,7 +550,10 @@ export default function SharePanel({
         </div>
 
         <FlyerModal propertyId={propertyId} slug={slug} showContact={showContact}>
-          <button className="flex items-center justify-center gap-2 w-full bg-ink text-white text-sm font-semibold px-4 py-2.5 rounded-full hover:bg-elevated transition-colors">
+          <button
+            disabled={!published}
+            className="flex items-center justify-center gap-2 w-full bg-ink text-white text-sm font-semibold px-4 py-2.5 rounded-full hover:bg-elevated transition-colors disabled:opacity-40 disabled:pointer-events-none"
+          >
             <ImageIcon className="w-4 h-4" />
             Generar flyer
           </button>
