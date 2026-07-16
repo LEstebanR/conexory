@@ -6,17 +6,19 @@ import Link from "next/link"
 import { Pencil, Eye, EyeOff, Loader2, Trash2, UserCheck, UserX, AlertTriangle } from "lucide-react"
 import * as Dialog from "@radix-ui/react-dialog"
 import { toast } from "sonner"
-import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { togglePublished, toggleShowContact, deleteProperty } from "./actions"
 
 export default function PropertyActions({
   propertyId,
   initialPublished,
   initialShowContact,
+  disableActivateReason,
 }: {
   propertyId: string
   initialPublished: boolean
   initialShowContact: boolean
+  disableActivateReason?: string
 }) {
   const [published, setPublished] = useState(initialPublished)
   const [showContact, setShowContact] = useState(initialShowContact)
@@ -69,24 +71,19 @@ export default function PropertyActions({
   return (
     <>
       <div className="flex items-center gap-2 flex-shrink-0">
-        <Link
-          href={`/dashboard/properties/${propertyId}/edit`}
-          className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-white border border-hairline-strong text-body text-sm font-bold hover:bg-canvas-softer transition-colors"
-        >
-          <Pencil className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Editar</span>
-        </Link>
+        <Button variant="secondary" size="chip" asChild>
+          <Link href={`/dashboard/properties/${propertyId}/edit`}>
+            <Pencil className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Editar</span>
+          </Link>
+        </Button>
 
-        <button
+        <Button
           onClick={handleToggleContact}
           disabled={busy}
           title={showContact ? "Ocultar datos de contacto en el link público" : "Mostrar datos de contacto en el link público"}
-          className={cn(
-            "flex items-center gap-1.5 px-3 h-9 rounded-xl text-sm font-bold border transition-colors disabled:opacity-60",
-            showContact
-              ? "bg-ink text-white border-ink hover:bg-elevated"
-              : "bg-white text-body border-hairline-strong hover:bg-canvas-softer"
-          )}
+          variant={showContact ? "default" : "secondary"}
+          size="chip"
         >
           {contactLoading ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -96,32 +93,37 @@ export default function PropertyActions({
             <UserX className="w-3.5 h-3.5" />
           )}
           <span className="hidden sm:inline">{showContact ? "Contacto visible" : "Sin contacto"}</span>
-        </button>
+        </Button>
 
-        <button
-          onClick={handleToggle}
-          disabled={busy}
-          className={cn(
-            "flex items-center gap-1.5 px-3 h-9 rounded-xl text-sm font-bold border transition-colors disabled:opacity-60",
-            published
-              ? "bg-warning-50 text-warning-700 border-warning-200 hover:bg-warning-100"
-              : "bg-canvas-soft text-ink border-hairline hover:bg-surface-pressed"
+        <div className="relative group flex-shrink-0">
+          <Button
+            onClick={handleToggle}
+            disabled={busy || (!published && !!disableActivateReason)}
+            variant={published ? "warning" : "subtle"}
+            size="chip"
+          >
+            {loading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : published ? (
+              <EyeOff className="w-3.5 h-3.5" />
+            ) : (
+              <Eye className="w-3.5 h-3.5" />
+            )}
+            <span className="hidden sm:inline">{published ? "Desactivar" : "Activar"}</span>
+          </Button>
+          {!published && disableActivateReason && (
+            <div className="pointer-events-none absolute top-full right-0 mt-2 w-56 px-3 py-2 bg-ink text-white text-xs font-medium leading-relaxed rounded-xl opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10">
+              <div className="absolute bottom-full right-2.5 border-[4px] border-transparent border-b-ink" />
+              {disableActivateReason}
+            </div>
           )}
-        >
-          {loading ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : published ? (
-            <EyeOff className="w-3.5 h-3.5" />
-          ) : (
-            <Eye className="w-3.5 h-3.5" />
-          )}
-          <span className="hidden sm:inline">{published ? "Desactivar" : "Activar"}</span>
-        </button>
+        </div>
 
-        <button
+        <Button
           onClick={() => setConfirmOpen(true)}
           disabled={busy}
-          className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-red-50 text-red-600 border border-red-200 text-sm font-bold hover:bg-red-100 transition-colors disabled:opacity-60"
+          variant="destructive-soft"
+          size="chip"
         >
           {deleting ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -129,7 +131,7 @@ export default function PropertyActions({
             <Trash2 className="w-3.5 h-3.5" />
           )}
           <span className="hidden sm:inline">Eliminar</span>
-        </button>
+        </Button>
       </div>
 
       {/* Delete confirmation modal */}
@@ -151,16 +153,13 @@ export default function PropertyActions({
               </div>
               <div className="flex gap-2 w-full pt-1">
                 <Dialog.Close asChild>
-                  <button className="flex-1 h-10 rounded-full border border-hairline-strong text-sm font-semibold text-ink hover:bg-canvas-soft transition-colors">
+                  <Button variant="secondary" className="flex-1">
                     Cancelar
-                  </button>
+                  </Button>
                 </Dialog.Close>
-                <button
-                  onClick={handleDelete}
-                  className="flex-1 h-10 rounded-full bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors"
-                >
+                <Button variant="destructive" className="flex-1" onClick={handleDelete}>
                   Sí, eliminar
-                </button>
+                </Button>
               </div>
             </div>
           </Dialog.Content>
