@@ -13,6 +13,7 @@ import { readMetrics, socialTotal, contactTotal } from "@/lib/property-metrics"
 import { hasProAccess, propertyLimit, pinnedLimit } from "@/lib/plans"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
+import PropertyVideo from "@/components/property-video"
 import PropertyActions from "./property-actions"
 import PropertyMap from "@/components/property-map-client"
 
@@ -225,11 +226,10 @@ export default async function PropertyDetailPage({
         />
 
         {/* Carrusel */}
-        {(property.images.length > 0 || videoId) && (
+        {property.images.length > 0 && (
           <PropertyCarousel
             images={property.images}
             title={property.title}
-            videoId={videoId}
           />
         )}
 
@@ -311,6 +311,8 @@ export default async function PropertyDetailPage({
             label={location || undefined}
           />
         )}
+
+        {videoId && <PropertyVideo videoId={videoId} title={property.title} />}
       </div>
     </div>
   )

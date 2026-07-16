@@ -4,32 +4,20 @@ import { useState } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { youtubeEmbedUrl } from "@/lib/youtube"
-
-type Slide =
-  | { kind: "video"; id: string }
-  | { kind: "image"; url: string }
 
 export default function PropertyCarousel({
   images,
   title,
-  videoId,
 }: {
   images: string[]
   title: string
-  videoId?: string | null
 }) {
   const [current, setCurrent] = useState(0)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
 
-  const slides: Slide[] = [
-    ...images.map((url) => ({ kind: "image", url }) as const),
-    ...(videoId ? [{ kind: "video", id: videoId } as const] : []),
-  ]
+  const total = images.length
 
-  if (slides.length === 0) return null
-
-  const total = slides.length
+  if (total === 0) return null
 
   function prev() {
     setCurrent((i) => (i === 0 ? total - 1 : i - 1))
@@ -59,46 +47,30 @@ export default function PropertyCarousel({
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {slides.map((slide, i) => (
+        {images.map((url, i) => (
           <div
-            key={slide.kind === "video" ? `v-${slide.id}` : slide.url}
+            key={url}
             className={cn(
               "absolute inset-0 transition-opacity duration-300",
               i === current ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
           >
-            {slide.kind === "video" ? (
-              <div className="w-full h-full bg-black">
-                {i === current && (
-                  <iframe
-                    src={youtubeEmbedUrl(slide.id)}
-                    title={title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    className="w-full h-full"
-                  />
-                )}
-              </div>
-            ) : (
-              <>
-                <Image
-                  fill
-                  src={slide.url}
-                  alt=""
-                  aria-hidden
-                  className="object-cover scale-110 blur-2xl opacity-50"
-                  sizes="(max-width: 768px) 100vw, 672px"
-                />
-                <Image
-                  fill
-                  src={slide.url}
-                  alt={i === 0 ? title : ""}
-                  className="object-contain"
-                  draggable={false}
-                  sizes="(max-width: 768px) 100vw, 672px"
-                />
-              </>
-            )}
+            <Image
+              fill
+              src={url}
+              alt=""
+              aria-hidden
+              className="object-cover scale-110 blur-2xl opacity-50"
+              sizes="(max-width: 768px) 100vw, 672px"
+            />
+            <Image
+              fill
+              src={url}
+              alt={i === 0 ? title : ""}
+              className="object-contain"
+              draggable={false}
+              sizes="(max-width: 768px) 100vw, 672px"
+            />
           </div>
         ))}
       </div>
@@ -133,7 +105,7 @@ export default function PropertyCarousel({
       {/* Dots */}
       {total > 1 && total <= 12 && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-          {slides.map((_, i) => (
+          {images.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrent(i)}
