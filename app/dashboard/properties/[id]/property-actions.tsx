@@ -13,10 +13,12 @@ export default function PropertyActions({
   propertyId,
   initialPublished,
   initialShowContact,
+  disableActivateReason,
 }: {
   propertyId: string
   initialPublished: boolean
   initialShowContact: boolean
+  disableActivateReason?: string
 }) {
   const [published, setPublished] = useState(initialPublished)
   const [showContact, setShowContact] = useState(initialShowContact)
@@ -100,9 +102,10 @@ export default function PropertyActions({
 
         <button
           onClick={handleToggle}
-          disabled={busy}
+          disabled={busy || (!published && !!disableActivateReason)}
+          title={!published ? disableActivateReason : undefined}
           className={cn(
-            "flex items-center gap-1.5 px-3 h-9 rounded-xl text-sm font-bold border transition-colors disabled:opacity-60",
+            "flex items-center gap-1.5 px-3 h-9 rounded-xl text-sm font-bold border transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
             published
               ? "bg-warning-50 text-warning-700 border-warning-200 hover:bg-warning-100"
               : "bg-canvas-soft text-ink border-hairline hover:bg-surface-pressed"

@@ -10,7 +10,7 @@ import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-ty
 import { formatCOP } from "@/lib/format"
 import { daysAgo } from "@/lib/dates"
 import { readMetrics, socialTotal, contactTotal } from "@/lib/property-metrics"
-import { hasProAccess } from "@/lib/plans"
+import { hasProAccess, propertyLimit } from "@/lib/plans"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
@@ -29,17 +29,27 @@ export default async function PropertyDetailPage({
   const weekAgo = daysAgo(7)
   const twoWeeksAgo = daysAgo(14)
 
-  const [property, totalVisits, visitsThisWeek, visitsPrevWeek] = await Promise.all([
+  const [property, totalVisits, visitsThisWeek, visitsPrevWeek, activePropertiesCount] = await Promise.all([
     prisma.property.findUnique({ where: { id, userId: session.user.id } }),
     prisma.propertyVisit.count({ where: { propertyId: id } }),
     prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: weekAgo } } }),
     prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
+    prisma.property.count({ where: { userId: session.user.id, published: true, id: { not: id } } }),
   ])
 
   if (!property) notFound()
 
   const isPremium = hasProAccess(session.user)
   const weekDelta = visitsThisWeek - visitsPrevWeek
+  const limit = propertyLimit(isPremium)
+  // Same copy togglePublished (app/dashboard/properties/[id]/actions.ts) returns
+  // when it rejects the activation server-side — this is only the proactive UX hint.
+  const disableActivateReason =
+    !property.published && activePropertiesCount >= limit
+      ? isPremium
+        ? `Has alcanzado el máximo de ${limit} propiedades activas de tu plan Pro. Contáctanos para un plan personalizado.`
+        : `Has alcanzado el límite de ${limit} propiedades activas del plan gratuito. Actualiza a Pro para activar más.`
+      : undefined
   const metrics = readMetrics(property.metrics)
   const totalWhatsapp = metrics.whatsapp
   const totalSocial = socialTotal(metrics)
@@ -79,7 +89,12 @@ export default async function PropertyDetailPage({
           </h1>
           <p className="text-sm text-body truncate">{property.title}</p>
         </div>
-        <PropertyActions propertyId={property.id} initialPublished={property.published} initialShowContact={property.showContact} />
+        <PropertyActions
+          propertyId={property.id}
+          initialPublished={property.published}
+          initialShowContact={property.showContact}
+          disableActivateReason={disableActivateReason}
+        />
       </div>
 
       {/* Banner de desactivada */}
