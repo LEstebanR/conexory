@@ -49,7 +49,6 @@ export default async function SettingsPage() {
       linkedin: true,
       youtube: true,
       brandColor: true,
-      secondaryColor: true,
       agentSlug: true,
       profilePublished: true,
     },
@@ -99,7 +98,6 @@ export default async function SettingsPage() {
             linkedin={user.linkedin ?? ""}
             youtube={user.youtube ?? ""}
             brandColor={user.brandColor}
-            secondaryColor={user.secondaryColor}
           />
         </div>
 

@@ -8,6 +8,7 @@ import {
   W,
   H,
   INK,
+  MUTE,
   readableOn,
   ensureTextContrast,
   ensureContrastAgainst,
@@ -48,9 +49,6 @@ export async function generateFlyerJpeg(
   ).filter((p): p is string => p !== null)
 
   const accentColor = options.accentColor || INK
-  // Falls back to accentColor (auto-darkened if needed) when the agent
-  // hasn't picked a secondary — keeps old callers / cached options working.
-  const secondaryColor = options.secondaryColor || accentColor
 
   const data: FlyerData = {
     property,
@@ -63,8 +61,7 @@ export async function generateFlyerJpeg(
     accentColor,
     accentOnColor: readableOn(accentColor),
     primaryTextColor: ensureTextContrast(accentColor),
-    accentTextColor: ensureTextContrast(secondaryColor),
-    secondaryOnAccentColor: ensureContrastAgainst(secondaryColor, relativeLuminance(accentColor)),
+    mutedOnAccentColor: ensureContrastAgainst(MUTE, relativeLuminance(accentColor)),
   }
 
   const node =

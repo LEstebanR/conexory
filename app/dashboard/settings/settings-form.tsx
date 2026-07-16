@@ -23,16 +23,14 @@ interface Props {
   linkedin: string
   youtube: string
   brandColor: string
-  secondaryColor: string
 }
 
-export default function SettingsForm({ name, email, image, location, bio, phone, phoneIsWhatsapp, instagram, facebook, tiktok, linkedin, youtube, brandColor, secondaryColor }: Props) {
+export default function SettingsForm({ name, email, image, location, bio, phone, phoneIsWhatsapp, instagram, facebook, tiktok, linkedin, youtube, brandColor }: Props) {
   const [state, formAction, isPending] = useActionState<ProfileState, FormData>(updateProfile, {})
   const [avatarUrl, setAvatarUrl] = useState(image ?? "")
   const [uploading, setUploading] = useState(false)
   const [isWhatsapp, setIsWhatsapp] = useState(phoneIsWhatsapp)
   const [accentColor, setAccentColor] = useState(brandColor)
-  const [secondColor, setSecondColor] = useState(secondaryColor)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -70,7 +68,6 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
       <input type="hidden" name="previousImage" value={image ?? ""} />
       <input type="hidden" name="phoneIsWhatsapp" value={isWhatsapp ? "true" : "false"} />
       <input type="hidden" name="brandColor" value={accentColor} />
-      <input type="hidden" name="secondaryColor" value={secondColor} />
 
       {/* Avatar */}
       <div className="flex items-center gap-4 pb-6 border-b border-hairline">
@@ -234,18 +231,9 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
       <div className="space-y-1.5 pt-2 border-t border-hairline">
         <label htmlFor="brandColorPicker" className="block text-sm font-semibold text-ink pt-2">
           Color de marca
-          <span className="ml-1.5 text-xs font-normal text-mute">Fondos de precio, chips y el pie de página del flyer</span>
+          <span className="ml-1.5 text-xs font-normal text-mute">Reemplaza el negro en tus flyers descargables</span>
         </label>
         <ColorInput id="brandColorPicker" value={accentColor} onChange={setAccentColor} />
-      </div>
-
-      {/* Color secundario */}
-      <div className="space-y-1.5">
-        <label htmlFor="secondaryColorPicker" className="block text-sm font-semibold text-ink">
-          Color secundario
-          <span className="ml-1.5 text-xs font-normal text-mute">Títulos y textos sobre fondo claro en el flyer</span>
-        </label>
-        <ColorInput id="secondaryColorPicker" value={secondColor} onChange={setSecondColor} />
       </div>
 
       <div className="pt-2">

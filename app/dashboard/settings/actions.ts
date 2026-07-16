@@ -43,7 +43,6 @@ const profileSchema = z.object({
   linkedin: handle,
   youtube: handle,
   brandColor: z.string().trim().regex(HEX_COLOR_REGEX, "Color inválido."),
-  secondaryColor: z.string().trim().regex(HEX_COLOR_REGEX, "Color inválido."),
 })
 
 export type ProfileState = { error?: string; success?: boolean }
@@ -74,7 +73,6 @@ export async function updateProfile(
     linkedin: formData.get("linkedin") ?? "",
     youtube: formData.get("youtube") ?? "",
     brandColor: formData.get("brandColor") ?? "#0a0a0a",
-    secondaryColor: formData.get("secondaryColor") ?? "#0a0a0a",
   })
 
   if (!parsed.success) {
@@ -82,7 +80,7 @@ export async function updateProfile(
   }
 
   const { name, image, previousImage, location, bio, phone, phoneIsWhatsapp,
-    instagram, facebook, tiktok, linkedin, youtube, brandColor, secondaryColor } = parsed.data
+    instagram, facebook, tiktok, linkedin, youtube, brandColor } = parsed.data
   const newImage = image || null
 
   if (previousImage && previousImage !== image && previousImage.includes("blob.vercel-storage.com")) {
@@ -104,7 +102,6 @@ export async function updateProfile(
       linkedin: stripAt(linkedin),
       youtube: stripAt(youtube),
       brandColor,
-      secondaryColor,
     },
   })
 

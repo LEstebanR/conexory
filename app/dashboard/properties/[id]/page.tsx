@@ -38,7 +38,7 @@ export default async function PropertyDetailPage({
     prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
     prisma.property.count({ where: { userId: session.user.id, published: true, id: { not: id } } }),
     prisma.property.count({ where: { userId: session.user.id, pinnedAt: { not: null }, id: { not: id } } }),
-    prisma.user.findUnique({ where: { id: session.user.id }, select: { brandColor: true, secondaryColor: true } }),
+    prisma.user.findUnique({ where: { id: session.user.id }, select: { brandColor: true } }),
   ])
 
   if (!property) notFound()
@@ -226,7 +226,6 @@ export default async function PropertyDetailPage({
           description={property.description}
           isPremium={isPremium}
           agentBrandColor={agent?.brandColor ?? DEFAULT_ACCENT_COLOR}
-          agentSecondaryColor={agent?.secondaryColor ?? DEFAULT_ACCENT_COLOR}
         />
 
         {/* Carrusel */}
