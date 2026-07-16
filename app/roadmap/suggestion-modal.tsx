@@ -87,20 +87,13 @@ export function SuggestionModal() {
 
             <div className="flex gap-2 pt-1">
               <Dialog.Close asChild>
-                <button
-                  type="button"
-                  className="flex-1 h-11 rounded-full border border-hairline-strong text-sm font-semibold text-ink hover:bg-canvas-soft transition-colors"
-                >
+                <Button type="button" variant="secondary" className="flex-1">
                   Cancelar
-                </button>
+                </Button>
               </Dialog.Close>
-              <button
-                type="submit"
-                disabled={pending}
-                className="flex-1 h-11 rounded-full bg-ink text-white text-sm font-bold hover:bg-elevated transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-              >
+              <Button type="submit" variant="default" className="flex-1" disabled={pending}>
                 {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar"}
-              </button>
+              </Button>
             </div>
           </form>
         </Dialog.Content>

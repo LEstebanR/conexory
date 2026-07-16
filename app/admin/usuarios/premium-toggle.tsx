@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { AlertTriangle, Loader2 } from "lucide-react"
 import * as Dialog from "@radix-ui/react-dialog"
+import { Button } from "@/components/ui/button"
 import { toggleUserIsPremium } from "../actions"
 
 export default function PremiumToggle({
@@ -74,16 +75,13 @@ export default function PremiumToggle({
               </div>
               <div className="flex gap-2 w-full pt-1">
                 <Dialog.Close asChild>
-                  <button className="flex-1 h-10 rounded-full border border-hairline-strong text-sm font-semibold text-ink hover:bg-canvas-soft transition-colors">
+                  <Button variant="secondary" className="flex-1">
                     Cancelar
-                  </button>
+                  </Button>
                 </Dialog.Close>
-                <button
-                  onClick={handleConfirm}
-                  className="flex-1 h-10 rounded-full bg-ink text-white text-sm font-bold hover:bg-elevated transition-colors"
-                >
+                <Button variant="default" className="flex-1" onClick={handleConfirm}>
                   Sí, confirmar
-                </button>
+                </Button>
               </div>
             </div>
           </Dialog.Content>
