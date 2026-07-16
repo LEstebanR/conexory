@@ -304,6 +304,8 @@ export default async function PropertyDetailPage({
           </div>
         )}
 
+        {videoId && <PropertyVideo videoId={videoId} title={property.title} />}
+
         {property.latitude != null && property.longitude != null && (
           <PropertyMap
             latitude={property.latitude}
@@ -311,8 +313,6 @@ export default async function PropertyDetailPage({
             label={location || undefined}
           />
         )}
-
-        {videoId && <PropertyVideo videoId={videoId} title={property.title} />}
       </div>
     </div>
   )
