@@ -48,6 +48,8 @@ export default async function SettingsPage() {
       tiktok: true,
       linkedin: true,
       youtube: true,
+      brandColor: true,
+      secondaryColor: true,
       agentSlug: true,
       profilePublished: true,
     },
@@ -96,6 +98,8 @@ export default async function SettingsPage() {
             tiktok={user.tiktok ?? ""}
             linkedin={user.linkedin ?? ""}
             youtube={user.youtube ?? ""}
+            brandColor={user.brandColor}
+            secondaryColor={user.secondaryColor}
           />
         </div>
 

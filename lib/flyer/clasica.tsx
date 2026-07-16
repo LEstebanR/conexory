@@ -8,7 +8,6 @@ import {
   dots,
   bigTitle,
   locationChip,
-  brandRow,
   highlightBadge,
   priceBox,
   sectionChip,
@@ -51,7 +50,6 @@ export function templateClasica(d: FlyerData): ReactElement {
             {locationChip(d)}
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 16, flexShrink: 0 }}>
-            {brandRow(false)}
             {badge}
           </div>
         </div>
@@ -95,7 +93,7 @@ export function templateClasica(d: FlyerData): ReactElement {
             {features.length > 0 &&
               panel(
                 [
-                  sectionChip("Características"),
+                  sectionChip("Características", d.accentColor, d.accentOnColor),
                   <div key="grid" style={{ display: "flex", flexWrap: "wrap", marginTop: 18 }}>
                     {features.map((f, i) => (
                       <div
@@ -116,7 +114,7 @@ export function templateClasica(d: FlyerData): ReactElement {
             {description &&
               panel(
                 [
-                  sectionChip("Descripción"),
+                  sectionChip("Descripción", d.accentColor, d.accentOnColor),
                   <div key="text" style={{ display: "flex", marginTop: 18 }}>
                     {description}
                   </div>,
