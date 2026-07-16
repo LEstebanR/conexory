@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import Sidebar from "@/components/dashboard/sidebar"
+import VerifyEmailGate from "./verify-email-gate"
 
 export const metadata: Metadata = {
   title: "Dashboard — Conexory",
@@ -18,6 +19,10 @@ export default async function DashboardLayout({
   })
 
   if (!session) redirect("/login")
+
+  if (!session.user.emailVerified) {
+    return <VerifyEmailGate email={session.user.email} />
+  }
 
   const user = {
     name: session.user.name,

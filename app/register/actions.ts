@@ -41,9 +41,15 @@ export async function registerAction(
 
   const { name, email, password } = parsed.data
 
+  const redirectTo = formData.get("redirect")
+  const destination =
+    typeof redirectTo === "string" && redirectTo.startsWith("/")
+      ? redirectTo
+      : "/dashboard"
+
   try {
     await auth.api.signUpEmail({
-      body: { name, email, password },
+      body: { name, email, password, callbackURL: destination },
       headers: await headers(),
     })
     // Generate agent slug for the new user (best-effort, non-blocking)
@@ -73,10 +79,5 @@ export async function registerAction(
     throw error
   }
 
-  const redirectTo = formData.get("redirect")
-  const destination =
-    typeof redirectTo === "string" && redirectTo.startsWith("/")
-      ? redirectTo
-      : "/dashboard"
   redirect(destination)
 }

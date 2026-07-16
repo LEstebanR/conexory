@@ -5,6 +5,7 @@ import { PaymentFailedEmail } from "@/emails/payment-failed"
 import { SubscriptionCancelledEmail } from "@/emails/subscription-cancelled"
 import { RenewalReminderEmail } from "@/emails/renewal-reminder"
 import { ResetPasswordEmail } from "@/emails/reset-password"
+import { VerifyEmailEmail } from "@/emails/verify-email"
 import { WelcomeEmail } from "@/emails/welcome"
 
 // Instantiated lazily inside each function so the build doesn't require
@@ -117,5 +118,15 @@ export async function sendResetPasswordEmail(email: string, name: string, url: s
     to: email,
     subject: "Recupera tu contraseña de Conexory",
     react: ResetPasswordEmail({ name, url, appUrl }),
+  })
+}
+
+export async function sendVerificationEmail(email: string, name: string, url: string) {
+  const appUrl = getAppUrl()
+  await resend().emails.send({
+    from: FROM,
+    to: email,
+    subject: "Confirma tu correo de Conexory",
+    react: VerifyEmailEmail({ name, url, appUrl }),
   })
 }
