@@ -3,27 +3,33 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Pencil, Eye, EyeOff, Loader2, Trash2, UserCheck, UserX, AlertTriangle } from "lucide-react"
+import { Pencil, Eye, EyeOff, Loader2, Trash2, UserCheck, UserX, Pin, PinOff, AlertTriangle } from "lucide-react"
 import * as Dialog from "@radix-ui/react-dialog"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { togglePublished, toggleShowContact, deleteProperty } from "./actions"
+import { togglePublished, toggleShowContact, togglePinned, deleteProperty } from "./actions"
 
 export default function PropertyActions({
   propertyId,
   initialPublished,
   initialShowContact,
+  initialPinned,
   disableActivateReason,
+  disablePinReason,
 }: {
   propertyId: string
   initialPublished: boolean
   initialShowContact: boolean
+  initialPinned: boolean
   disableActivateReason?: string
+  disablePinReason?: string
 }) {
   const [published, setPublished] = useState(initialPublished)
   const [showContact, setShowContact] = useState(initialShowContact)
+  const [pinned, setPinned] = useState(initialPinned)
   const [loading, setLoading] = useState(false)
   const [contactLoading, setContactLoading] = useState(false)
+  const [pinLoading, setPinLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const router = useRouter()
@@ -54,6 +60,21 @@ export default function PropertyActions({
     }
   }
 
+  async function handleTogglePin() {
+    setPinLoading(true)
+    try {
+      const result = await togglePinned(propertyId)
+      if (!result.success) {
+        toast.error(result.error)
+        return
+      }
+      setPinned((p) => !p)
+      router.refresh()
+    } finally {
+      setPinLoading(false)
+    }
+  }
+
   async function handleDelete() {
     setDeleting(true)
     setConfirmOpen(false)
@@ -66,7 +87,7 @@ export default function PropertyActions({
     }
   }
 
-  const busy = loading || contactLoading || deleting
+  const busy = loading || contactLoading || pinLoading || deleting
 
   return (
     <>
@@ -77,6 +98,30 @@ export default function PropertyActions({
             <span className="hidden sm:inline">Editar</span>
           </Link>
         </Button>
+
+        <div className="relative group flex-shrink-0">
+          <Button
+            onClick={handleTogglePin}
+            disabled={busy || (!pinned && !!disablePinReason)}
+            variant={pinned ? "default" : "secondary"}
+            size="chip"
+          >
+            {pinLoading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : pinned ? (
+              <Pin className="w-3.5 h-3.5" />
+            ) : (
+              <PinOff className="w-3.5 h-3.5" />
+            )}
+            <span className="hidden sm:inline">{pinned ? "Fijada" : "Fijar"}</span>
+          </Button>
+          {!pinned && disablePinReason && (
+            <div className="pointer-events-none absolute top-full right-0 mt-2 w-56 px-3 py-2 bg-ink text-white text-xs font-medium leading-relaxed rounded-xl opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10">
+              <div className="absolute bottom-full right-2.5 border-[4px] border-transparent border-b-ink" />
+              {disablePinReason}
+            </div>
+          )}
+        </div>
 
         <Button
           onClick={handleToggleContact}

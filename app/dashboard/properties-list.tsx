@@ -3,9 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { MapPin, BedDouble, Bath, Square, Share2, ChevronRight, EyeOff, Building2, Search, SlidersHorizontal, ArrowUpDown, Eye, MessageCircle } from "lucide-react"
+import { toast } from "sonner"
+import { MapPin, BedDouble, Bath, Square, Share2, ChevronRight, EyeOff, Building2, Search, SlidersHorizontal, ArrowUpDown, Eye, MessageCircle, Pin, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
+import { pinnedLimit } from "@/lib/plans"
+import { togglePinned } from "./properties/[id]/actions"
 
 export type PropertyItem = {
   id: string
@@ -14,6 +17,7 @@ export type PropertyItem = {
   type: string
   typeLabel: string
   published: boolean
+  pinned: boolean
   shares: number
   price: string
   priceValue: number
@@ -114,14 +118,54 @@ function Thumbnail({ item }: { item: PropertyItem }) {
   )
 }
 
-function Row({ item }: { item: PropertyItem }) {
+function Row({
+  item,
+  pinning,
+  disablePin,
+  onTogglePin,
+}: {
+  item: PropertyItem
+  pinning: boolean
+  disablePin: boolean
+  onTogglePin: (id: string) => void
+}) {
   const inactive = !item.published
   return (
     <Link
       href={`/dashboard/properties/${item.id}`}
       className="group flex items-center gap-4 p-3 sm:p-4 rounded-2xl border border-hairline bg-white hover:border-ink hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5 transition-all duration-200"
     >
-      <Thumbnail item={item} />
+      <div className="relative flex-shrink-0">
+        <Thumbnail item={item} />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onTogglePin(item.id)
+          }}
+          disabled={pinning || (!item.pinned && disablePin)}
+          title={
+            item.pinned
+              ? "Desfijar del perfil público"
+              : disablePin
+                ? `Ya tienes ${pinnedLimit()} propiedades fijadas. Desfija una para fijar esta.`
+                : "Fijar en el perfil público"
+          }
+          className={cn(
+            "absolute top-1 left-1 w-6 h-6 rounded-full flex items-center justify-center transition-colors disabled:cursor-not-allowed",
+            item.pinned
+              ? "bg-ink text-white"
+              : "bg-white/90 text-mute border border-hairline-strong backdrop-blur-sm hover:text-ink disabled:opacity-50"
+          )}
+        >
+          {pinning ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : (
+            <Pin className="w-3 h-3" fill={item.pinned ? "currentColor" : "none"} />
+          )}
+        </button>
+      </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2 mb-1">
@@ -231,6 +275,30 @@ export default function PropertiesList({ items }: { items: PropertyItem[] }) {
   const [minParking, setMinParking] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const filterRef = useRef<HTMLDivElement>(null)
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(
+    () => new Set(items.filter((i) => i.pinned).map((i) => i.id))
+  )
+  const [pinningId, setPinningId] = useState<string | null>(null)
+  const atPinLimit = pinnedIds.size >= pinnedLimit()
+
+  async function handleTogglePin(id: string) {
+    setPinningId(id)
+    try {
+      const result = await togglePinned(id)
+      if (!result.success) {
+        toast.error(result.error)
+        return
+      }
+      setPinnedIds((prev) => {
+        const next = new Set(prev)
+        if (next.has(id)) next.delete(id)
+        else next.add(id)
+        return next
+      })
+    } finally {
+      setPinningId(null)
+    }
+  }
 
   useEffect(() => {
     if (!showFilters) return
@@ -476,7 +544,13 @@ export default function PropertiesList({ items }: { items: PropertyItem[] }) {
       ) : (
         <div className="space-y-2.5">
           {filtered.map((item) => (
-            <Row key={item.id} item={item} />
+            <Row
+              key={item.id}
+              item={{ ...item, pinned: pinnedIds.has(item.id) }}
+              pinning={pinningId === item.id}
+              disablePin={atPinLimit}
+              onTogglePin={handleTogglePin}
+            />
           ))}
         </div>
       )}

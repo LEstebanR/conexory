@@ -5,7 +5,7 @@ import Link from "next/link"
 import dynamic from "next/dynamic"
 import {
   Search, MapPin, Building2, ChevronLeft, ChevronRight,
-  SlidersHorizontal, ArrowUpDown, Check,
+  SlidersHorizontal, ArrowUpDown, Check, Pin,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
@@ -36,6 +36,7 @@ export interface AgentProperty {
   latitude: number | null
   longitude: number | null
   createdAt: number
+  pinnedAt: number | null
 }
 
 type SortKey = "recent" | "price-desc" | "price-asc"
@@ -181,6 +182,13 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
     result.sort((a, b) => {
       if (sort === "price-desc") return b.price - a.price
       if (sort === "price-asc") return a.price - b.price
+      // "recent" (default): pinned properties float first, tie-broken by when
+      // they were pinned, then everything falls back to recency. Explicit
+      // price sorts ignore pin — a shopper comparing prices wants pure price order.
+      const aPinned = a.pinnedAt != null
+      const bPinned = b.pinnedAt != null
+      if (aPinned !== bPinned) return aPinned ? -1 : 1
+      if (aPinned && bPinned) return (b.pinnedAt as number) - (a.pinnedAt as number)
       return b.createdAt - a.createdAt
     })
     return result
@@ -338,6 +346,12 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
                 className="group flex gap-3 bg-white rounded-2xl border border-hairline hover:border-hairline-strong overflow-hidden transition-all hover:shadow-sm p-3"
               >
                 <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-canvas-soft flex-shrink-0 relative">
+                  {property.pinnedAt != null && (
+                    <span className="absolute top-1.5 left-1.5 z-10 inline-flex items-center gap-0.5 bg-ink text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                      <Pin className="w-2.5 h-2.5" />
+                      Destacada
+                    </span>
+                  )}
                   {cover ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={cover} alt={property.title} className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300" />
