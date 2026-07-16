@@ -3,14 +3,12 @@ import {
   W,
   PAD,
   CANVAS,
-  INK,
   BODY,
   type FlyerData,
   has,
   dots,
   bigTitle,
   locationChip,
-  brandRow,
   highlightBadge,
   sectionChip,
   featureRow,
@@ -52,13 +50,12 @@ export function templateFicha(d: FlyerData): ReactElement {
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 24 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, width: 600 }}>
             {bigTitle(d, 58)}
-            <span style={{ fontSize: 26, fontWeight: 700, color: BODY, letterSpacing: -0.5, lineHeight: 1.3 }}>
+            <span style={{ fontSize: 26, fontWeight: 700, color: d.accentTextColor, letterSpacing: -0.5, lineHeight: 1.3 }}>
               {truncate(d.property.title, 80)}
             </span>
             {locationChip(d, 21)}
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 14, flexShrink: 0 }}>
-            {brandRow(false)}
             {badge}
           </div>
         </div>
@@ -88,10 +85,10 @@ export function templateFicha(d: FlyerData): ReactElement {
           <div style={{ display: "flex", flexDirection: "column", gap: 20, width: rightW }}>
             {features.length > 0 && (
               <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: 24, fontWeight: 900, color: INK, letterSpacing: 2.5, textTransform: "uppercase" }}>
+                <span style={{ fontSize: 24, fontWeight: 900, color: d.accentTextColor, letterSpacing: 2.5, textTransform: "uppercase" }}>
                   Características
                 </span>
-                <div style={{ display: "flex", width: 64, height: 5, background: INK, borderRadius: 3, marginTop: 10 }} />
+                <div style={{ display: "flex", width: 64, height: 5, background: d.accentTextColor, borderRadius: 3, marginTop: 10 }} />
                 <div style={{ display: "flex", flexDirection: "column", marginTop: 22 }}>
                   {features.map((f, i) => (
                     <div
@@ -128,7 +125,7 @@ export function templateFicha(d: FlyerData): ReactElement {
           <div style={{ display: "flex", marginBottom: 26 }}>
             {panel(
               [
-                sectionChip("Descripción"),
+                sectionChip("Descripción", d.accentColor, d.accentOnColor),
                 <div key="text" style={{ display: "flex", marginTop: 18 }}>
                   {description}
                 </div>,

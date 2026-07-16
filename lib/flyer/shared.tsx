@@ -8,7 +8,16 @@ import { formatCOP, formatCOPMillionsValue } from "@/lib/format"
 
 // Bump when template rendering logic changes so cached flyers (keyed in part
 // on this) get regenerated instead of serving a stale pre-deploy image.
-export const FLYER_RENDER_VERSION = 1
+// v2: brand color support (+ contrast-safe text), top-right logo removed,
+// footer contact block is phone-only.
+// v3: secondary color for text-on-light instead of an auto-darkened accent.
+// v4: big title (type + transaction line) is fully primary-colored; the
+// transaction line no longer uses a fixed gray; ficha's property-title
+// subtitle uses the secondary color.
+// v5: "Precio"/"Contáctame"/"Mira la propiedad..." labels use the secondary
+// color (contrast-adjusted against the accent bg) instead of fixed gray;
+// every icon is always black, regardless of the chosen colors.
+export const FLYER_RENDER_VERSION = 5
 
 // Above this amount the full peso figure ("$ 12.500.000.000") no longer fits
 // the price boxes, so every template switches to the compact "$ 12.500 M"
@@ -40,6 +49,116 @@ export type FlyerData = {
   transactionLabel: string | null
   publicPath: string
   photos: string[]
+  // The color the agent picked, used as-is for solid fills (chips, price box,
+  // footer bar) — paired with accentOnColor for whatever text/icon sits on
+  // top of those fills.
+  accentColor: string
+  accentOnColor: string
+  // accentColor itself, darkened just enough to stay legible when drawn as
+  // the big headline text directly on the light canvas.
+  primaryTextColor: string
+  // The agent's secondary color (or accentColor if they didn't set one),
+  // darkened if needed — used for subtitle-level text/icons on the light
+  // canvas or a white panel (transaction label, card subtitles, section
+  // headings, feature icons).
+  accentTextColor: string
+  // Secondary color again, but nudged (lighter or darker) to stay legible
+  // against accentColor itself — for the small uppercase labels ("Precio",
+  // "Contáctame", "Mira la propiedad completa en") that sit on the
+  // accent-colored price box / footer bar rather than the light canvas.
+  secondaryOnAccentColor: string
+}
+
+// ---------------------------------------------------------------------------
+// Accent color contrast — an agent can pick any hex, including very light
+// ones that would make white-on-accent or accent-on-canvas text unreadable.
+// ---------------------------------------------------------------------------
+
+function hexToRgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  const c = (v: number) => Math.round(Math.min(255, Math.max(0, v))).toString(16).padStart(2, "0")
+  return `#${c(r)}${c(g)}${c(b)}`
+}
+
+function srgbToLinear(c: number): number {
+  const s = c / 255
+  return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+}
+
+export function relativeLuminance(hex: string): number {
+  const [r, g, b] = hexToRgb(hex)
+  return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b)
+}
+
+function contrastRatio(l1: number, l2: number): number {
+  const [lighter, darker] = l1 > l2 ? [l1, l2] : [l2, l1]
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
+// White or near-black text on top of `bgHex`, whichever reads better.
+export function readableOn(bgHex: string): string {
+  const l = relativeLuminance(bgHex)
+  return contrastRatio(l, 1) >= contrastRatio(l, 0) ? "#ffffff" : INK
+}
+
+function hexToHsl(hex: string): [number, number, number] {
+  const [r, g, b] = hexToRgb(hex).map((v) => v / 255)
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  let h = 0
+  const l = (max + min) / 2
+  const d = max - min
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1))
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d) % 6
+    else if (max === g) h = (b - r) / d + 2
+    else h = (r - g) / d + 4
+    h *= 60
+    if (h < 0) h += 360
+  }
+  return [h, s, l]
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const c = (1 - Math.abs(2 * l - 1)) * s
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+  const m = l - c / 2
+  let [r, g, b] = [0, 0, 0]
+  if (h < 60) [r, g, b] = [c, x, 0]
+  else if (h < 120) [r, g, b] = [x, c, 0]
+  else if (h < 180) [r, g, b] = [0, c, x]
+  else if (h < 240) [r, g, b] = [0, x, c]
+  else if (h < 300) [r, g, b] = [x, 0, c]
+  else [r, g, b] = [c, 0, x]
+  return rgbToHex((r + m) * 255, (g + m) * 255, (b + m) * 255)
+}
+
+// Nudges `hex`'s HSL lightness — darker if `bgLuminance` is light, lighter if
+// `bgLuminance` is dark — until it contrasts enough to read as text on that
+// background. Leaves already-legible colors untouched.
+export function ensureContrastAgainst(hex: string, bgLuminance: number, minRatio = 3.2): string {
+  if (contrastRatio(relativeLuminance(hex), bgLuminance) >= minRatio) return hex
+
+  const [h, s, l0] = hexToHsl(hex)
+  const darken = bgLuminance >= 0.5
+  let l = l0
+  for (let i = 0; i < 40; i++) {
+    l = darken ? l - 0.04 : l + 0.04
+    if (l < 0.02 || l > 0.98) break
+    const candidate = hslToHex(h, s, l)
+    if (contrastRatio(relativeLuminance(candidate), bgLuminance) >= minRatio) return candidate
+  }
+  return darken ? INK : "#ffffff"
+}
+
+// Darkens `hex` until it contrasts enough against a near-white surface
+// (canvas/panels) to read as text — the common case for titles/headings.
+export function ensureTextContrast(hex: string, minRatio = 3.2): string {
+  return ensureContrastAgainst(hex, 1, minRatio)
 }
 
 export function loadFont(filename: string): Buffer {
@@ -223,7 +342,7 @@ export function bigTitle(d: FlyerData, size: number): ReactElement {
         style={{
           fontSize: size,
           fontWeight: 900,
-          color: INK,
+          color: d.primaryTextColor,
           letterSpacing: -2,
           lineHeight: 1.02,
           textTransform: "uppercase",
@@ -236,7 +355,7 @@ export function bigTitle(d: FlyerData, size: number): ReactElement {
           style={{
             fontSize: size,
             fontWeight: 900,
-            color: "#b4b4b2",
+            color: d.primaryTextColor,
             letterSpacing: -2,
             lineHeight: 1.06,
             textTransform: "uppercase",
@@ -259,32 +378,28 @@ export function locationChip(d: FlyerData, size = 23): ReactElement | null {
         alignItems: "center",
         gap: 10,
         alignSelf: "flex-start",
-        background: INK,
+        background: d.accentColor,
         borderRadius: 50,
         padding: "12px 26px 12px 20px",
       }}
     >
-      {icon("pin", size + 3, "#fff")}
-      <span style={{ fontSize: size, fontWeight: 700, color: "#fff" }}>
+      {icon("pin", size + 3, INK)}
+      <span style={{ fontSize: size, fontWeight: 700, color: d.accentOnColor }}>
         {truncate(location, 44)}
       </span>
     </div>
   )
 }
 
-export function brandRow(dark: boolean, size = 26): ReactElement {
+// Only remaining call site is the footer's no-contact fallback, on top of
+// the accent-colored bar — `onColor` picks whichever of white/black text
+// reads there, and swaps in the matching logo mark.
+export function brandRow(onColor: string, size = 26): ReactElement {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={dark ? markWhite : markBlack} alt="" style={{ width: size + 2, height: size + 2 }} />
-      <span
-        style={{
-          fontSize: size,
-          fontWeight: 900,
-          color: dark ? "#fff" : INK,
-          letterSpacing: -0.5,
-        }}
-      >
+      <img src={onColor === "#ffffff" ? markWhite : markBlack} alt="" style={{ width: size + 2, height: size + 2 }} />
+      <span style={{ fontSize: size, fontWeight: 900, color: onColor, letterSpacing: -0.5 }}>
         conexory
       </span>
     </div>
@@ -302,15 +417,15 @@ export function highlightBadge(d: FlyerData, fontSize = 20, maxWidth = 460): Rea
         display: "flex",
         alignItems: "center",
         gap: 10,
-        background: INK,
-        color: "#fff",
+        background: d.accentColor,
+        color: d.accentOnColor,
         borderRadius: 28,
         padding: "13px 26px",
         maxWidth,
         boxShadow: DARK_SHADOW,
       }}
     >
-      <div style={{ display: "flex", flexShrink: 0 }}>{icon("tag", fontSize + 4, "#fff")}</div>
+      <div style={{ display: "flex", flexShrink: 0 }}>{icon("tag", fontSize + 4, INK)}</div>
       <span
         style={{
           fontSize,
@@ -373,16 +488,16 @@ export function priceBox(d: FlyerData, valueSize = 52): ReactElement | null {
       style={{
         display: "flex",
         flexDirection: "column",
-        background: INK,
+        background: d.accentColor,
         borderRadius: 22,
         padding: "20px 34px",
         boxShadow: DARK_SHADOW,
       }}
     >
-      <span style={{ fontSize: 19, fontWeight: 900, color: MUTE, letterSpacing: 4, textTransform: "uppercase" }}>
+      <span style={{ fontSize: 19, fontWeight: 900, color: d.secondaryOnAccentColor, letterSpacing: 4, textTransform: "uppercase" }}>
         Precio
       </span>
-      {priceValueNode(d, valueSize, "#fff", MUTE)}
+      {priceValueNode(d, valueSize, d.accentOnColor, MUTE)}
     </div>
   )
 }
@@ -390,16 +505,16 @@ export function priceBox(d: FlyerData, valueSize = 52): ReactElement | null {
 // Ficha técnica's price panel is white-on-black text instead of a black box,
 // so it needs the same value logic with different colors.
 export function priceValuePanelNode(d: FlyerData, size: number): ReactElement {
-  return priceValueNode(d, size, INK, BODY)
+  return priceValueNode(d, size, d.accentTextColor, BODY)
 }
 
-export function sectionChip(text: string): ReactElement {
+export function sectionChip(text: string, bg: string, onColor: string): ReactElement {
   return (
     <div
       style={{
         display: "flex",
-        background: INK,
-        color: "#fff",
+        background: bg,
+        color: onColor,
         borderRadius: 50,
         padding: "10px 24px",
         fontSize: 21,
@@ -478,7 +593,9 @@ export function panel(children: ReactElement | (ReactElement | null)[], style: R
 function footerGroup(
   iconName: keyof typeof ICONS,
   label: string,
-  value: string
+  value: string,
+  onColor: string,
+  labelColor: string
 ): ReactElement {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
@@ -490,18 +607,18 @@ function footerGroup(
           width: 54,
           height: 54,
           borderRadius: 27,
-          border: "2.5px solid #fff",
+          border: `2.5px solid ${onColor}`,
           flexShrink: 0,
         }}
       >
-        {icon(iconName, 26, "#fff")}
+        {icon(iconName, 26, INK)}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <div style={{ display: "flex" }}>
-          <span style={{ fontSize: 18, fontWeight: 700, color: MUTE }}>{label}</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: labelColor }}>{label}</span>
         </div>
         <div style={{ display: "flex" }}>
-          <span style={{ fontSize: 23, fontWeight: 900, color: "#fff", letterSpacing: -0.3 }}>
+          <span style={{ fontSize: 23, fontWeight: 900, color: onColor, letterSpacing: -0.3 }}>
             {value}
           </span>
         </div>
@@ -511,23 +628,28 @@ function footerGroup(
 }
 
 export function footerBar(d: FlyerData): ReactElement {
-  const contact = has(d, "contacto")
+  // "Contáctame" only makes sense with a phone to show — no name fallback,
+  // so an agent who enabled contact but never saved a phone just falls back
+  // to the brandRow, same as the "no contact" case below.
+  const showContactBlock = has(d, "contacto") && !!d.agent.phone
+  const onColor = d.accentOnColor
+  const labelColor = d.secondaryOnAccentColor
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
         gap: 30,
-        background: INK,
+        background: d.accentColor,
         padding: `22px ${PAD}px`,
         marginTop: "auto",
       }}
     >
-      {contact && footerGroup("phone", "Contáctame", d.agent.phone ? `${truncate(d.agent.name, 18)} · ${d.agent.phone}` : truncate(d.agent.name, 30))}
-      {contact && <div style={{ display: "flex", width: 2, height: 50, background: "#333" }} />}
-      {footerGroup("globe", "Mira la propiedad completa en", truncate(d.publicPath, contact ? 34 : 48))}
-      {!contact && (
-        <div style={{ display: "flex", marginLeft: "auto" }}>{brandRow(true, 24)}</div>
+      {showContactBlock && footerGroup("phone", "Contáctame", d.agent.phone as string, onColor, labelColor)}
+      {showContactBlock && <div style={{ display: "flex", width: 2, height: 50, background: "#333" }} />}
+      {footerGroup("globe", "Mira la propiedad completa en", truncate(d.publicPath, showContactBlock ? 34 : 48), onColor, labelColor)}
+      {!showContactBlock && (
+        <div style={{ display: "flex", marginLeft: "auto" }}>{brandRow(onColor, 24)}</div>
       )}
     </div>
   )

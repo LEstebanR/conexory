@@ -26,9 +26,20 @@ export type FlyerOptions = {
   template: FlyerTemplate
   highlight?: string
   include: FlyerInfo[]
+  accentColor?: string
+  // Used for titles/icons drawn directly on the light canvas or white
+  // panels — kept separate from accentColor so an agent whose brand color
+  // is light isn't stuck with an auto-darkened gray for those.
+  secondaryColor?: string
 }
 
 export const DEFAULT_FLYER_OPTIONS: FlyerOptions = {
   template: "clasica",
   include: [...FLYER_INFO_IDS],
 }
+
+// Same value as INK in lib/flyer/shared.tsx — duplicated on purpose: that
+// module pulls in fs/sharp (server-only) and can't be imported from client
+// components like the flyer modal or settings form.
+export const DEFAULT_ACCENT_COLOR = "#0a0a0a"
+export const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/

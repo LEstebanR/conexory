@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma"
 import { ensureAgentSlug } from "@/lib/agent-slug"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { parseOnboarding } from "@/lib/onboarding"
+import { HEX_COLOR_REGEX } from "@/lib/flyer-options"
 
 export async function isSettingsTourPending(): Promise<boolean> {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -41,6 +42,8 @@ const profileSchema = z.object({
   tiktok: handle,
   linkedin: handle,
   youtube: handle,
+  brandColor: z.string().trim().regex(HEX_COLOR_REGEX, "Color inválido."),
+  secondaryColor: z.string().trim().regex(HEX_COLOR_REGEX, "Color inválido."),
 })
 
 export type ProfileState = { error?: string; success?: boolean }
@@ -70,6 +73,8 @@ export async function updateProfile(
     tiktok: formData.get("tiktok") ?? "",
     linkedin: formData.get("linkedin") ?? "",
     youtube: formData.get("youtube") ?? "",
+    brandColor: formData.get("brandColor") ?? "#0a0a0a",
+    secondaryColor: formData.get("secondaryColor") ?? "#0a0a0a",
   })
 
   if (!parsed.success) {
@@ -77,7 +82,7 @@ export async function updateProfile(
   }
 
   const { name, image, previousImage, location, bio, phone, phoneIsWhatsapp,
-    instagram, facebook, tiktok, linkedin, youtube } = parsed.data
+    instagram, facebook, tiktok, linkedin, youtube, brandColor, secondaryColor } = parsed.data
   const newImage = image || null
 
   if (previousImage && previousImage !== image && previousImage.includes("blob.vercel-storage.com")) {
@@ -98,6 +103,8 @@ export async function updateProfile(
       tiktok: stripAt(tiktok),
       linkedin: stripAt(linkedin),
       youtube: stripAt(youtube),
+      brandColor,
+      secondaryColor,
     },
   })
 

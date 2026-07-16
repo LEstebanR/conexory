@@ -11,6 +11,7 @@ import { formatCOP } from "@/lib/format"
 import { daysAgo } from "@/lib/dates"
 import { readMetrics, socialTotal, contactTotal } from "@/lib/property-metrics"
 import { hasProAccess, propertyLimit, pinnedLimit } from "@/lib/plans"
+import { DEFAULT_ACCENT_COLOR } from "@/lib/flyer-options"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyVideo from "@/components/property-video"
@@ -30,13 +31,14 @@ export default async function PropertyDetailPage({
   const weekAgo = daysAgo(7)
   const twoWeeksAgo = daysAgo(14)
 
-  const [property, totalVisits, visitsThisWeek, visitsPrevWeek, activePropertiesCount, pinnedCount] = await Promise.all([
+  const [property, totalVisits, visitsThisWeek, visitsPrevWeek, activePropertiesCount, pinnedCount, agent] = await Promise.all([
     prisma.property.findUnique({ where: { id, userId: session.user.id } }),
     prisma.propertyVisit.count({ where: { propertyId: id } }),
     prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: weekAgo } } }),
     prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
     prisma.property.count({ where: { userId: session.user.id, published: true, id: { not: id } } }),
     prisma.property.count({ where: { userId: session.user.id, pinnedAt: { not: null }, id: { not: id } } }),
+    prisma.user.findUnique({ where: { id: session.user.id }, select: { brandColor: true, secondaryColor: true } }),
   ])
 
   if (!property) notFound()
@@ -223,6 +225,8 @@ export default async function PropertyDetailPage({
           gatedCommunity={property.gatedCommunity}
           description={property.description}
           isPremium={isPremium}
+          agentBrandColor={agent?.brandColor ?? DEFAULT_ACCENT_COLOR}
+          agentSecondaryColor={agent?.secondaryColor ?? DEFAULT_ACCENT_COLOR}
         />
 
         {/* Carrusel */}
