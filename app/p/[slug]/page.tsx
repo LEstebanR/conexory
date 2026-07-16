@@ -460,6 +460,13 @@ export default async function PublicPropertyPage({
           </Reveal>
         )}
 
+        {/* Video — separate from the photo gallery, between description and map */}
+        {videoId && (
+          <Reveal delay={150}>
+            <PropertyVideo videoId={videoId} title={property.title} />
+          </Reveal>
+        )}
+
         {/* Map */}
         {property.latitude != null && property.longitude != null && (
           <Reveal delay={180}>
@@ -468,13 +475,6 @@ export default async function PublicPropertyPage({
               longitude={property.longitude}
               label={location || undefined}
             />
-          </Reveal>
-        )}
-
-        {/* Video — separate from the photo gallery, near the end of the sheet */}
-        {videoId && (
-          <Reveal delay={190}>
-            <PropertyVideo videoId={videoId} title={property.title} />
           </Reveal>
         )}
 
