@@ -10,7 +10,7 @@ import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-ty
 import { formatCOP } from "@/lib/format"
 import { daysAgo } from "@/lib/dates"
 import { readMetrics, socialTotal, contactTotal } from "@/lib/property-metrics"
-import { hasProAccess, propertyLimit } from "@/lib/plans"
+import { hasProAccess, propertyLimit, pinnedLimit } from "@/lib/plans"
 import SharePanel from "./share-panel"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyActions from "./property-actions"
@@ -29,12 +29,13 @@ export default async function PropertyDetailPage({
   const weekAgo = daysAgo(7)
   const twoWeeksAgo = daysAgo(14)
 
-  const [property, totalVisits, visitsThisWeek, visitsPrevWeek, activePropertiesCount] = await Promise.all([
+  const [property, totalVisits, visitsThisWeek, visitsPrevWeek, activePropertiesCount, pinnedCount] = await Promise.all([
     prisma.property.findUnique({ where: { id, userId: session.user.id } }),
     prisma.propertyVisit.count({ where: { propertyId: id } }),
     prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: weekAgo } } }),
     prisma.propertyVisit.count({ where: { propertyId: id, createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
     prisma.property.count({ where: { userId: session.user.id, published: true, id: { not: id } } }),
+    prisma.property.count({ where: { userId: session.user.id, pinnedAt: { not: null }, id: { not: id } } }),
   ])
 
   if (!property) notFound()
@@ -49,6 +50,13 @@ export default async function PropertyDetailPage({
       ? isPremium
         ? `Has alcanzado el máximo de ${limit} propiedades activas de tu plan Pro. Contáctanos para un plan personalizado.`
         : `Has alcanzado el límite de ${limit} propiedades activas del plan gratuito. Actualiza a Pro para activar más.`
+      : undefined
+  const pinLimit = pinnedLimit()
+  // Same message togglePinned (app/dashboard/properties/[id]/actions.ts) returns
+  // when it rejects pinning server-side — proactive UX hint, same as disableActivateReason.
+  const disablePinReason =
+    property.pinnedAt == null && pinnedCount >= pinLimit
+      ? `Ya tienes ${pinLimit} propiedades fijadas. Desfija una para fijar esta.`
       : undefined
   const metrics = readMetrics(property.metrics)
   const totalWhatsapp = metrics.whatsapp
@@ -76,25 +84,31 @@ export default async function PropertyDetailPage({
   return (
     <div className="flex-1 p-6 lg:p-8 max-w-3xl w-full mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <Link
-          href="/dashboard"
-          className="p-2 rounded-xl text-mute hover:bg-canvas-soft hover:text-ink transition-colors flex-shrink-0"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-black text-ink tracking-tight">
-            {property.published ? "Propiedad publicada" : "Propiedad desactivada"}
-          </h1>
-          <p className="text-sm text-body truncate">{property.title}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+        <div className="flex items-center gap-3 min-w-0">
+          <Link
+            href="/dashboard"
+            className="p-2 -ml-2 rounded-xl text-mute hover:bg-canvas-soft hover:text-ink transition-colors flex-shrink-0"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-black text-ink tracking-tight">
+              {property.published ? "Propiedad publicada" : "Propiedad desactivada"}
+            </h1>
+            <p className="text-sm text-body truncate">{property.title}</p>
+          </div>
         </div>
-        <PropertyActions
-          propertyId={property.id}
-          initialPublished={property.published}
-          initialShowContact={property.showContact}
-          disableActivateReason={disableActivateReason}
-        />
+        <div className="flex justify-end sm:contents">
+          <PropertyActions
+            propertyId={property.id}
+            initialPublished={property.published}
+            initialShowContact={property.showContact}
+            initialPinned={property.pinnedAt != null}
+            disableActivateReason={disableActivateReason}
+            disablePinReason={disablePinReason}
+          />
+        </div>
       </div>
 
       {/* Banner de desactivada */}

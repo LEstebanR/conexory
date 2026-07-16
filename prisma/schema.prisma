@@ -105,6 +105,7 @@ model Property {
   showContact  Boolean  @default(false)
   shares       Int      @default(0)
   published    Boolean  @default(true)
+  pinnedAt     DateTime?
   metrics      Json     @default("{\"whatsapp\":0,\"social\":{\"instagram\":0,\"facebook\":0,\"tiktok\":0,\"linkedin\":0,\"youtube\":0},\"contact\":{\"phone\":0,\"email\":0,\"whatsapp\":0}}")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

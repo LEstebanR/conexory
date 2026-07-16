@@ -72,7 +72,10 @@ async function getAgent(slug: string) {
       profilePublished: true,
       properties: {
         where: { published: true },
-        orderBy: { createdAt: "desc" },
+        orderBy: [
+          { pinnedAt: { sort: "desc", nulls: "last" } },
+          { createdAt: "desc" },
+        ],
         select: {
           id: true,
           slug: true,
@@ -91,6 +94,7 @@ async function getAgent(slug: string) {
           latitude: true,
           longitude: true,
           createdAt: true,
+          pinnedAt: true,
         },
       },
     },
@@ -161,6 +165,7 @@ export default async function AgentProfilePage({
     ...p,
     price: Number(p.price),
     createdAt: p.createdAt.getTime(),
+    pinnedAt: p.pinnedAt ? p.pinnedAt.getTime() : null,
   }))
 
   const socialLinks = [

@@ -1,6 +1,7 @@
 "use server"
 
 import { headers } from "next/headers"
+import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -8,7 +9,7 @@ import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-message"
 import { SHARE_INFO_IDS, SHARE_MESSAGE_KINDS } from "@/lib/share-message-options"
-import { propertyLimit, hasProAccess } from "@/lib/plans"
+import { propertyLimit, pinnedLimit, hasProAccess } from "@/lib/plans"
 
 export async function togglePublished(
   propertyId: string,
@@ -37,6 +38,44 @@ export async function togglePublished(
     where: { id: propertyId, userId: session.user.id },
     data: { published },
   })
+
+  return { success: true }
+}
+
+export async function togglePinned(
+  propertyId: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return { success: false, error: "Sesión expirada. Vuelve a iniciar sesión." }
+
+  const property = await prisma.property.findUnique({
+    where: { id: propertyId, userId: session.user.id },
+    select: { pinnedAt: true },
+  })
+  if (!property) return { success: false, error: "Propiedad no encontrada" }
+
+  const willPin = property.pinnedAt == null
+
+  if (willPin) {
+    const limit = pinnedLimit()
+    const pinnedCount = await prisma.property.count({
+      where: { userId: session.user.id, pinnedAt: { not: null }, id: { not: propertyId } },
+    })
+    if (pinnedCount >= limit) {
+      return {
+        success: false,
+        error: `Ya tienes ${limit} propiedades fijadas. Desfija una para fijar esta.`,
+      }
+    }
+  }
+
+  await prisma.property.update({
+    where: { id: propertyId, userId: session.user.id },
+    data: { pinnedAt: willPin ? new Date() : null },
+  })
+
+  revalidatePath("/agente", "layout")
+  revalidatePath(`/dashboard/properties/${propertyId}`)
 
   return { success: true }
 }
