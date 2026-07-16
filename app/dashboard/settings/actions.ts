@@ -109,6 +109,22 @@ export async function updateProfile(
   return { success: true }
 }
 
+export async function updateBrandColor(color: string): Promise<{ error?: string }> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return { error: "Sesión expirada." }
+
+  const parsed = z.string().trim().regex(HEX_COLOR_REGEX).safeParse(color)
+  if (!parsed.success) return { error: "Color inválido." }
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { brandColor: parsed.data },
+  })
+
+  revalidatePath("/dashboard", "layout")
+  return {}
+}
+
 export async function toggleProfilePublished(): Promise<void> {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) return

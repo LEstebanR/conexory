@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog"
 import { Download, Loader2, X, AlertCircle, ArrowLeft, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ColorInput } from "@/components/ui/color-input"
+import { updateBrandColor } from "@/app/dashboard/settings/actions"
 import {
   DEFAULT_FLYER_OPTIONS,
   FLYER_HIGHLIGHT_MAX_LENGTH,
@@ -62,6 +63,7 @@ export default function FlyerModal({
         if (prev) URL.revokeObjectURL(prev)
         return URL.createObjectURL(blob)
       })
+      if (accentColor !== agentBrandColor) updateBrandColor(accentColor)
     } catch {
       setError(true)
     } finally {
