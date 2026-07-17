@@ -89,7 +89,8 @@ model Property {
   slug         String   @unique
   type         String
   transactionType String?  // sale | rent | rent_furnished | exchange
-  price        Decimal  @db.Decimal(15, 2)
+  price         Decimal  @db.Decimal(15, 2)
+  previousPrice Decimal? @db.Decimal(15, 2)
   state        String?
   city         String
   neighborhood String?

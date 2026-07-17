@@ -25,13 +25,25 @@ export async function updateProperty(
       return { success: false, error: `Tu plan permite máximo ${maxPhotos} fotos por propiedad.` }
     }
 
+    const current = await prisma.property.findUnique({
+      where: { id: propertyId, userId: session.user.id },
+      select: { price: true },
+    })
+
+    const newPrice = parsed.data.price
+    const previousPrice =
+      current && Number(newPrice) < Number(current.price)
+        ? current.price
+        : null
+
     await prisma.property.update({
       where: { id: propertyId, userId: session.user.id },
       data: {
         title: parsed.data.title,
         type: parsed.data.type,
         transactionType: parsed.data.transactionType,
-        price: parsed.data.price,
+        price: newPrice,
+        previousPrice,
         state: parsed.data.state,
         city: parsed.data.city,
         neighborhood: parsed.data.neighborhood,
