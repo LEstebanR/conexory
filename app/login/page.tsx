@@ -134,14 +134,9 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-semibold text-ink">
-                  Contraseña
-                </label>
-                <Link href="/forgot-password" className="text-xs text-ink font-semibold hover:opacity-70 transition-opacity">
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
+              <label htmlFor="password" className="block text-sm font-semibold text-ink">
+                Contraseña
+              </label>
               <div className="relative">
                 <Input
                   id="password"
@@ -163,6 +158,11 @@ export default function LoginPage() {
               {state.errors?.password && (
                 <p className="text-xs font-medium text-red-500">{state.errors.password}</p>
               )}
+              <div className="flex justify-end">
+                <Link href="/forgot-password" className="text-xs text-ink font-semibold hover:opacity-70 transition-opacity">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
             </div>
 
             {state.error && (
