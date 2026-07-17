@@ -9,7 +9,7 @@ import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-message"
 import { SHARE_INFO_IDS, SHARE_MESSAGE_KINDS } from "@/lib/share-message-options"
-import { propertyLimit, pinnedLimit, hasProAccess } from "@/lib/plans"
+import { propertyLimit, pinnedLimit, hasProAccess, aiMessageLimit } from "@/lib/plans"
 
 export async function togglePublished(
   propertyId: string,
@@ -113,7 +113,7 @@ export async function generateShareMessage(input: {
   propertyId: string
   kind: string
   include?: string[]
-}): Promise<{ message: string } | { error: string }> {
+}): Promise<{ message: string; usedToday?: number; limit?: number } | { error: string }> {
   try {
     const session = await auth.api.getSession({ headers: await headers() })
     if (!session) return { error: "No autenticado" }
@@ -122,6 +122,24 @@ export async function generateShareMessage(input: {
     const parsed = GenerateMessageSchema.safeParse(input)
     if (!parsed.success) return { error: "Solicitud inválida" }
 
+    const isAdmin = session.user.role === "admin"
+
+    if (!isAdmin) {
+      const now = new Date()
+      const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+      const dbUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { aiMessagesUsedToday: true, aiMessagesResetAt: true },
+      })
+      if (!dbUser) return { error: "Usuario no encontrado" }
+      const needsReset = !dbUser.aiMessagesResetAt || dbUser.aiMessagesResetAt < todayUTC
+      const usedToday = needsReset ? 0 : dbUser.aiMessagesUsedToday
+      const limit = aiMessageLimit(session.user.isPremium)
+      if (usedToday >= limit) {
+        return { error: `Alcanzaste el límite de ${limit} mensajes generados con IA por día. Vuelve mañana.` }
+      }
+    }
+
     const property = await prisma.property.findUnique({
       where: { id: parsed.data.propertyId, userId: session.user.id },
     })
@@ -129,6 +147,25 @@ export async function generateShareMessage(input: {
 
     const message = await generateShareMessageWithAI(property, parsed.data.kind, parsed.data.include, session.user.name)
     if (!message) return { error: "No pudimos generar el mensaje. Inténtalo de nuevo." }
+
+    if (!isAdmin) {
+      const now = new Date()
+      const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+      const dbUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { aiMessagesUsedToday: true, aiMessagesResetAt: true },
+      })
+      const needsReset = !dbUser?.aiMessagesResetAt || dbUser.aiMessagesResetAt < todayUTC
+      const newCount = needsReset ? 1 : (dbUser?.aiMessagesUsedToday ?? 0) + 1
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          aiMessagesUsedToday: newCount,
+          aiMessagesResetAt: todayUTC,
+        },
+      })
+      return { message, usedToday: newCount, limit: aiMessageLimit(session.user.isPremium) }
+    }
 
     return { message }
   } catch {
