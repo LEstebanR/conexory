@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils"
 import { signOut } from "@/lib/auth-client"
 import { hasProAccess } from "@/lib/plans"
+import { SUPPORT_EMAIL } from "@/lib/urls"
 
 interface User {
   name: string
@@ -236,6 +237,12 @@ function SidebarContent({
           )}
           {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
         </button>
+        <a
+          href={`mailto:${SUPPORT_EMAIL}`}
+          className="block text-center text-[11px] text-mute hover:text-ink transition-colors mt-2 pt-2 border-t border-hairline"
+        >
+          ¿Necesitas ayuda? {SUPPORT_EMAIL}
+        </a>
       </div>
     </div>
   )
