@@ -106,13 +106,13 @@ function RangeSlider({
 function Thumbnail({ item }: { item: PropertyItem }) {
   if (item.image) {
     return (
-      <div className="relative w-20 h-16 sm:w-24 sm:h-[72px] rounded-xl overflow-hidden flex-shrink-0">
+      <div className={cn("relative w-20 h-16 sm:w-24 sm:h-[72px] rounded-xl overflow-hidden flex-shrink-0", !item.published && "grayscale opacity-60")}>
         <Image src={item.image} alt={item.title} fill sizes="96px" className="object-cover" />
       </div>
     )
   }
   return (
-    <div className="w-20 h-16 sm:w-24 sm:h-[72px] rounded-xl bg-canvas-soft flex items-center justify-center flex-shrink-0">
+    <div className={cn("w-20 h-16 sm:w-24 sm:h-[72px] rounded-xl bg-canvas-soft flex items-center justify-center flex-shrink-0", !item.published && "opacity-50")}>
       <Building2 className="w-6 h-6 text-mute" strokeWidth={1.5} />
     </div>
   )
