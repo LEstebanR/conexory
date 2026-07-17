@@ -116,16 +116,41 @@ export default async function BlogPostPage({
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tight leading-tight mb-4">
+        <h1 className="text-2xl sm:text-4xl font-black text-ink tracking-tight leading-tight mb-4">
           {post.title}
         </h1>
 
-        <p className="text-lg text-body leading-relaxed mb-8 border-b border-hairline pb-8">
+        <p className="text-lg text-body leading-relaxed mb-12 border-b border-hairline pb-8">
           {post.description}
         </p>
 
         <div
-          className="prose prose-slate prose-headings:font-black prose-headings:tracking-tight prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-p:text-body prose-p:leading-relaxed prose-strong:text-ink prose-li:text-body prose-code:bg-canvas-soft prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:text-ink prose-pre:bg-canvas-softer prose-pre:border prose-pre:border-hairline-strong prose-pre:rounded-xl max-w-none"
+          className={[
+            "prose prose-slate max-w-none",
+            // headings
+            "prose-headings:font-black prose-headings:tracking-tight",
+            "prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5",
+            "prose-h3:text-lg prose-h3:mt-10 prose-h3:mb-3",
+            // paragraphs
+            "prose-p:text-[16px] prose-p:leading-[1.85] prose-p:text-body prose-p:mb-6",
+            // lead paragraph
+            "[&>p:first-child]:text-[17px] [&>p:first-child]:text-ink [&>p:first-child]:font-medium [&>p:first-child]:leading-[1.9]",
+            // lists
+            "prose-li:text-body prose-li:leading-relaxed prose-li:mb-1",
+            "prose-ul:my-6 prose-ol:my-6",
+            // inline
+            "prose-strong:text-ink prose-strong:font-bold",
+            // blockquote
+            "prose-blockquote:border-l-4 prose-blockquote:border-ink",
+            "prose-blockquote:bg-canvas-softer prose-blockquote:rounded-r-xl",
+            "prose-blockquote:px-5 prose-blockquote:py-3",
+            "prose-blockquote:not-italic prose-blockquote:text-body prose-blockquote:font-medium",
+            // dividers
+            "prose-hr:border-hairline prose-hr:my-10",
+            // code
+            "prose-code:bg-canvas-soft prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:text-ink",
+            "prose-pre:bg-canvas-softer prose-pre:border prose-pre:border-hairline-strong prose-pre:rounded-xl",
+          ].join(" ")}
           dangerouslySetInnerHTML={{ __html: html }}
         />
 
