@@ -18,6 +18,7 @@ model User {
   image         String?
   role             String    @default("user")
   isPremium        Boolean   @default(false)
+  premiumUntil     DateTime?
   onboarding       Json      @default("{\"welcomeModalSeen\": false, \"dashboardTourCompleted\": false, \"propertyTourCompleted\": false, \"settingsTourCompleted\": false, \"firstPropertyCreated\": false, \"firstPropertyShared\": false}")
   agentSlug        String?   @unique
   profilePublished Boolean   @default(false)
