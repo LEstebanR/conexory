@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 import { signOut } from "@/lib/auth-client"
 import { hasProAccess } from "@/lib/plans"
 import { SUPPORT_EMAIL } from "@/lib/urls"
+import FeedbackModal from "./feedback-modal"
 
 interface User {
   name: string
@@ -183,6 +184,24 @@ function SidebarContent({
         )}
       </div>
 
+      {/* User */}
+      <div className="flex-shrink-0 border-b border-hairline px-3 py-3">
+        <div className="flex items-center gap-3 px-2 py-2">
+          <UserAvatar name={user.name} image={user.image} size={36} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-bold text-ink truncate">{user.name}</p>
+              {hasProAccess(user) && (
+                <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-wider bg-ink text-white px-1.5 py-0.5 rounded-full leading-none">
+                  Pro
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-mute truncate">{user.email}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Nav */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         {navItems.map((item) => (
@@ -193,6 +212,7 @@ function SidebarContent({
             onClick={onClose}
           />
         ))}
+        <FeedbackModal userName={user.name} />
       </div>
 
       {/* Admin + Configuración — encima del separador */}
@@ -209,22 +229,8 @@ function SidebarContent({
         />
       </div>
 
-      {/* User */}
+      {/* Cerrar sesión */}
       <div className="flex-shrink-0 border-t border-hairline p-3">
-        <div className="flex items-center gap-3 px-2 py-2 mb-1">
-          <UserAvatar name={user.name} image={user.image} size={36} />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <p className="text-sm font-bold text-ink truncate">{user.name}</p>
-              {hasProAccess(user) && (
-                <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-wider bg-ink text-white px-1.5 py-0.5 rounded-full leading-none">
-                  Pro
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-mute truncate">{user.email}</p>
-          </div>
-        </div>
         <button
           onClick={handleSignOut}
           disabled={signingOut}
@@ -268,14 +274,6 @@ export default function Sidebar({ user }: { user: User }) {
 
       {/* Mobile header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-hairline h-14 flex items-center px-4 gap-3">
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="p-2 rounded-xl text-body hover:bg-canvas-soft transition-colors"
-          aria-label="Abrir menú"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center">
             <Image src="/mark-white.png" alt="Conexory" width={18} height={18} className="w-4.5 h-4.5" />
@@ -283,9 +281,13 @@ export default function Sidebar({ user }: { user: User }) {
           <span className="text-base font-bold text-ink tracking-tight">Conexory</span>
         </div>
 
-        <div className="ml-auto">
-          <UserAvatar name={user.name} image={user.image} size={32} />
-        </div>
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="ml-auto p-2 rounded-xl text-body hover:bg-canvas-soft transition-colors"
+          aria-label="Abrir menú"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
       </header>
 
       {/* Mobile drawer */}
@@ -297,7 +299,7 @@ export default function Sidebar({ user }: { user: User }) {
             onClick={() => setMobileOpen(false)}
           />
           {/* Drawer */}
-          <div className="lg:hidden fixed top-0 left-0 bottom-0 w-72 bg-white z-50 shadow-2xl">
+          <div className="lg:hidden fixed top-0 left-0 bottom-0 w-full sm:w-80 bg-white z-50 shadow-2xl">
             <SidebarContent user={user} onClose={() => setMobileOpen(false)} variant="mobile" />
           </div>
         </>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Users, Building2, Zap, TrendingUp, Layers, ListChecks } from "lucide-react"
+import { Users, Building2, Zap, TrendingUp, Layers, ListChecks, Eye, Inbox } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { daysAgo } from "@/lib/dates"
 import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
@@ -113,7 +113,7 @@ export default async function AdminPage() {
     totalProperties,
     publishedProperties,
     propertiesByType,
-    topSharedProperties,
+    topVisitedPropertyVisits,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { createdAt: { gte: week } } }),
@@ -126,12 +126,23 @@ export default async function AdminPage() {
     prisma.property.count(),
     prisma.property.count({ where: { published: true } }),
     prisma.property.groupBy({ by: ["type"], _count: { id: true } }),
-    prisma.property.findMany({
-      orderBy: { shares: "desc" },
+    prisma.propertyVisit.groupBy({
+      by: ["propertyId"],
+      _count: { propertyId: true },
+      orderBy: { _count: { propertyId: "desc" } },
       take: 10,
-      select: { id: true, slug: true, title: true, shares: true, city: true },
     }),
   ])
+
+  const topVisitedPropertyIds = topVisitedPropertyVisits.map((v) => v.propertyId)
+  const topVisitedPropertiesData = await prisma.property.findMany({
+    where: { id: { in: topVisitedPropertyIds } },
+    select: { id: true, slug: true, title: true, city: true },
+  })
+  const topVisitedProperties = topVisitedPropertyVisits.flatMap((v) => {
+    const property = topVisitedPropertiesData.find((p) => p.id === v.propertyId)
+    return property ? [{ ...property, visits: v._count.propertyId }] : []
+  })
 
   // Filtered relation counts aren't directly comparable in a single query, so
   // fetch active-property counts for free (non-admin) users and filter in memory.
@@ -220,13 +231,21 @@ export default async function AdminPage() {
       {/* Top propiedades */}
       <div className="mb-8">
         <h2 className="text-sm font-bold text-ink uppercase tracking-wider mb-3">
-          Top 10 propiedades por veces compartidas
+          Top 10 propiedades por visitas
         </h2>
         <div className="bg-white rounded-2xl border border-hairline divide-y divide-hairline">
-          {topSharedProperties.length === 0 ? (
-            <p className="text-sm text-mute p-5">Sin datos todavía.</p>
+          {topVisitedProperties.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-14 px-5 text-center">
+              <span className="inline-flex w-12 h-12 rounded-2xl bg-canvas-soft items-center justify-center">
+                <Inbox className="w-5 h-5 text-mute" strokeWidth={1.75} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-ink">Sin visitas todavía</p>
+                <p className="text-xs text-mute mt-0.5">Cuando las propiedades reciban visitas, el top aparecerá aquí.</p>
+              </div>
+            </div>
           ) : (
-            topSharedProperties.map((p, i) => (
+            topVisitedProperties.map((p, i) => (
               <Link
                 key={p.id}
                 href={`/p/${p.slug}`}
@@ -246,8 +265,9 @@ export default async function AdminPage() {
                   <p className="text-sm font-semibold text-ink truncate">{p.title}</p>
                   <p className="text-xs text-mute truncate">{p.city}</p>
                 </div>
-                <span className="text-sm font-bold text-ink tabular-nums flex-shrink-0">
-                  {p.shares}
+                <span className="flex items-center gap-1.5 text-sm font-bold text-ink tabular-nums flex-shrink-0">
+                  <Eye className="w-3.5 h-3.5 text-mute" strokeWidth={1.75} />
+                  {p.visits}
                 </span>
               </Link>
             ))

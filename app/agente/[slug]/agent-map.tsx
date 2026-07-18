@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import L from "leaflet"
 import Link from "next/link"
@@ -86,6 +86,66 @@ function formatCOP(n: number): string {
   return n >= 1_000_000 ? formatCOPMillions(n) : formatCOPFull(n)
 }
 
+type PositionedProperty = MapProperty & { lat: number; lng: number }
+
+// Hover opens the preview; a short grace period on close lets the cursor
+// travel from the marker onto the popup (a separate DOM node in Leaflet's
+// overlay pane) without it closing mid-move. Touch devices never fire
+// mouseover/mouseout, so tapping the marker still opens it on click as before.
+function PropertyMarker({ p }: { p: PositionedProperty }) {
+  const markerRef = useRef<L.Marker>(null)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function cancelClose() {
+    if (closeTimer.current != null) {
+      clearTimeout(closeTimer.current)
+      closeTimer.current = null
+    }
+  }
+
+  function scheduleClose() {
+    cancelClose()
+    closeTimer.current = setTimeout(() => markerRef.current?.closePopup(), 150)
+  }
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={[p.lat, p.lng]}
+      eventHandlers={{
+        mouseover: () => {
+          cancelClose()
+          markerRef.current?.openPopup()
+        },
+        mouseout: scheduleClose,
+      }}
+    >
+      <Popup minWidth={200} maxWidth={220}>
+        <div onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
+          <Link href={`/p/${p.slug}`} target="_blank" className="block no-underline">
+            {p.images[0] && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={p.images[0]}
+                alt={p.title}
+                style={{ width: "100%", height: 120, objectFit: "cover", display: "block", borderRadius: "8px 8px 0 0", margin: 0 }}
+              />
+            )}
+            <div style={{ padding: "10px 12px 12px" }}>
+              <p style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.3, margin: "0 0 4px", color: "#000" }}>{p.title}</p>
+              <p style={{ fontSize: 11, color: "#afafaf", margin: "0 0 8px" }}>{p.city}</p>
+              <p style={{ fontWeight: 900, fontSize: 15, margin: "0 0 10px", color: "#000" }}>{formatCOP(p.price)}</p>
+              <span style={{ display: "block", textAlign: "center", fontSize: 12, fontWeight: 700, background: "#000", color: "#fff", borderRadius: 999, padding: "6px 14px" }}>
+                Ver propiedad
+              </span>
+            </div>
+          </Link>
+        </div>
+      </Popup>
+    </Marker>
+  )
+}
+
 export default function AgentMap({ properties }: { properties: MapProperty[] }) {
   useEffect(() => { fixLeafletIcons() }, [])
 
@@ -125,28 +185,7 @@ export default function AgentMap({ properties }: { properties: MapProperty[] }) 
       />
       <FitBounds positions={allPositions} />
       {positioned.map((p) => (
-        <Marker key={p.id} position={[p.lat, p.lng]}>
-          <Popup minWidth={200} maxWidth={220}>
-            <Link href={`/p/${p.slug}`} target="_blank" className="block no-underline">
-              {p.images[0] && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={p.images[0]}
-                  alt={p.title}
-                  style={{ width: "100%", height: 120, objectFit: "cover", display: "block", borderRadius: "8px 8px 0 0", margin: 0 }}
-                />
-              )}
-              <div style={{ padding: "10px 12px 12px" }}>
-                <p style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.3, margin: "0 0 4px", color: "#000" }}>{p.title}</p>
-                <p style={{ fontSize: 11, color: "#afafaf", margin: "0 0 8px" }}>{p.city}</p>
-                <p style={{ fontWeight: 900, fontSize: 15, margin: "0 0 10px", color: "#000" }}>{formatCOP(p.price)}</p>
-                <span style={{ display: "block", textAlign: "center", fontSize: 12, fontWeight: 700, background: "#000", color: "#fff", borderRadius: 999, padding: "6px 14px" }}>
-                  Ver propiedad
-                </span>
-              </div>
-            </Link>
-          </Popup>
-        </Marker>
+        <PropertyMarker key={p.id} p={p} />
       ))}
     </MapContainer>
   )

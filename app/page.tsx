@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import { faqs } from "@/lib/faq-data"
 import Navbar from "@/components/navbar"
@@ -8,6 +9,7 @@ import Hero from "@/components/hero"
 import Marquee from "@/components/marquee"
 import Features from "@/components/features"
 import HowItWorks from "@/components/how-it-works"
+import FeaturedProperties from "@/components/featured-properties"
 import Stats from "@/components/stats"
 import FAQ from "@/components/faq"
 import PricingTeaser from "@/components/pricing-teaser"
@@ -19,6 +21,24 @@ export default async function Home() {
   if (session) redirect("/dashboard")
 
   const appUrl = getAppUrl()
+
+  const topProperties = await prisma.property.findMany({
+    where: { published: true },
+    orderBy: { shares: "desc" },
+    take: 10,
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      price: true,
+      type: true,
+      transactionType: true,
+      city: true,
+      neighborhood: true,
+      images: true,
+    },
+  })
+  const featuredProperties = topProperties.map((p) => ({ ...p, price: Number(p.price) }))
 
   const softwareAppSchema = {
     "@context": "https://schema.org",
@@ -71,6 +91,7 @@ export default async function Home() {
       <Marquee />
       <Features />
       <HowItWorks />
+      <FeaturedProperties properties={featuredProperties} />
       <Stats />
       <FAQ />
       <PricingTeaser />

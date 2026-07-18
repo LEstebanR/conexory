@@ -8,6 +8,7 @@ const TABS = [
   { href: "/admin", label: "Métricas", exact: true },
   { href: "/admin/usuarios", label: "Usuarios", exact: false },
   { href: "/admin/referidos", label: "Referidos", exact: false },
+  { href: "/admin/feedback", label: "Feedback", exact: false },
 ]
 
 export default function AdminNav() {

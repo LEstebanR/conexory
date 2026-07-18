@@ -516,6 +516,7 @@ export default function SharePanel({
               href={waUrlNoContact}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={handleWhatsApp}
               className={`w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity ${!canShare ? "opacity-40 pointer-events-none" : ""}`}
               title="Compartir por WhatsApp"
             >

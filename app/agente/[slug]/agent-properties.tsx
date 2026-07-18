@@ -106,9 +106,15 @@ function MinSelect({ label, value, set }: { label: string; value: string; set: (
   )
 }
 
-const PAGE_SIZE = 5
+const PAGE_SIZE = 6
 
-export default function AgentProperties({ properties }: { properties: AgentProperty[] }) {
+export default function AgentProperties({
+  properties,
+  showHeader = true,
+}: {
+  properties: AgentProperty[]
+  showHeader?: boolean
+}) {
   const [query, setQuery] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [sort, setSort] = useState<SortKey>("recent")
@@ -207,10 +213,12 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
 
   return (
     <div className="space-y-4">
-      <div className="flex items-baseline justify-between">
-        <h2 className="text-base font-black text-ink">Propiedades disponibles</h2>
-        <span className="text-sm font-bold text-mute">{properties.length}</span>
-      </div>
+      {showHeader && (
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-base font-black text-ink">Propiedades disponibles</h2>
+          <span className="text-sm font-bold text-mute">{properties.length}</span>
+        </div>
+      )}
 
       {/* Search + filters + sort — only useful with 5+ properties */}
       {properties.length >= 5 && <div className="flex items-center gap-2">
@@ -332,9 +340,9 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
         </p>
       )}
 
-      {/* Property list */}
+      {/* Property grid */}
       {paginated.length > 0 ? (
-        <div key={currentPage} className="space-y-3 animate-fade-in">
+        <div key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
           {paginated.map((property) => {
             const cover = property.images[0]
             const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
@@ -343,48 +351,46 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
 
             return (
               <Link key={property.id} href={`/p/${property.slug}`} target="_blank" rel="noopener noreferrer"
-                className="group flex gap-3 bg-white rounded-2xl border border-hairline hover:border-hairline-strong overflow-hidden transition-all hover:shadow-sm p-3"
+                className="group rounded-2xl overflow-hidden border border-hairline hover:border-hairline-strong bg-white transition-all hover:shadow-md hover:shadow-black/5"
               >
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-canvas-soft flex-shrink-0 relative">
+                <div className="relative aspect-[4/3] bg-canvas-soft overflow-hidden">
                   {property.pinnedAt != null && (
-                    <span className="absolute top-1.5 left-1.5 z-10 inline-flex items-center gap-0.5 bg-ink text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                    <span className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1 bg-ink text-white text-[10px] font-bold px-2 py-1 rounded-full">
                       <Pin className="w-2.5 h-2.5" />
                       Destacada
                     </span>
                   )}
                   {cover ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={cover} alt={property.title} className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300" />
+                    <img src={cover} alt={property.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Building2 className="w-7 h-7 text-mute" strokeWidth={1.5} />
+                      <Building2 className="w-8 h-8 text-mute" strokeWidth={1.5} />
                     </div>
                   )}
+                  <span className="absolute bottom-2.5 left-2.5 bg-white/90 backdrop-blur-sm text-ink text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full">
+                    {typeLabel}
+                  </span>
                 </div>
 
-                <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                  <div>
-                    <span className="inline-block text-[10px] font-bold bg-canvas-soft text-body px-2 py-0.5 rounded-full mb-1.5">{typeLabel}</span>
-                    <p className="text-sm font-black text-ink leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">{property.title}</p>
-                    {location && (
-                      <div className="flex items-center gap-1 mt-1">
-                        <MapPin className="w-3 h-3 text-mute flex-shrink-0" strokeWidth={2} />
-                        <span className="text-xs text-mute truncate">{location}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-base font-black text-ink tracking-tight mt-1.5">{formatCOP(property.price)}</p>
-                    {hasStats && (
-                      <p className="text-xs text-mute mt-0.5">
-                        {[
-                          property.bedrooms != null && `${property.bedrooms} hab`,
-                          property.bathrooms != null && `${property.bathrooms} baño${property.bathrooms !== 1 ? "s" : ""}`,
-                          property.area != null && `${property.area} m²`,
-                        ].filter(Boolean).join(" · ")}
-                      </p>
-                    )}
-                  </div>
+                <div className="p-4">
+                  <p className="text-sm font-black text-ink leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">{property.title}</p>
+                  {location && (
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <MapPin className="w-3 h-3 text-mute flex-shrink-0" strokeWidth={2} />
+                      <span className="text-xs text-mute truncate">{location}</span>
+                    </div>
+                  )}
+                  <p className="text-lg font-black text-ink tracking-tight mt-2.5">{formatCOP(property.price)}</p>
+                  {hasStats && (
+                    <p className="text-xs text-mute mt-1">
+                      {[
+                        property.bedrooms != null && `${property.bedrooms} hab`,
+                        property.bathrooms != null && `${property.bathrooms} baño${property.bathrooms !== 1 ? "s" : ""}`,
+                        property.area != null && `${property.area} m²`,
+                      ].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
                 </div>
               </Link>
             )
@@ -414,7 +420,7 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
       {/* Map */}
       <div className="pt-4">
         <h2 className="text-base font-black text-ink mb-3">Ubicación de propiedades</h2>
-        <div className="rounded-2xl overflow-hidden border border-hairline" style={{ height: 340 }}>
+        <div className="relative isolate rounded-2xl overflow-hidden border border-hairline" style={{ height: 340 }}>
           <AgentMap properties={mapProperties} />
         </div>
       </div>

@@ -81,7 +81,7 @@ export default function FlyerModal({
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm animate-fade-in" />
-        <Dialog.Content className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl shadow-black/10 p-6 sm:p-7 animate-fade-up">
+        <Dialog.Content className="fixed z-50 inset-0 flex flex-col sm:block sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 w-full sm:w-[calc(100%-2rem)] sm:max-w-md h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto bg-white rounded-none sm:rounded-2xl shadow-2xl shadow-black/10 p-6 sm:p-7 animate-fade-up">
           <div className="flex items-start justify-between mb-4">
             <div>
               <Dialog.Title className="text-lg font-black text-ink tracking-tight">

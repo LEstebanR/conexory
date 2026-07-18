@@ -46,6 +46,7 @@ model User {
   paymentEvents         PaymentEvent[]
   referredBy            User?          @relation("UserReferrals", fields: [referredById], references: [id])
   referrals             User[]         @relation("UserReferrals")
+  feedback              Feedback[]
 
   @@map("users")
 }
@@ -182,4 +183,15 @@ model Suggestion {
   createdAt DateTime @default(now())
 
   @@map("suggestions")
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String?
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("feedback")
 }
