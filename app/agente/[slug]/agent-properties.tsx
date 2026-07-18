@@ -9,7 +9,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
-import { PROPERTY_TYPE_LABELS as TYPE_LABELS } from "@/lib/property-types"
+import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import { formatCOP as formatCOPFull, formatCOPMillions } from "@/lib/format"
 import type { MapProperty } from "./agent-map"
 
@@ -23,6 +23,7 @@ export interface AgentProperty {
   slug: string
   title: string
   type: string
+  transactionType: string | null
   price: number
   city: string
   state: string | null
@@ -347,6 +348,9 @@ export default function AgentProperties({
             const cover = property.images[0]
             const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
             const typeLabel = TYPE_LABELS[property.type] ?? property.type
+            const transactionLabel = property.transactionType
+              ? TRANSACTION_TYPE_LABELS[property.transactionType] ?? null
+              : null
             const hasStats = property.area != null || property.bedrooms != null || property.bathrooms != null
 
             return (
@@ -370,6 +374,7 @@ export default function AgentProperties({
                   )}
                   <span className="absolute bottom-2.5 left-2.5 bg-white/90 backdrop-blur-sm text-ink text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full">
                     {typeLabel}
+                    {transactionLabel ? ` · ${transactionLabel}` : ""}
                   </span>
                 </div>
 
