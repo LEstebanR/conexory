@@ -71,7 +71,7 @@ export default async function PropertiesPage() {
               </div>
             </div>
           ) : (
-            <AgentProperties properties={items} />
+            <AgentProperties properties={items} showHeader={false} />
           )}
         </div>
       </main>

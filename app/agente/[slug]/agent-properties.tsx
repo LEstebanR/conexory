@@ -108,7 +108,13 @@ function MinSelect({ label, value, set }: { label: string; value: string; set: (
 
 const PAGE_SIZE = 6
 
-export default function AgentProperties({ properties }: { properties: AgentProperty[] }) {
+export default function AgentProperties({
+  properties,
+  showHeader = true,
+}: {
+  properties: AgentProperty[]
+  showHeader?: boolean
+}) {
   const [query, setQuery] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [sort, setSort] = useState<SortKey>("recent")
@@ -207,10 +213,12 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
 
   return (
     <div className="space-y-4">
-      <div className="flex items-baseline justify-between">
-        <h2 className="text-base font-black text-ink">Propiedades disponibles</h2>
-        <span className="text-sm font-bold text-mute">{properties.length}</span>
-      </div>
+      {showHeader && (
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-base font-black text-ink">Propiedades disponibles</h2>
+          <span className="text-sm font-bold text-mute">{properties.length}</span>
+        </div>
+      )}
 
       {/* Search + filters + sort — only useful with 5+ properties */}
       {properties.length >= 5 && <div className="flex items-center gap-2">
