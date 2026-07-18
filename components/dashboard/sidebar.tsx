@@ -212,7 +212,7 @@ function SidebarContent({
             onClick={onClose}
           />
         ))}
-        <FeedbackModal userName={user.name} onOpen={onClose} />
+        <FeedbackModal userName={user.name} />
       </div>
 
       {/* Admin + Configuración — encima del separador */}

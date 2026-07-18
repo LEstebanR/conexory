@@ -7,13 +7,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { submitFeedback, type FeedbackState } from "@/app/dashboard/actions"
 
-export default function FeedbackModal({
-  userName,
-  onOpen,
-}: {
-  userName: string
-  onOpen?: () => void
-}) {
+export default function FeedbackModal({ userName }: { userName: string }) {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -40,7 +34,6 @@ export default function FeedbackModal({
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <button
-          onClick={onOpen}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-body hover:bg-canvas-softer hover:text-ink transition-all duration-150"
         >
           <MessageSquareHeart className="w-4.5 h-4.5 flex-shrink-0" strokeWidth={1.75} />
