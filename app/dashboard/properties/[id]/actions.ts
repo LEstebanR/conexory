@@ -136,7 +136,7 @@ export async function generateShareMessage(input: {
       const usedToday = needsReset ? 0 : dbUser.aiMessagesUsedToday
       const limit = aiMessageLimit(session.user.isPremium)
       if (usedToday >= limit) {
-        return { error: `Alcanzaste el límite de ${limit} mensajes generados con IA por día. Vuelve mañana.` }
+        return { error: `Alcanzaste el límite de ${limit} mensajes generados con IA por día. Usaremos una plantilla por ahora, mañana se reactivan los mensajes con IA.` }
       }
     }
 
