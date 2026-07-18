@@ -1,6 +1,9 @@
 import { describe, test, expect, mock } from "bun:test"
 
-const mockVerifyWompiEvent = mock((_event: unknown) => true)
+const mockVerifyWompiEvent = mock((...args: [unknown]) => {
+  void args
+  return true
+})
 // Spread the real module so unrelated exports (createPaymentSource,
 // makeSubscriptionReference) stay real for any other test file that imports
 // "@/lib/wompi" after this one — mock.module replaces it process-wide, not
@@ -11,18 +14,29 @@ mock.module("@/lib/wompi", () => ({
   verifyWompiEvent: mockVerifyWompiEvent,
 }))
 
-const mockPaymentEventCreate = mock((_args: { data: Record<string, unknown> }) =>
-  Promise.resolve({})
-)
-const mockPaymentEventUpdate = mock((_args: unknown) => Promise.resolve({}))
+const mockPaymentEventCreate = mock((...args: [{ data: Record<string, unknown> }]) => {
+  void args
+  return Promise.resolve({})
+})
+const mockPaymentEventUpdate = mock((...args: [unknown]) => {
+  void args
+  return Promise.resolve({})
+})
 const mockSubscriptionFindUnique = mock(() =>
   Promise.resolve<{ currentPeriodEnd: Date | null; status: string } | null>(null)
 )
-const mockSubscriptionUpsert = mock((_args: unknown) => Promise.resolve({}))
-const mockSubscriptionUpdateMany = mock((_args: unknown) => Promise.resolve({ count: 1 }))
-const mockUserUpdate = mock((_args: unknown) =>
-  Promise.resolve({ email: "u@example.com", name: "User" })
-)
+const mockSubscriptionUpsert = mock((...args: [unknown]) => {
+  void args
+  return Promise.resolve({})
+})
+const mockSubscriptionUpdateMany = mock((...args: [unknown]) => {
+  void args
+  return Promise.resolve({ count: 1 })
+})
+const mockUserUpdate = mock((...args: [unknown]) => {
+  void args
+  return Promise.resolve({ email: "u@example.com", name: "User" })
+})
 const mockUserFindUnique = mock(() =>
   Promise.resolve<{ email: string; name: string } | null>({ email: "u@example.com", name: "User" })
 )
@@ -39,8 +53,14 @@ mock.module("@/lib/prisma", () => ({
   },
 }))
 
-const mockSendSubscriptionConfirmation = mock((_email: string, _name: string) => Promise.resolve())
-const mockSendPaymentFailed = mock((_email: string, _name: string) => Promise.resolve())
+const mockSendSubscriptionConfirmation = mock((...args: [string, string]) => {
+  void args
+  return Promise.resolve()
+})
+const mockSendPaymentFailed = mock((...args: [string, string]) => {
+  void args
+  return Promise.resolve()
+})
 mock.module("@/lib/email", () => ({
   sendSubscriptionConfirmation: mockSendSubscriptionConfirmation,
   sendPaymentFailed: mockSendPaymentFailed,
@@ -115,6 +135,22 @@ describe("POST /api/webhooks/wompi", () => {
     expect(mockSendSubscriptionConfirmation).toHaveBeenCalledTimes(1)
   })
 
+  test("still returns 200 if linking the event to the user fails", async () => {
+    mockSubscriptionFindUnique.mockImplementationOnce(() => Promise.resolve(null))
+    mockPaymentEventUpdate.mockImplementationOnce(() => Promise.reject(new Error("db down")))
+    const res = await POST(makeRequest(approvedEvent()))
+    expect(res.status).toBe(200)
+  })
+
+  test("still returns 200 if the confirmation email fails to send", async () => {
+    mockSubscriptionFindUnique.mockImplementationOnce(() => Promise.resolve(null))
+    mockSendSubscriptionConfirmation.mockImplementationOnce(() =>
+      Promise.reject(new Error("resend down"))
+    )
+    const res = await POST(makeRequest(approvedEvent()))
+    expect(res.status).toBe(200)
+  })
+
   test("does not send a confirmation email for a renewal of an active subscription", async () => {
     mockSubscriptionFindUnique.mockImplementationOnce(() =>
       Promise.resolve({ currentPeriodEnd: new Date(Date.now() + 86_400_000), status: "active" })
@@ -155,6 +191,14 @@ describe("POST /api/webhooks/wompi", () => {
       data: { status: "past_due", pastDueSince: expect.any(Date) },
     })
     expect(mockSendPaymentFailed).toHaveBeenCalledTimes(1)
+  })
+
+  test("still returns 200 if the payment-failed email fails to send", async () => {
+    mockSubscriptionUpdateMany.mockImplementationOnce(() => Promise.resolve({ count: 1 }))
+    mockSendPaymentFailed.mockImplementationOnce(() => Promise.reject(new Error("resend down")))
+    const event = approvedEvent({ status: "DECLINED" })
+    const res = await POST(makeRequest(event))
+    expect(res.status).toBe(200)
   })
 
   test("does not resend the payment-failed email for a second decline in the same cycle", async () => {

@@ -23,10 +23,12 @@ mock.module("sharp", () => ({
   }),
 }))
 
-const mockPut = mock(
-  (_pathname: string, _body: Buffer, _options?: { access: string; contentType: string }) =>
-    Promise.resolve({ url: "https://blob.example.com/img.jpg" })
-)
+// The args are only there so mockPut.mock.calls[0] has the right tuple type
+// (see the "calls put with..." test below) — void marks them as read.
+const mockPut = mock((...args: [string, Buffer, { access: string; contentType: string }?]) => {
+  void args
+  return Promise.resolve({ url: "https://blob.example.com/img.jpg" })
+})
 mock.module("@vercel/blob", () => ({ put: mockPut }))
 
 mock.module("next/server", () => ({

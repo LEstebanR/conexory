@@ -8,4 +8,4 @@ coverageThreshold = 0.80
 # be unit tested alongside lib/subscription.test.ts's mock of the same module
 # — bun:test's mock.module() replaces modules process-wide, not per file. See
 # LES-263. Excluded here rather than left permanently failing the threshold.
-coveragePathIgnorePatterns = ["lib/wompi.ts"]
+coveragePathIgnorePatterns = ["**/lib/wompi.ts"]

@@ -17,10 +17,6 @@ const eslintConfig = defineConfig([
     rules: {
       "@next/next/no-img-element": "error",
       "@typescript-eslint/no-unused-expressions": "error",
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-      ],
     },
   },
 ]);
