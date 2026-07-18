@@ -22,6 +22,11 @@ const PRO_FEATURES = [
   "Vista pública para tus clientes",
 ]
 
+// Provisional support inbox for plan-related questions — not yet the
+// verified conexory.com domain, so it's a plain mailto rather than
+// something sent via Resend (see lib/email.ts TEAM_INBOX).
+const PLAN_SUPPORT_MAILTO = `mailto:conexory@gmail.com?cc=leramirezca@gmail.com&subject=${encodeURIComponent("Ayuda con mi plan Conexory")}`
+
 function formatDate(date: Date) {
   // Render in Colombia time (UTC-5) so the date the user sees matches their day.
   return date.toLocaleDateString("es-CO", {
@@ -104,16 +109,22 @@ export default async function UpgradePage() {
             </Button>
           </div>
 
-          {!isCanceling && !isPastDue && subscription && (
-            <div className="text-center mt-5">
-              <Link
-                href="/dashboard/upgrade/cancel"
-                className="text-xs text-mute hover:text-ink transition-colors"
-              >
-                Cancelar suscripción
-              </Link>
-            </div>
-          )}
+          <div className="text-center mt-5 flex items-center justify-center gap-3">
+            {!isCanceling && !isPastDue && subscription && (
+              <>
+                <Link
+                  href="/dashboard/upgrade/cancel"
+                  className="text-xs text-mute hover:text-ink transition-colors"
+                >
+                  Cancelar suscripción
+                </Link>
+                <span className="text-hairline-strong">·</span>
+              </>
+            )}
+            <a href={PLAN_SUPPORT_MAILTO} className="text-xs text-mute hover:text-ink transition-colors">
+              ¿Problemas con tu plan? Escríbenos
+            </a>
+          </div>
         </div>
       </div>
     )
@@ -166,7 +177,10 @@ export default async function UpgradePage() {
 
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-mute">
           <ShieldCheck className="w-3.5 h-3.5" strokeWidth={1.75} />
-          Pago seguro con Wompi · Conexory@gmail.com
+          Pago seguro con Wompi ·{" "}
+          <a href={PLAN_SUPPORT_MAILTO} className="hover:text-ink transition-colors">
+            Conexory@gmail.com
+          </a>
         </div>
       </div>
     </div>
