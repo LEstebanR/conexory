@@ -10,6 +10,7 @@ import { ensureAgentSlug } from "@/lib/agent-slug"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { parseOnboarding } from "@/lib/onboarding"
 import { HEX_COLOR_REGEX } from "@/lib/flyer-options"
+import { sanitizePhoneInput } from "@/lib/phone"
 
 export async function isSettingsTourPending(): Promise<boolean> {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -82,6 +83,10 @@ export async function updateProfile(
   const { name, image, previousImage, location, bio, phone, phoneIsWhatsapp,
     instagram, facebook, tiktok, linkedin, youtube, brandColor } = parsed.data
   const newImage = image || null
+  // Defense in depth: the settings form already sanitizes as the agent
+  // types (lib/phone.ts sanitizePhoneInput), but this runs regardless of
+  // client JS so a stray "+57" can never reach the DB and break wa.me links.
+  const sanitizedPhone = phone ? sanitizePhoneInput(phone) : ""
 
   if (previousImage && previousImage !== image && previousImage.includes("blob.vercel-storage.com")) {
     await del(previousImage).catch(() => null)
@@ -94,7 +99,7 @@ export async function updateProfile(
       image: newImage,
       location: location || null,
       bio: bio || null,
-      phone: phone || null,
+      phone: sanitizedPhone || null,
       phoneIsWhatsapp: phoneIsWhatsapp === "true",
       instagram: stripAt(instagram),
       facebook: stripAt(facebook),

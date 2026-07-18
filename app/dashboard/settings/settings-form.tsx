@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { ColorInput } from "@/components/ui/color-input"
 import { cn } from "@/lib/utils"
 import { updateProfile, type ProfileState } from "./actions"
+import { sanitizePhoneInput } from "@/lib/phone"
 
 interface Props {
   name: string
@@ -30,6 +31,7 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
   const [avatarUrl, setAvatarUrl] = useState(image ?? "")
   const [uploading, setUploading] = useState(false)
   const [isWhatsapp, setIsWhatsapp] = useState(phoneIsWhatsapp)
+  const [phoneValue, setPhoneValue] = useState(() => sanitizePhoneInput(phone))
   const [accentColor, setAccentColor] = useState(brandColor)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -169,12 +171,15 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
           id="phone"
           name="phone"
           type="tel"
-          defaultValue={phone}
+          value={phoneValue}
+          onChange={(e) => setPhoneValue(sanitizePhoneInput(e.target.value))}
           placeholder="Ej. 3001234567"
           maxLength={10}
           className="h-11"
         />
-        <p className="text-xs text-mute mt-1.5">Solo números, sin espacios ni guiones. Ej: 3001234567</p>
+        <p className="text-xs text-mute mt-1.5">
+          Solo el número local, sin +57 ni espacios. Ej: 3001234567
+        </p>
         <label className="flex items-center gap-2.5 cursor-pointer mt-2 select-none">
           <div className="relative flex-shrink-0">
             <input

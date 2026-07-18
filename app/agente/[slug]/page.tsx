@@ -5,6 +5,7 @@ import Link from "next/link"
 import { MapPin, Phone, MessageCircle, Mail, ArrowUpRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
+import { toWhatsAppNumber } from "@/lib/phone"
 import AgentProperties, { type AgentProperty } from "./agent-properties"
 
 // ── Inline SVG brand icons ─────────────────────────────────────────────────
@@ -262,7 +263,7 @@ export default async function AgentProfilePage({
         <section className="max-w-lg mx-auto w-full px-5 py-7 space-y-2.5">
           {agent.phone && agent.phoneIsWhatsapp && (
             <a
-              href={`https://wa.me/${agent.phone.replace(/\D/g, "")}`}
+              href={`https://wa.me/${toWhatsAppNumber(agent.phone)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex w-full items-center justify-center gap-2.5 h-12 rounded-full bg-ink text-white text-sm font-bold hover:bg-elevated transition-colors shadow-sm"

@@ -2,49 +2,21 @@ import type { Metadata } from "next"
 import { Building2 } from "lucide-react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import { prisma } from "@/lib/prisma"
-import AgentProperties, { type AgentProperty } from "@/app/agente/[slug]/agent-properties"
+import { getPublishedProperties } from "@/lib/properties"
+import AgentProperties from "@/app/agente/[slug]/agent-properties"
 
 export const metadata: Metadata = {
   title: "Propiedades — Conexory",
   description: "Explora todas las propiedades publicadas por agentes inmobiliarios en Conexory.",
 }
 
-export default async function PropertiesPage() {
-  const properties = await prisma.property.findMany({
-    where: { published: true },
-    orderBy: [
-      { pinnedAt: { sort: "desc", nulls: "last" } },
-      { createdAt: "desc" },
-    ],
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      type: true,
-      price: true,
-      city: true,
-      state: true,
-      neighborhood: true,
-      images: true,
-      area: true,
-      bedrooms: true,
-      bathrooms: true,
-      parking: true,
-      shares: true,
-      latitude: true,
-      longitude: true,
-      createdAt: true,
-      pinnedAt: true,
-    },
-  })
+// Safety net on top of the on-demand revalidatePath("/propiedades") calls in
+// the property actions (create/update/delete/toggle publish/pin) — bounds
+// staleness even if a future mutation path forgets to revalidate.
+export const revalidate = 3600
 
-  const items: AgentProperty[] = properties.map((p) => ({
-    ...p,
-    price: Number(p.price),
-    createdAt: p.createdAt.getTime(),
-    pinnedAt: p.pinnedAt ? p.pinnedAt.getTime() : null,
-  }))
+export default async function PropertiesPage() {
+  const items = await getPublishedProperties()
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
