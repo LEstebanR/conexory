@@ -27,7 +27,11 @@ const mockPut = mock((...args: [string, Buffer, { access: string; contentType: s
   void args
   return Promise.resolve({ url: "https://blob.example.com/img.jpg" })
 })
-mock.module("@vercel/blob", () => ({ put: mockPut }))
+// Spread the real module so unrelated exports (del, needed by
+// dashboard/properties/[id]/actions.test.ts) stay real — mock.module()
+// replaces "@vercel/blob" process-wide, not just for this file.
+const realBlob = await import("@vercel/blob")
+mock.module("@vercel/blob", () => ({ ...realBlob, put: mockPut }))
 
 mock.module("next/server", () => ({
   NextResponse: {
