@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 
 const navLinks = [
-  { label: "Funciones", href: "/#features" },
   { label: "Cómo funciona", href: "/#how-it-works" },
-  { label: "Propiedades destacadas", href: "/#featured" },
+  { label: "Propiedades", href: "/propiedades" },
   { label: "Precios", href: "/#pricing" },
 ]
 
@@ -36,12 +35,12 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
-                className="text-sm font-medium text-body hover:text-ink transition-colors"
+                className="text-sm font-medium text-body hover:text-ink hover:bg-canvas-soft rounded-full px-4 py-2 transition-colors"
               >
                 {link.label}
               </a>
