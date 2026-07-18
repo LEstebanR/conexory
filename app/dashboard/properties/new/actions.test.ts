@@ -18,7 +18,9 @@ const mockPropertyCreate = mock((...args: [{ data: { userId: string } }]) => {
   void args
   return Promise.resolve({ id: "prop-1" })
 })
-const mockUserFindUnique = mock(() => Promise.resolve(null))
+const mockUserFindUnique = mock(() =>
+  Promise.resolve<{ onboarding: unknown } | null>(null)
+)
 
 mock.module("@/lib/prisma", () => ({
   prisma: {
@@ -39,13 +41,10 @@ mock.module("@/lib/onboarding-server", () => ({
   setOnboardingFlag: mockSetOnboardingFlag,
 }))
 
-const mockParseOnboarding = mock((...args: [unknown]) => {
-  void args
-  return { propertyTourCompleted: false }
-})
-mock.module("@/lib/onboarding", () => ({
-  parseOnboarding: mockParseOnboarding,
-}))
+// @/lib/onboarding's parseOnboarding is pure and already covered directly in
+// lib/onboarding.test.ts — run the real thing here via mockUserFindUnique's
+// `onboarding` field instead of mocking the module (mock.module() replaces a
+// module process-wide, and other test files need it for their own flags).
 
 const { createProperty, isPropertyTourPending, completePropertyTour } = await import("./actions")
 
@@ -153,14 +152,18 @@ describe("isPropertyTourPending", () => {
   })
 
   test("returns true when the tour hasn't been completed", async () => {
-    mockParseOnboarding.mockImplementation(() => ({ propertyTourCompleted: false }))
+    mockUserFindUnique.mockImplementation(() =>
+      Promise.resolve({ onboarding: { propertyTourCompleted: false } })
+    )
     expect(await isPropertyTourPending()).toBe(true)
   })
 
   test("returns false when the tour was already completed", async () => {
-    mockParseOnboarding.mockImplementation(() => ({ propertyTourCompleted: true }))
+    mockUserFindUnique.mockImplementation(() =>
+      Promise.resolve({ onboarding: { propertyTourCompleted: true } })
+    )
     expect(await isPropertyTourPending()).toBe(false)
-    mockParseOnboarding.mockImplementation(() => ({ propertyTourCompleted: false }))
+    mockUserFindUnique.mockImplementation(() => Promise.resolve(null))
   })
 })
 
