@@ -33,12 +33,13 @@ export async function GET(req: Request) {
   }
 
   const now = new Date()
-  const summary = { reminded: 0, charged: 0, pastDue: 0, downgraded: 0, canceled: 0 }
+  const summary = { reminded: 0, charged: 0, pastDue: 0, downgraded: 0, canceled: 0, manualExpired: 0 }
 
   await sendReminders(now, summary)
   await chargeRenewals(now, summary)
   await expireCanceled(now, summary)
   await downgradeExpired(now, summary)
+  await expireManualPro(now, summary)
 
   return Response.json({ ok: true, ...summary })
 }
@@ -183,5 +184,41 @@ async function downgradeExpired(
     })
     await sendSubscriptionCancelled(sub.user.email, sub.user.name).catch(() => null)
     summary.downgraded++
+  }
+}
+
+// Admin-granted manual Pro with a premiumUntil date that has passed.
+// If the user also has an active Wompi subscription, keep isPremium and just clear
+// the manual date so the real subscription continues uninterrupted.
+async function expireManualPro(
+  now: Date,
+  summary: { manualExpired: number },
+) {
+  const expired = await prisma.user.findMany({
+    where: { isPremium: true, premiumUntil: { lte: now } },
+    select: {
+      id: true,
+      subscription: { select: { status: true } },
+    },
+  })
+
+  for (const user of expired) {
+    const hasActiveSub =
+      user.subscription?.status === "active" ||
+      user.subscription?.status === "canceling"
+
+    if (hasActiveSub) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { premiumUntil: null },
+      })
+    } else {
+      await downgradeToFree(user.id)
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { premiumUntil: null },
+      })
+    }
+    summary.manualExpired++
   }
 }

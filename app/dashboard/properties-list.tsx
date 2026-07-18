@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { toast } from "sonner"
-import { MapPin, BedDouble, Bath, Square, Share2, ChevronRight, EyeOff, Building2, Search, SlidersHorizontal, ArrowUpDown, Eye, MessageCircle, Pin, Loader2 } from "lucide-react"
+import { MapPin, BedDouble, Bath, Square, Share2, ChevronRight, EyeOff, Building2, Search, SlidersHorizontal, ArrowUpDown, Eye, MessageCircle, Pin, Loader2, TrendingDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
 import { pinnedLimit } from "@/lib/plans"
@@ -32,6 +32,7 @@ export type PropertyItem = {
   visitsThisWeek: number
   whatsappClicks: number
   isPremium: boolean
+  priceReduced: boolean
 }
 
 type Filter = "all" | "active" | "inactive"
@@ -106,13 +107,13 @@ function RangeSlider({
 function Thumbnail({ item }: { item: PropertyItem }) {
   if (item.image) {
     return (
-      <div className="relative w-20 h-16 sm:w-24 sm:h-[72px] rounded-xl overflow-hidden flex-shrink-0">
+      <div className={cn("relative w-20 h-16 sm:w-24 sm:h-[72px] rounded-xl overflow-hidden flex-shrink-0", !item.published && "grayscale opacity-60")}>
         <Image src={item.image} alt={item.title} fill sizes="96px" className="object-cover" />
       </div>
     )
   }
   return (
-    <div className="w-20 h-16 sm:w-24 sm:h-[72px] rounded-xl bg-canvas-soft flex items-center justify-center flex-shrink-0">
+    <div className={cn("w-20 h-16 sm:w-24 sm:h-[72px] rounded-xl bg-canvas-soft flex items-center justify-center flex-shrink-0", !item.published && "opacity-50")}>
       <Building2 className="w-6 h-6 text-mute" strokeWidth={1.5} />
     </div>
   )
@@ -178,6 +179,12 @@ function Row({
               <span className="inline-flex items-center gap-1 bg-warning-50 text-warning-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-warning-200">
                 <EyeOff className="w-2.5 h-2.5" />
                 Inactiva
+              </span>
+            )}
+            {item.priceReduced && (
+              <span className="inline-flex items-center gap-1 bg-warning-50 text-warning-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-warning-200">
+                <TrendingDown className="w-2.5 h-2.5" />
+                ↓ Precio reducido
               </span>
             )}
           </div>

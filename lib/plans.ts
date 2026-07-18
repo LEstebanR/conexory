@@ -9,7 +9,7 @@ export const FREE_PHOTO_LIMIT = 10
 export const PRO_PHOTO_LIMIT = 20
 export const PINNED_LIMIT = 3
 export const FREE_AI_MESSAGE_LIMIT = 0
-export const PRO_AI_MESSAGE_LIMIT = 20
+export const PRO_AI_MESSAGE_LIMIT = 10
 
 export function propertyLimit(isPremium: boolean): number {
   return isPremium ? PRO_PROPERTY_LIMIT : FREE_PROPERTY_LIMIT

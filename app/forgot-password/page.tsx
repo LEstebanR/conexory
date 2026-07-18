@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { forgotPasswordAction } from "./actions"
+import { SUPPORT_EMAIL } from "@/lib/urls"
 
 export default function ForgotPasswordPage() {
   const [state, formAction, isPending] = useActionState(forgotPasswordAction, {})
@@ -103,6 +104,12 @@ export default function ForgotPasswordPage() {
                   )}
                 </Button>
               </form>
+              <p className="text-xs text-mute text-center mt-5">
+                ¿Problemas para acceder?{" "}
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="text-ink font-semibold hover:opacity-70 transition-opacity">
+                  Escríbenos
+                </a>
+              </p>
             </>
           )}
         </div>

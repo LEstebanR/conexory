@@ -81,6 +81,7 @@ export default async function DashboardPage({
         pinnedAt: true,
         shares: true,
         price: true,
+        previousPrice: true,
         city: true,
         neighborhood: true,
         area: true,
@@ -172,6 +173,7 @@ export default async function DashboardPage({
     visitsThisWeek: visitWeekMap.get(p.id) ?? 0,
     whatsappClicks: readMetrics(p.metrics).whatsapp,
     isPremium,
+    priceReduced: p.previousPrice != null && Number(p.previousPrice) > p.price.toNumber(),
   }))
 
   const stats = [
