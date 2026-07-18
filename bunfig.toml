@@ -1,2 +1,6 @@
 [test]
 preload = ["./test-setup.ts"]
+# Coverage thresholds apply when running bun test --coverage (enforced in CI).
+# Bun only reports files actually executed during the test run, so the
+# threshold measures quality across the files that have tests.
+coverageThreshold = 0.80
