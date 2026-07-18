@@ -38,6 +38,7 @@ export default async function AdminUsersPage({
         name: true,
         email: true,
         isPremium: true,
+        premiumUntil: true,
         role: true,
         agentSlug: true,
         profilePublished: true,
@@ -127,7 +128,12 @@ export default async function AdminUsersPage({
                   </td>
                   <td className="px-5 py-3 tabular-nums text-body">{u._count.properties}</td>
                   <td className="px-5 py-3 whitespace-nowrap">
-                    <PremiumToggle userId={u.id} userName={u.name} initialIsPremium={u.isPremium} />
+                    <PremiumToggle
+                      userId={u.id}
+                      userName={u.name}
+                      initialIsPremium={u.isPremium}
+                      initialPremiumUntil={u.premiumUntil?.toISOString() ?? null}
+                    />
                   </td>
                 </tr>
               ))
