@@ -18,6 +18,7 @@ model User {
   image         String?
   role             String    @default("user")
   isPremium        Boolean   @default(false)
+  premiumUntil     DateTime?
   onboarding       Json      @default("{\"welcomeModalSeen\": false, \"dashboardTourCompleted\": false, \"propertyTourCompleted\": false, \"settingsTourCompleted\": false, \"firstPropertyCreated\": false, \"firstPropertyShared\": false}")
   agentSlug        String?   @unique
   profilePublished Boolean   @default(false)
@@ -89,7 +90,8 @@ model Property {
   slug         String   @unique
   type         String
   transactionType String?  // sale | rent | rent_furnished | exchange
-  price        Decimal  @db.Decimal(15, 2)
+  price         Decimal  @db.Decimal(15, 2)
+  previousPrice Decimal? @db.Decimal(15, 2)
   state        String?
   city         String
   neighborhood String?

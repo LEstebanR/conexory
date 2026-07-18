@@ -319,6 +319,10 @@ export default async function PublicPropertyPage({
   }
 
   const price = formatCOP(Number(property.price))
+  const priceReduced =
+    property.previousPrice != null &&
+    Number(property.previousPrice) > Number(property.price)
+  const previousPrice = priceReduced ? formatCOP(Number(property.previousPrice)) : null
   const videoId = youtubeId(property.videoUrl)
   const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
   const transactionLabel = property.transactionType
@@ -422,9 +426,19 @@ export default async function PublicPropertyPage({
                 </div>
               )}
             </div>
-            <p className="text-4xl sm:text-5xl font-black text-ink tracking-tighter">
-              {price}
-            </p>
+            <div className="space-y-1.5">
+              {priceReduced && (
+                <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full bg-ink text-white">
+                  Precio reducido
+                </span>
+              )}
+              <p className="text-4xl sm:text-5xl font-black text-ink tracking-tighter">
+                {price}
+              </p>
+              {priceReduced && previousPrice && (
+                <p className="text-base text-mute line-through">{previousPrice}</p>
+              )}
+            </div>
           </div>
         </Reveal>
 
