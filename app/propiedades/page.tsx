@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { Building2 } from "lucide-react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import { prisma } from "@/lib/prisma"
-import AgentProperties, { type AgentProperty } from "@/app/agente/[slug]/agent-properties"
+import { getPublishedProperties } from "@/lib/properties"
+import AgentProperties from "@/app/agente/[slug]/agent-properties"
 
 export const metadata: Metadata = {
   title: "Propiedades — Conexory",
@@ -16,40 +16,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600
 
 export default async function PropertiesPage() {
-  const properties = await prisma.property.findMany({
-    where: { published: true },
-    orderBy: [
-      { pinnedAt: { sort: "desc", nulls: "last" } },
-      { createdAt: "desc" },
-    ],
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      type: true,
-      price: true,
-      city: true,
-      state: true,
-      neighborhood: true,
-      images: true,
-      area: true,
-      bedrooms: true,
-      bathrooms: true,
-      parking: true,
-      shares: true,
-      latitude: true,
-      longitude: true,
-      createdAt: true,
-      pinnedAt: true,
-    },
-  })
-
-  const items: AgentProperty[] = properties.map((p) => ({
-    ...p,
-    price: Number(p.price),
-    createdAt: p.createdAt.getTime(),
-    pinnedAt: p.pinnedAt ? p.pinnedAt.getTime() : null,
-  }))
+  const items = await getPublishedProperties()
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

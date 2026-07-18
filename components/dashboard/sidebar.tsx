@@ -6,6 +6,7 @@ import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutGrid,
+  Building2,
   LogOut,
   Menu,
   X,
@@ -76,6 +77,12 @@ const navItems = [
     icon: LayoutGrid,
     label: "Mis propiedades",
     href: "/dashboard",
+    exact: true,
+  },
+  {
+    icon: Building2,
+    label: "Propiedades disponibles",
+    href: "/dashboard/propiedades",
     exact: true,
   },
 ]
