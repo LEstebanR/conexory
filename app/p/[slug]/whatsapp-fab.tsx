@@ -2,6 +2,7 @@
 
 import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
 import { trackPropertyEvent } from "@/lib/track-property-event"
+import { toWhatsAppNumber } from "@/lib/phone"
 
 type Props = {
   propertyId: string
@@ -13,7 +14,7 @@ type Props = {
 export default function WhatsAppFab({ propertyId, phone, phoneIsWhatsapp, whatsappMessage }: Props) {
   if (!phone || !phoneIsWhatsapp) return null
 
-  const href = `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`
+  const href = `https://wa.me/${toWhatsAppNumber(phone)}?text=${encodeURIComponent(whatsappMessage)}`
 
   return (
     <a

@@ -2,6 +2,7 @@
 
 import { Phone, Mail, MessageCircle } from "lucide-react"
 import { trackPropertyEvent } from "@/lib/track-property-event"
+import { toWhatsAppNumber } from "@/lib/phone"
 
 type Props = {
   propertyId: string
@@ -17,7 +18,7 @@ export default function ContactButtons({ propertyId, phone, phoneIsWhatsapp, ema
       {phone && phoneIsWhatsapp && (
         <div className="relative group flex-1">
           <a
-            href={`https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`}
+            href={`https://wa.me/${toWhatsAppNumber(phone)}?text=${encodeURIComponent(whatsappMessage)}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackPropertyEvent(propertyId, "contact_whatsapp_click")}
