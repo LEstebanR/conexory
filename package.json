@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
     "test": "bun test",
+    "coverage": "bun test --coverage",
     "postinstall": "prisma generate",
     "prepare": "git config core.hooksPath .githooks"
   },
