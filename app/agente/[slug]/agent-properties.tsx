@@ -412,7 +412,7 @@ export default function AgentProperties({ properties }: { properties: AgentPrope
       {/* Map */}
       <div className="pt-4">
         <h2 className="text-base font-black text-ink mb-3">Ubicación de propiedades</h2>
-        <div className="rounded-2xl overflow-hidden border border-hairline" style={{ height: 340 }}>
+        <div className="relative isolate rounded-2xl overflow-hidden border border-hairline" style={{ height: 340 }}>
           <AgentMap properties={mapProperties} />
         </div>
       </div>
