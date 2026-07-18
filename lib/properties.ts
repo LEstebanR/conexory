@@ -15,6 +15,7 @@ export async function getPublishedProperties(): Promise<AgentProperty[]> {
       slug: true,
       title: true,
       type: true,
+      transactionType: true,
       price: true,
       city: true,
       state: true,
