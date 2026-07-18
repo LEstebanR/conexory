@@ -33,15 +33,7 @@ const mockPut = mock((...args: [string, Buffer, { access: string; contentType: s
 const realBlob = await import("@vercel/blob")
 mock.module("@vercel/blob", () => ({ ...realBlob, put: mockPut }))
 
-mock.module("next/server", () => ({
-  NextResponse: {
-    json: (data: unknown, init?: { status?: number }) =>
-      new Response(JSON.stringify(data), {
-        status: init?.status ?? 200,
-        headers: { "content-type": "application/json" },
-      }),
-  },
-}))
+// next/server (NextResponse.json) is mocked globally in test-setup.ts
 
 const { POST } = await import("./route")
 

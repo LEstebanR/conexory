@@ -22,3 +22,13 @@ mock.module("next/navigation", () => ({
     throw new Error(`REDIRECT:${path}`)
   },
 }))
+
+mock.module("next/server", () => ({
+  NextResponse: {
+    json: (data: unknown, init?: { status?: number }) =>
+      new Response(JSON.stringify(data), {
+        status: init?.status ?? 200,
+        headers: { "content-type": "application/json" },
+      }),
+  },
+}))
