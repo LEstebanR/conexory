@@ -2,9 +2,11 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // Expose SENTRY_DSN to the client bundle (needed for sentry.client.config.ts)
+  // Expose these to the client bundle (needed for sentry.client.config.ts —
+  // VERCEL_ENV isn't inlined client-side by default like NODE_ENV is)
   env: {
     SENTRY_DSN: process.env.SENTRY_DSN ?? "",
+    VERCEL_ENV: process.env.VERCEL_ENV ?? "",
   },
   images: {
     remotePatterns: [
