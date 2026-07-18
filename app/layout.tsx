@@ -58,6 +58,12 @@ export const metadata: Metadata = {
   verification: {
     google: "3L9SqbwkEe2EMtjeK8_ife3MMmCukkGx1us6Z0f65WA",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Conexory",
+  },
 }
 
 export default function RootLayout({
