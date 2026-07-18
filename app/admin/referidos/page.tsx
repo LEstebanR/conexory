@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Users } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { hasProAccess } from "@/lib/plans"
 import AdminNav from "../admin-nav"
@@ -11,9 +12,28 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })
 }
 
-export default async function AdminReferralsPage() {
+export default async function AdminReferralsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const sp = await searchParams
+  const q = sp.q?.trim() ?? ""
+
   const referrals = await prisma.user.findMany({
-    where: { referredById: { not: null } },
+    where: {
+      referredById: { not: null },
+      ...(q
+        ? {
+            OR: [
+              { name: { contains: q, mode: "insensitive" as const } },
+              { email: { contains: q, mode: "insensitive" as const } },
+              { referredBy: { name: { contains: q, mode: "insensitive" as const } } },
+              { referredBy: { email: { contains: q, mode: "insensitive" as const } } },
+            ],
+          }
+        : {}),
+    },
     select: {
       id: true,
       name: true,
@@ -35,6 +55,16 @@ export default async function AdminReferralsPage() {
 
       <AdminNav />
 
+      <form method="get" className="mb-4">
+        <input
+          type="text"
+          name="q"
+          defaultValue={q}
+          placeholder="Buscar por nombre o email…"
+          className="w-full max-w-sm h-10 px-4 rounded-full border border-hairline-strong text-sm focus:outline-none focus:ring-2 focus:ring-ink"
+        />
+      </form>
+
       <div className="bg-white rounded-2xl border border-hairline overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -48,8 +78,22 @@ export default async function AdminReferralsPage() {
           <tbody className="divide-y divide-hairline">
             {referrals.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-5 py-8 text-center text-mute">
-                  Todavía no hay referidos.
+                <td colSpan={4} className="px-5 py-14">
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <span className="inline-flex w-12 h-12 rounded-2xl bg-canvas-soft items-center justify-center">
+                      <Users className="w-5 h-5 text-mute" strokeWidth={1.75} />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-ink">
+                        {q ? "Sin resultados" : "Todavía no hay referidos"}
+                      </p>
+                      <p className="text-xs text-mute mt-0.5">
+                        {q
+                          ? "Prueba con otro nombre o email."
+                          : "Cuando un usuario se registre con un link de referido, aparecerá aquí."}
+                      </p>
+                    </div>
+                  </div>
                 </td>
               </tr>
             ) : (

@@ -183,8 +183,8 @@ export default function PropertyActions({
       <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm animate-fade-in" />
-          <Dialog.Content className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-white rounded-2xl shadow-2xl shadow-black/10 p-6 animate-fade-in">
-            <div className="flex flex-col items-center text-center gap-4">
+          <Dialog.Content className="fixed z-50 inset-0 flex flex-col items-center justify-center sm:block sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 w-full sm:w-[calc(100%-2rem)] sm:max-w-sm bg-white rounded-none sm:rounded-2xl shadow-2xl shadow-black/10 p-7 sm:p-6 animate-fade-in">
+            <div className="flex flex-col items-center text-center gap-4 w-full max-w-sm">
               <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center flex-shrink-0">
                 <AlertTriangle className="w-6 h-6 text-red-500" strokeWidth={2} />
               </div>

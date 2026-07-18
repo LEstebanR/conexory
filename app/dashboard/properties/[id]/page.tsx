@@ -87,7 +87,7 @@ export default async function PropertyDetailPage({
   return (
     <div className="flex-1 p-6 lg:p-8 max-w-3xl w-full mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+      <div className="flex flex-col gap-3 mb-8">
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/dashboard"
@@ -102,7 +102,7 @@ export default async function PropertyDetailPage({
             <p className="text-sm text-body truncate">{property.title}</p>
           </div>
         </div>
-        <div className="flex justify-end sm:contents">
+        <div className="flex justify-end">
           <PropertyActions
             propertyId={property.id}
             initialPublished={property.published}

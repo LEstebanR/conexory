@@ -28,7 +28,7 @@ export default function PropertyMap({ latitude, longitude, label }: Props) {
   )
 
   return (
-    <div className="rounded-2xl border border-hairline overflow-hidden">
+    <div className="relative isolate rounded-2xl border border-hairline overflow-hidden">
       <div style={{ height: 280 }}>
         <MapContainer
           center={[latitude, longitude]}

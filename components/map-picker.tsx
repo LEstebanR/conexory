@@ -221,7 +221,7 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
       </div>
 
       {/* Map */}
-      <div className="relative rounded-2xl overflow-hidden border border-hairline-strong" style={{ height: 300 }}>
+      <div className="relative isolate rounded-2xl overflow-hidden border border-hairline-strong" style={{ height: 300 }}>
         <MapContainer
           center={flyTarget ?? COLOMBIA_CENTER}
           zoom={flyTarget ? flyZoom : DEFAULT_ZOOM}
