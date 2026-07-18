@@ -61,7 +61,12 @@ const mockSendPaymentFailed = mock((...args: [string, string]) => {
   void args
   return Promise.resolve()
 })
+// Spread the real module so unrelated exports (sendRenewalReminder,
+// sendSubscriptionCancelled, needed by the billing cron's tests) stay real —
+// mock.module() replaces "@/lib/email" process-wide, not just for this file.
+const realEmail = await import("@/lib/email")
 mock.module("@/lib/email", () => ({
+  ...realEmail,
   sendSubscriptionConfirmation: mockSendSubscriptionConfirmation,
   sendPaymentFailed: mockSendPaymentFailed,
 }))
