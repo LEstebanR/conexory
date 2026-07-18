@@ -5,6 +5,7 @@ import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-ty
 import { SHARE_INFO_IDS, type ShareInfo, type ShareMessageKind } from "@/lib/share-message-options"
 
 const GEMINI_TIMEOUT_MS = 8000
+const GEMINI_RETRY_DELAY_MS = 1500
 
 const KIND_INSTRUCTIONS: Record<ShareMessageKind, string> = {
   intro:
@@ -61,6 +62,27 @@ function propertyFacts(property: Property, include: readonly ShareInfo[]): strin
     .join("\n")
 }
 
+async function callGemini(
+  ai: GoogleGenAI,
+  prompt: string,
+  agentName: string | null | undefined
+): Promise<string | null> {
+  const response = await ai.models.generateContent({
+    // flash-lite: the plain 2.5-flash free tier is capped at ~20 req/day,
+    // too low for this feature; lite has a much higher daily quota.
+    model: "gemini-2.5-flash-lite",
+    contents: prompt,
+    config: {
+      abortSignal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
+      thinkingConfig: { thinkingBudget: 0 },
+    },
+  })
+  const text = response.text?.trim()
+  if (!text) return null
+  // Replace any leftover bracket placeholders the model may have emitted.
+  return text.replace(/\[[^\]]{1,40}\]/g, agentName ?? "").replace(/\s{2,}/g, " ").trim()
+}
+
 export async function generateShareMessage(
   property: Property,
   kind: ShareMessageKind,
@@ -70,13 +92,8 @@ export async function generateShareMessage(
   const apiKey = process.env.GOOGLE_AI_API_KEY
   if (!apiKey) return null
 
-  try {
-    const ai = new GoogleGenAI({ apiKey })
-    const response = await ai.models.generateContent({
-      // flash-lite: the plain 2.5-flash free tier is capped at ~20 req/day,
-      // too low for this feature; lite has a much higher daily quota.
-      model: "gemini-2.5-flash-lite",
-      contents: `Eres un agente inmobiliario colombiano experto en ventas por WhatsApp.
+  const ai = new GoogleGenAI({ apiKey })
+  const prompt = `Eres un agente inmobiliario colombiano experto en ventas por WhatsApp.
 Escribe un mensaje de WhatsApp para enviárselo a un cliente potencial sobre la propiedad de abajo. Hazlo vendedor, cercano y claro, sin sonar robótico ni exagerado.
 
 ${KIND_INSTRUCTIONS[kind]}
@@ -86,18 +103,21 @@ ${MESSAGE_RULES}
 Nombre del agente: ${agentName ?? "no disponible"}
 
 Datos reales de la propiedad (menciona solo lo que está aquí):
-${propertyFacts(property, include)}`,
-      config: {
-        abortSignal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
-        thinkingConfig: { thinkingBudget: 0 },
-      },
-    })
-    const text = response.text?.trim()
-    if (!text) return null
-    // Replace any leftover bracket placeholders the model may have emitted.
-    return text.replace(/\[[^\]]{1,40}\]/g, agentName ?? "").replace(/\s{2,}/g, " ").trim()
-  } catch (error) {
-    console.error("[share-message] Gemini generation failed:", error)
-    return null
+${propertyFacts(property, include)}`
+
+  try {
+    return await callGemini(ai, prompt, agentName)
+  } catch (firstError) {
+    // Single retry after a short delay — covers transient Gemini errors (rate
+    // limits, brief outages). Next evolution: route through Vercel AI Gateway
+    // for unified observability, caching, and provider fallback.
+    console.warn("[share-message] Gemini attempt 1 failed, retrying:", firstError)
+    await new Promise((resolve) => setTimeout(resolve, GEMINI_RETRY_DELAY_MS))
+    try {
+      return await callGemini(ai, prompt, agentName)
+    } catch (secondError) {
+      console.error("[share-message] Gemini attempt 2 failed:", secondError)
+      return null
+    }
   }
 }
