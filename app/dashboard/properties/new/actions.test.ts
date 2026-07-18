@@ -10,16 +10,17 @@ mock.module("@/lib/auth", () => ({
   auth: { api: { getSession: mockGetSession } },
 }))
 
-mock.module("next/headers", () => ({
-  headers: () => Promise.resolve(new Headers()),
-}))
+// next/headers is mocked globally in test-setup.ts
 
 const mockPropertyCount = mock(() => Promise.resolve(0))
 const mockPropertyFindUnique = mock(() => Promise.resolve(null))
-const mockPropertyCreate = mock((_args: { data: { userId: string } }) =>
-  Promise.resolve({ id: "prop-1" })
+const mockPropertyCreate = mock((...args: [{ data: { userId: string } }]) => {
+  void args
+  return Promise.resolve({ id: "prop-1" })
+})
+const mockUserFindUnique = mock(() =>
+  Promise.resolve<{ onboarding: unknown } | null>(null)
 )
-const mockUserFindUnique = mock(() => Promise.resolve(null))
 
 mock.module("@/lib/prisma", () => ({
   prisma: {
@@ -40,11 +41,12 @@ mock.module("@/lib/onboarding-server", () => ({
   setOnboardingFlag: mockSetOnboardingFlag,
 }))
 
-mock.module("@/lib/onboarding", () => ({
-  parseOnboarding: () => ({ propertyTourCompleted: false }),
-}))
+// @/lib/onboarding's parseOnboarding is pure and already covered directly in
+// lib/onboarding.test.ts — run the real thing here via mockUserFindUnique's
+// `onboarding` field instead of mocking the module (mock.module() replaces a
+// module process-wide, and other test files need it for their own flags).
 
-const { createProperty } = await import("./actions")
+const { createProperty, isPropertyTourPending, completePropertyTour } = await import("./actions")
 
 const validInput = {
   title: "Apartamento en Laureles",
@@ -137,5 +139,48 @@ describe("createProperty", () => {
     mockGetSession.mockImplementation(() =>
       Promise.resolve({ user: { id: "u1", isPremium: false, role: "user" } })
     )
+  })
+})
+
+describe("isPropertyTourPending", () => {
+  test("returns false when unauthenticated", async () => {
+    mockGetSession.mockImplementation(() => Promise.resolve(null))
+    expect(await isPropertyTourPending()).toBe(false)
+    mockGetSession.mockImplementation(() =>
+      Promise.resolve({ user: { id: "u1", isPremium: false, role: "user" } })
+    )
+  })
+
+  test("returns true when the tour hasn't been completed", async () => {
+    mockUserFindUnique.mockImplementation(() =>
+      Promise.resolve({ onboarding: { propertyTourCompleted: false } })
+    )
+    expect(await isPropertyTourPending()).toBe(true)
+  })
+
+  test("returns false when the tour was already completed", async () => {
+    mockUserFindUnique.mockImplementation(() =>
+      Promise.resolve({ onboarding: { propertyTourCompleted: true } })
+    )
+    expect(await isPropertyTourPending()).toBe(false)
+    mockUserFindUnique.mockImplementation(() => Promise.resolve(null))
+  })
+})
+
+describe("completePropertyTour", () => {
+  test("does nothing when unauthenticated", async () => {
+    mockGetSession.mockImplementation(() => Promise.resolve(null))
+    mockSetOnboardingFlag.mockClear()
+    await completePropertyTour()
+    expect(mockSetOnboardingFlag).not.toHaveBeenCalled()
+    mockGetSession.mockImplementation(() =>
+      Promise.resolve({ user: { id: "u1", isPremium: false, role: "user" } })
+    )
+  })
+
+  test("sets the propertyTourCompleted flag when authenticated", async () => {
+    mockSetOnboardingFlag.mockClear()
+    await completePropertyTour()
+    expect(mockSetOnboardingFlag).toHaveBeenCalledWith("u1", "propertyTourCompleted")
   })
 })

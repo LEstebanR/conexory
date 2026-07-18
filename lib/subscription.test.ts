@@ -1,19 +1,31 @@
 import { describe, test, expect, mock } from "bun:test"
 
-const mockUserUpdate = mock((_args: { where: { id: string }; data: { isPremium: boolean } }) =>
-  Promise.resolve({})
+const mockUserUpdate = mock(
+  (...args: [{ where: { id: string }; data: { isPremium: boolean } }]) => {
+    void args
+    return Promise.resolve({})
+  }
 )
 const mockPropertyFindMany = mock(() => Promise.resolve<{ id: string }[]>([]))
 const mockPropertyUpdateMany = mock(
-  (_args: { where: { id: { in: string[] } }; data: { published: boolean } }) =>
-    Promise.resolve({ count: 0 })
+  (...args: [{ where: { id: { in: string[] } }; data: { published: boolean } }]) => {
+    void args
+    return Promise.resolve({ count: 0 })
+  }
 )
 const mockSubscriptionUpsert = mock(
-  (_args: {
-    where: { userId: string }
-    create: Record<string, unknown>
-    update: Record<string, unknown>
-  }) => Promise.resolve({})
+  (
+    ...args: [
+      {
+        where: { userId: string }
+        create: Record<string, unknown>
+        update: Record<string, unknown>
+      },
+    ]
+  ) => {
+    void args
+    return Promise.resolve({})
+  }
 )
 
 mock.module("@/lib/prisma", () => ({
@@ -30,12 +42,18 @@ type PaymentSourceResult = {
   status?: string
 }
 const mockCreatePaymentSource = mock(
-  (_args: { token: string; customerEmail: string; type: string }) =>
-    Promise.resolve<PaymentSourceResult>({ ok: true, paymentSourceId: 123, status: "AVAILABLE" })
+  (...args: [{ token: string; customerEmail: string; type: string }]) => {
+    void args
+    return Promise.resolve<PaymentSourceResult>({ ok: true, paymentSourceId: 123, status: "AVAILABLE" })
+  }
 )
 const mockChargeRecurringPayment = mock(
-  (_args: { paymentSourceId: number; reference: string; customerEmail: string; type: string }) =>
-    Promise.resolve<{ ok: boolean }>({ ok: true })
+  (
+    ...args: [{ paymentSourceId: number; reference: string; customerEmail: string; type: string }]
+  ) => {
+    void args
+    return Promise.resolve<{ ok: boolean }>({ ok: true })
+  }
 )
 
 // Spread the real module so unrelated exports (verifyWompiEvent,

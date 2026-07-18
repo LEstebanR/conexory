@@ -8,9 +8,7 @@ mock.module("@/lib/auth", () => ({
   auth: { api: { getSession: mockGetSession } },
 }))
 
-mock.module("next/headers", () => ({
-  headers: () => Promise.resolve(new Headers()),
-}))
+// next/headers is mocked globally in test-setup.ts
 
 const mockToBuffer = mock(() => Promise.resolve(Buffer.from("fake-jpeg")))
 mock.module("sharp", () => ({
@@ -23,21 +21,19 @@ mock.module("sharp", () => ({
   }),
 }))
 
-const mockPut = mock(
-  (_pathname: string, _body: Buffer, _options?: { access: string; contentType: string }) =>
-    Promise.resolve({ url: "https://blob.example.com/img.jpg" })
-)
-mock.module("@vercel/blob", () => ({ put: mockPut }))
+// The args are only there so mockPut.mock.calls[0] has the right tuple type
+// (see the "calls put with..." test below) — void marks them as read.
+const mockPut = mock((...args: [string, Buffer, { access: string; contentType: string }?]) => {
+  void args
+  return Promise.resolve({ url: "https://blob.example.com/img.jpg" })
+})
+// Spread the real module so unrelated exports (del, needed by
+// dashboard/properties/[id]/actions.test.ts) stay real — mock.module()
+// replaces "@vercel/blob" process-wide, not just for this file.
+const realBlob = await import("@vercel/blob")
+mock.module("@vercel/blob", () => ({ ...realBlob, put: mockPut }))
 
-mock.module("next/server", () => ({
-  NextResponse: {
-    json: (data: unknown, init?: { status?: number }) =>
-      new Response(JSON.stringify(data), {
-        status: init?.status ?? 200,
-        headers: { "content-type": "application/json" },
-      }),
-  },
-}))
+// next/server (NextResponse.json) is mocked globally in test-setup.ts
 
 const { POST } = await import("./route")
 
