@@ -10,9 +10,7 @@ mock.module("@/lib/auth", () => ({
   auth: { api: { getSession: mockGetSession } },
 }))
 
-mock.module("next/headers", () => ({
-  headers: () => Promise.resolve(new Headers()),
-}))
+// next/headers is mocked globally in test-setup.ts
 
 const mockPropertyCount = mock(() => Promise.resolve(0))
 const mockPropertyFindUnique = mock(() => Promise.resolve(null))
