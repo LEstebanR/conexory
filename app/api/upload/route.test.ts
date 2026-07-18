@@ -1,6 +1,8 @@
 import { describe, test, expect, mock } from "bun:test"
 
-const mockGetSession = mock(() => Promise.resolve({ user: { id: "user-1" } }))
+const mockGetSession = mock(() =>
+  Promise.resolve<{ user: { id: string } } | null>({ user: { id: "user-1" } })
+)
 
 mock.module("@/lib/auth", () => ({
   auth: { api: { getSession: mockGetSession } },
@@ -21,7 +23,10 @@ mock.module("sharp", () => ({
   }),
 }))
 
-const mockPut = mock(() => Promise.resolve({ url: "https://blob.example.com/img.jpg" }))
+const mockPut = mock(
+  (_pathname: string, _body: Buffer, _options?: { access: string; contentType: string }) =>
+    Promise.resolve({ url: "https://blob.example.com/img.jpg" })
+)
 mock.module("@vercel/blob", () => ({ put: mockPut }))
 
 mock.module("next/server", () => ({

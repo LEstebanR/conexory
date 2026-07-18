@@ -1,7 +1,9 @@
 import { describe, test, expect, mock } from "bun:test"
 
 const mockGetSession = mock(() =>
-  Promise.resolve({ user: { id: "u1", isPremium: false, role: "user" } })
+  Promise.resolve<{ user: { id: string; isPremium: boolean; role: string } } | null>({
+    user: { id: "u1", isPremium: false, role: "user" },
+  })
 )
 
 mock.module("@/lib/auth", () => ({
@@ -14,7 +16,9 @@ mock.module("next/headers", () => ({
 
 const mockPropertyCount = mock(() => Promise.resolve(0))
 const mockPropertyFindUnique = mock(() => Promise.resolve(null))
-const mockPropertyCreate = mock(() => Promise.resolve({ id: "prop-1" }))
+const mockPropertyCreate = mock((_args: { data: { userId: string } }) =>
+  Promise.resolve({ id: "prop-1" })
+)
 const mockUserFindUnique = mock(() => Promise.resolve(null))
 
 mock.module("@/lib/prisma", () => ({
