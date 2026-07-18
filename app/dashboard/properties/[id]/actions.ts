@@ -39,6 +39,8 @@ export async function togglePublished(
     data: { published },
   })
 
+  revalidatePath("/propiedades")
+
   return { success: true }
 }
 
@@ -76,6 +78,7 @@ export async function togglePinned(
 
   revalidatePath("/agente", "layout")
   revalidatePath(`/dashboard/properties/${propertyId}`)
+  revalidatePath("/propiedades")
 
   return { success: true }
 }
@@ -192,4 +195,6 @@ export async function deleteProperty(propertyId: string) {
   await prisma.property.delete({
     where: { id: propertyId, userId: session.user.id },
   })
+
+  revalidatePath("/propiedades")
 }

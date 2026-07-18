@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   description: "Explora todas las propiedades publicadas por agentes inmobiliarios en Conexory.",
 }
 
+// Safety net on top of the on-demand revalidatePath("/propiedades") calls in
+// the property actions (create/update/delete/toggle publish/pin) — bounds
+// staleness even if a future mutation path forgets to revalidate.
+export const revalidate = 3600
+
 export default async function PropertiesPage() {
   const properties = await prisma.property.findMany({
     where: { published: true },
