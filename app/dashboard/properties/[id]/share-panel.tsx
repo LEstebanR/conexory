@@ -277,7 +277,7 @@ export default function SharePanel({
         // Fallback: the static template appears only when the AI call fails.
         setPreviousBody(current.trim() ? current : null)
         typeOut(buildBody(template, ctx))
-        toast.error("No pudimos generar con IA — te dejamos una plantilla base.")
+        toast.error(result.error)
         return
       }
       setPreviousBody(current.trim() ? current : null)

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { Toaster } from "sonner"
 import "./globals.css"
 import { getAppUrl } from "@/lib/urls"
 
@@ -75,6 +76,7 @@ export default function RootLayout({
     <html lang="es" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
         {children}
+        <Toaster position="top-center" />
         <Analytics />
       </body>
     </html>

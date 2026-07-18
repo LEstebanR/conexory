@@ -19,6 +19,8 @@ model User {
   role             String    @default("user")
   isPremium        Boolean   @default(false)
   premiumUntil     DateTime?
+  aiMessagesUsedToday Int       @default(0)
+  aiMessagesResetAt   DateTime?
   onboarding       Json      @default("{\"welcomeModalSeen\": false, \"dashboardTourCompleted\": false, \"propertyTourCompleted\": false, \"settingsTourCompleted\": false, \"firstPropertyCreated\": false, \"firstPropertyShared\": false}")
   agentSlug        String?   @unique
   profilePublished Boolean   @default(false)
