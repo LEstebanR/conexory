@@ -7,6 +7,8 @@ import {
   ImagePlus,
   MessageCircle,
   Copy,
+  Sparkles,
+  BarChart3,
 } from "lucide-react"
 import Reveal from "@/components/reveal"
 
@@ -16,17 +18,7 @@ const img = (id: string) =>
 const PHOTOS = {
   laureles: img("1600596542815-ffad4c1539a9"),
   poblado: img("1545324418-cc1a3fa10c00"),
-  campestre: img("1570129477492-45c003edd2be"),
-  loft: img("1502672260266-1c1ef2d93688"),
-  penthouse: img("1493809842364-78817add7ffb"),
 }
-
-const gallery = [
-  { src: PHOTOS.poblado, title: "Apartamento exclusivo", price: "$420.000.000" },
-  { src: PHOTOS.campestre, title: "Casa campestre", price: "$750.000.000" },
-  { src: PHOTOS.loft, title: "Loft de diseño", price: "$310.000.000" },
-  { src: PHOTOS.penthouse, title: "Penthouse con vista", price: "$1.200.000.000" },
-]
 
 function FormMock() {
   return (
@@ -105,33 +97,44 @@ function ShareMock() {
 function GalleryMock() {
   return (
     <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 overflow-hidden">
-      {/* Agent header */}
-      <div className="px-5 py-4 border-b border-hairline flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-ink flex items-center justify-center text-white text-sm font-black flex-shrink-0">
-          CR
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-black text-ink leading-tight tracking-tight">Carolina Restrepo</p>
-          <p className="text-xs text-mute">Asesor inmobiliario · Colombia</p>
-        </div>
-        <div className="ml-auto flex-shrink-0 text-[10px] font-bold text-white bg-ink px-2.5 py-1 rounded-full">
-          4 propiedades
-        </div>
-      </div>
-      {/* Property grid */}
-      <div className="grid grid-cols-2 gap-px bg-hairline">
-        {gallery.map((p) => (
-          <div key={p.title} className="bg-white">
-            <div className="relative h-24">
-              <Image src={p.src} alt={p.title} fill sizes="200px" className="object-cover" />
-            </div>
-            <div className="px-3 py-2.5">
-              <p className="text-[11px] font-black text-ink truncate leading-tight">{p.title}</p>
-              <p className="text-[11px] font-bold text-body mt-0.5">{p.price}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <Image
+        src="/marketing/agent-gallery.png"
+        alt="Perfil público de un agente en Conexory con su portafolio de propiedades activas"
+        width={2560}
+        height={1780}
+        sizes="(max-width: 1024px) 100vw, 500px"
+        className="w-full h-auto"
+      />
+    </div>
+  )
+}
+
+function AIMessageMock() {
+  return (
+    <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 overflow-hidden">
+      <Image
+        src="/marketing/share-panel-ai.png"
+        alt="Panel de Conexory generando un mensaje de WhatsApp con IA para una propiedad"
+        width={1408}
+        height={1866}
+        sizes="(max-width: 1024px) 100vw, 500px"
+        className="w-full h-auto"
+      />
+    </div>
+  )
+}
+
+function AnalyticsMock() {
+  return (
+    <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 overflow-hidden">
+      <Image
+        src="/marketing/analytics-panel.png"
+        alt="Panel de estadísticas de una propiedad en Conexory: visitas, clics de WhatsApp, redes y contacto"
+        width={1408}
+        height={284}
+        sizes="(max-width: 1024px) 100vw, 500px"
+        className="w-full h-auto"
+      />
     </div>
   )
 }
@@ -143,8 +146,17 @@ const blocks = [
     title: "Un formulario, nada más.",
     description:
       "Solo fotos, precio y una breve descripción. Sin campos innecesarios ni formularios eternos. Sube las fotos directo desde la cámara de tu celular y publica al instante.",
-    points: ["Sin campos innecesarios", "Funciona 100% desde el celular", "Edita y actualiza cuando quieras"],
+    points: ["Video, área de lote y conjunto cerrado si aplican", "Funciona 100% desde el celular", "Edita y actualiza cuando quieras"],
     mock: <FormMock />,
+  },
+  {
+    eyebrow: "Escribe menos, vende más",
+    icon: Sparkles,
+    title: "Mensajes de WhatsApp con IA.",
+    description:
+      "Elige el tipo de mensaje —presentación, seguimiento, rebaja de precio, invitación a visita— y la IA lo redacta con los datos reales de la propiedad. Tú editas antes de enviar.",
+    points: ["6 tipos de mensaje listos", "Detecta cuándo bajó el precio", "El link se agrega solo al final"],
+    mock: <AIMessageMock />,
   },
   {
     eyebrow: "Comparte donde sea",
@@ -152,8 +164,17 @@ const blocks = [
     title: "Un link, una preview perfecta.",
     description:
       "Cada propiedad tiene su URL única. Compártela por cualquier canal y se ve siempre profesional, con foto, precio y detalles en la preview.",
-    points: ["Preview enriquecida en cualquier canal", "Link único por propiedad", "Cambios reflejados al instante"],
+    points: ["Con o sin tus datos de contacto", "Link único por propiedad", "Cambios reflejados al instante"],
     mock: <ShareMock />,
+  },
+  {
+    eyebrow: "Mide lo que funciona",
+    icon: BarChart3,
+    title: "Analytics por propiedad.",
+    description:
+      "Cuántas personas vieron cada ficha, cuántas escribieron por WhatsApp y cuántas llegaron por redes o contacto directo. Sabes qué propiedad está funcionando sin adivinar.",
+    points: ["Visitas en tiempo real", "Clics en WhatsApp, redes y contacto", "Comparación semana a semana"],
+    mock: <AnalyticsMock />,
   },
   {
     eyebrow: "Luce profesional",

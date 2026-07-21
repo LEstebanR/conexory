@@ -19,4 +19,20 @@ export const faqs = [
     q: "¿Puedo usar Conexory si tengo muchas propiedades?",
     a: "El plan gratuito incluye hasta 3 propiedades activas, ideal para empezar. Si manejas más propiedades, el plan Pro soporta hasta 50 por $99.999 COP al mes. Para agencias o equipos grandes, contáctanos para un plan personalizado.",
   },
+  {
+    q: "¿Puedo saber cuántas personas visitan mis propiedades?",
+    a: "Sí. Cada propiedad tiene su propio panel de estadísticas con visitas totales, visitas de la última semana y, en el plan Pro, clics en WhatsApp, redes sociales y contacto directo — para que sepas qué propiedad está generando interés real.",
+  },
+  {
+    q: "¿Puedo compartir una propiedad sin que se vean mis datos de contacto?",
+    a: "Sí. Cada propiedad tiene dos enlaces: uno con tu nombre y contacto visibles, y otro sin ellos, ideal para publicar en portales o redes donde prefieres que el interesado te escriba por tu canal.",
+  },
+  {
+    q: "¿Conexory me ayuda a escribir el mensaje para WhatsApp?",
+    a: "Sí, si tienes el plan Pro. Eliges el tipo de mensaje (presentación, seguimiento, rebaja de precio, invitación a visita, entre otros) y la IA lo redacta con los datos reales de la propiedad. Siempre puedes editarlo antes de enviarlo.",
+  },
+  {
+    q: "¿Hay alguna forma de conseguir el plan Pro más barato?",
+    a: "Sí. Desde tu perfil obtienes un link de referido para compartir con otros agentes. Cuando alguien se registra con tu link y pasa a Pro, recibes un descuento.",
+  },
 ]
