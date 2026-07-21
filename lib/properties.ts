@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import type { AgentProperty } from "@/app/agente/[slug]/agent-properties"
 
-// Shared by the public /propiedades directory and its authenticated
-// dashboard counterpart — both list every published property app-wide.
+// Used by the authenticated /dashboard/propiedades directory to list
+// every published property app-wide.
 export async function getPublishedProperties(): Promise<AgentProperty[]> {
   const properties = await prisma.property.findMany({
     where: { published: true },

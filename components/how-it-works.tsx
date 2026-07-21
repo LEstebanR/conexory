@@ -101,7 +101,7 @@ const steps = [
   {
     number: "03",
     title: "Comparte y vende",
-    description: "Envía el link por donde quieras y la propiedad llega completa al interesado, con tu contacto directo.",
+    description: "Envía el link por donde quieras, con un mensaje de WhatsApp generado por IA si lo necesitas. La propiedad llega completa al interesado, con tu contacto directo.",
     visual: <PreviewVisual />,
   },
 ]
