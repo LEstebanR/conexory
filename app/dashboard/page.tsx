@@ -97,11 +97,12 @@ export default async function DashboardPage({
     prisma.propertyVisit.groupBy({
       by: ["propertyId"],
       _count: { id: true },
+      where: { property: { userId: session.user.id } },
     }),
     prisma.propertyVisit.groupBy({
       by: ["propertyId"],
       _count: { id: true },
-      where: { createdAt: { gte: weekAgo } },
+      where: { property: { userId: session.user.id }, createdAt: { gte: weekAgo } },
     }),
   ])
 
