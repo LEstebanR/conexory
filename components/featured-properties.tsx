@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Building2 } from "lucide-react"
+import { Building2 } from "lucide-react"
 import Reveal from "@/components/reveal"
 import { formatCOP } from "@/lib/format"
 import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
@@ -81,12 +81,6 @@ export default function FeaturedProperties({ properties }: { properties: Feature
             <br />
             <span className="text-mute">de nuestros agentes.</span>
           </h2>
-          <Link
-            href="/propiedades"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink hover:opacity-70 transition-opacity mt-6"
-          >
-            Ver propiedades <ArrowRight className="w-4 h-4" />
-          </Link>
         </Reveal>
       </div>
 

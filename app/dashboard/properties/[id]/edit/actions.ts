@@ -2,7 +2,6 @@
 
 import * as Sentry from "@sentry/nextjs"
 import { headers } from "next/headers"
-import { revalidatePath } from "next/cache"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
@@ -62,8 +61,6 @@ export async function updateProperty(
         showContact: parsed.data.showContact,
       },
     })
-
-    revalidatePath("/propiedades")
 
     return { success: true }
   } catch (err) {

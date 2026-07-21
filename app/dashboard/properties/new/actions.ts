@@ -2,7 +2,6 @@
 
 import * as Sentry from "@sentry/nextjs"
 import { headers } from "next/headers"
-import { revalidatePath } from "next/cache"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
@@ -96,8 +95,6 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
 
     // Best-effort: a flag-write failure must not fail the (already committed) create.
     await setOnboardingFlag(session.user.id, "firstPropertyCreated").catch(() => {})
-
-    revalidatePath("/propiedades")
 
     return { success: true, id: property.id }
   } catch (err) {
