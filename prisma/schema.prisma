@@ -48,6 +48,7 @@ model User {
   referrals             User[]         @relation("UserReferrals")
   feedback              Feedback[]
 
+  @@index([referredById])
   @@map("users")
 }
 
@@ -120,6 +121,9 @@ model Property {
   user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   visits PropertyVisit[]
 
+  @@index([userId])
+  @@index([published, shares])
+  @@index([published, pinnedAt, createdAt])
   @@map("properties")
 }
 
@@ -129,6 +133,7 @@ model PropertyVisit {
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 
+  @@index([propertyId])
   @@map("property_visits")
 }
 
@@ -193,5 +198,6 @@ model Feedback {
   message   String
   createdAt DateTime @default(now())
 
+  @@index([userId])
   @@map("feedback")
 }
