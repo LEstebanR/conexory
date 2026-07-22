@@ -343,7 +343,7 @@ export default function AgentProperties({
 
       {/* Property grid */}
       {paginated.length > 0 ? (
-        <div key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
+        <div key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
           {paginated.map((property) => {
             const cover = property.images[0]
             const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
