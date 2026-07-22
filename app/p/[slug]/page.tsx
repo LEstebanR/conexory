@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import { after } from "next/server"
 import type { Metadata } from "next"
@@ -60,6 +61,23 @@ function YouTubeIcon({ className }: { className?: string }) {
   )
 }
 
+// ── Data ───────────────────────────────────────────────────────────────────
+
+const getProperty = cache(async (slug: string) => {
+  return prisma.property.findUnique({
+    where: { slug },
+    include: {
+      user: {
+        select: {
+          name: true, email: true, image: true, location: true, bio: true,
+          phone: true, phoneIsWhatsapp: true,
+          instagram: true, facebook: true, tiktok: true, linkedin: true, youtube: true,
+        },
+      },
+    },
+  })
+})
+
 // ── Metadata ───────────────────────────────────────────────────────────────
 
 export async function generateMetadata({
@@ -71,7 +89,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const { c } = await searchParams
-  const property = await prisma.property.findUnique({ where: { slug } })
+  const property = await getProperty(slug)
   if (!property) return { title: "Propiedad no encontrada" }
 
   const type = TYPE_LABELS[property.type] ?? property.type
@@ -276,18 +294,7 @@ export default async function PublicPropertyPage({
   const { c } = await searchParams
   const hideContact = c === "0"
 
-  const property = await prisma.property.findUnique({
-    where: { slug },
-    include: {
-      user: {
-        select: {
-          name: true, email: true, image: true, location: true, bio: true,
-          phone: true, phoneIsWhatsapp: true,
-          instagram: true, facebook: true, tiktok: true, linkedin: true, youtube: true,
-        },
-      },
-    },
-  })
+  const property = await getProperty(slug)
 
   if (!property) notFound()
 

@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Image from "next/image"
@@ -53,7 +54,7 @@ function YouTubeIcon({ className }: { className?: string }) {
 
 // ── Data ───────────────────────────────────────────────────────────────────
 
-async function getAgent(slug: string) {
+const getAgent = cache(async (slug: string) => {
   return prisma.user.findUnique({
     where: { agentSlug: slug },
     select: {
@@ -101,7 +102,7 @@ async function getAgent(slug: string) {
       },
     },
   })
-}
+})
 
 export async function generateMetadata({
   params,
