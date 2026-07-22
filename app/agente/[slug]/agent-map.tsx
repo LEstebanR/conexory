@@ -90,8 +90,11 @@ type PositionedProperty = MapProperty & { lat: number; lng: number }
 
 // Hover opens the preview; a short grace period on close lets the cursor
 // travel from the marker onto the popup (a separate DOM node in Leaflet's
-// overlay pane) without it closing mid-move. Touch devices never fire
-// mouseover/mouseout, so tapping the marker still opens it on click as before.
+// overlay pane) without it closing mid-move. On touch, mobile browsers fire
+// a synthetic mouseover on the first tap immediately before the native click
+// — with hover handlers attached, that click would toggle the popup we just
+// opened closed again, so touch skips the hover handlers entirely and relies
+// on Leaflet's default click-to-open behavior instead.
 function PropertyMarker({ p }: { p: PositionedProperty }) {
   const markerRef = useRef<L.Marker>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -112,7 +115,7 @@ function PropertyMarker({ p }: { p: PositionedProperty }) {
     <Marker
       ref={markerRef}
       position={[p.lat, p.lng]}
-      eventHandlers={{
+      eventHandlers={L.Browser.touch ? {} : {
         mouseover: () => {
           cancelClose()
           markerRef.current?.openPopup()
