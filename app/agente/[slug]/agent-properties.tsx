@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import dynamic from "next/dynamic"
 import {
@@ -365,8 +366,13 @@ export default function AgentProperties({
                     </span>
                   )}
                   {cover ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={cover} alt={property.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <Image
+                      src={cover}
+                      alt={property.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 228px"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Building2 className="w-8 h-8 text-mute" strokeWidth={1.5} />
