@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun lint*)",
+      "Bash(bunx tsc --noEmit*)",
+      "Bash(bun run typecheck*)",
+      "mcp__claude_ai_Linear__get_issue",
+      "mcp__linear-server__get_issue",
+      "mcp__claude_ai_Vercel__get_runtime_logs",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "mcp__claude_ai_Vercel__get_project",
+      "mcp__claude_ai_Vercel__list_deployments",
+      "mcp__claude_ai_Linear__list_issues"
+    ]
+  }
+}

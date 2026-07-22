@@ -20,7 +20,7 @@ Verifica que estás en el repo correcto: `git remote get-url origin` debe conten
 - Nunca hagas `git commit` ni `git push` sin autorización explícita del usuario en ese momento — ni siquiera dentro del flujo de `/create-pr` (Paso 8), y aunque ya haya aprobado algo similar antes en la misma conversación.
 - No inventes alcance, criterios de aceptación o decisiones de producto que no estén respaldados por el issue o por lo que diga el usuario. Si algo no está claro, pregunta antes de implementar — regla global de `CLAUDE.md`.
 - El issue de Linear es la única fuente de tracking de este proyecto: no hay una capa de GitHub Issues separada que sincronizar.
-- El vault de Obsidian (`01-projects/conexory/`) es el registro durable de este trabajo, además de (no en vez de) la memoria de Claude Code — ver Paso 9.
+- El vault de Obsidian (`01-projects/conexory/`) es el registro durable de este trabajo, además de (no en vez de) la memoria de Claude Code — ver Paso 10.
 
 ## Proceso
 
@@ -33,8 +33,9 @@ Resuelve el ID del issue y revisa si ya hay trabajo empezado:
 Decide el punto de entrada:
 - Nada existe → Paso 1.
 - Rama con commits, sin PR, sin plan claro aprobado → retoma desde el Paso 3 usando el estado de la rama como contexto (no repitas preguntas ya respondidas si se pueden inferir de los commits).
-- Rama con commits que ya implementan un plan claro, sin PR → Paso 6 (code review).
-- PR ya abierto → Paso 8 (revisar descripción/estado) o Paso 9 si ya está aprobado/mergeado y solo falta dejar constancia.
+- Rama con commits que ya implementan un plan claro, sin PR → Paso 6 (code review pre-PR).
+- PR ya abierto sin el `/code-review` real corrido todavía → Paso 9.
+- PR ya abierto y revisado, o ya aprobado/mergeado y solo falta dejar constancia → Paso 10.
 
 Anuncia en una línea el punto de entrada elegido y por qué, antes de continuar.
 
@@ -78,9 +79,11 @@ Para cambios de UI, valida el flujo real en `bun dev` antes de dar el paso por t
 
 Si aparece una desviación real del plan aprobado (algo no contemplado, un cambio de alcance), avísale al usuario — no la asumas en silencio como si fuera parte del plan original.
 
-### Paso 6 — Code review
+### Paso 6 — Code review pre-PR
 
-Corre **ambas** revisiones sobre el diff acumulado: `/review-conexory` (invariantes propios del proyecto) y `/code-review` (correctness genérico) — `review-conexory.md` mismo recomienda correr las dos, ninguna reemplaza a la otra.
+`/code-review` está pensada para revisar un PR ya abierto en GitHub (usa `gh`, comenta ahí) — todavía no existe en este punto del flujo, se crea recién en el Paso 8. No la invoques acá.
+
+Corre `/review-conexory` (invariantes propios del proyecto) sobre el diff local, y además hacé vos mismo una pasada de correctness genérica sobre el mismo diff (equivalente en espíritu a lo que haría `/code-review`, pero manual: bugs obvios, casos borde, nada específico de Conexory).
 
 Resuelve los hallazgos bloqueantes antes de seguir (con el mismo criterio de avisar antes de aplicar cambios no triviales). Las sugerencias menores, decídelas con el usuario: ahora o quedan para después.
 
@@ -98,16 +101,27 @@ Muéstrale al usuario la descripción propuesta (título + body) **antes** de cr
 
 Muestra la URL del PR al usuario.
 
-### Paso 9 — Actualizar el vault y el issue de Linear
+### Paso 9 — Code review post-PR
+
+`/code-review` (el multi-agente real: 5 agentes Sonnet en paralelo + scoring, comenta directamente en el PR de GitHub) es caro en tiempo y tokens — cada corrida completa puede tardar varios minutos y consumir cientos de miles de tokens. Escala este paso con el mismo criterio del Paso 2:
+
+- **Si el Paso 2 clasificó el cambio como pequeño y mecánico:** saltea este paso — la revisión manual del Paso 6 ya alcanza. Dilo en una línea y avanza al Paso 10.
+- **Si el Paso 2 lo marcó como multi-archivo o con decisiones de diseño reales:** corre `/code-review` sobre el PR ya abierto — recién acá tiene un PR sobre el que operar.
+
+Si en cualquier punto el usuario pide cortar la corrida (por costo, tiempo, o porque no lo justifica), usar `TaskStop` sobre los agentes en vuelo en vez de dejarlos terminar, y no comentar en el PR con resultados parciales.
+
+Resuelve los hallazgos bloqueantes que reporte, con el mismo criterio de avisar antes de aplicar cambios no triviales; si hay que pushear un fix, es un commit nuevo sobre la misma rama, no un amend.
+
+### Paso 10 — Actualizar el vault y el issue de Linear
 
 1. Actualiza el diario de desarrollo del vault: `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Esteban/01-projects/conexory/diario-desarrollo/2026/<YYYYMM>-desarrollo-conexory.md` — agrega un bullet bajo el encabezado del día de hoy (`### D NombreDía`) describiendo qué se hizo, en qué rama/PR, y decisiones o gotchas relevantes, en el mismo tono narrativo (español, primera persona, pasado) que las entradas existentes. Si el mes no existe todavía, créalo y enlázalo desde `diario-desarrollo/desarrollo-conexory.md`.
 2. Si el cambio es significativo (nueva feature, decisión de producto o arquitectura — no un fix menor), actualiza también `01-projects/conexory/conexory.md`: `en_progreso`, `Notas`, progreso de `milestones` si corresponde.
 3. Actualiza el estado del issue en Linear (`mcp__linear-server__save_issue`) al estado que corresponda del flujo del equipo (ej. "In Review") y deja el link del PR como comentario o link attachment.
 
-### Paso 10 — Reflexión sobre la skill
+### Paso 11 — Reflexión sobre la skill
 
 Antes de cerrar, repasa cómo salió el proceso en esta corrida: fricción real, pasos redundantes, algo que debiste preguntar y no preguntaste, un paso que se pudo saltar o que en realidad necesitaba más rigor del que tuvo, información que faltó. Si encuentras algo concreto y accionable, pregúntale al usuario si quiere que ajustes esta skill (`.claude/commands/dev-issue.md`) antes de terminar — no la edites sin preguntar. Si no hay nada relevante, no digas nada al respecto.
 
-### Paso 11 — Cierre
+### Paso 12 — Cierre
 
 Resume en 2-3 líneas qué se hizo y en qué quedó: estado del PR (abierto/mergeado), si el vault quedó actualizado, y el estado final del issue en Linear.
