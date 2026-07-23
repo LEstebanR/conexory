@@ -1,5 +1,5 @@
-import { cache } from "react"
-import { notFound } from "next/navigation"
+import { cache, Suspense } from "react"
+import { notFound, redirect } from "next/navigation"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
@@ -7,7 +7,11 @@ import { MapPin, Phone, MessageCircle, Mail, ArrowUpRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import { toWhatsAppNumber } from "@/lib/phone"
-import AgentProperties, { type AgentProperty } from "./agent-properties"
+import {
+  getProperties, getPropertyFacets, getPropertiesForMap,
+  parsePropertyQuery, withPropertyPage, PROPERTIES_PAGE_SIZE,
+} from "@/lib/properties"
+import AgentProperties from "./agent-properties"
 
 // ── Inline SVG brand icons ─────────────────────────────────────────────────
 
@@ -72,37 +76,14 @@ const getAgent = cache(async (slug: string) => {
       linkedin: true,
       youtube: true,
       profilePublished: true,
-      properties: {
-        where: { published: true },
-        orderBy: [
-          { pinnedAt: { sort: "desc", nulls: "last" } },
-          { createdAt: "desc" },
-        ],
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          type: true,
-          transactionType: true,
-          price: true,
-          city: true,
-          state: true,
-          neighborhood: true,
-          images: true,
-          area: true,
-          bedrooms: true,
-          bathrooms: true,
-          parking: true,
-          shares: true,
-          latitude: true,
-          longitude: true,
-          createdAt: true,
-          pinnedAt: true,
-        },
-      },
     },
   })
 })
+
+// Cached per userId so generateMetadata and the page body share one query —
+// this is the agent's full (unfiltered) property count/bounds, independent
+// of whatever filters the visitor currently has applied via searchParams.
+const getAgentFacets = cache((userId: string) => getPropertyFacets({ published: true, userId }))
 
 export async function generateMetadata({
   params,
@@ -113,10 +94,11 @@ export async function generateMetadata({
   const agent = await getAgent(slug)
   if (!agent || !agent.profilePublished) return {}
 
+  const { totalCount } = await getAgentFacets(agent.id)
   const title = `${agent.name} · Asesor inmobiliario`
   const description =
     agent.bio ||
-    `Conoce las propiedades de ${agent.name} en Conexory. ${agent.properties.length} propiedad${agent.properties.length !== 1 ? "es" : ""} activa${agent.properties.length !== 1 ? "s" : ""}.`
+    `Conoce las propiedades de ${agent.name} en Conexory. ${totalCount} propiedad${totalCount !== 1 ? "es" : ""} activa${totalCount !== 1 ? "s" : ""}.`
   const appUrl = getAppUrl()
 
   return {
@@ -147,13 +129,31 @@ function formatPhone(raw: string): string {
 
 export default async function AgentProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const { slug } = await params
   const agent = await getAgent(slug)
 
   if (!agent || !agent.profilePublished) notFound()
+
+  const facets = await getAgentFacets(agent.id)
+
+  const sp = await searchParams
+  const { filters, sort, page } = parsePropertyQuery(sp)
+  const base = { published: true, userId: agent.id }
+
+  const [{ properties, total }, mapProperties] = await Promise.all([
+    getProperties(base, filters, sort, page, PROPERTIES_PAGE_SIZE),
+    getPropertiesForMap(base, filters),
+  ])
+
+  if (properties.length === 0 && total > 0 && page > 1) {
+    const totalPages = Math.max(1, Math.ceil(total / PROPERTIES_PAGE_SIZE))
+    redirect(`/agente/${slug}?${withPropertyPage(sp, totalPages)}`)
+  }
 
   const initials = agent.name
     .split(" ")
@@ -161,15 +161,6 @@ export default async function AgentProfilePage({
     .join("")
     .toUpperCase()
     .slice(0, 2)
-
-  const uniqueCities = new Set(agent.properties.map((p) => p.city)).size
-
-  const properties: AgentProperty[] = agent.properties.map((p) => ({
-    ...p,
-    price: Number(p.price),
-    createdAt: p.createdAt.getTime(),
-    pinnedAt: p.pinnedAt ? p.pinnedAt.getTime() : null,
-  }))
 
   const socialLinks = [
     { handle: agent.instagram, href: `https://instagram.com/${agent.instagram}`,     label: "Instagram", Icon: InstagramIcon },
@@ -226,14 +217,14 @@ export default async function AgentProfilePage({
           )}
 
           {/* Quick stats — only if meaningful */}
-          {agent.properties.length > 0 && (
+          {facets.totalCount > 0 && (
             <div className="flex items-center gap-1.5 mt-4 text-xs text-mute font-medium">
-              <span className="font-black text-ink text-sm">{agent.properties.length}</span>
-              {agent.properties.length === 1 ? "propiedad" : "propiedades"}
-              {uniqueCities > 1 && (
+              <span className="font-black text-ink text-sm">{facets.totalCount}</span>
+              {facets.totalCount === 1 ? "propiedad" : "propiedades"}
+              {facets.uniqueCityCount > 1 && (
                 <>
                   <span className="text-hairline-strong mx-0.5">·</span>
-                  <span className="font-black text-ink text-sm">{uniqueCities}</span>
+                  <span className="font-black text-ink text-sm">{facets.uniqueCityCount}</span>
                   ciudades
                 </>
               )}
@@ -300,10 +291,19 @@ export default async function AgentProfilePage({
       )}
 
       {/* ── Properties ───────────────────────────────────────────────────── */}
-      {properties.length > 0 && (
+      {facets.totalCount > 0 && (
         <section className="flex-1">
           <div className="max-w-lg mx-auto w-full px-5 py-7">
-            <AgentProperties properties={properties} />
+            <Suspense fallback={null}>
+              <AgentProperties
+                properties={properties}
+                total={total}
+                page={page}
+                pageSize={PROPERTIES_PAGE_SIZE}
+                facets={facets}
+                mapProperties={mapProperties}
+              />
+            </Suspense>
           </div>
         </section>
       )}

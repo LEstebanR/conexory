@@ -1,14 +1,36 @@
+import { Suspense } from "react"
+import { redirect } from "next/navigation"
 import type { Metadata } from "next"
 import { Building2 } from "lucide-react"
-import { getPublishedProperties } from "@/lib/properties"
+import {
+  getProperties, getPropertyFacets, getPropertiesForMap,
+  parsePropertyQuery, withPropertyPage, PROPERTIES_PAGE_SIZE,
+} from "@/lib/properties"
 import AgentProperties from "@/app/agente/[slug]/agent-properties"
 
 export const metadata: Metadata = {
   title: "Propiedades disponibles — Conexory",
 }
 
-export default async function DashboardPropertiesPage() {
-  const items = await getPublishedProperties()
+export default async function DashboardPropertiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const sp = await searchParams
+  const { filters, sort, page } = parsePropertyQuery(sp)
+  const base = { published: true }
+
+  const [{ properties, total }, facets, mapProperties] = await Promise.all([
+    getProperties(base, filters, sort, page, PROPERTIES_PAGE_SIZE),
+    getPropertyFacets(base),
+    getPropertiesForMap(base, filters),
+  ])
+
+  if (properties.length === 0 && total > 0 && page > 1) {
+    const totalPages = Math.max(1, Math.ceil(total / PROPERTIES_PAGE_SIZE))
+    redirect(`/dashboard/propiedades?${withPropertyPage(sp, totalPages)}`)
+  }
 
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
@@ -21,7 +43,7 @@ export default async function DashboardPropertiesPage() {
         </p>
       </div>
 
-      {items.length === 0 ? (
+      {facets.totalCount === 0 ? (
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <span className="inline-flex w-12 h-12 rounded-2xl bg-canvas-soft items-center justify-center">
             <Building2 className="w-5 h-5 text-mute" strokeWidth={1.75} />
@@ -32,7 +54,17 @@ export default async function DashboardPropertiesPage() {
           </div>
         </div>
       ) : (
-        <AgentProperties properties={items} showHeader={false} />
+        <Suspense fallback={null}>
+          <AgentProperties
+            properties={properties}
+            total={total}
+            page={page}
+            pageSize={PROPERTIES_PAGE_SIZE}
+            facets={facets}
+            mapProperties={mapProperties}
+            showHeader={false}
+          />
+        </Suspense>
       )}
     </div>
   )

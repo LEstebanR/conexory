@@ -61,14 +61,54 @@ const CITY_COORDS: Record<string, [number, number]> = {
   "soacha": [4.5793, -74.2177],
 }
 
+// Coordinates of each department's capital — fallback for properties whose
+// city isn't in CITY_COORDS (a small list of major cities only). Covers all
+// 33 Colombian departamentos so a property is only ever dropped from the map
+// if it also lacks a recognized `state`.
+const DEPARTAMENTO_COORDS: Record<string, [number, number]> = {
+  "amazonas": [-4.2153, -69.9406],
+  "antioquia": [6.2442, -75.5812],
+  "arauca": [7.0847, -70.7591],
+  "atlantico": [10.9685, -74.7813],
+  "bolivar": [10.3910, -75.4794],
+  "boyaca": [5.5353, -73.3678],
+  "caldas": [5.0703, -75.5138],
+  "caqueta": [1.6144, -75.6062],
+  "casanare": [5.3378, -72.3959],
+  "cauca": [2.4448, -76.6147],
+  "cesar": [10.4631, -73.2532],
+  "choco": [5.6947, -76.6611],
+  "cordoba": [8.7575, -75.8869],
+  "cundinamarca": [4.7110, -74.0721],
+  "guainia": [3.8653, -67.9239],
+  "guaviare": [2.5729, -72.6459],
+  "huila": [2.9273, -75.2819],
+  "la guajira": [11.5444, -72.9072],
+  "magdalena": [11.2408, -74.1990],
+  "meta": [4.1420, -73.6266],
+  "narino": [1.2136, -77.2811],
+  "norte de santander": [7.8939, -72.5078],
+  "putumayo": [1.1487, -76.6486],
+  "quindio": [4.5339, -75.6811],
+  "risaralda": [4.8133, -75.6961],
+  "san andres y providencia": [12.5847, -81.7006],
+  "santander": [7.1193, -73.1227],
+  "sucre": [9.3047, -75.3978],
+  "tolima": [4.4389, -75.2322],
+  "valle del cauca": [3.4516, -76.5320],
+  "vaupes": [1.2531, -70.2339],
+  "vichada": [6.1891, -67.4859],
+}
+
 function normalize(s: string): string {
   return s.toLowerCase().trim().normalize("NFD").replace(/[̀-ͯ]/g, "")
 }
 
-// Deterministic jitter so clustered city-level markers don't stack
-function jitter(id: string): [number, number] {
+// Deterministic jitter so clustered markers don't stack — `scale` widens the
+// spread for the coarser department-level fallback vs. city-level.
+function jitter(id: string, scale = 1): [number, number] {
   const n = parseInt(id.slice(-6), 16) || 0
-  return [((n % 200) - 100) / 20000, (((n >> 8) % 200) - 100) / 20000]
+  return [((n % 200) - 100) / 20000 * scale, (((n >> 8) % 200) - 100) / 20000 * scale]
 }
 
 export interface MapProperty {
@@ -76,6 +116,7 @@ export interface MapProperty {
   slug: string
   title: string
   city: string
+  state: string | null
   price: number
   images: string[]
   latitude: number | null
@@ -159,9 +200,11 @@ export default function AgentMap({ properties }: { properties: MapProperty[] }) 
       lat = p.latitude
       lng = p.longitude
     } else {
-      const coords = CITY_COORDS[normalize(p.city)]
+      const cityCoords = CITY_COORDS[normalize(p.city)]
+      const departamentoCoords = p.state ? DEPARTAMENTO_COORDS[normalize(p.state)] : undefined
+      const coords = cityCoords ?? departamentoCoords
       if (!coords) return []
-      const [jLat, jLng] = jitter(p.id)
+      const [jLat, jLng] = jitter(p.id, cityCoords ? 1 : 100)
       lat = coords[0] + jLat
       lng = coords[1] + jLng
     }
