@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import dynamic from "next/dynamic"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   Search, MapPin, Building2, ChevronLeft, ChevronRight,
   SlidersHorizontal, ArrowUpDown, Check, Pin,
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
 import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import { formatCOP as formatCOPFull, formatCOPMillions } from "@/lib/format"
+import type { PropertyFacets, PropertySort } from "@/lib/properties"
 import type { MapProperty } from "./agent-map"
 
 const AgentMap = dynamic(() => import("./agent-map"), {
@@ -41,10 +43,9 @@ export interface AgentProperty {
   pinnedAt: number | null
 }
 
-type SortKey = "recent" | "price-desc" | "price-asc"
 type Range = [number, number]
 
-const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+const SORT_OPTIONS: { key: PropertySort; label: string }[] = [
   { key: "recent", label: "Más recientes" },
   { key: "price-desc", label: "Precio: mayor a menor" },
   { key: "price-asc", label: "Precio: menor a mayor" },
@@ -71,9 +72,9 @@ function niceStep(range: number): number {
   return Math.max(1, Math.round(raw / mag) * mag)
 }
 
-function RangeSlider({ label, bounds, value, onChange, format }: {
+function RangeSlider({ label, bounds, value, onPreview, onCommit, format }: {
   label: string; bounds: Range; value: Range | null
-  onChange: (v: Range) => void; format: (n: number) => string
+  onPreview: (v: Range) => void; onCommit: (v: Range) => void; format: (n: number) => string
 }) {
   const current = value ?? bounds
   return (
@@ -88,7 +89,8 @@ function RangeSlider({ label, bounds, value, onChange, format }: {
         min={bounds[0]} max={bounds[1]}
         step={niceStep(bounds[1] - bounds[0])}
         value={current}
-        onValueChange={(v) => onChange([v[0], v[1]])}
+        onValueChange={(v) => onPreview([v[0], v[1]])}
+        onValueCommit={(v) => onCommit([v[0], v[1]])}
         className="py-1"
       />
     </div>
@@ -108,26 +110,74 @@ function MinSelect({ label, value, set }: { label: string; value: string; set: (
   )
 }
 
-const PAGE_SIZE = 6
-
 export default function AgentProperties({
   properties,
+  total,
+  page,
+  pageSize,
+  facets,
+  mapProperties,
   showHeader = true,
 }: {
   properties: AgentProperty[]
+  total: number
+  page: number
+  pageSize: number
+  facets: PropertyFacets
+  mapProperties: MapProperty[]
   showHeader?: boolean
 }) {
-  const [query, setQuery] = useState("")
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [sort, setSort] = useState<SortKey>("recent")
-  const [priceRange, setPriceRange] = useState<Range | null>(null)
-  const [areaRange, setAreaRange] = useState<Range | null>(null)
-  const [minBeds, setMinBeds] = useState("")
-  const [minBaths, setMinBaths] = useState("")
-  const [minParking, setMinParking] = useState("")
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  // Kept fresh via effect (not during render) so a debounced search commit
+  // that fires after another filter/sort change carries that change forward
+  // instead of overwriting it with the stale snapshot closed over at typing time.
+  const paramsRef = useRef(searchParams)
+  useEffect(() => { paramsRef.current = searchParams }, [searchParams])
+
+  const currentQuery = searchParams.get("q") ?? ""
+  const [queryInput, setQueryInput] = useState(currentQuery)
+  const [syncedQuery, setSyncedQuery] = useState(currentQuery)
+  if (currentQuery !== syncedQuery) {
+    setSyncedQuery(currentQuery)
+    setQueryInput(currentQuery)
+  }
+
+  const typeFilter = searchParams.get("type") ?? "all"
+  const sort = ((): PropertySort => {
+    const s = searchParams.get("sort")
+    return s === "price-desc" || s === "price-asc" ? s : "recent"
+  })()
+
+  const priceMinParam = searchParams.get("priceMin")
+  const priceMaxParam = searchParams.get("priceMax")
+  const priceRange: Range | null =
+    priceMinParam != null && priceMaxParam != null ? [Number(priceMinParam), Number(priceMaxParam)] : null
+  const [previewPriceRange, setPreviewPriceRange] = useState<Range | null>(null)
+  const [syncedPriceParams, setSyncedPriceParams] = useState([priceMinParam, priceMaxParam])
+  if (syncedPriceParams[0] !== priceMinParam || syncedPriceParams[1] !== priceMaxParam) {
+    setSyncedPriceParams([priceMinParam, priceMaxParam])
+    setPreviewPriceRange(null)
+  }
+
+  const areaMinParam = searchParams.get("areaMin")
+  const areaMaxParam = searchParams.get("areaMax")
+  const areaRange: Range | null =
+    areaMinParam != null && areaMaxParam != null ? [Number(areaMinParam), Number(areaMaxParam)] : null
+  const [previewAreaRange, setPreviewAreaRange] = useState<Range | null>(null)
+  const [syncedAreaParams, setSyncedAreaParams] = useState([areaMinParam, areaMaxParam])
+  if (syncedAreaParams[0] !== areaMinParam || syncedAreaParams[1] !== areaMaxParam) {
+    setSyncedAreaParams([areaMinParam, areaMaxParam])
+    setPreviewAreaRange(null)
+  }
+
+  const minBeds = searchParams.get("beds") ?? ""
+  const minBaths = searchParams.get("baths") ?? ""
+  const minParking = searchParams.get("parking") ?? ""
+
   const [showFilters, setShowFilters] = useState(false)
   const [showSort, setShowSort] = useState(false)
-  const [page, setPage] = useState(1)
   const filterRef = useRef<HTMLDivElement>(null)
   const sortRef = useRef<HTMLDivElement>(null)
 
@@ -141,21 +191,30 @@ export default function AgentProperties({
     return () => window.removeEventListener("mousedown", onDown)
   }, [showFilters, showSort])
 
-  const types = useMemo(() => {
-    const seen = new Map<string, string>()
-    for (const p of properties) if (!seen.has(p.type)) seen.set(p.type, TYPE_LABELS[p.type] ?? p.type)
-    return [...seen.entries()]
-  }, [properties])
+  // Reads searchParams via a ref (not the closed-over value) so a debounced
+  // search commit that fires after another filter/sort change still carries
+  // that change forward instead of overwriting it with a stale snapshot.
+  const updateParams = useCallback((
+    patch: Record<string, string | null>,
+    opts: { resetPage?: boolean; method?: "push" | "replace" } = {}
+  ) => {
+    const { resetPage = true, method = "replace" } = opts
+    const params = new URLSearchParams(paramsRef.current.toString())
+    for (const [key, value] of Object.entries(patch)) {
+      if (value == null || value === "") params.delete(key)
+      else params.set(key, value)
+    }
+    if (resetPage) params.delete("page")
+    const qs = params.toString()
+    router[method](qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+  }, [pathname, router])
 
-  const priceBounds = useMemo<Range>(() => {
-    const vals = properties.map((p) => p.price)
-    return [Math.min(...vals), Math.max(...vals)]
-  }, [properties])
-
-  const areaBounds = useMemo<Range | null>(() => {
-    const vals = properties.map((p) => p.area).filter((a): a is number => a != null)
-    return vals.length ? [Math.min(...vals), Math.max(...vals)] : null
-  }, [properties])
+  useEffect(() => {
+    if (queryInput === currentQuery) return
+    const t = setTimeout(() => updateParams({ q: queryInput || null }), 300)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryInput])
 
   const activeFilterCount =
     (typeFilter !== "all" ? 1 : 0) +
@@ -166,70 +225,38 @@ export default function AgentProperties({
     (minParking ? 1 : 0)
 
   function clearAll() {
-    setTypeFilter("all"); setPriceRange(null); setAreaRange(null)
-    setMinBeds(""); setMinBaths(""); setMinParking(""); setPage(1)
+    updateParams({
+      type: null, priceMin: null, priceMax: null, areaMin: null, areaMax: null,
+      beds: null, baths: null, parking: null,
+    })
   }
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    const minB = minBeds ? Number(minBeds) : null
-    const minBa = minBaths ? Number(minBaths) : null
-    const minPk = minParking ? Number(minParking) : null
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const currentPage = Math.min(Math.max(page, 1), totalPages)
 
-    const result = properties.filter((p) => {
-      if (typeFilter !== "all" && p.type !== typeFilter) return false
-      if (priceRange && (p.price < priceRange[0] || p.price > priceRange[1])) return false
-      if (areaRange && (p.area == null || p.area < areaRange[0] || p.area > areaRange[1])) return false
-      if (minB != null && (p.bedrooms == null || p.bedrooms < minB)) return false
-      if (minBa != null && (p.bathrooms == null || p.bathrooms < minBa)) return false
-      if (minPk != null && (p.parking == null || p.parking < minPk)) return false
-      if (q && ![p.title, p.city, p.neighborhood ?? "", p.state ?? ""].some((s) => s.toLowerCase().includes(q))) return false
-      return true
-    })
+  function goToPage(p: number) {
+    updateParams({ page: p > 1 ? String(p) : null }, { resetPage: false, method: "push" })
+  }
 
-    result.sort((a, b) => {
-      if (sort === "price-desc") return b.price - a.price
-      if (sort === "price-asc") return a.price - b.price
-      // "recent" (default): pinned properties float first, tie-broken by when
-      // they were pinned, then everything falls back to recency. Explicit
-      // price sorts ignore pin — a shopper comparing prices wants pure price order.
-      const aPinned = a.pinnedAt != null
-      const bPinned = b.pinnedAt != null
-      if (aPinned !== bPinned) return aPinned ? -1 : 1
-      if (aPinned && bPinned) return (b.pinnedAt as number) - (a.pinnedAt as number)
-      return b.createdAt - a.createdAt
-    })
-    return result
-  }, [properties, query, typeFilter, sort, priceRange, areaRange, minBeds, minBaths, minParking])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const currentPage = Math.min(page, totalPages)
-  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-
-  const mapProperties: MapProperty[] = properties.map((p) => ({
-    id: p.id, slug: p.slug, title: p.title, city: p.city, price: p.price,
-    images: p.images, latitude: p.latitude, longitude: p.longitude,
-  }))
-
-  if (properties.length === 0) return null
+  if (facets.totalCount === 0) return null
 
   return (
     <div className="space-y-4">
       {showHeader && (
         <div className="flex items-baseline justify-between">
           <h2 className="text-base font-black text-ink">Propiedades disponibles</h2>
-          <span className="text-sm font-bold text-mute">{properties.length}</span>
+          <span className="text-sm font-bold text-mute">{facets.totalCount}</span>
         </div>
       )}
 
       {/* Search + filters + sort — only useful with 5+ properties */}
-      {properties.length >= 5 && <div className="flex items-center gap-2">
+      {facets.totalCount >= 5 && <div className="flex items-center gap-2">
         {/* Search */}
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-mute" />
           <input
-            type="search" value={query}
-            onChange={(e) => { setQuery(e.target.value); setPage(1) }}
+            type="search" value={queryInput}
+            onChange={(e) => setQueryInput(e.target.value)}
             placeholder="Buscar por título o ubicación"
             className="w-full h-9 pl-10 pr-3 rounded-full border border-hairline-strong bg-white text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
           />
@@ -267,32 +294,46 @@ export default function AgentProperties({
                 )}
               </div>
 
-              {types.length > 1 && (
+              {facets.types.length > 1 && (
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-mute">Tipo</label>
-                  <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1) }} className={cn(selectClass, "w-full")}>
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => updateParams({ type: e.target.value === "all" ? null : e.target.value })}
+                    className={cn(selectClass, "w-full")}
+                  >
                     <option value="all">Todos los tipos</option>
-                    {types.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                    {facets.types.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                   </select>
                 </div>
               )}
 
-              {priceBounds[0] < priceBounds[1] && (
-                <RangeSlider label="Precio" bounds={priceBounds} value={priceRange}
-                  onChange={(v) => { setPriceRange(v); setPage(1) }} format={priceLabel} />
+              {facets.priceBounds && facets.priceBounds[0] < facets.priceBounds[1] && (
+                <RangeSlider
+                  label="Precio" bounds={facets.priceBounds}
+                  value={previewPriceRange ?? priceRange}
+                  onPreview={setPreviewPriceRange}
+                  onCommit={(v) => updateParams({ priceMin: String(v[0]), priceMax: String(v[1]) })}
+                  format={priceLabel}
+                />
               )}
 
-              {areaBounds && areaBounds[0] < areaBounds[1] && (
-                <RangeSlider label="Área" bounds={areaBounds} value={areaRange}
-                  onChange={(v) => { setAreaRange(v); setPage(1) }} format={areaLabel} />
+              {facets.areaBounds && facets.areaBounds[0] < facets.areaBounds[1] && (
+                <RangeSlider
+                  label="Área" bounds={facets.areaBounds}
+                  value={previewAreaRange ?? areaRange}
+                  onPreview={setPreviewAreaRange}
+                  onCommit={(v) => updateParams({ areaMin: String(v[0]), areaMax: String(v[1]) })}
+                  format={areaLabel}
+                />
               )}
 
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-mute">Mínimo</label>
                 <div className="grid grid-cols-3 gap-2">
-                  <MinSelect label="Hab." value={minBeds} set={(v) => { setMinBeds(v); setPage(1) }} />
-                  <MinSelect label="Baños" value={minBaths} set={(v) => { setMinBaths(v); setPage(1) }} />
-                  <MinSelect label="Parq." value={minParking} set={(v) => { setMinParking(v); setPage(1) }} />
+                  <MinSelect label="Hab." value={minBeds} set={(v) => updateParams({ beds: v || null })} />
+                  <MinSelect label="Baños" value={minBaths} set={(v) => updateParams({ baths: v || null })} />
+                  <MinSelect label="Parq." value={minParking} set={(v) => updateParams({ parking: v || null })} />
                 </div>
               </div>
             </div>
@@ -321,7 +362,7 @@ export default function AgentProperties({
                 <button
                   key={o.key}
                   type="button"
-                  onClick={() => { setSort(o.key); setPage(1); setShowSort(false) }}
+                  onClick={() => { updateParams({ sort: o.key === "recent" ? null : o.key }); setShowSort(false) }}
                   className="flex items-center justify-between w-full px-4 py-2.5 text-sm text-left hover:bg-canvas-soft transition-colors"
                 >
                   <span className={cn("font-medium", sort === o.key ? "text-ink font-semibold" : "text-body")}>
@@ -336,16 +377,16 @@ export default function AgentProperties({
       </div>}
 
       {/* Results count */}
-      {(query || activeFilterCount > 0) && (
+      {(currentQuery || activeFilterCount > 0) && (
         <p className="text-xs text-mute">
-          {filtered.length === 0 ? "Sin resultados" : `${filtered.length} propiedad${filtered.length !== 1 ? "es" : ""} encontrada${filtered.length !== 1 ? "s" : ""}`}
+          {total === 0 ? "Sin resultados" : `${total} propiedad${total !== 1 ? "es" : ""} encontrada${total !== 1 ? "s" : ""}`}
         </p>
       )}
 
       {/* Property grid */}
-      {paginated.length > 0 ? (
+      {properties.length > 0 ? (
         <div key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
-          {paginated.map((property) => {
+          {properties.map((property) => {
             const cover = property.images[0]
             const location = [property.neighborhood, property.city].filter(Boolean).join(", ")
             const typeLabel = TYPE_LABELS[property.type] ?? property.type
@@ -416,19 +457,20 @@ export default function AgentProperties({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-1">
-          <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}
+          <button type="button" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}
             className="flex items-center gap-1 text-sm font-semibold text-ink disabled:text-mute disabled:cursor-not-allowed hover:text-body transition-colors">
             <ChevronLeft className="w-4 h-4" /> Anterior
           </button>
           <span className="text-xs text-mute font-medium">{currentPage} / {totalPages}</span>
-          <button type="button" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+          <button type="button" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}
             className="flex items-center gap-1 text-sm font-semibold text-ink disabled:text-mute disabled:cursor-not-allowed hover:text-body transition-colors">
             Siguiente <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Map */}
+      {/* Map — shows every property matching the current filters, not just
+          the loaded page, so it doesn't jump around as the user paginates */}
       <div className="pt-4">
         <h2 className="text-base font-black text-ink mb-3">Ubicación de propiedades</h2>
         <div className="relative isolate rounded-2xl overflow-hidden border border-hairline" style={{ height: 340 }}>
