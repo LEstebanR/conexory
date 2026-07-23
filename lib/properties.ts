@@ -142,7 +142,7 @@ export async function getPropertiesForMap(
   const rows = await prisma.property.findMany({
     where,
     select: {
-      id: true, slug: true, title: true, city: true, price: true,
+      id: true, slug: true, title: true, city: true, state: true, price: true,
       images: true, latitude: true, longitude: true,
     },
   })
