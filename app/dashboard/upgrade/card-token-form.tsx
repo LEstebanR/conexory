@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { initMercadoPago, CardPayment } from "@mercadopago/sdk-react"
 import * as Dialog from "@radix-ui/react-dialog"
 import { Lock } from "lucide-react"
@@ -57,6 +57,50 @@ export function CardTokenForm({
     mercadoPagoInitialized = true
   }, [])
 
+  // The Brick reinitializes itself whenever the object/function references it
+  // receives change — setSubmitting below re-renders this component, so
+  // initialization/customization/onSubmit/onError all need stable identities
+  // across that re-render or the Brick tears itself down and remounts mid
+  // submit, corrupting the flow instead of just showing a loading state.
+  const initialization = useMemo(() => ({ amount, payer: { email } }), [amount, email])
+  const customization = useMemo(() => ({ visual: { hideFormTitle: true } }), [])
+
+  const handleSubmit = useCallback(
+    async (
+      formData: { token: string; payment_method_id: string },
+      additionalData?: { lastFourDigits?: string },
+    ) => {
+      setSubmitting(true)
+      let handledFailure = false
+      try {
+        const result = await onTokenize({
+          cardTokenId: formData.token,
+          cardBrand: formData.payment_method_id,
+          cardLastFour: additionalData?.lastFourDigits ?? "",
+        })
+        if (result.ok) {
+          setOpen(false)
+          onSuccess()
+          return
+        }
+        handledFailure = true
+        if (onFailure) onFailure(result.reason)
+        else toast.error(errorMessage)
+        throw new Error(result.reason ?? "payment_action_failed")
+      } catch (error) {
+        if (!handledFailure) toast.error(errorMessage)
+        throw error
+      } finally {
+        setSubmitting(false)
+      }
+    },
+    [onTokenize, onSuccess, onFailure, errorMessage],
+  )
+
+  const handleError = useCallback((error: unknown) => {
+    console.error("[mercadopago] CardPayment brick error:", error)
+  }, [])
+
   if (!MERCADOPAGO_PUBLIC_KEY) {
     return (
       <p className="text-xs text-warning-200 text-center">
@@ -81,39 +125,15 @@ export function CardTokenForm({
             {modalTitle}
           </Dialog.Title>
 
-          <CardPayment
-            initialization={{ amount, payer: { email } }}
-            customization={{ visual: { hideFormTitle: true } }}
-            locale="es-CO"
-            onSubmit={async (formData, additionalData) => {
-              setSubmitting(true)
-              let handledFailure = false
-              try {
-                const result = await onTokenize({
-                  cardTokenId: formData.token,
-                  cardBrand: formData.payment_method_id,
-                  cardLastFour: additionalData?.lastFourDigits ?? "",
-                })
-                if (result.ok) {
-                  setOpen(false)
-                  onSuccess()
-                  return
-                }
-                handledFailure = true
-                if (onFailure) onFailure(result.reason)
-                else toast.error(errorMessage)
-                throw new Error(result.reason ?? "payment_action_failed")
-              } catch (error) {
-                if (!handledFailure) toast.error(errorMessage)
-                throw error
-              } finally {
-                setSubmitting(false)
-              }
-            }}
-            onError={(error) => {
-              console.error("[mercadopago] CardPayment brick error:", error)
-            }}
-          />
+          {open && (
+            <CardPayment
+              initialization={initialization}
+              customization={customization}
+              locale="es-CO"
+              onSubmit={handleSubmit}
+              onError={handleError}
+            />
+          )}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
