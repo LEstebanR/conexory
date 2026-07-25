@@ -42,6 +42,7 @@ export default async function AdminUsersPage({
         role: true,
         agentSlug: true,
         profilePublished: true,
+        subscription: { select: { currentPeriodEnd: true, status: true } },
         _count: { select: { properties: { where: { published: true } } } },
       },
       orderBy: { createdAt: "desc" },
@@ -133,6 +134,14 @@ export default async function AdminUsersPage({
                       userName={u.name}
                       initialIsPremium={u.isPremium}
                       initialPremiumUntil={u.premiumUntil?.toISOString() ?? null}
+                      subscription={
+                        u.subscription
+                          ? {
+                              currentPeriodEnd: u.subscription.currentPeriodEnd?.toISOString() ?? null,
+                              status: u.subscription.status,
+                            }
+                          : null
+                      }
                     />
                   </td>
                 </tr>
