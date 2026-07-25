@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { AlertTriangle, CalendarClock, Loader2, Pencil } from "lucide-react"
 import * as Dialog from "@radix-ui/react-dialog"
 import { Button } from "@/components/ui/button"
-import { toggleUserIsPremium, updatePremiumUntil } from "../actions"
+import { toggleUserIsPremium, updatePremiumUntil, updateSubscriptionPeriodEnd } from "../actions"
 
 function tomorrowISO(): string {
   const d = new Date()
@@ -41,12 +41,15 @@ export default function PremiumToggle({
 }) {
   const [isPremium, setIsPremium] = useState(initialIsPremium)
   const [premiumUntil, setPremiumUntil] = useState(initialPremiumUntil ?? null)
+  const [subscriptionUntil, setSubscriptionUntil] = useState(subscription?.currentPeriodEnd ?? null)
   const [dateInput, setDateInput] = useState(tomorrowISO)
   const [loading, setLoading] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editDateInput, setEditDateInput] = useState(tomorrowISO)
   const router = useRouter()
+
+  const hasSubscription = Boolean(subscription)
 
   async function handleConfirm() {
     if (!isPremium && !dateInput) {
@@ -74,7 +77,8 @@ export default function PremiumToggle({
   }
 
   function openEdit() {
-    setEditDateInput(premiumUntil ? premiumUntil.split("T")[0] : tomorrowISO())
+    const current = hasSubscription ? subscriptionUntil : premiumUntil
+    setEditDateInput(current ? current.split("T")[0] : tomorrowISO())
     setEditOpen(true)
   }
 
@@ -86,12 +90,15 @@ export default function PremiumToggle({
     setEditOpen(false)
     setLoading(true)
     try {
-      const result = await updatePremiumUntil(userId, editDateInput)
+      const result = hasSubscription
+        ? await updateSubscriptionPeriodEnd(userId, editDateInput)
+        : await updatePremiumUntil(userId, editDateInput)
       if (!result.success) {
         toast.error(result.error)
         return
       }
-      setPremiumUntil(editDateInput)
+      if (hasSubscription) setSubscriptionUntil(editDateInput)
+      else setPremiumUntil(editDateInput)
       router.refresh()
     } finally {
       setLoading(false)
@@ -117,26 +124,23 @@ export default function PremiumToggle({
             "Free → Pro"
           )}
         </button>
-        {isPremium && subscription ? (
-          <span className="inline-flex items-center gap-1 text-[10px] text-mute font-medium whitespace-nowrap">
+        {isPremium && (
+          <button
+            type="button"
+            onClick={openEdit}
+            disabled={loading}
+            className="inline-flex items-center gap-1 text-[10px] text-mute font-medium whitespace-nowrap hover:text-ink transition-colors disabled:opacity-50"
+          >
             <CalendarClock className="w-3 h-3" />
-            {subscription.currentPeriodEnd
-              ? `${subscription.status === "canceling" ? "cancela" : "renueva"} el ${formatDate(subscription.currentPeriodEnd)}`
-              : "suscripción Mercado Pago"}
-          </span>
-        ) : (
-          isPremium && (
-            <button
-              type="button"
-              onClick={openEdit}
-              disabled={loading}
-              className="inline-flex items-center gap-1 text-[10px] text-mute font-medium whitespace-nowrap hover:text-ink transition-colors disabled:opacity-50"
-            >
-              <CalendarClock className="w-3 h-3" />
-              {premiumUntil ? `hasta ${formatDate(premiumUntil)}` : "sin fecha"}
-              <Pencil className="w-2.5 h-2.5" />
-            </button>
-          )
+            {hasSubscription
+              ? subscriptionUntil
+                ? `${subscription?.status === "canceling" ? "cancela" : "renueva"} el ${formatDate(subscriptionUntil)}`
+                : "suscripción Mercado Pago"
+              : premiumUntil
+                ? `hasta ${formatDate(premiumUntil)}`
+                : "sin fecha"}
+            <Pencil className="w-2.5 h-2.5" />
+          </button>
         )}
       </div>
 
@@ -205,7 +209,9 @@ export default function PremiumToggle({
                   Editar fecha de {userName}
                 </Dialog.Title>
                 <Dialog.Description className="text-sm text-body mt-1.5 leading-relaxed">
-                  Cambia la fecha hasta la que tiene acceso Pro manual.
+                  {hasSubscription
+                    ? "Ajuste manual de la suscripción real en Mercado Pago — el próximo cobro puede volver a mover esta fecha."
+                    : "Cambia la fecha hasta la que tiene acceso Pro manual."}
                 </Dialog.Description>
                 <div className="mt-4 text-left">
                   <label

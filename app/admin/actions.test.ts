@@ -14,8 +14,18 @@ const mockUserUpdate = mock((...args: [unknown]) => {
   void args
   return Promise.resolve({})
 })
+const mockSubscriptionFindUnique = mock(() =>
+  Promise.resolve<{ userId: string } | null>({ userId: "u1" })
+)
+const mockSubscriptionUpdate = mock((...args: [unknown]) => {
+  void args
+  return Promise.resolve({})
+})
 mock.module("@/lib/prisma", () => ({
-  prisma: { user: { update: mockUserUpdate } },
+  prisma: {
+    user: { update: mockUserUpdate },
+    subscription: { findUnique: mockSubscriptionFindUnique, update: mockSubscriptionUpdate },
+  },
 }))
 
 mock.module("next/cache", () => ({
@@ -24,7 +34,9 @@ mock.module("next/cache", () => ({
 
 // next/headers is mocked globally in test-setup.ts.
 
-const { toggleUserIsPremium, updatePremiumUntil } = await import("./actions")
+const { toggleUserIsPremium, updatePremiumUntil, updateSubscriptionPeriodEnd } = await import(
+  "./actions"
+)
 
 const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 const pastDate = "2020-01-01"
@@ -32,6 +44,9 @@ const pastDate = "2020-01-01"
 beforeEach(() => {
   mockGetSession.mockImplementation(() => Promise.resolve({ user: { role: "admin" } }))
   mockUserUpdate.mockClear()
+  mockSubscriptionFindUnique.mockClear()
+  mockSubscriptionFindUnique.mockImplementation(() => Promise.resolve({ userId: "u1" }))
+  mockSubscriptionUpdate.mockClear()
 })
 
 describe("toggleUserIsPremium", () => {
@@ -97,6 +112,37 @@ describe("updatePremiumUntil", () => {
     expect(mockUserUpdate).toHaveBeenCalledWith({
       where: { id: "u1" },
       data: { premiumUntil: new Date(futureDate) },
+    })
+  })
+})
+
+describe("updateSubscriptionPeriodEnd", () => {
+  test("rejects a non-admin session", async () => {
+    mockGetSession.mockImplementation(() => Promise.resolve({ user: { role: "user" } }))
+    const result = await updateSubscriptionPeriodEnd("u1", futureDate)
+    expect(result).toEqual({ success: false, error: "No autorizado" })
+    expect(mockSubscriptionUpdate).not.toHaveBeenCalled()
+  })
+
+  test("rejects a past date", async () => {
+    const result = await updateSubscriptionPeriodEnd("u1", pastDate)
+    expect(result.success).toBe(false)
+    expect(mockSubscriptionUpdate).not.toHaveBeenCalled()
+  })
+
+  test("rejects a user with no subscription", async () => {
+    mockSubscriptionFindUnique.mockImplementation(() => Promise.resolve(null))
+    const result = await updateSubscriptionPeriodEnd("u1", futureDate)
+    expect(result).toEqual({ success: false, error: "Este usuario no tiene una suscripción" })
+    expect(mockSubscriptionUpdate).not.toHaveBeenCalled()
+  })
+
+  test("updates currentPeriodEnd for an existing subscription", async () => {
+    const result = await updateSubscriptionPeriodEnd("u1", futureDate)
+    expect(result).toEqual({ success: true })
+    expect(mockSubscriptionUpdate).toHaveBeenCalledWith({
+      where: { userId: "u1" },
+      data: { currentPeriodEnd: new Date(futureDate) },
     })
   })
 })
