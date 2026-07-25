@@ -14,6 +14,8 @@ export function SubscribeCardForm({ email }: { email: string }) {
       amount={PRO_AMOUNT_COP}
       revealLabel={`Suscribirme — $${PRO_AMOUNT_COP.toLocaleString("es-CO")}/mes`}
       modalTitle="Confirma tu tarjeta"
+      submitLabel={`Confirmar — $${PRO_AMOUNT_COP.toLocaleString("es-CO")}/mes`}
+      submittingLabel="Confirmando…"
       errorMessage="No pudimos iniciar la suscripción con Mercado Pago. Intenta de nuevo."
       onTokenize={subscribeAction}
       onSuccess={() => router.push("/dashboard?upgrade=processing")}

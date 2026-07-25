@@ -40,6 +40,7 @@ type CreatePreapprovalResult = {
   ok: boolean
   preapprovalId?: string
   status?: string
+  cardBrand?: string
 }
 const mockCreatePreapproval = mock(
   (...args: [{ userId: string; email: string; backUrl: string; cardTokenId: string }]) => {
@@ -48,9 +49,16 @@ const mockCreatePreapproval = mock(
       ok: true,
       preapprovalId: "preapproval-123",
       status: "in_process",
+      cardBrand: "visa",
     })
   }
 )
+
+type CardTokenDetails = { ok: boolean; cardLastFour?: string }
+const mockGetCardToken = mock((...args: [string]) => {
+  void args
+  return Promise.resolve<CardTokenDetails>({ ok: true, cardLastFour: "1234" })
+})
 
 // Spread the real module so unrelated exports (verifyMercadoPagoWebhook,
 // makeExternalReference) stay real for any other test file that imports
@@ -59,6 +67,7 @@ const realMercadoPago = await import("@/lib/mercadopago")
 mock.module("@/lib/mercadopago", () => ({
   ...realMercadoPago,
   createPreapproval: mockCreatePreapproval,
+  getCardToken: mockGetCardToken,
 }))
 
 const { downgradeToFree, startSubscription } = await import("./subscription")
@@ -102,8 +111,6 @@ describe("startSubscription", () => {
     email: "a@b.com",
     backUrl: "https://conexory.com/dashboard",
     cardTokenId: "card-token-123",
-    cardBrand: "visa",
-    cardLastFour: "1234",
   }
 
   test("returns preapproval_failed when Mercado Pago rejects the request", async () => {
@@ -111,7 +118,12 @@ describe("startSubscription", () => {
     const result = await startSubscription(input)
     expect(result).toEqual({ ok: false, reason: "preapproval_failed" })
     mockCreatePreapproval.mockImplementation(() =>
-      Promise.resolve({ ok: true, preapprovalId: "preapproval-123", status: "in_process" })
+      Promise.resolve({
+        ok: true,
+        preapprovalId: "preapproval-123",
+        status: "in_process",
+        cardBrand: "visa",
+      })
     )
   })
 
@@ -138,7 +150,7 @@ describe("startSubscription", () => {
 
   test("activates isPremium optimistically when Mercado Pago authorizes the card immediately", async () => {
     mockCreatePreapproval.mockImplementationOnce(() =>
-      Promise.resolve({ ok: true, preapprovalId: "preapproval-123", status: "authorized" })
+      Promise.resolve({ ok: true, preapprovalId: "preapproval-123", status: "authorized", cardBrand: "visa" })
     )
     mockSubscriptionUpsert.mockClear()
     mockUserUpdate.mockClear()

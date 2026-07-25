@@ -1,116 +1,216 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { initMercadoPago, CardPayment } from "@mercadopago/sdk-react"
+import { useEffect, useRef, useState } from "react"
+import { loadMercadoPago } from "@mercadopago/sdk-js"
 import * as Dialog from "@radix-ui/react-dialog"
-import { Lock } from "lucide-react"
+import { Loader2, Lock } from "lucide-react"
 import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-const MERCADOPAGO_PUBLIC_KEY = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY
-
-// initMercadoPago() only needs to run once per page load, regardless of how
-// many CardTokenForm instances mount (SubscribeCardForm, ChangeCardForm).
-let mercadoPagoInitialized = false
-
-export interface TokenizedCard {
-  cardTokenId: string
-  cardBrand: string
-  cardLastFour: string
+declare global {
+  interface Window {
+    MercadoPago: new (publicKey: string, options?: { locale?: string }) => MercadoPagoInstance
+  }
 }
+
+interface CardFormData {
+  token: string
+}
+
+interface MercadoPagoCardForm {
+  getCardFormData: () => CardFormData
+  unmount: () => void
+}
+
+interface CardFormFieldConfig {
+  id: string
+  placeholder?: string
+  value?: string
+}
+
+interface CardFormConfig {
+  id: string
+  cardNumber: CardFormFieldConfig
+  expirationDate: CardFormFieldConfig
+  securityCode: CardFormFieldConfig
+  cardholderName: CardFormFieldConfig
+  issuer: CardFormFieldConfig
+  installments: CardFormFieldConfig
+  identificationType: CardFormFieldConfig
+  identificationNumber: CardFormFieldConfig
+  cardholderEmail: CardFormFieldConfig
+}
+
+interface MercadoPagoInstance {
+  cardForm: (config: {
+    amount: string
+    iframe: boolean
+    form: CardFormConfig
+    callbacks: {
+      onFormMounted: (error?: unknown) => void
+      onSubmit: (event: { preventDefault: () => void }) => void
+    }
+  }) => MercadoPagoCardForm
+}
+
+const FIELD_IDS = {
+  form: "form-checkout",
+  cardNumber: "form-checkout__cardNumber",
+  expirationDate: "form-checkout__expirationDate",
+  securityCode: "form-checkout__securityCode",
+  cardholderName: "form-checkout__cardholderName",
+  issuer: "form-checkout__issuer",
+  installments: "form-checkout__installments",
+  identificationType: "form-checkout__identificationType",
+  identificationNumber: "form-checkout__identificationNumber",
+  cardholderEmail: "form-checkout__cardholderEmail",
+}
+
+const secureFieldClass =
+  "flex h-11 w-full items-center rounded-lg border border-hairline-strong bg-white px-4 text-sm text-ink"
+
+const MERCADOPAGO_PUBLIC_KEY = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY
 
 interface CardTokenFormProps {
   email: string
   amount: number
   revealLabel: string
   modalTitle: string
+  submitLabel: string
+  submittingLabel: string
   errorMessage: string
-  onTokenize: (card: TokenizedCard) => Promise<{ ok: boolean; reason?: string }>
+  onTokenize: (cardTokenId: string) => Promise<{ ok: boolean; reason?: string }>
   onSuccess: () => void
   onFailure?: (reason?: string) => void
 }
 
 // Shared card-capture building block for both subscribing and swapping a
-// subscription's card, rendered inside a modal so Mercado Pago's own Payment
-// Brick UI (which we don't fully control the styling of) reads as a distinct
-// "their widget" step rather than part of our page. Raw card data never
-// reaches our server — only the resulting token does — but unlike the
-// previous Secure Fields form, the Brick also hands us the card's brand and
-// last four digits directly in onSubmit, so we don't have to wait for
-// Mercado Pago's webhook to display them.
+// subscription's card, rendered inside a modal so Mercado Pago's own form
+// reads as a distinct "their widget" step rather than part of our page.
+// cardNumber, expirationDate and securityCode are mounted as Mercado Pago
+// iframes we never touch, so raw card data never reaches our server — only
+// the resulting token does. The Payment Brick (Mercado Pago's newer,
+// React-friendly widget) was tried here first because it hands back the
+// card's brand/last-four-digits immediately — but its tokens turned out to
+// be rejected by the Suscripciones API ("CC_VAL_433"), which only accepts
+// tokens from this classic card-tokens flow. Brand/last-four instead come
+// from a server-side lookup right after tokenizing (see lib/subscription.ts,
+// app/dashboard/upgrade/actions.ts) — still immediate, just not from the
+// client.
 export function CardTokenForm({
   email,
   amount,
   revealLabel,
   modalTitle,
+  submitLabel,
+  submittingLabel,
   errorMessage,
   onTokenize,
   onSuccess,
   onFailure,
 }: CardTokenFormProps) {
   const [open, setOpen] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
+  const [status, setStatus] = useState<"loading" | "ready" | "submitting" | "error">(
+    MERCADOPAGO_PUBLIC_KEY ? "loading" : "error"
+  )
+  const cardFormRef = useRef<MercadoPagoCardForm | null>(null)
 
   useEffect(() => {
-    if (!MERCADOPAGO_PUBLIC_KEY || mercadoPagoInitialized) return
-    initMercadoPago(MERCADOPAGO_PUBLIC_KEY, { locale: "es-CO" })
-    mercadoPagoInitialized = true
-  }, [])
+    const publicKey = MERCADOPAGO_PUBLIC_KEY
+    if (!open || !publicKey) return
 
-  // The Brick reinitializes itself whenever the object/function references it
-  // receives change — setSubmitting below re-renders this component, so
-  // initialization/customization/onSubmit/onError all need stable identities
-  // across that re-render or the Brick tears itself down and remounts mid
-  // submit, corrupting the flow instead of just showing a loading state.
-  const initialization = useMemo(() => ({ amount, payer: { email } }), [amount, email])
-  const customization = useMemo(() => ({ visual: { hideFormTitle: true } }), [])
+    let cancelled = false
 
-  const handleSubmit = useCallback(
-    async (
-      formData: { token: string; payment_method_id: string },
-      additionalData?: { lastFourDigits?: string },
-    ) => {
-      setSubmitting(true)
-      let handledFailure = false
-      try {
-        const result = await onTokenize({
-          cardTokenId: formData.token,
-          cardBrand: formData.payment_method_id,
-          cardLastFour: additionalData?.lastFourDigits ?? "",
-        })
-        if (result.ok) {
-          setOpen(false)
-          onSuccess()
-          return
-        }
-        handledFailure = true
-        if (onFailure) onFailure(result.reason)
-        else toast.error(errorMessage)
-        throw new Error(result.reason ?? "payment_action_failed")
-      } catch (error) {
-        if (!handledFailure) toast.error(errorMessage)
-        throw error
-      } finally {
-        setSubmitting(false)
-      }
-    },
-    [onTokenize, onSuccess, onFailure, errorMessage],
-  )
+    async function init() {
+      await loadMercadoPago()
+      if (cancelled) return
 
-  const handleError = useCallback((error: unknown) => {
-    console.error("[mercadopago] CardPayment brick error:", error)
-  }, [])
+      const mp = new window.MercadoPago(publicKey!, { locale: "es-CO" })
+      const cardForm = mp.cardForm({
+        amount: String(amount),
+        iframe: true,
+        form: {
+          id: FIELD_IDS.form,
+          cardNumber: { id: FIELD_IDS.cardNumber, placeholder: "Número de tarjeta" },
+          expirationDate: { id: FIELD_IDS.expirationDate, placeholder: "MM/AA" },
+          securityCode: { id: FIELD_IDS.securityCode, placeholder: "CVV" },
+          cardholderName: { id: FIELD_IDS.cardholderName, placeholder: "Nombre en la tarjeta" },
+          issuer: { id: FIELD_IDS.issuer, placeholder: "Banco emisor" },
+          installments: { id: FIELD_IDS.installments, placeholder: "Cuotas" },
+          identificationType: { id: FIELD_IDS.identificationType, placeholder: "Tipo de documento" },
+          identificationNumber: {
+            id: FIELD_IDS.identificationNumber,
+            placeholder: "Número de documento",
+          },
+          cardholderEmail: { id: FIELD_IDS.cardholderEmail, value: email },
+        },
+        callbacks: {
+          onFormMounted: (error) => {
+            if (cancelled) return
+            if (error) {
+              console.error("[mercadopago] cardForm mount failed:", error)
+              setStatus("error")
+              return
+            }
+            setStatus("ready")
+          },
+          onSubmit: (event) => {
+            event.preventDefault()
+            if (!cardFormRef.current) return
+            setStatus("submitting")
 
-  if (!MERCADOPAGO_PUBLIC_KEY) {
-    return (
-      <p className="text-xs text-warning-200 text-center">
-        No pudimos cargar el formulario de pago. Recarga la página e intenta de nuevo.
-      </p>
-    )
-  }
+            const { token } = cardFormRef.current.getCardFormData()
+            if (!token) {
+              setStatus("ready")
+              toast.error("No pudimos validar los datos de la tarjeta. Revísalos e intenta de nuevo.")
+              return
+            }
+
+            onTokenize(token)
+              .then((result) => {
+                if (cancelled) return
+                if (result.ok) {
+                  setStatus("ready")
+                  setOpen(false)
+                  onSuccess()
+                  return
+                }
+                setStatus("ready")
+                if (onFailure) onFailure(result.reason)
+                else toast.error(errorMessage)
+              })
+              .catch(() => {
+                if (cancelled) return
+                setStatus("ready")
+                toast.error(errorMessage)
+              })
+          },
+        },
+      })
+      cardFormRef.current = cardForm
+    }
+
+    init()
+
+    return () => {
+      cancelled = true
+      cardFormRef.current?.unmount()
+      cardFormRef.current = null
+    }
+  }, [open, email, amount, onTokenize, onSuccess, onFailure, errorMessage])
+
+  const disabled = status !== "ready" && status !== "submitting"
 
   return (
-    <Dialog.Root open={open} onOpenChange={(next) => !submitting && setOpen(next)}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(next) => {
+        if (status === "submitting") return
+        if (next && MERCADOPAGO_PUBLIC_KEY) setStatus("loading")
+        setOpen(next)
+      }}
+    >
       <Dialog.Trigger asChild>
         <Button type="button" size="lg" variant="secondary" className="w-full">
           <Lock className="w-4 h-4" />
@@ -125,15 +225,38 @@ export function CardTokenForm({
             {modalTitle}
           </Dialog.Title>
 
-          {open && (
-            <CardPayment
-              initialization={initialization}
-              customization={customization}
-              locale="es-CO"
-              onSubmit={handleSubmit}
-              onError={handleError}
-            />
-          )}
+          <form id={FIELD_IDS.form} className="space-y-3">
+            <div id={FIELD_IDS.cardNumber} className={secureFieldClass} />
+            <div className="grid grid-cols-2 gap-3">
+              <div id={FIELD_IDS.expirationDate} className={secureFieldClass} />
+              <div id={FIELD_IDS.securityCode} className={secureFieldClass} />
+            </div>
+            <Input id={FIELD_IDS.cardholderName} placeholder="Nombre en la tarjeta" autoComplete="cc-name" />
+            <div className="grid grid-cols-[auto_1fr] gap-3">
+              <select
+                id={FIELD_IDS.identificationType}
+                className="h-11 rounded-lg border border-hairline-strong bg-white px-3 text-sm text-ink outline-none focus:ring-2 focus:ring-ink focus:border-ink"
+              />
+              <Input id={FIELD_IDS.identificationNumber} placeholder="Número de documento" />
+            </div>
+            <select id={FIELD_IDS.issuer} className="hidden" />
+            <select id={FIELD_IDS.installments} className="hidden" />
+            <input id={FIELD_IDS.cardholderEmail} type="hidden" defaultValue={email} />
+
+            <Button type="submit" size="lg" className="w-full" disabled={disabled}>
+              {status === "loading" || status === "submitting" ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Lock className="w-4 h-4" />
+              )}
+              {status === "submitting" ? submittingLabel : submitLabel}
+            </Button>
+            {status === "error" && (
+              <p className="text-xs text-red-600 text-center">
+                No pudimos cargar el formulario de pago. Cierra y vuelve a intentar.
+              </p>
+            )}
+          </form>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

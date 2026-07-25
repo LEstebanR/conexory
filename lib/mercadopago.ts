@@ -17,6 +17,7 @@ export interface CreatePreapprovalResult {
   ok: boolean
   preapprovalId?: string
   status?: string
+  cardBrand?: string
   error?: string
 }
 
@@ -63,14 +64,46 @@ export async function createPreapproval({
   })
 
   const raw = await res.text()
-  const json = parseJson<{ id?: string; status?: string; message?: string }>(raw)
+  const json = parseJson<{ id?: string; status?: string; payment_method_id?: string; message?: string }>(
+    raw,
+  )
 
   if (!res.ok || !json?.id) {
     console.error("[mercadopago] createPreapproval failed:", res.status, raw.slice(0, 500))
     return { ok: false, error: json?.message ?? `http_${res.status}` }
   }
 
-  return { ok: true, preapprovalId: json.id, status: json.status }
+  return { ok: true, preapprovalId: json.id, status: json.status, cardBrand: json.payment_method_id }
+}
+
+export interface CardTokenDetails {
+  ok: boolean
+  cardLastFour?: string
+  error?: string
+}
+
+// Looks up the last four digits of a just-tokenized card by its token id.
+// Mercado Pago's card-tokenization endpoint (which cardForm calls internally)
+// returns this in its own creation response, but cardForm's client-side
+// wrapper never surfaces it to us — this fetches the same record server-side
+// right after we receive the token, so subscribeAction/changeCardAction can
+// show the real card immediately instead of waiting on a webhook.
+export async function getCardToken(tokenId: string): Promise<CardTokenDetails> {
+  const publicKey = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY
+  if (!publicKey) return { ok: false, error: "missing_public_key" }
+
+  const res = await fetch(
+    `${API_BASE}/v1/card_tokens/${tokenId}?public_key=${encodeURIComponent(publicKey)}`,
+    { cache: "no-store" },
+  )
+  const raw = await res.text()
+  const json = parseJson<{ last_four_digits?: string }>(raw)
+
+  if (!res.ok) {
+    console.error("[mercadopago] getCardToken failed:", res.status, raw.slice(0, 500))
+    return { ok: false, error: `http_${res.status}` }
+  }
+  return { ok: true, cardLastFour: json?.last_four_digits }
 }
 
 export interface PreapprovalDetails {
@@ -186,15 +219,16 @@ export async function cancelPreapproval(preapprovalId: string): Promise<CancelPr
 
 export interface UpdatePreapprovalCardResult {
   ok: boolean
+  cardBrand?: string
   error?: string
 }
 
 // Swaps the card charged for future recurring payments on an existing
 // subscription. The buyer re-tokenizes a card client-side exactly like at
 // sign-up, and this just points the same preapproval at the new token — no
-// need to cancel and recreate the subscription. The brand/last-four-digits
-// shown in the UI come from the Payment Brick's own onSubmit data (captured
-// at tokenization time) rather than from this response.
+// need to cancel and recreate the subscription. The response carries the new
+// payment_method_id (brand) immediately; changeCardAction pairs it with
+// getCardToken() for the last four digits.
 export async function updatePreapprovalCard(
   preapprovalId: string,
   cardTokenId: string,
@@ -211,12 +245,13 @@ export async function updatePreapprovalCard(
     cache: "no-store",
   })
 
+  const raw = await res.text()
   if (!res.ok) {
-    const raw = await res.text()
     console.error("[mercadopago] updatePreapprovalCard failed:", res.status, raw.slice(0, 500))
     return { ok: false, error: `http_${res.status}` }
   }
-  return { ok: true }
+  const json = parseJson<{ payment_method_id?: string }>(raw)
+  return { ok: true, cardBrand: json?.payment_method_id }
 }
 
 // Mercado Pago signs webhooks via the `x-signature` header ("ts=...,v1=...")

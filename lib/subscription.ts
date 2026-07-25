@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
-import { createPreapproval } from "@/lib/mercadopago"
+import { createPreapproval, getCardToken } from "@/lib/mercadopago"
 
 // Drop a user to Free: clear the premium flag and deactivate properties beyond
 // the Free limit (keeping the most recent ones). Used both when a canceled plan
@@ -50,17 +50,16 @@ export async function startSubscription({
   email,
   backUrl,
   cardTokenId,
-  cardBrand,
-  cardLastFour,
 }: {
   userId: string
   email: string
   backUrl: string
   cardTokenId: string
-  cardBrand: string
-  cardLastFour: string
 }): Promise<StartSubscriptionResult> {
-  const result = await createPreapproval({ userId, email, backUrl, cardTokenId })
+  const [result, cardToken] = await Promise.all([
+    createPreapproval({ userId, email, backUrl, cardTokenId }),
+    getCardToken(cardTokenId),
+  ])
   if (!result.ok || !result.preapprovalId) {
     return { ok: false, reason: "preapproval_failed" }
   }
@@ -68,6 +67,8 @@ export async function startSubscription({
   const authorized = result.status === "authorized"
   const periodEnd = new Date()
   periodEnd.setDate(periodEnd.getDate() + 30)
+  const cardBrand = result.cardBrand
+  const cardLastFour = cardToken.ok ? cardToken.cardLastFour : undefined
 
   await Promise.all([
     prisma.subscription.upsert({

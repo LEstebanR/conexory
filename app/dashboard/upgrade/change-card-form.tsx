@@ -15,6 +15,8 @@ export function ChangeCardForm({ email }: { email: string }) {
       amount={PRO_AMOUNT_COP}
       revealLabel="Cambiar tarjeta"
       modalTitle="Nueva tarjeta"
+      submitLabel="Guardar tarjeta"
+      submittingLabel="Guardando…"
       errorMessage="No pudimos actualizar la tarjeta. Intenta de nuevo."
       onTokenize={changeCardAction}
       onSuccess={() => {
