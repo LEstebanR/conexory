@@ -50,11 +50,15 @@ export async function startSubscription({
   email,
   backUrl,
   cardTokenId,
+  cardBrand,
+  cardLastFour,
 }: {
   userId: string
   email: string
   backUrl: string
   cardTokenId: string
+  cardBrand: string
+  cardLastFour: string
 }): Promise<StartSubscriptionResult> {
   const result = await createPreapproval({ userId, email, backUrl, cardTokenId })
   if (!result.ok || !result.preapprovalId) {
@@ -73,12 +77,16 @@ export async function startSubscription({
         status: authorized ? "active" : "incomplete",
         mpPreapprovalId: result.preapprovalId,
         currentPeriodEnd: authorized ? periodEnd : null,
+        cardBrand,
+        cardLastFour,
       },
       update: {
         status: authorized ? "active" : "incomplete",
         mpPreapprovalId: result.preapprovalId,
         currentPeriodEnd: authorized ? periodEnd : null,
         pastDueSince: null,
+        cardBrand,
+        cardLastFour,
       },
     }),
     authorized ? prisma.user.update({ where: { id: userId }, data: { isPremium: true } }) : Promise.resolve(),

@@ -19,6 +19,7 @@
     "@dnd-kit/utilities": "3.2.2",
     "@google/genai": "2.10.0",
     "@mercadopago/sdk-js": "0.0.3",
+    "@mercadopago/sdk-react": "1.0.7",
     "@neondatabase/serverless": "1.1.0",
     "@prisma/client": "5",
     "@radix-ui/react-dialog": "1.1.15",

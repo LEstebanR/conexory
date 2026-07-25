@@ -102,6 +102,8 @@ describe("startSubscription", () => {
     email: "a@b.com",
     backUrl: "https://conexory.com/dashboard",
     cardTokenId: "card-token-123",
+    cardBrand: "visa",
+    cardLastFour: "1234",
   }
 
   test("returns preapproval_failed when Mercado Pago rejects the request", async () => {
@@ -151,6 +153,8 @@ describe("startSubscription", () => {
       userId: "u1",
       status: "active",
       mpPreapprovalId: "preapproval-123",
+      cardBrand: "visa",
+      cardLastFour: "1234",
     })
     expect((call[0].create as { currentPeriodEnd: Date }).currentPeriodEnd).toBeInstanceOf(Date)
   })

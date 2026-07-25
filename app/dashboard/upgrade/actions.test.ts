@@ -38,10 +38,10 @@ mock.module("@/lib/prisma", () => ({
   prisma: { subscription: { findUnique: mockSubscriptionFindUnique, update: mockSubscriptionUpdate } },
 }))
 
-type UpdatePreapprovalCardResult = { ok: boolean; cardBrand?: string }
+type UpdatePreapprovalCardResult = { ok: boolean }
 const mockUpdatePreapprovalCard = mock((...args: [string, string]) => {
   void args
-  return Promise.resolve<UpdatePreapprovalCardResult>({ ok: true, cardBrand: "visa" })
+  return Promise.resolve<UpdatePreapprovalCardResult>({ ok: true })
 })
 // Spread the real module so unrelated exports (createPreapproval, getPayment,
 // verifyMercadoPagoWebhook, etc.) stay real for any other test file that
@@ -58,6 +58,8 @@ mock.module("@/lib/mercadopago", () => ({
 
 const { subscribeAction, changeCardAction } = await import("./actions")
 
+const card = { cardTokenId: "card-token-123", cardBrand: "visa", cardLastFour: "1234" }
+
 beforeEach(() => {
   mockGetSession.mockImplementation(() =>
     Promise.resolve({ user: { id: "u1", email: "a@b.com", isPremium: false } })
@@ -69,19 +71,30 @@ beforeEach(() => {
     Promise.resolve({ mpPreapprovalId: "preapproval-123" })
   )
   mockUpdatePreapprovalCard.mockClear()
-  mockUpdatePreapprovalCard.mockImplementation(() => Promise.resolve({ ok: true, cardBrand: "visa" }))
+  mockUpdatePreapprovalCard.mockImplementation(() => Promise.resolve({ ok: true }))
   mockSubscriptionUpdate.mockClear()
 })
 
 describe("subscribeAction", () => {
   test("returns preapproval_failed when the card token is missing", async () => {
-    expect(await subscribeAction("")).toEqual({ ok: false, reason: "preapproval_failed" })
+    expect(await subscribeAction({ ...card, cardTokenId: "" })).toEqual({
+      ok: false,
+      reason: "preapproval_failed",
+    })
+    expect(mockStartSubscription).not.toHaveBeenCalled()
+  })
+
+  test("returns preapproval_failed when the card brand is missing", async () => {
+    expect(await subscribeAction({ ...card, cardBrand: "" })).toEqual({
+      ok: false,
+      reason: "preapproval_failed",
+    })
     expect(mockStartSubscription).not.toHaveBeenCalled()
   })
 
   test("returns unauthenticated when there's no session", async () => {
     mockGetSession.mockImplementation(() => Promise.resolve(null))
-    expect(await subscribeAction("card-token-123")).toEqual({ ok: false, reason: "unauthenticated" })
+    expect(await subscribeAction(card)).toEqual({ ok: false, reason: "unauthenticated" })
     expect(mockStartSubscription).not.toHaveBeenCalled()
   })
 
@@ -89,17 +102,19 @@ describe("subscribeAction", () => {
     mockGetSession.mockImplementation(() =>
       Promise.resolve({ user: { id: "u1", email: "a@b.com", isPremium: true } })
     )
-    expect(await subscribeAction("card-token-123")).toEqual({ ok: false, reason: "already_premium" })
+    expect(await subscribeAction(card)).toEqual({ ok: false, reason: "already_premium" })
     expect(mockStartSubscription).not.toHaveBeenCalled()
   })
 
   test("starts the subscription with the tokenized card and returns ok", async () => {
-    expect(await subscribeAction("card-token-123")).toEqual({ ok: true })
+    expect(await subscribeAction(card)).toEqual({ ok: true })
     expect(mockStartSubscription).toHaveBeenCalledWith({
       userId: "u1",
       email: "a@b.com",
       backUrl: "https://conexory.com/dashboard?upgrade=processing",
       cardTokenId: "card-token-123",
+      cardBrand: "visa",
+      cardLastFour: "1234",
     })
   })
 
@@ -107,7 +122,7 @@ describe("subscribeAction", () => {
     mockStartSubscription.mockImplementation(() =>
       Promise.resolve({ ok: false, reason: "preapproval_failed" })
     )
-    expect(await subscribeAction("card-token-123")).toEqual({
+    expect(await subscribeAction(card)).toEqual({
       ok: false,
       reason: "preapproval_failed",
     })
@@ -116,37 +131,40 @@ describe("subscribeAction", () => {
 
 describe("changeCardAction", () => {
   test("returns update_failed when the card token is missing", async () => {
-    expect(await changeCardAction("")).toEqual({ ok: false, reason: "update_failed" })
+    expect(await changeCardAction({ ...card, cardTokenId: "" })).toEqual({
+      ok: false,
+      reason: "update_failed",
+    })
     expect(mockUpdatePreapprovalCard).not.toHaveBeenCalled()
   })
 
   test("returns unauthenticated when there's no session", async () => {
     mockGetSession.mockImplementation(() => Promise.resolve(null))
-    expect(await changeCardAction("card-token-123")).toEqual({ ok: false, reason: "unauthenticated" })
+    expect(await changeCardAction(card)).toEqual({ ok: false, reason: "unauthenticated" })
     expect(mockUpdatePreapprovalCard).not.toHaveBeenCalled()
   })
 
   test("returns no_subscription when the user has no stored preapproval id", async () => {
     mockSubscriptionFindUnique.mockImplementation(() => Promise.resolve({ mpPreapprovalId: null }))
-    expect(await changeCardAction("card-token-123")).toEqual({ ok: false, reason: "no_subscription" })
+    expect(await changeCardAction(card)).toEqual({ ok: false, reason: "no_subscription" })
     expect(mockUpdatePreapprovalCard).not.toHaveBeenCalled()
   })
 
   test("updates the card on the stored preapproval and returns ok", async () => {
-    expect(await changeCardAction("card-token-123")).toEqual({ ok: true })
+    expect(await changeCardAction(card)).toEqual({ ok: true })
     expect(mockUpdatePreapprovalCard).toHaveBeenCalledWith("preapproval-123", "card-token-123")
   })
 
-  test("stores the new brand and clears the stale last four digits", async () => {
-    await changeCardAction("card-token-123")
+  test("stores the brand and last four digits handed back by the Brick", async () => {
+    await changeCardAction(card)
     expect(mockSubscriptionUpdate).toHaveBeenCalledWith({
       where: { userId: "u1" },
-      data: { cardBrand: "visa", cardLastFour: null },
+      data: { cardBrand: "visa", cardLastFour: "1234" },
     })
   })
 
   test("returns update_failed when Mercado Pago rejects the update", async () => {
     mockUpdatePreapprovalCard.mockImplementation(() => Promise.resolve({ ok: false }))
-    expect(await changeCardAction("card-token-123")).toEqual({ ok: false, reason: "update_failed" })
+    expect(await changeCardAction(card)).toEqual({ ok: false, reason: "update_failed" })
   })
 })

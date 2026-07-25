@@ -186,17 +186,15 @@ export async function cancelPreapproval(preapprovalId: string): Promise<CancelPr
 
 export interface UpdatePreapprovalCardResult {
   ok: boolean
-  cardBrand?: string
   error?: string
 }
 
 // Swaps the card charged for future recurring payments on an existing
 // subscription. The buyer re-tokenizes a card client-side exactly like at
 // sign-up, and this just points the same preapproval at the new token — no
-// need to cancel and recreate the subscription. The response carries the new
-// payment_method_id (brand) immediately, but never the last four digits —
-// Mercado Pago only exposes those on an actual Payment object, so the stored
-// cardLastFour goes stale until the next real charge (handleApproved) confirms it.
+// need to cancel and recreate the subscription. The brand/last-four-digits
+// shown in the UI come from the Payment Brick's own onSubmit data (captured
+// at tokenization time) rather than from this response.
 export async function updatePreapprovalCard(
   preapprovalId: string,
   cardTokenId: string,
@@ -213,13 +211,12 @@ export async function updatePreapprovalCard(
     cache: "no-store",
   })
 
-  const raw = await res.text()
   if (!res.ok) {
+    const raw = await res.text()
     console.error("[mercadopago] updatePreapprovalCard failed:", res.status, raw.slice(0, 500))
     return { ok: false, error: `http_${res.status}` }
   }
-  const json = parseJson<{ payment_method_id?: string }>(raw)
-  return { ok: true, cardBrand: json?.payment_method_id }
+  return { ok: true }
 }
 
 // Mercado Pago signs webhooks via the `x-signature` header ("ts=...,v1=...")
