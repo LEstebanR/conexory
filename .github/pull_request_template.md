@@ -2,9 +2,10 @@
 
 <!-- Describe el cambio en 1-3 oraciones. Qué problema resuelve o qué funcionalidad agrega. -->
 
-## Issue de Linear
+## Issue relacionado
 
-<!-- Pega el link del issue. Ej: https://linear.app/lesteban/issue/LES-149/... -->
+<!-- Si el issue vive en Linear, pega el link. Ej: https://linear.app/lesteban/issue/LES-149/...
+     Si el issue vive en GitHub, usa la sintaxis de cierre automático. Ej: Closes #116 -->
 
 Closes: 
 
