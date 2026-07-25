@@ -236,6 +236,42 @@ describe("POST /api/webhooks/mercadopago", () => {
     expect(mockSendSubscriptionConfirmation).toHaveBeenCalledTimes(1)
   })
 
+  test("does not extend currentPeriodEnd again when confirming an optimistically-activated subscription's first charge", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
+    const optimisticPeriodEnd = new Date(Date.now() + 30 * 86_400_000)
+    mockSubscriptionFindUnique.mockImplementationOnce(() =>
+      Promise.resolve({ currentPeriodEnd: optimisticPeriodEnd, status: "active", lastChargeAt: null })
+    )
+    mockSubscriptionUpsert.mockClear()
+    await POST(paymentWebhook())
+    const [call] = mockSubscriptionUpsert.mock.calls
+    expect((call[0] as { update: { currentPeriodEnd: Date } }).update.currentPeriodEnd).toEqual(
+      optimisticPeriodEnd
+    )
+  })
+
+  test("extends currentPeriodEnd by 30 days on a genuine renewal", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
+    const currentPeriodEnd = new Date(Date.now() + 2 * 86_400_000)
+    mockSubscriptionFindUnique.mockImplementationOnce(() =>
+      Promise.resolve({
+        currentPeriodEnd,
+        status: "active",
+        lastChargeAt: new Date(Date.now() - 28 * 86_400_000),
+      })
+    )
+    mockSubscriptionUpsert.mockClear()
+    await POST(paymentWebhook())
+    const [call] = mockSubscriptionUpsert.mock.calls
+    const expected = new Date(currentPeriodEnd)
+    expected.setDate(expected.getDate() + 30)
+    expect((call[0] as { update: { currentPeriodEnd: Date } }).update.currentPeriodEnd).toEqual(expected)
+  })
+
   test("ignores a late approval for a subscription the user already cancelled", async () => {
     mockGetPayment.mockImplementationOnce(() =>
       Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),

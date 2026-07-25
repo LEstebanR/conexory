@@ -99,16 +99,21 @@ export default async function UpgradePage() {
             </ul>
 
             <div className="mb-6 pb-6 border-b border-white/10">
-              {subscription?.cardLastFour ? (
+              {subscription?.cardBrand || subscription?.cardLastFour ? (
                 <div className="flex items-center gap-3 mb-1">
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 flex-shrink-0">
                     <CreditCard className="w-4 h-4 text-white/70" strokeWidth={1.75} />
                   </span>
                   <div>
                     <p className="text-sm font-medium text-white">
-                      {subscription.cardBrand ? formatCardBrand(subscription.cardBrand) : "Tarjeta"} ···· {subscription.cardLastFour}
+                      {subscription.cardBrand ? formatCardBrand(subscription.cardBrand) : "Tarjeta"}
+                      {subscription.cardLastFour ? ` ···· ${subscription.cardLastFour}` : ""}
                     </p>
-                    <p className="text-xs text-white/40">Se cobra automáticamente cada mes</p>
+                    <p className="text-xs text-white/40">
+                      {subscription.cardLastFour
+                        ? "Se cobra automáticamente cada mes"
+                        : "Confirmando los últimos dígitos con Mercado Pago…"}
+                    </p>
                   </div>
                 </div>
               ) : (

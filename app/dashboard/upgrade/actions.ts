@@ -69,6 +69,15 @@ export async function changeCardAction(cardTokenId: string): Promise<ChangeCardR
   const result = await updatePreapprovalCard(subscription.mpPreapprovalId, parsed.data.cardTokenId)
   if (!result.ok) return { ok: false, reason: "update_failed" }
 
+  // Mercado Pago confirms the new brand immediately, but never hands us the
+  // last four digits outside of an actual Payment object — clear the stale
+  // ones so the UI doesn't keep showing the old card's digits under the new
+  // brand. They're filled back in once the next real charge lands.
+  await prisma.subscription.update({
+    where: { userId: session.user.id },
+    data: { cardBrand: result.cardBrand, cardLastFour: null },
+  })
+
   revalidatePath("/dashboard/upgrade")
   return { ok: true }
 }

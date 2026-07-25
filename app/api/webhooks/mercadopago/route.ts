@@ -123,26 +123,34 @@ async function handleApproved(
     return
   }
 
-  // Extend from the later of now / current period end so renewals charged a
-  // few days early don't lose the remaining days of the running period.
-  const base =
-    existing?.currentPeriodEnd && existing.currentPeriodEnd > new Date()
-      ? existing.currentPeriodEnd
-      : new Date()
-  const periodEnd = new Date(base)
-  periodEnd.setDate(periodEnd.getDate() + 30)
-
   // lastChargeAt (not just status/currentPeriodEnd) is what distinguishes a
   // genuine renewal from the first real charge landing on a subscription
   // that startSubscription already activated optimistically — that path sets
-  // status "active" + currentPeriodEnd without ever setting lastChargeAt, so
-  // the confirmation email still goes out exactly once, on the first real
-  // charge, not on every renewal.
-  const isRenewal =
-    existing?.status === "active" &&
-    !!existing.currentPeriodEnd &&
-    existing.currentPeriodEnd > new Date() &&
-    !!existing.lastChargeAt
+  // status "active" + currentPeriodEnd without ever setting lastChargeAt.
+  const isFirstRealConfirmation = !existing?.lastChargeAt
+
+  // Extend from the later of now / current period end so renewals charged a
+  // few days early don't lose the remaining days of the running period.
+  // But if this is the first real charge confirming a subscription that was
+  // already activated optimistically, currentPeriodEnd already holds the
+  // correct date for this same charge — extending it again here would double
+  // the period (charge 1 of 1 counted as if it were charge 2).
+  let periodEnd: Date
+  if (isFirstRealConfirmation && existing?.currentPeriodEnd && existing.currentPeriodEnd > new Date()) {
+    periodEnd = existing.currentPeriodEnd
+  } else {
+    const base =
+      existing?.currentPeriodEnd && existing.currentPeriodEnd > new Date()
+        ? existing.currentPeriodEnd
+        : new Date()
+    periodEnd = new Date(base)
+    periodEnd.setDate(periodEnd.getDate() + 30)
+  }
+
+  // isRenewal (for the welcome email) still goes off lastChargeAt: the
+  // confirmation email should go out exactly once, on the first real charge,
+  // not on every renewal.
+  const isRenewal = existing?.status === "active" && !isFirstRealConfirmation
 
   const [user] = await Promise.all([
     prisma.user.update({

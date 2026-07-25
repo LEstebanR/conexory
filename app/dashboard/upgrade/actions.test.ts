@@ -30,14 +30,18 @@ mock.module("next/cache", () => ({
 const mockSubscriptionFindUnique = mock(() =>
   Promise.resolve<{ mpPreapprovalId: string | null } | null>({ mpPreapprovalId: "preapproval-123" })
 )
+const mockSubscriptionUpdate = mock((...args: [unknown]) => {
+  void args
+  return Promise.resolve({})
+})
 mock.module("@/lib/prisma", () => ({
-  prisma: { subscription: { findUnique: mockSubscriptionFindUnique } },
+  prisma: { subscription: { findUnique: mockSubscriptionFindUnique, update: mockSubscriptionUpdate } },
 }))
 
-type UpdatePreapprovalCardResult = { ok: boolean }
+type UpdatePreapprovalCardResult = { ok: boolean; cardBrand?: string }
 const mockUpdatePreapprovalCard = mock((...args: [string, string]) => {
   void args
-  return Promise.resolve<UpdatePreapprovalCardResult>({ ok: true })
+  return Promise.resolve<UpdatePreapprovalCardResult>({ ok: true, cardBrand: "visa" })
 })
 // Spread the real module so unrelated exports (createPreapproval, getPayment,
 // verifyMercadoPagoWebhook, etc.) stay real for any other test file that
@@ -65,7 +69,8 @@ beforeEach(() => {
     Promise.resolve({ mpPreapprovalId: "preapproval-123" })
   )
   mockUpdatePreapprovalCard.mockClear()
-  mockUpdatePreapprovalCard.mockImplementation(() => Promise.resolve({ ok: true }))
+  mockUpdatePreapprovalCard.mockImplementation(() => Promise.resolve({ ok: true, cardBrand: "visa" }))
+  mockSubscriptionUpdate.mockClear()
 })
 
 describe("subscribeAction", () => {
@@ -130,6 +135,14 @@ describe("changeCardAction", () => {
   test("updates the card on the stored preapproval and returns ok", async () => {
     expect(await changeCardAction("card-token-123")).toEqual({ ok: true })
     expect(mockUpdatePreapprovalCard).toHaveBeenCalledWith("preapproval-123", "card-token-123")
+  })
+
+  test("stores the new brand and clears the stale last four digits", async () => {
+    await changeCardAction("card-token-123")
+    expect(mockSubscriptionUpdate).toHaveBeenCalledWith({
+      where: { userId: "u1" },
+      data: { cardBrand: "visa", cardLastFour: null },
+    })
   })
 
   test("returns update_failed when Mercado Pago rejects the update", async () => {
