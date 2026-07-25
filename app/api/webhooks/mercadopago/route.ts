@@ -116,6 +116,13 @@ async function handleApproved(
 ) {
   if (!userId) return
 
+  // A stale or malformed external_reference (e.g. leftover test data) can
+  // resolve to a userId that doesn't exist. Without this check, user.update
+  // and subscription.upsert's create branch below throw (P2025/P2003), which
+  // surfaces as an uncaught 500 to Mercado Pago and gets retried forever.
+  const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } })
+  if (!userExists) return
+
   const existing = await prisma.subscription.findUnique({
     where: { userId },
     select: { currentPeriodEnd: true, status: true, lastChargeAt: true },
