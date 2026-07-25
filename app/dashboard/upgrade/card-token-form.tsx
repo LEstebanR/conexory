@@ -164,6 +164,8 @@ export function CardTokenForm({
               .then((result) => {
                 if (cancelled) return
                 if (result.ok) {
+                  setStatus("ready")
+                  setRevealed(false)
                   onSuccess()
                   return
                 }
