@@ -39,15 +39,13 @@ mock.module("@/lib/prisma", () => ({
 type CreatePreapprovalResult = {
   ok: boolean
   preapprovalId?: string
-  initPoint?: string
 }
 const mockCreatePreapproval = mock(
-  (...args: [{ userId: string; email: string; backUrl: string }]) => {
+  (...args: [{ userId: string; email: string; backUrl: string; cardTokenId: string }]) => {
     void args
     return Promise.resolve<CreatePreapprovalResult>({
       ok: true,
       preapprovalId: "preapproval-123",
-      initPoint: "https://mercadopago.com.co/checkout/pending-init",
     })
   }
 )
@@ -97,14 +95,19 @@ describe("downgradeToFree", () => {
 })
 
 describe("startSubscription", () => {
-  const input = { userId: "u1", email: "a@b.com", backUrl: "https://conexory.com/dashboard" }
+  const input = {
+    userId: "u1",
+    email: "a@b.com",
+    backUrl: "https://conexory.com/dashboard",
+    cardTokenId: "card-token-123",
+  }
 
   test("returns preapproval_failed when Mercado Pago rejects the request", async () => {
     mockCreatePreapproval.mockImplementation(() => Promise.resolve({ ok: false }))
     const result = await startSubscription(input)
     expect(result).toEqual({ ok: false, reason: "preapproval_failed" })
     mockCreatePreapproval.mockImplementation(() =>
-      Promise.resolve({ ok: true, preapprovalId: "preapproval-123", initPoint: "https://mercadopago.com.co/checkout/pending-init" })
+      Promise.resolve({ ok: true, preapprovalId: "preapproval-123" })
     )
   })
 
@@ -121,8 +124,8 @@ describe("startSubscription", () => {
     })
   })
 
-  test("returns the initPoint to redirect the buyer to on success", async () => {
+  test("returns ok on success", async () => {
     const result = await startSubscription(input)
-    expect(result).toEqual({ ok: true, initPoint: "https://mercadopago.com.co/checkout/pending-init" })
+    expect(result).toEqual({ ok: true })
   })
 })

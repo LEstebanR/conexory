@@ -6,7 +6,7 @@ import { Check, Zap, ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-rea
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
-import { SubscribeButton } from "./subscribe-button"
+import { SubscribeCardForm } from "./subscribe-card-form"
 import { UpgradeErrorToast } from "./upgrade-error-toast"
 import { hasProAccess } from "@/lib/plans"
 import type { Metadata } from "next"
@@ -168,7 +168,7 @@ export default async function UpgradePage() {
           <p className="text-xs font-medium text-white/50 mb-3">
             Se renueva automáticamente cada mes · Cancela cuando quieras
           </p>
-          <SubscribeButton />
+          <SubscribeCardForm email={session.user.email} />
         </div>
 
         <Suspense fallback={null}>

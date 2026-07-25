@@ -16,23 +16,26 @@ export function makeExternalReference(userId: string): string {
 export interface CreatePreapprovalResult {
   ok: boolean
   preapprovalId?: string
-  initPoint?: string
   status?: string
   error?: string
 }
 
-// Mercado Pago hosts the whole card-entry + confirmation flow at init_point:
-// we create a "pending" preapproval and hand the buyer that URL. Unlike Wompi,
-// we never see a card token — Mercado Pago drives every future charge itself
-// and tells us about it via webhook, so there's no server-side cron charging.
+// The buyer's card is tokenized client-side (lib/mercadopago.js's cardForm,
+// via the public key — raw card data never reaches our server) into a
+// cardTokenId, which authorizes the subscription immediately instead of
+// bouncing the buyer to Mercado Pago's hosted checkout. Mercado Pago still
+// drives every future recurring charge itself and tells us about it via
+// webhook, so there's no server-side cron charging.
 export async function createPreapproval({
   userId,
   email,
   backUrl,
+  cardTokenId,
 }: {
   userId: string
   email: string
   backUrl: string
+  cardTokenId: string
 }): Promise<CreatePreapprovalResult> {
   if (!MERCADOPAGO_ACCESS_TOKEN) return { ok: false, error: "missing_access_token" }
 
@@ -46,8 +49,9 @@ export async function createPreapproval({
       reason: SUBSCRIPTION_REASON,
       external_reference: makeExternalReference(userId),
       payer_email: email,
+      card_token_id: cardTokenId,
       back_url: backUrl,
-      status: "pending",
+      status: "authorized",
       auto_recurring: {
         frequency: 1,
         frequency_type: "months",
@@ -59,14 +63,14 @@ export async function createPreapproval({
   })
 
   const raw = await res.text()
-  const json = parseJson<{ id?: string; status?: string; init_point?: string; message?: string }>(raw)
+  const json = parseJson<{ id?: string; status?: string; message?: string }>(raw)
 
-  if (!res.ok || !json?.id || !json.init_point) {
+  if (!res.ok || !json?.id) {
     console.error("[mercadopago] createPreapproval failed:", res.status, raw.slice(0, 500))
     return { ok: false, error: json?.message ?? `http_${res.status}` }
   }
 
-  return { ok: true, preapprovalId: json.id, initPoint: json.init_point, status: json.status }
+  return { ok: true, preapprovalId: json.id, status: json.status }
 }
 
 export interface PreapprovalDetails {

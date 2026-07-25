@@ -27,25 +27,29 @@ export async function downgradeToFree(userId: string) {
 }
 
 export type StartSubscriptionResult =
-  | { ok: true; initPoint: string }
+  | { ok: true }
   | { ok: false; reason: "preapproval_failed" }
 
-// Kicks off a subscription: create a pending preapproval and persist its id
-// so the webhook (which only carries an id, not a full payload) can find the
-// right user later. The buyer finishes entering their card on Mercado Pago's
-// own hosted page (initPoint) — we never see card data, and Mercado Pago
-// drives every future charge itself instead of us cron-charging a stored token.
+// Kicks off a subscription with a card already tokenized client-side
+// (cardTokenId) and persists the preapproval id so the webhook (which only
+// carries an id, not a full payload) can find the right user later. The
+// preapproval is created "authorized" — Mercado Pago charges the first
+// installment asynchronously (within about an hour) and drives every future
+// recurring charge itself, notifying us via webhook instead of us
+// cron-charging a stored token.
 export async function startSubscription({
   userId,
   email,
   backUrl,
+  cardTokenId,
 }: {
   userId: string
   email: string
   backUrl: string
+  cardTokenId: string
 }): Promise<StartSubscriptionResult> {
-  const result = await createPreapproval({ userId, email, backUrl })
-  if (!result.ok || !result.preapprovalId || !result.initPoint) {
+  const result = await createPreapproval({ userId, email, backUrl, cardTokenId })
+  if (!result.ok || !result.preapprovalId) {
     return { ok: false, reason: "preapproval_failed" }
   }
 
@@ -58,5 +62,5 @@ export async function startSubscription({
     update: { status: "incomplete", mpPreapprovalId: result.preapprovalId, pastDueSince: null },
   })
 
-  return { ok: true, initPoint: result.initPoint }
+  return { ok: true }
 }
