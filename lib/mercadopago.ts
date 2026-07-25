@@ -5,7 +5,9 @@ const MERCADOPAGO_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET ?? ""
 
 const API_BASE = "https://api.mercadopago.com"
 
-export const PRO_AMOUNT_COP = 99_999
+// TEMPORARY — lowered for a real-money production test (revert to 99_999
+// right after). Do not merge/leave this value in place.
+export const PRO_AMOUNT_COP = 2_000
 const CURRENCY = "COP"
 const SUBSCRIPTION_REASON = "Conexory Pro — suscripción mensual"
 
