@@ -12,9 +12,9 @@ const mockSendSuggestionNotification = mock((...args: [unknown, unknown]) => {
   void args
   return Promise.resolve()
 })
-// Spread the real module so unrelated exports (used by the wompi webhook and
-// billing cron tests) stay real — mock.module() replaces "@/lib/email"
-// process-wide, not just for this file.
+// Spread the real module so unrelated exports (used by the Mercado Pago
+// webhook and billing cron tests) stay real — mock.module() replaces
+// "@/lib/email" process-wide, not just for this file.
 const realEmail = await import("@/lib/email")
 mock.module("@/lib/email", () => ({
   ...realEmail,

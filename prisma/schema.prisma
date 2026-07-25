@@ -55,14 +55,14 @@ model User {
 model Subscription {
   id               String    @id @default(cuid())
   userId           String    @unique
-  wompiSubId       String?
-  wompiReference   String?
-  wompiPaymentSourceId  Int?
-  wompiPaymentSourceType String?  // CARD | NEQUI
+  mpPreapprovalId  String?
+  mpPayerId        String?
   status           String    // incomplete | active | past_due | canceling | cancelled | expired
   currentPeriodEnd DateTime?
   pastDueSince     DateTime?
   lastChargeAt     DateTime?
+  cardBrand        String?
+  cardLastFour     String?
   renewalReminderSentAt DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt

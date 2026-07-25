@@ -28,19 +28,6 @@ mock.module("@/lib/prisma", () => ({
   },
 }))
 
-const mockChargeRecurringPayment = mock((...args: [unknown]) => {
-  void args
-  return Promise.resolve<{ ok: boolean }>({ ok: true })
-})
-// Spread the real module so verifyWompiEvent (needed by other test files)
-// stays real — mock.module() replaces "@/lib/wompi" process-wide.
-const realWompi = await import("@/lib/wompi")
-mock.module("@/lib/wompi", () => ({
-  ...realWompi,
-  chargeRecurringPayment: mockChargeRecurringPayment,
-  makeSubscriptionReference: (userId: string) => `ref-${userId}`,
-}))
-
 const mockDowngradeToFree = mock((...args: [string]) => {
   void args
   return Promise.resolve()
@@ -80,7 +67,6 @@ beforeEach(() => {
   mockSubUpdate.mockClear()
   mockUserFindMany.mockImplementation(() => Promise.resolve([]))
   mockUserUpdate.mockClear()
-  mockChargeRecurringPayment.mockImplementation(() => Promise.resolve({ ok: true }))
   mockDowngradeToFree.mockClear()
   mockSendRenewalReminder.mockImplementation(() => Promise.resolve())
   mockSendRenewalReminder.mockClear()
@@ -110,8 +96,6 @@ describe("GET /api/cron/billing — auth", () => {
     expect(body).toMatchObject({
       ok: true,
       reminded: 0,
-      charged: 0,
-      pastDue: 0,
       downgraded: 0,
       canceled: 0,
       manualExpired: 0,
@@ -128,7 +112,7 @@ describe("sendReminders", () => {
           {
             id: "sub-1",
             currentPeriodEnd: new Date(),
-            wompiPaymentSourceId: 42,
+            mpPreapprovalId: "preapproval-42",
             user: { email: "a@b.com", name: "Ana" },
           },
         ])
@@ -149,7 +133,7 @@ describe("sendReminders", () => {
       const where = (args as { where: Record<string, unknown> }).where
       if (where.status === "active" && "renewalReminderSentAt" in where) {
         return Promise.resolve([
-          { id: "sub-1", currentPeriodEnd: null, wompiPaymentSourceId: null, user: { email: "a@b.com", name: "Ana" } },
+          { id: "sub-1", currentPeriodEnd: null, mpPreapprovalId: null, user: { email: "a@b.com", name: "Ana" } },
         ])
       }
       return Promise.resolve([])
@@ -165,7 +149,7 @@ describe("sendReminders", () => {
       const where = (args as { where: Record<string, unknown> }).where
       if (where.status === "active" && "renewalReminderSentAt" in where) {
         return Promise.resolve([
-          { id: "sub-1", currentPeriodEnd: new Date(), wompiPaymentSourceId: null, user: { email: "a@b.com", name: "Ana" } },
+          { id: "sub-1", currentPeriodEnd: new Date(), mpPreapprovalId: null, user: { email: "a@b.com", name: "Ana" } },
         ])
       }
       return Promise.resolve([])
@@ -174,131 +158,6 @@ describe("sendReminders", () => {
     const res = await GET(authedRequest())
     const body = await res.json()
     expect(body.reminded).toBe(1)
-  })
-})
-
-describe("chargeRenewals", () => {
-  function withDueSubs(subs: SubRow[]) {
-    mockSubFindMany.mockImplementation((args: unknown) => {
-      const where = (args as { where: Record<string, unknown> }).where
-      if (where.status === "active" && "currentPeriodEnd" in where && !("renewalReminderSentAt" in where)) {
-        return Promise.resolve(subs)
-      }
-      return Promise.resolve([])
-    })
-  }
-
-  test("marks past_due (no retries) when there's no saved payment source", async () => {
-    withDueSubs([
-      {
-        id: "sub-1",
-        userId: "u1",
-        currentPeriodEnd: new Date(),
-        wompiPaymentSourceId: null,
-        wompiPaymentSourceType: null,
-        lastChargeAt: null,
-        pastDueSince: null,
-        user: { email: "a@b.com", name: "Ana" },
-      },
-    ])
-    const res = await GET(authedRequest())
-    const body = await res.json()
-    expect(body.pastDue).toBe(1)
-    expect(mockSubUpdate).toHaveBeenCalledWith({
-      where: { id: "sub-1" },
-      data: { status: "past_due", pastDueSince: expect.any(Date) },
-    })
-    expect(mockChargeRecurringPayment).not.toHaveBeenCalled()
-  })
-
-  test("does not re-mark or re-count a sub that's already past_due", async () => {
-    withDueSubs([
-      {
-        id: "sub-1",
-        userId: "u1",
-        currentPeriodEnd: new Date(),
-        wompiPaymentSourceId: null,
-        wompiPaymentSourceType: null,
-        lastChargeAt: null,
-        pastDueSince: new Date(),
-        user: { email: "a@b.com", name: "Ana" },
-      },
-    ])
-    const res = await GET(authedRequest())
-    const body = await res.json()
-    expect(body.pastDue).toBe(0)
-    expect(mockSubUpdate).not.toHaveBeenCalled()
-  })
-
-  test("skips charging when a renewal attempt is already pending a webhook", async () => {
-    const periodEnd = new Date("2026-01-01T00:00:00Z")
-    withDueSubs([
-      {
-        id: "sub-1",
-        userId: "u1",
-        currentPeriodEnd: periodEnd,
-        wompiPaymentSourceId: 42,
-        wompiPaymentSourceType: "CARD",
-        lastChargeAt: new Date("2026-01-01T00:05:00Z"),
-        pastDueSince: null,
-        user: { email: "a@b.com", name: "Ana" },
-      },
-    ])
-    const res = await GET(authedRequest())
-    const body = await res.json()
-    expect(body.charged).toBe(0)
-    expect(mockChargeRecurringPayment).not.toHaveBeenCalled()
-  })
-
-  test("charges a due subscription with a saved source and stamps lastChargeAt", async () => {
-    withDueSubs([
-      {
-        id: "sub-1",
-        userId: "u1",
-        currentPeriodEnd: new Date(),
-        wompiPaymentSourceId: 42,
-        wompiPaymentSourceType: "NEQUI",
-        lastChargeAt: null,
-        pastDueSince: null,
-        user: { email: "a@b.com", name: "Ana" },
-      },
-    ])
-    const res = await GET(authedRequest())
-    const body = await res.json()
-    expect(body.charged).toBe(1)
-    expect(mockChargeRecurringPayment).toHaveBeenCalledWith({
-      paymentSourceId: 42,
-      reference: "ref-u1",
-      customerEmail: "a@b.com",
-      type: "NEQUI",
-    })
-    expect(mockSubUpdate).toHaveBeenCalledWith({
-      where: { id: "sub-1" },
-      data: { lastChargeAt: expect.any(Date) },
-    })
-  })
-
-  test("stamps lastChargeAt but doesn't count a declined charge", async () => {
-    withDueSubs([
-      {
-        id: "sub-1",
-        userId: "u1",
-        currentPeriodEnd: new Date(),
-        wompiPaymentSourceId: 42,
-        wompiPaymentSourceType: "CARD",
-        lastChargeAt: null,
-        pastDueSince: null,
-        user: { email: "a@b.com", name: "Ana" },
-      },
-    ])
-    mockChargeRecurringPayment.mockImplementation(() => Promise.resolve({ ok: false }))
-    const res = await GET(authedRequest())
-    const body = await res.json()
-    expect(body.charged).toBe(0)
-    expect(mockSubUpdate).toHaveBeenCalledWith({
-      where: { id: "sub-1" },
-      data: { lastChargeAt: expect.any(Date) },
-    })
   })
 })
 

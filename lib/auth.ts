@@ -40,6 +40,13 @@ export const auth = betterAuth({
     },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
+    // Google sign-ups arrive already verified and get their welcome email from
+    // the user.create hook below; email/password sign-ups get it here instead,
+    // once they've actually clicked the link — not bundled with the
+    // verification email itself.
+    afterEmailVerification: async (user) => {
+      await sendWelcome(user.email, user.name).catch(() => null)
+    },
   },
 
   socialProviders: {
@@ -82,13 +89,18 @@ export const auth = betterAuth({
     },
   },
 
-  // Fires for both email/password and Google OAuth sign-up (a new User row is
-  // created either way). Best-effort: never block account creation on Resend.
+  // Google OAuth sign-ups land here already verified, so send the welcome
+  // email right away. Email/password sign-ups start unverified — theirs is
+  // sent from emailVerification.afterEmailVerification instead, so it
+  // doesn't arrive bundled with the verification email. Best-effort: never
+  // block account creation on Resend.
   databaseHooks: {
     user: {
       create: {
         after: async (user) => {
-          await sendWelcome(user.email, user.name).catch(() => null)
+          if (user.emailVerified) {
+            await sendWelcome(user.email, user.name).catch(() => null)
+          }
         },
       },
     },

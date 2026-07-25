@@ -1,16 +1,13 @@
 import { prisma } from "@/lib/prisma"
-import {
-  chargeRecurringPayment,
-  makeSubscriptionReference,
-} from "@/lib/wompi"
 import { downgradeToFree } from "@/lib/subscription"
 import { sendRenewalReminder, sendSubscriptionCancelled } from "@/lib/email"
 
-// Daily billing job (scheduled in vercel.json). Wompi doesn't drive the
-// recurrence for us, so this route is the heartbeat that charges renewals,
-// reminds users beforehand, and downgrades accounts whose payment failed —
-// no grace window and no retries, so a failed renewal drops to Free on the
-// next run.
+// Daily billing job (scheduled in vercel.json). Mercado Pago drives the
+// recurring charges itself (unlike Wompi) and reports outcomes via
+// /api/webhooks/mercadopago, so this route no longer charges anything — it's
+// left with the parts Mercado Pago doesn't do for us: reminding users before
+// a renewal, and downgrading accounts whose cancellation/decline already
+// landed via webhook.
 export const dynamic = "force-dynamic"
 
 const REMINDER_DAYS = 3
@@ -33,10 +30,9 @@ export async function GET(req: Request) {
   }
 
   const now = new Date()
-  const summary = { reminded: 0, charged: 0, pastDue: 0, downgraded: 0, canceled: 0, manualExpired: 0 }
+  const summary = { reminded: 0, downgraded: 0, canceled: 0, manualExpired: 0 }
 
   await sendReminders(now, summary)
-  await chargeRenewals(now, summary)
   await expireCanceled(now, summary)
   await downgradeExpired(now, summary)
   await expireManualPro(now, summary)
@@ -78,7 +74,7 @@ async function sendReminders(
     select: {
       id: true,
       currentPeriodEnd: true,
-      wompiPaymentSourceId: true,
+      mpPreapprovalId: true,
       user: { select: { email: true, name: true } },
     },
   })
@@ -89,75 +85,13 @@ async function sendReminders(
       sub.user.email,
       sub.user.name,
       sub.currentPeriodEnd,
-      !!sub.wompiPaymentSourceId,
+      !!sub.mpPreapprovalId,
     ).catch(() => null)
     await prisma.subscription.update({
       where: { id: sub.id },
       data: { renewalReminderSentAt: now },
     })
     summary.reminded++
-  }
-}
-
-async function chargeRenewals(
-  now: Date,
-  summary: { charged: number; pastDue: number },
-) {
-  const due = await prisma.subscription.findMany({
-    where: {
-      status: "active",
-      currentPeriodEnd: { lte: now },
-    },
-    select: {
-      id: true,
-      userId: true,
-      currentPeriodEnd: true,
-      wompiPaymentSourceId: true,
-      wompiPaymentSourceType: true,
-      lastChargeAt: true,
-      pastDueSince: true,
-      user: { select: { email: true, name: true } },
-    },
-  })
-
-  for (const sub of due) {
-    // No saved card (a half-finished activation or legacy sub): nothing to
-    // auto-charge. Mark past_due so the next run's downgradeExpired drops it —
-    // no retries.
-    if (!sub.wompiPaymentSourceId) {
-      if (!sub.pastDueSince) {
-        await prisma.subscription.update({
-          where: { id: sub.id },
-          data: { status: "past_due", pastDueSince: now },
-        })
-        summary.pastDue++
-      }
-      continue
-    }
-
-    // A renewal already attempted this cycle (lastChargeAt is after the period
-    // end) is waiting on the webhook — don't re-charge it, or a lost webhook
-    // would re-bill the card on every run. There's no retry after a decline:
-    // the webhook flips the sub to past_due and the cron downgrades it.
-    if (sub.lastChargeAt && sub.currentPeriodEnd && sub.lastChargeAt > sub.currentPeriodEnd) {
-      continue
-    }
-
-    const result = await chargeRecurringPayment({
-      paymentSourceId: sub.wompiPaymentSourceId,
-      reference: makeSubscriptionReference(sub.userId),
-      customerEmail: sub.user.email,
-      type: sub.wompiPaymentSourceType === "NEQUI" ? "NEQUI" : "CARD",
-    })
-
-    // Stamp the attempt so the next run won't re-charge while the webhook with
-    // the real outcome (APPROVED/DECLINED) is still pending.
-    await prisma.subscription.update({
-      where: { id: sub.id },
-      data: { lastChargeAt: now },
-    })
-
-    if (result.ok) summary.charged++
   }
 }
 
@@ -188,7 +122,7 @@ async function downgradeExpired(
 }
 
 // Admin-granted manual Pro with a premiumUntil date that has passed.
-// If the user also has an active Wompi subscription, keep isPremium and just clear
+// If the user also has an active subscription, keep isPremium and just clear
 // the manual date so the real subscription continues uninterrupted.
 async function expireManualPro(
   now: Date,
