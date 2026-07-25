@@ -177,51 +177,55 @@ export function SubscribeCardForm({ email }: { email: string }) {
     }
   }, [email, router])
 
-  if (!revealed) {
-    return (
-      <Button
-        type="button"
-        size="lg"
-        variant="secondary"
-        className="w-full"
-        disabled={status === "error"}
-        onClick={() => setRevealed(true)}
-      >
-        <Lock className="w-4 h-4" />
-        {`Suscribirme — $${PRO_AMOUNT_COP.toLocaleString("es-CO")}/mes`}
-      </Button>
-    )
-  }
-
   const disabled = status !== "ready" && status !== "submitting"
 
+  // The field elements stay mounted in the DOM at all times (just visually
+  // hidden until revealed) — mp.cardForm() binds to them by id from the very
+  // first render, so hiding them by not rendering them at all would make the
+  // SDK fail to find its own fields and never reach "ready".
   return (
     <form id={FIELD_IDS.form} className="space-y-3">
-      <div id={FIELD_IDS.cardNumber} className={secureFieldClass} />
-      <div className="grid grid-cols-2 gap-3">
-        <div id={FIELD_IDS.expirationDate} className={secureFieldClass} />
-        <div id={FIELD_IDS.securityCode} className={secureFieldClass} />
-      </div>
-      <Input id={FIELD_IDS.cardholderName} placeholder="Nombre en la tarjeta" autoComplete="cc-name" />
-      <div className="grid grid-cols-[auto_1fr] gap-3">
-        <select
-          id={FIELD_IDS.identificationType}
-          className="h-11 rounded-lg border border-hairline-strong bg-white px-3 text-sm text-ink outline-none focus:ring-2 focus:ring-ink focus:border-ink"
-        />
-        <Input id={FIELD_IDS.identificationNumber} placeholder="Número de documento" />
+      <div className={revealed ? "space-y-3" : "hidden"}>
+        <div id={FIELD_IDS.cardNumber} className={secureFieldClass} />
+        <div className="grid grid-cols-2 gap-3">
+          <div id={FIELD_IDS.expirationDate} className={secureFieldClass} />
+          <div id={FIELD_IDS.securityCode} className={secureFieldClass} />
+        </div>
+        <Input id={FIELD_IDS.cardholderName} placeholder="Nombre en la tarjeta" autoComplete="cc-name" />
+        <div className="grid grid-cols-[auto_1fr] gap-3">
+          <select
+            id={FIELD_IDS.identificationType}
+            className="h-11 rounded-lg border border-hairline-strong bg-white px-3 text-sm text-ink outline-none focus:ring-2 focus:ring-ink focus:border-ink"
+          />
+          <Input id={FIELD_IDS.identificationNumber} placeholder="Número de documento" />
+        </div>
       </div>
       <select id={FIELD_IDS.issuer} className="hidden" />
       <select id={FIELD_IDS.installments} className="hidden" />
       <input id={FIELD_IDS.cardholderEmail} type="hidden" defaultValue={email} />
 
-      <Button type="submit" size="lg" variant="secondary" className="w-full" disabled={disabled}>
-        {status === "loading" || status === "submitting" ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
+      {!revealed ? (
+        <Button
+          type="button"
+          size="lg"
+          variant="secondary"
+          className="w-full"
+          disabled={status === "error"}
+          onClick={() => setRevealed(true)}
+        >
           <Lock className="w-4 h-4" />
-        )}
-        {status === "submitting" ? "Confirmando…" : `Confirmar — $${PRO_AMOUNT_COP.toLocaleString("es-CO")}/mes`}
-      </Button>
+          {`Suscribirme — $${PRO_AMOUNT_COP.toLocaleString("es-CO")}/mes`}
+        </Button>
+      ) : (
+        <Button type="submit" size="lg" variant="secondary" className="w-full" disabled={disabled}>
+          {status === "loading" || status === "submitting" ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Lock className="w-4 h-4" />
+          )}
+          {status === "submitting" ? "Confirmando…" : `Confirmar — $${PRO_AMOUNT_COP.toLocaleString("es-CO")}/mes`}
+        </Button>
+      )}
       {status === "error" && (
         <p className="text-xs text-warning-200 text-center">
           No pudimos cargar el formulario de pago. Recarga la página e intenta de nuevo.
