@@ -39,6 +39,7 @@ mock.module("@/lib/prisma", () => ({
 type CreatePreapprovalResult = {
   ok: boolean
   preapprovalId?: string
+  status?: string
 }
 const mockCreatePreapproval = mock(
   (...args: [{ userId: string; email: string; backUrl: string; cardTokenId: string }]) => {
@@ -46,6 +47,7 @@ const mockCreatePreapproval = mock(
     return Promise.resolve<CreatePreapprovalResult>({
       ok: true,
       preapprovalId: "preapproval-123",
+      status: "in_process",
     })
   }
 )
@@ -107,12 +109,13 @@ describe("startSubscription", () => {
     const result = await startSubscription(input)
     expect(result).toEqual({ ok: false, reason: "preapproval_failed" })
     mockCreatePreapproval.mockImplementation(() =>
-      Promise.resolve({ ok: true, preapprovalId: "preapproval-123" })
+      Promise.resolve({ ok: true, preapprovalId: "preapproval-123", status: "in_process" })
     )
   })
 
-  test("persists the preapproval as incomplete", async () => {
+  test("persists the preapproval as incomplete when Mercado Pago hasn't authorized it yet", async () => {
     mockSubscriptionUpsert.mockClear()
+    mockUserUpdate.mockClear()
     await startSubscription(input)
     expect(mockSubscriptionUpsert).toHaveBeenCalledTimes(1)
     const [call] = mockSubscriptionUpsert.mock.calls
@@ -122,10 +125,33 @@ describe("startSubscription", () => {
       status: "incomplete",
       mpPreapprovalId: "preapproval-123",
     })
+    expect(call[0].create).not.toHaveProperty("currentPeriodEnd", expect.any(Date))
+    expect(mockUserUpdate).not.toHaveBeenCalled()
   })
 
   test("returns ok on success", async () => {
     const result = await startSubscription(input)
     expect(result).toEqual({ ok: true })
+  })
+
+  test("activates isPremium optimistically when Mercado Pago authorizes the card immediately", async () => {
+    mockCreatePreapproval.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, preapprovalId: "preapproval-123", status: "authorized" })
+    )
+    mockSubscriptionUpsert.mockClear()
+    mockUserUpdate.mockClear()
+    const result = await startSubscription(input)
+    expect(result).toEqual({ ok: true })
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: "u1" },
+      data: { isPremium: true },
+    })
+    const [call] = mockSubscriptionUpsert.mock.calls
+    expect(call[0].create).toMatchObject({
+      userId: "u1",
+      status: "active",
+      mpPreapprovalId: "preapproval-123",
+    })
+    expect((call[0].create as { currentPeriodEnd: Date }).currentPeriodEnd).toBeInstanceOf(Date)
   })
 })

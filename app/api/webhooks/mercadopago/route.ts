@@ -106,7 +106,7 @@ async function handleApproved(userId: string | null, payment: { preapprovalId?: 
 
   const existing = await prisma.subscription.findUnique({
     where: { userId },
-    select: { currentPeriodEnd: true, status: true },
+    select: { currentPeriodEnd: true, status: true, lastChargeAt: true },
   })
 
   // A late/stray approval (e.g. a charge in flight when the user canceled)
@@ -125,10 +125,17 @@ async function handleApproved(userId: string | null, payment: { preapprovalId?: 
   const periodEnd = new Date(base)
   periodEnd.setDate(periodEnd.getDate() + 30)
 
+  // lastChargeAt (not just status/currentPeriodEnd) is what distinguishes a
+  // genuine renewal from the first real charge landing on a subscription
+  // that startSubscription already activated optimistically — that path sets
+  // status "active" + currentPeriodEnd without ever setting lastChargeAt, so
+  // the confirmation email still goes out exactly once, on the first real
+  // charge, not on every renewal.
   const isRenewal =
     existing?.status === "active" &&
     !!existing.currentPeriodEnd &&
-    existing.currentPeriodEnd > new Date()
+    existing.currentPeriodEnd > new Date() &&
+    !!existing.lastChargeAt
 
   const [user] = await Promise.all([
     prisma.user.update({

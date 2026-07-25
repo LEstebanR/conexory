@@ -32,11 +32,19 @@ export type StartSubscriptionResult =
 
 // Kicks off a subscription with a card already tokenized client-side
 // (cardTokenId) and persists the preapproval id so the webhook (which only
-// carries an id, not a full payload) can find the right user later. The
-// preapproval is created "authorized" — Mercado Pago charges the first
-// installment asynchronously (within about an hour) and drives every future
-// recurring charge itself, notifying us via webhook instead of us
-// cron-charging a stored token.
+// carries an id, not a full payload) can find the right user later.
+//
+// Mercado Pago's first charge on an "authorized" preapproval settles
+// asynchronously — anywhere from a few minutes to about an hour — which
+// would otherwise leave a buyer who just handed over a validated card
+// staring at "confirming your payment" for a long time. Since the card was
+// already validated moments earlier (that's what "authorized" means here),
+// we activate isPremium optimistically instead of waiting for the webhook.
+// lastChargeAt stays null until the webhook confirms a real charge — the
+// webhook uses that (not just status/currentPeriodEnd) to tell "this is the
+// first confirmation" from "this is a renewal", so it still sends the
+// welcome-to-Pro email once, and handleDeclined downgrades back to Free if
+// that first real charge ends up rejected.
 export async function startSubscription({
   userId,
   email,
@@ -53,14 +61,28 @@ export async function startSubscription({
     return { ok: false, reason: "preapproval_failed" }
   }
 
-  // status "incomplete" until the webhook confirms the first charge — mirrors
-  // the Wompi flow so downstream cron logic (expireCanceled, downgradeExpired)
-  // didn't need to change.
-  await prisma.subscription.upsert({
-    where: { userId },
-    create: { userId, status: "incomplete", mpPreapprovalId: result.preapprovalId },
-    update: { status: "incomplete", mpPreapprovalId: result.preapprovalId, pastDueSince: null },
-  })
+  const authorized = result.status === "authorized"
+  const periodEnd = new Date()
+  periodEnd.setDate(periodEnd.getDate() + 30)
+
+  await Promise.all([
+    prisma.subscription.upsert({
+      where: { userId },
+      create: {
+        userId,
+        status: authorized ? "active" : "incomplete",
+        mpPreapprovalId: result.preapprovalId,
+        currentPeriodEnd: authorized ? periodEnd : null,
+      },
+      update: {
+        status: authorized ? "active" : "incomplete",
+        mpPreapprovalId: result.preapprovalId,
+        currentPeriodEnd: authorized ? periodEnd : null,
+        pastDueSince: null,
+      },
+    }),
+    authorized ? prisma.user.update({ where: { id: userId }, data: { isPremium: true } }) : Promise.resolve(),
+  ])
 
   return { ok: true }
 }

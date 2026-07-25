@@ -44,7 +44,9 @@ const mockPaymentEventUpdate = mock((...args: [unknown]) => {
   return Promise.resolve({})
 })
 const mockSubscriptionFindUnique = mock(() =>
-  Promise.resolve<{ currentPeriodEnd: Date | null; status: string } | null>(null)
+  Promise.resolve<{ currentPeriodEnd: Date | null; status: string; lastChargeAt: Date | null } | null>(
+    null
+  )
 )
 const mockSubscriptionUpsert = mock((...args: [unknown]) => {
   void args
@@ -186,11 +188,31 @@ describe("POST /api/webhooks/mercadopago", () => {
       Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
     )
     mockSubscriptionFindUnique.mockImplementationOnce(() =>
-      Promise.resolve({ currentPeriodEnd: new Date(Date.now() + 86_400_000), status: "active" })
+      Promise.resolve({
+        currentPeriodEnd: new Date(Date.now() + 86_400_000),
+        status: "active",
+        lastChargeAt: new Date(Date.now() - 30 * 86_400_000),
+      })
     )
     mockSendSubscriptionConfirmation.mockClear()
     await POST(paymentWebhook())
     expect(mockSendSubscriptionConfirmation).not.toHaveBeenCalled()
+  })
+
+  test("sends a confirmation email the first time an optimistically-activated subscription's charge is confirmed", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
+    mockSubscriptionFindUnique.mockImplementationOnce(() =>
+      Promise.resolve({
+        currentPeriodEnd: new Date(Date.now() + 86_400_000),
+        status: "active",
+        lastChargeAt: null,
+      })
+    )
+    mockSendSubscriptionConfirmation.mockClear()
+    await POST(paymentWebhook())
+    expect(mockSendSubscriptionConfirmation).toHaveBeenCalledTimes(1)
   })
 
   test("ignores a late approval for a subscription the user already cancelled", async () => {
@@ -198,7 +220,7 @@ describe("POST /api/webhooks/mercadopago", () => {
       Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
     )
     mockSubscriptionFindUnique.mockImplementationOnce(() =>
-      Promise.resolve({ currentPeriodEnd: null, status: "cancelled" })
+      Promise.resolve({ currentPeriodEnd: null, status: "cancelled", lastChargeAt: null })
     )
     mockUserUpdate.mockClear()
     mockSubscriptionUpsert.mockClear()
