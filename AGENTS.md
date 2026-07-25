@@ -247,42 +247,49 @@ bunx prisma studio        # GUI de la base de datos
 
 ---
 
+## Tracking de trabajo: Linear + GitHub Issues
+
+El proyecto convive con **dos sistemas de tracking**: Linear (issues previos, gestionados históricamente ahí) y **GitHub Issues** (nuevos issues creados por Luis, desde que el plan gratuito de Linear llegó a su tope). Los issues de Linear pendientes siguen viviendo ahí — no se migran retroactivamente. Todo issue nuevo que gestione Luis va a GitHub; el socio puede seguir usando Linear si le resulta más cómodo. Para crear un issue de GitHub bien formado, usar la skill `/create-gh-issue` (plantilla en `.github/ISSUE_TEMPLATE/tarea.md`).
+
 ## Convenciones Git
 
 ### Nombres de rama
 
+El formato depende de dónde vive el issue que origina el cambio:
+
 ```
-{type}/LES-{número}-{descripción-corta}
+{type}/LES-{número}-{descripción-corta}     # issue en Linear
+{type}/{descripción-corta}                  # issue en GitHub (sin número)
 ```
 
 | Parte | Valores válidos |
 |---|---|
 | `type` | `feat` · `fix` · `refactor` · `chore` · `docs` |
-| `LES-{número}` | ID del issue de Linear que origina el cambio |
+| `LES-{número}` | ID del issue de Linear, solo si el issue vive ahí |
 | `descripción-corta` | kebab-case, máximo 5 palabras, en inglés |
 
 **Ejemplos correctos:**
 ```
 feat/LES-149-plan-pro-subscriptions
 fix/LES-155-zod-validation-actions
-chore/LES-156-custom-404-page
-refactor/LES-154-listing-type-field
+chore/migrate-mercadopago
+refactor/listing-type-field
 ```
 
 El workflow `.github/workflows/branch-name.yml` valida este formato en cada PR y falla si no se cumple.
 
 ### Pull Requests
 
-**Título:** `{type}(LES-{número}): descripción corta en imperativo`
+**Título:** `{type}: descripción corta en imperativo` (agregar `(LES-{número})` solo si el issue es de Linear)
 
 ```
 feat(LES-149): add Pro plan subscription flow with Wompi
-fix(LES-155): validate property input with Zod in server actions
+chore: migrate recurring billing to Mercado Pago
 ```
 
 **Descripción:** usar la plantilla en `.github/pull_request_template.md`. Siempre incluir:
 - Qué hace el PR (1-3 oraciones)
-- Link al issue de Linear (`Closes:`)
+- Issue relacionado — link de Linear (`Closes:`) o `Closes #{número}` si el issue es de GitHub (lo cierra automáticamente al mergear)
 - Pasos para probarlo
 - Checklist de build, tipos y migraciones
 
