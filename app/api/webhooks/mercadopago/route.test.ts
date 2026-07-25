@@ -183,6 +183,27 @@ describe("POST /api/webhooks/mercadopago", () => {
     expect(mockSendSubscriptionConfirmation).toHaveBeenCalledTimes(1)
   })
 
+  test("persists the card brand and last four digits from the payment", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: "approved",
+        externalReference: reference,
+        preapprovalId: "pa-1",
+        cardBrand: "master",
+        cardLastFour: "3564",
+      }),
+    )
+    mockSubscriptionFindUnique.mockImplementationOnce(() => Promise.resolve(null))
+    mockSubscriptionUpsert.mockClear()
+    await POST(paymentWebhook())
+    const [call] = mockSubscriptionUpsert.mock.calls
+    expect((call[0] as { create: { cardBrand: string; cardLastFour: string } }).create).toMatchObject({
+      cardBrand: "master",
+      cardLastFour: "3564",
+    })
+  })
+
   test("does not send a confirmation email for a renewal of an active subscription", async () => {
     mockGetPayment.mockImplementationOnce(() =>
       Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),

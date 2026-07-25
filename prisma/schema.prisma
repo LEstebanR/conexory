@@ -61,6 +61,8 @@ model Subscription {
   currentPeriodEnd DateTime?
   pastDueSince     DateTime?
   lastChargeAt     DateTime?
+  cardBrand        String?
+  cardLastFour     String?
   renewalReminderSentAt DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt

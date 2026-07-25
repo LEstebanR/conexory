@@ -2,14 +2,26 @@ import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
 import { Suspense } from "react"
-import { Check, Zap, ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-react"
+import { Check, CreditCard, Zap, ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import { SubscribeCardForm } from "./subscribe-card-form"
+import { ChangeCardForm } from "./change-card-form"
 import { UpgradeErrorToast } from "./upgrade-error-toast"
 import { hasProAccess } from "@/lib/plans"
 import type { Metadata } from "next"
+
+const CARD_BRAND_NAMES: Record<string, string> = {
+  master: "Mastercard",
+  visa: "Visa",
+  amex: "American Express",
+  diners: "Diners Club",
+}
+
+function formatCardBrand(brand: string): string {
+  return CARD_BRAND_NAMES[brand] ?? brand.charAt(0).toUpperCase() + brand.slice(1)
+}
 
 export const metadata: Metadata = {
   title: "Plan Pro — Conexory",
@@ -44,7 +56,7 @@ export default async function UpgradePage() {
   if (hasProAccess(session.user)) {
     const subscription = await prisma.subscription.findUnique({
       where: { userId: session.user.id },
-      select: { currentPeriodEnd: true, createdAt: true, status: true },
+      select: { currentPeriodEnd: true, createdAt: true, status: true, cardBrand: true, cardLastFour: true },
     })
     const isCanceling = subscription?.status === "canceling"
     const isPastDue = subscription?.status === "past_due"
@@ -75,14 +87,6 @@ export default async function UpgradePage() {
           </div>
 
           <div className="rounded-3xl bg-ink text-white p-7">
-            <div className="mb-6 pb-6 border-b border-white/10">
-              <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-black tracking-tighter">$99.999</span>
-                <span className="text-base font-medium text-white/50">/mes</span>
-              </div>
-              <p className="text-xs text-white/40 mt-1">COP · facturación mensual</p>
-            </div>
-
             <ul className="space-y-3 mb-7">
               {PRO_FEATURES.map((f) => (
                 <li key={f} className="flex items-center gap-3 text-sm text-white/80">
@@ -94,19 +98,42 @@ export default async function UpgradePage() {
               ))}
             </ul>
 
-            {subscription?.currentPeriodEnd && (
-              <p className="text-xs text-white/40 mb-6">
-                {isPastDue
-                  ? `Se cancela el ${formatDate(subscription.currentPeriodEnd)}`
-                  : isCanceling
-                  ? `Activo hasta el ${formatDate(subscription.currentPeriodEnd)} · no se renueva`
-                  : `Próximo cobro: ${formatDate(subscription.currentPeriodEnd)}`}
-              </p>
-            )}
+            <div className="mb-6 pb-6 border-b border-white/10">
+              {subscription?.cardLastFour ? (
+                <div className="flex items-center gap-3 mb-1">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 flex-shrink-0">
+                    <CreditCard className="w-4 h-4 text-white/70" strokeWidth={1.75} />
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-white">
+                      {subscription.cardBrand ? formatCardBrand(subscription.cardBrand) : "Tarjeta"} ···· {subscription.cardLastFour}
+                    </p>
+                    <p className="text-xs text-white/40">Se cobra automáticamente cada mes</p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-white/40 mb-1">
+                  Confirmando los datos de tu tarjeta con Mercado Pago…
+                </p>
+              )}
+              {subscription?.currentPeriodEnd && (
+                <p className="text-xs text-white/40 mt-3">
+                  {isPastDue
+                    ? `Se cancela el ${formatDate(subscription.currentPeriodEnd)}`
+                    : isCanceling
+                    ? `Activo hasta el ${formatDate(subscription.currentPeriodEnd)} · no se renueva`
+                    : `Próximo cobro: ${formatDate(subscription.currentPeriodEnd)}`}
+                </p>
+              )}
+            </div>
 
-            <Button size="lg" variant="secondary" className="w-full" asChild>
-              <Link href="/dashboard">Ir al dashboard</Link>
-            </Button>
+            {!isCanceling && <ChangeCardForm email={session.user.email} />}
+
+            <div className={!isCanceling ? "mt-3" : undefined}>
+              <Button size="lg" variant="secondary" className="w-full" asChild>
+                <Link href="/dashboard">Ir al dashboard</Link>
+              </Button>
+            </div>
           </div>
 
           <div className="text-center mt-5 flex items-center justify-center gap-3">

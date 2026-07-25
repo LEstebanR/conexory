@@ -1,9 +1,12 @@
 "use server"
 
 import { headers } from "next/headers"
+import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { startSubscription } from "@/lib/subscription"
+import { updatePreapprovalCard } from "@/lib/mercadopago"
 import { getAppUrl } from "@/lib/urls"
 
 const subscribeSchema = z.object({ cardTokenId: z.string().min(1) })
@@ -39,5 +42,33 @@ export async function subscribeAction(cardTokenId: string): Promise<SubscribeRes
 
   if (!result.ok) return { ok: false, reason: result.reason }
 
+  return { ok: true }
+}
+
+export type ChangeCardResult =
+  | { ok: true }
+  | { ok: false; reason: "unauthenticated" | "no_subscription" | "update_failed" }
+
+// Swaps the card Mercado Pago charges for future renewals, tokenized
+// client-side the same way as subscribeAction. Doesn't touch isPremium or
+// the local subscription status — the card is just how the existing
+// subscription gets paid, not whether it exists.
+export async function changeCardAction(cardTokenId: string): Promise<ChangeCardResult> {
+  const parsed = subscribeSchema.safeParse({ cardTokenId })
+  if (!parsed.success) return { ok: false, reason: "update_failed" }
+
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return { ok: false, reason: "unauthenticated" }
+
+  const subscription = await prisma.subscription.findUnique({
+    where: { userId: session.user.id },
+    select: { mpPreapprovalId: true },
+  })
+  if (!subscription?.mpPreapprovalId) return { ok: false, reason: "no_subscription" }
+
+  const result = await updatePreapprovalCard(subscription.mpPreapprovalId, parsed.data.cardTokenId)
+  if (!result.ok) return { ok: false, reason: "update_failed" }
+
+  revalidatePath("/dashboard/upgrade")
   return { ok: true }
 }

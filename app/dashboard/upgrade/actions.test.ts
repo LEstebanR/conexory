@@ -23,9 +23,36 @@ mock.module("@/lib/urls", () => ({
   getAppUrl: () => "https://conexory.com",
 }))
 
+mock.module("next/cache", () => ({
+  revalidatePath: mock((...args: [unknown]) => void args),
+}))
+
+const mockSubscriptionFindUnique = mock(() =>
+  Promise.resolve<{ mpPreapprovalId: string | null } | null>({ mpPreapprovalId: "preapproval-123" })
+)
+mock.module("@/lib/prisma", () => ({
+  prisma: { subscription: { findUnique: mockSubscriptionFindUnique } },
+}))
+
+type UpdatePreapprovalCardResult = { ok: boolean }
+const mockUpdatePreapprovalCard = mock((...args: [string, string]) => {
+  void args
+  return Promise.resolve<UpdatePreapprovalCardResult>({ ok: true })
+})
+// Spread the real module so unrelated exports (createPreapproval, getPayment,
+// verifyMercadoPagoWebhook, etc.) stay real for any other test file that
+// imports "@/lib/mercadopago" after this one — mock.module replaces it
+// process-wide, not per file (see lib/subscription.test.ts for the same
+// pattern).
+const realMercadoPago = await import("@/lib/mercadopago")
+mock.module("@/lib/mercadopago", () => ({
+  ...realMercadoPago,
+  updatePreapprovalCard: mockUpdatePreapprovalCard,
+}))
+
 // next/headers is mocked globally in test-setup.ts.
 
-const { subscribeAction } = await import("./actions")
+const { subscribeAction, changeCardAction } = await import("./actions")
 
 beforeEach(() => {
   mockGetSession.mockImplementation(() =>
@@ -33,6 +60,12 @@ beforeEach(() => {
   )
   mockStartSubscription.mockClear()
   mockStartSubscription.mockImplementation(() => Promise.resolve({ ok: true }))
+  mockSubscriptionFindUnique.mockClear()
+  mockSubscriptionFindUnique.mockImplementation(() =>
+    Promise.resolve({ mpPreapprovalId: "preapproval-123" })
+  )
+  mockUpdatePreapprovalCard.mockClear()
+  mockUpdatePreapprovalCard.mockImplementation(() => Promise.resolve({ ok: true }))
 })
 
 describe("subscribeAction", () => {
@@ -73,5 +106,34 @@ describe("subscribeAction", () => {
       ok: false,
       reason: "preapproval_failed",
     })
+  })
+})
+
+describe("changeCardAction", () => {
+  test("returns update_failed when the card token is missing", async () => {
+    expect(await changeCardAction("")).toEqual({ ok: false, reason: "update_failed" })
+    expect(mockUpdatePreapprovalCard).not.toHaveBeenCalled()
+  })
+
+  test("returns unauthenticated when there's no session", async () => {
+    mockGetSession.mockImplementation(() => Promise.resolve(null))
+    expect(await changeCardAction("card-token-123")).toEqual({ ok: false, reason: "unauthenticated" })
+    expect(mockUpdatePreapprovalCard).not.toHaveBeenCalled()
+  })
+
+  test("returns no_subscription when the user has no stored preapproval id", async () => {
+    mockSubscriptionFindUnique.mockImplementation(() => Promise.resolve({ mpPreapprovalId: null }))
+    expect(await changeCardAction("card-token-123")).toEqual({ ok: false, reason: "no_subscription" })
+    expect(mockUpdatePreapprovalCard).not.toHaveBeenCalled()
+  })
+
+  test("updates the card on the stored preapproval and returns ok", async () => {
+    expect(await changeCardAction("card-token-123")).toEqual({ ok: true })
+    expect(mockUpdatePreapprovalCard).toHaveBeenCalledWith("preapproval-123", "card-token-123")
+  })
+
+  test("returns update_failed when Mercado Pago rejects the update", async () => {
+    mockUpdatePreapprovalCard.mockImplementation(() => Promise.resolve({ ok: false }))
+    expect(await changeCardAction("card-token-123")).toEqual({ ok: false, reason: "update_failed" })
   })
 })

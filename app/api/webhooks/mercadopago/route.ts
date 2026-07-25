@@ -52,7 +52,11 @@ async function handlePaymentNotification(paymentId: string, type: string, body: 
   await linkEvent(externalId, userId)
 
   if (payment.status === "approved") {
-    await handleApproved(userId, { preapprovalId: payment.preapprovalId })
+    await handleApproved(userId, {
+      preapprovalId: payment.preapprovalId,
+      cardBrand: payment.cardBrand,
+      cardLastFour: payment.cardLastFour,
+    })
   } else if (payment.status === "rejected" || payment.status === "cancelled") {
     await handleDeclined(userId)
   }
@@ -101,7 +105,10 @@ async function linkEvent(externalId: string, userId: string | null) {
   await prisma.paymentEvent.update({ where: { externalId }, data: { userId } }).catch(() => null)
 }
 
-async function handleApproved(userId: string | null, payment: { preapprovalId?: string }) {
+async function handleApproved(
+  userId: string | null,
+  payment: { preapprovalId?: string; cardBrand?: string; cardLastFour?: string },
+) {
   if (!userId) return
 
   const existing = await prisma.subscription.findUnique({
@@ -151,6 +158,8 @@ async function handleApproved(userId: string | null, payment: { preapprovalId?: 
         mpPreapprovalId: payment.preapprovalId,
         currentPeriodEnd: periodEnd,
         lastChargeAt: new Date(),
+        cardBrand: payment.cardBrand,
+        cardLastFour: payment.cardLastFour,
       },
       update: {
         status: "active",
@@ -158,9 +167,11 @@ async function handleApproved(userId: string | null, payment: { preapprovalId?: 
         pastDueSince: null,
         renewalReminderSentAt: null,
         lastChargeAt: new Date(),
-        // Only overwrite the stored preapproval id when Mercado Pago gives us
-        // one, so a payment that omits it doesn't wipe the id we already hold.
+        // Only overwrite these when Mercado Pago actually gives us a value,
+        // so a payment payload that omits one doesn't wipe what we already hold.
         ...(payment.preapprovalId ? { mpPreapprovalId: payment.preapprovalId } : {}),
+        ...(payment.cardBrand ? { cardBrand: payment.cardBrand } : {}),
+        ...(payment.cardLastFour ? { cardLastFour: payment.cardLastFour } : {}),
       },
     }),
   ])
