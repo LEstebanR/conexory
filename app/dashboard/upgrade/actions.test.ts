@@ -23,7 +23,7 @@ mock.module("@/lib/urls", () => ({
   getAppUrl: () => "https://conexory.com",
 }))
 
-// next/headers and next/navigation are mocked globally in test-setup.ts.
+// next/headers is mocked globally in test-setup.ts.
 
 const { subscribeAction } = await import("./actions")
 
@@ -36,31 +36,27 @@ beforeEach(() => {
 })
 
 describe("subscribeAction", () => {
-  test("redirects with an error when the card token is missing", async () => {
-    await expect(subscribeAction("")).rejects.toThrow(
-      "REDIRECT:/dashboard/upgrade?error=preapproval_failed"
-    )
+  test("returns preapproval_failed when the card token is missing", async () => {
+    expect(await subscribeAction("")).toEqual({ ok: false, reason: "preapproval_failed" })
     expect(mockStartSubscription).not.toHaveBeenCalled()
   })
 
-  test("redirects to /login when unauthenticated", async () => {
+  test("returns unauthenticated when there's no session", async () => {
     mockGetSession.mockImplementation(() => Promise.resolve(null))
-    await expect(subscribeAction("card-token-123")).rejects.toThrow("REDIRECT:/login")
+    expect(await subscribeAction("card-token-123")).toEqual({ ok: false, reason: "unauthenticated" })
     expect(mockStartSubscription).not.toHaveBeenCalled()
   })
 
-  test("redirects to /dashboard when already Pro", async () => {
+  test("returns already_premium when the user already has Pro", async () => {
     mockGetSession.mockImplementation(() =>
       Promise.resolve({ user: { id: "u1", email: "a@b.com", isPremium: true } })
     )
-    await expect(subscribeAction("card-token-123")).rejects.toThrow("REDIRECT:/dashboard")
+    expect(await subscribeAction("card-token-123")).toEqual({ ok: false, reason: "already_premium" })
     expect(mockStartSubscription).not.toHaveBeenCalled()
   })
 
-  test("starts the subscription with the tokenized card and redirects to the dashboard", async () => {
-    await expect(subscribeAction("card-token-123")).rejects.toThrow(
-      "REDIRECT:/dashboard?upgrade=processing"
-    )
+  test("starts the subscription with the tokenized card and returns ok", async () => {
+    expect(await subscribeAction("card-token-123")).toEqual({ ok: true })
     expect(mockStartSubscription).toHaveBeenCalledWith({
       userId: "u1",
       email: "a@b.com",
@@ -69,12 +65,13 @@ describe("subscribeAction", () => {
     })
   })
 
-  test("redirects with an error when Mercado Pago rejects the preapproval", async () => {
+  test("returns preapproval_failed when Mercado Pago rejects the preapproval", async () => {
     mockStartSubscription.mockImplementation(() =>
       Promise.resolve({ ok: false, reason: "preapproval_failed" })
     )
-    await expect(subscribeAction("card-token-123")).rejects.toThrow(
-      "REDIRECT:/dashboard/upgrade?error=preapproval_failed"
-    )
+    expect(await subscribeAction("card-token-123")).toEqual({
+      ok: false,
+      reason: "preapproval_failed",
+    })
   })
 })

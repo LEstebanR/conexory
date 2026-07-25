@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { loadMercadoPago } from "@mercadopago/sdk-js"
 import { Loader2, Lock } from "lucide-react"
 import { toast } from "sonner"
@@ -77,11 +78,17 @@ const MERCADOPAGO_PUBLIC_KEY = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY
 // expirationDate and securityCode are mounted as iframes we never touch, so
 // raw card data never reaches our server — only the resulting token does.
 // Identification type options are fetched and populated by the SDK itself
-// once mounted (varies by country).
+// once mounted (varies by country). The SDK loads in the background from
+// mount so the fields are ready the moment the buyer reveals them, but the
+// fields themselves stay hidden until they click through from the plan
+// summary — showing a card number/CVV/document form immediately felt like
+// too much, too soon.
 export function SubscribeCardForm({ email }: { email: string }) {
+  const router = useRouter()
   const [status, setStatus] = useState<"loading" | "ready" | "submitting" | "error">(
     MERCADOPAGO_PUBLIC_KEY ? "loading" : "error"
   )
+  const [revealed, setRevealed] = useState(false)
   const cardFormRef = useRef<MercadoPagoCardForm | null>(null)
 
   useEffect(() => {
@@ -135,11 +142,27 @@ export function SubscribeCardForm({ email }: { email: string }) {
               return
             }
 
-            subscribeAction(token).catch(() => {
-              if (cancelled) return
-              setStatus("ready")
-              toast.error("No pudimos iniciar la suscripción con Mercado Pago. Intenta de nuevo.")
-            })
+            subscribeAction(token)
+              .then((result) => {
+                if (cancelled) return
+                if (result.ok) {
+                  router.push("/dashboard?upgrade=processing")
+                  return
+                }
+                setStatus("ready")
+                if (result.reason === "unauthenticated") {
+                  router.push("/login")
+                } else if (result.reason === "already_premium") {
+                  router.push("/dashboard")
+                } else {
+                  toast.error("No pudimos iniciar la suscripción con Mercado Pago. Intenta de nuevo.")
+                }
+              })
+              .catch(() => {
+                if (cancelled) return
+                setStatus("ready")
+                toast.error("No pudimos iniciar la suscripción con Mercado Pago. Intenta de nuevo.")
+              })
           },
         },
       })
@@ -152,7 +175,23 @@ export function SubscribeCardForm({ email }: { email: string }) {
       cancelled = true
       cardFormRef.current?.unmount()
     }
-  }, [email])
+  }, [email, router])
+
+  if (!revealed) {
+    return (
+      <Button
+        type="button"
+        size="lg"
+        variant="secondary"
+        className="w-full"
+        disabled={status === "error"}
+        onClick={() => setRevealed(true)}
+      >
+        <Lock className="w-4 h-4" />
+        {`Suscribirme — $${PRO_AMOUNT_COP.toLocaleString("es-CO")}/mes`}
+      </Button>
+    )
+  }
 
   const disabled = status !== "ready" && status !== "submitting"
 
@@ -181,7 +220,7 @@ export function SubscribeCardForm({ email }: { email: string }) {
         ) : (
           <Lock className="w-4 h-4" />
         )}
-        {status === "submitting" ? "Confirmando…" : `Suscribirme — $${PRO_AMOUNT_COP.toLocaleString("es-CO")}/mes`}
+        {status === "submitting" ? "Confirmando…" : `Confirmar — $${PRO_AMOUNT_COP.toLocaleString("es-CO")}/mes`}
       </Button>
       {status === "error" && (
         <p className="text-xs text-warning-200 text-center">
