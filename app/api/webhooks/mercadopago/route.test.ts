@@ -183,6 +183,19 @@ describe("POST /api/webhooks/mercadopago", () => {
     expect(mockSendSubscriptionConfirmation).toHaveBeenCalledTimes(1)
   })
 
+  test("ignores an approved payment whose external_reference resolves to a nonexistent user", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
+    mockUserFindUnique.mockImplementationOnce(() => Promise.resolve(null))
+    mockUserUpdate.mockClear()
+    mockSubscriptionUpsert.mockClear()
+    const res = await POST(paymentWebhook())
+    expect(res.status).toBe(200)
+    expect(mockUserUpdate).not.toHaveBeenCalled()
+    expect(mockSubscriptionUpsert).not.toHaveBeenCalled()
+  })
+
   test("persists the card brand and last four digits from the payment", async () => {
     mockGetPayment.mockImplementationOnce(() =>
       Promise.resolve({
