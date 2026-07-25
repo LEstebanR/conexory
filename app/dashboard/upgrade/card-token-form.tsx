@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { loadMercadoPago } from "@mercadopago/sdk-js"
 import * as Dialog from "@radix-ui/react-dialog"
-import { Loader2, Lock } from "lucide-react"
+import { Loader2, Lock, X } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -195,6 +195,14 @@ export function CardTokenForm({
 
     return () => {
       cancelled = true
+      // Blur before unmounting: the card iframes (CVV in particular) can be
+      // holding focus when the modal closes, and browsers key their native
+      // autofill/password popovers off frame focus — removing the iframe
+      // without blurring it first can leave that popover stranded on screen.
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+      document
+        .querySelectorAll<HTMLIFrameElement>(`#${FIELD_IDS.form} iframe`)
+        .forEach((iframe) => iframe.blur())
       cardFormRef.current?.unmount()
       cardFormRef.current = null
     }
@@ -220,44 +228,77 @@ export function CardTokenForm({
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm animate-fade-in" />
-        <Dialog.Content className="fixed z-50 bottom-0 left-0 right-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 w-full sm:w-[calc(100%-2rem)] sm:max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl shadow-black/10 p-6 sm:p-7 animate-fade-in text-left">
-          <Dialog.Title className="text-lg font-black text-ink tracking-tight mb-4">
-            {modalTitle}
-          </Dialog.Title>
-
-          <form id={FIELD_IDS.form} className="space-y-3">
-            <div id={FIELD_IDS.cardNumber} className={secureFieldClass} />
-            <div className="grid grid-cols-2 gap-3">
-              <div id={FIELD_IDS.expirationDate} className={secureFieldClass} />
-              <div id={FIELD_IDS.securityCode} className={secureFieldClass} />
+        {/* Centering via flex instead of top/left + transform — a transformed
+            ancestor is what makes browsers mis-anchor their native autofill
+            popover for the plain-text fields below (cardholder name, document).
+            Full-screen on mobile instead of a half-height bottom sheet: with a
+            form this long, a short sheet just meant more scrolling inside a
+            cramped box. */}
+        <div className="fixed inset-0 z-50 flex sm:items-center sm:justify-center">
+          <Dialog.Content className="relative flex flex-col w-full h-[100dvh] sm:h-auto sm:w-[calc(100%-2rem)] sm:max-w-md sm:max-h-[90vh] bg-white sm:rounded-2xl shadow-2xl shadow-black/10 animate-fade-in text-left overflow-hidden">
+            <div className="flex items-center justify-between px-6 pt-6 sm:px-7 sm:pt-7 pb-4">
+              <Dialog.Title className="text-lg font-black text-ink tracking-tight">
+                {modalTitle}
+              </Dialog.Title>
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  aria-label="Cerrar"
+                  className="rounded-full p-2 text-body hover:bg-canvas-soft transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </Dialog.Close>
             </div>
-            <Input id={FIELD_IDS.cardholderName} placeholder="Nombre en la tarjeta" autoComplete="cc-name" />
-            <div className="grid grid-cols-[auto_1fr] gap-3">
-              <select
-                id={FIELD_IDS.identificationType}
-                className="h-11 rounded-lg border border-hairline-strong bg-white px-3 text-sm text-ink outline-none focus:ring-2 focus:ring-ink focus:border-ink"
+
+            <form
+              id={FIELD_IDS.form}
+              autoComplete="off"
+              className="flex-1 overflow-y-auto px-6 sm:px-7 pb-6 sm:pb-7 space-y-3"
+            >
+              <div id={FIELD_IDS.cardNumber} className={secureFieldClass} />
+              <div className="grid grid-cols-2 gap-3">
+                <div id={FIELD_IDS.expirationDate} className={secureFieldClass} />
+                <div id={FIELD_IDS.securityCode} className={secureFieldClass} />
+              </div>
+              <Input
+                id={FIELD_IDS.cardholderName}
+                placeholder="Nombre en la tarjeta"
+                autoComplete="off"
               />
-              <Input id={FIELD_IDS.identificationNumber} placeholder="Número de documento" />
-            </div>
-            <select id={FIELD_IDS.issuer} className="hidden" />
-            <select id={FIELD_IDS.installments} className="hidden" />
-            <input id={FIELD_IDS.cardholderEmail} type="hidden" defaultValue={email} />
+              <div className="grid grid-cols-[auto_1fr] gap-3">
+                <select
+                  id={FIELD_IDS.identificationType}
+                  className="h-11 rounded-lg border border-hairline-strong bg-white px-3 text-sm text-ink outline-none focus:ring-2 focus:ring-ink focus:border-ink"
+                />
+                <Input
+                  id={FIELD_IDS.identificationNumber}
+                  placeholder="Número de documento"
+                  autoComplete="off"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                />
+              </div>
+              <select id={FIELD_IDS.issuer} className="hidden" />
+              <select id={FIELD_IDS.installments} className="hidden" />
+              <input id={FIELD_IDS.cardholderEmail} type="hidden" defaultValue={email} />
 
-            <Button type="submit" size="lg" className="w-full" disabled={disabled}>
-              {status === "loading" || status === "submitting" ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Lock className="w-4 h-4" />
+              <Button type="submit" size="lg" className="w-full" disabled={disabled}>
+                {status === "loading" || status === "submitting" ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Lock className="w-4 h-4" />
+                )}
+                {status === "submitting" ? submittingLabel : submitLabel}
+              </Button>
+              {status === "error" && (
+                <p className="text-xs text-red-600 text-center">
+                  No pudimos cargar el formulario de pago. Cierra y vuelve a intentar.
+                </p>
               )}
-              {status === "submitting" ? submittingLabel : submitLabel}
-            </Button>
-            {status === "error" && (
-              <p className="text-xs text-red-600 text-center">
-                No pudimos cargar el formulario de pago. Cierra y vuelve a intentar.
-              </p>
-            )}
-          </form>
-        </Dialog.Content>
+            </form>
+          </Dialog.Content>
+        </div>
       </Dialog.Portal>
     </Dialog.Root>
   )
