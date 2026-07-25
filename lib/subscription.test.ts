@@ -36,38 +36,32 @@ mock.module("@/lib/prisma", () => ({
   },
 }))
 
-type PaymentSourceResult = {
+type CreatePreapprovalResult = {
   ok: boolean
-  paymentSourceId?: number
-  status?: string
+  preapprovalId?: string
+  initPoint?: string
 }
-const mockCreatePaymentSource = mock(
-  (...args: [{ token: string; customerEmail: string; type: string }]) => {
+const mockCreatePreapproval = mock(
+  (...args: [{ userId: string; email: string; backUrl: string }]) => {
     void args
-    return Promise.resolve<PaymentSourceResult>({ ok: true, paymentSourceId: 123, status: "AVAILABLE" })
-  }
-)
-const mockChargeRecurringPayment = mock(
-  (
-    ...args: [{ paymentSourceId: number; reference: string; customerEmail: string; type: string }]
-  ) => {
-    void args
-    return Promise.resolve<{ ok: boolean }>({ ok: true })
+    return Promise.resolve<CreatePreapprovalResult>({
+      ok: true,
+      preapprovalId: "preapproval-123",
+      initPoint: "https://mercadopago.com.co/checkout/pending-init",
+    })
   }
 )
 
-// Spread the real module so unrelated exports (verifyWompiEvent,
-// makeSubscriptionReference) stay real for any other test file that imports
-// "@/lib/wompi" after this one — mock.module replaces it process-wide, not
-// just for this file.
-const realWompi = await import("@/lib/wompi")
-mock.module("@/lib/wompi", () => ({
-  ...realWompi,
-  createPaymentSource: mockCreatePaymentSource,
-  chargeRecurringPayment: mockChargeRecurringPayment,
+// Spread the real module so unrelated exports (verifyMercadoPagoWebhook,
+// makeExternalReference) stay real for any other test file that imports
+// "@/lib/mercadopago" after this one — mock.module replaces it process-wide.
+const realMercadoPago = await import("@/lib/mercadopago")
+mock.module("@/lib/mercadopago", () => ({
+  ...realMercadoPago,
+  createPreapproval: mockCreatePreapproval,
 }))
 
-const { downgradeToFree, activateSubscription } = await import("./subscription")
+const { downgradeToFree, startSubscription } = await import("./subscription")
 
 describe("downgradeToFree", () => {
   test("clears isPremium", async () => {
@@ -102,62 +96,33 @@ describe("downgradeToFree", () => {
   })
 })
 
-describe("activateSubscription", () => {
-  const input = { userId: "u1", email: "a@b.com", token: "tok", type: "CARD" as const }
+describe("startSubscription", () => {
+  const input = { userId: "u1", email: "a@b.com", backUrl: "https://conexory.com/dashboard" }
 
-  test("returns source_failed when the payment source creation fails", async () => {
-    mockCreatePaymentSource.mockImplementation(() => Promise.resolve({ ok: false }))
-    const result = await activateSubscription(input)
-    expect(result).toEqual({ ok: false, reason: "source_failed" })
-    mockCreatePaymentSource.mockImplementation(() =>
-      Promise.resolve({ ok: true, paymentSourceId: 123, status: "AVAILABLE" })
+  test("returns preapproval_failed when Mercado Pago rejects the request", async () => {
+    mockCreatePreapproval.mockImplementation(() => Promise.resolve({ ok: false }))
+    const result = await startSubscription(input)
+    expect(result).toEqual({ ok: false, reason: "preapproval_failed" })
+    mockCreatePreapproval.mockImplementation(() =>
+      Promise.resolve({ ok: true, preapprovalId: "preapproval-123", initPoint: "https://mercadopago.com.co/checkout/pending-init" })
     )
   })
 
-  test("returns pending when the source isn't immediately available", async () => {
-    mockCreatePaymentSource.mockImplementation(() =>
-      Promise.resolve({ ok: true, paymentSourceId: 123, status: "PENDING" })
-    )
-    const result = await activateSubscription(input)
-    expect(result).toEqual({ ok: false, reason: "pending" })
-    mockCreatePaymentSource.mockImplementation(() =>
-      Promise.resolve({ ok: true, paymentSourceId: 123, status: "AVAILABLE" })
-    )
-  })
-
-  test("persists the source as incomplete before charging", async () => {
+  test("persists the preapproval as incomplete", async () => {
     mockSubscriptionUpsert.mockClear()
-    await activateSubscription(input)
+    await startSubscription(input)
     expect(mockSubscriptionUpsert).toHaveBeenCalledTimes(1)
     const [call] = mockSubscriptionUpsert.mock.calls
     expect(call[0].where).toEqual({ userId: "u1" })
     expect(call[0].create).toMatchObject({
       userId: "u1",
       status: "incomplete",
-      wompiPaymentSourceId: 123,
-      wompiPaymentSourceType: "CARD",
+      mpPreapprovalId: "preapproval-123",
     })
   })
 
-  test("returns charge_failed when the first charge is declined", async () => {
-    mockChargeRecurringPayment.mockImplementation(() => Promise.resolve({ ok: false }))
-    const result = await activateSubscription(input)
-    expect(result).toEqual({ ok: false, reason: "charge_failed" })
-    mockChargeRecurringPayment.mockImplementation(() => Promise.resolve({ ok: true }))
-  })
-
-  test("returns ok when the source is created and the first charge succeeds", async () => {
-    const result = await activateSubscription(input)
-    expect(result).toEqual({ ok: true })
-  })
-
-  test("does not attempt to charge when the source failed", async () => {
-    mockCreatePaymentSource.mockImplementation(() => Promise.resolve({ ok: false }))
-    mockChargeRecurringPayment.mockClear()
-    await activateSubscription(input)
-    expect(mockChargeRecurringPayment).not.toHaveBeenCalled()
-    mockCreatePaymentSource.mockImplementation(() =>
-      Promise.resolve({ ok: true, paymentSourceId: 123, status: "AVAILABLE" })
-    )
+  test("returns the initPoint to redirect the buyer to on success", async () => {
+    const result = await startSubscription(input)
+    expect(result).toEqual({ ok: true, initPoint: "https://mercadopago.com.co/checkout/pending-init" })
   })
 })

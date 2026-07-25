@@ -140,7 +140,7 @@ export default function PremiumToggle({
                 </Dialog.Title>
                 <Dialog.Description className="text-sm text-body mt-1.5 leading-relaxed">
                   {activating
-                    ? "Tendrá acceso inmediato a los límites y funciones del plan Pro, sin pasar por Wompi."
+                    ? "Tendrá acceso inmediato a los límites y funciones del plan Pro, sin pasar por Mercado Pago."
                     : "Perderá el acceso a los límites y funciones del plan Pro de inmediato."}
                 </Dialog.Description>
                 {activating && (

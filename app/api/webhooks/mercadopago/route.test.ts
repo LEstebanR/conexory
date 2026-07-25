@@ -1,17 +1,38 @@
 import { describe, test, expect, mock } from "bun:test"
 
-const mockVerifyWompiEvent = mock((...args: [unknown]) => {
+const mockVerifyMercadoPagoWebhook = mock((...args: [unknown]) => {
   void args
   return true
 })
-// Spread the real module so unrelated exports (createPaymentSource,
-// makeSubscriptionReference) stay real for any other test file that imports
-// "@/lib/wompi" after this one — mock.module replaces it process-wide, not
-// just for this file.
-const realWompi = await import("@/lib/wompi")
-mock.module("@/lib/wompi", () => ({
-  ...realWompi,
-  verifyWompiEvent: mockVerifyWompiEvent,
+type PaymentDetails = {
+  ok: boolean
+  status?: string
+  externalReference?: string
+  preapprovalId?: string
+}
+type PreapprovalDetails = {
+  ok: boolean
+  status?: string
+  externalReference?: string
+}
+const mockGetPayment = mock((...args: [string]) => {
+  void args
+  return Promise.resolve<PaymentDetails>({ ok: true, status: "approved" })
+})
+const mockGetPreapproval = mock((...args: [string]) => {
+  void args
+  return Promise.resolve<PreapprovalDetails>({ ok: true, status: "cancelled" })
+})
+
+// Spread the real module so unrelated exports (makeExternalReference) stay
+// real for any other test file that imports "@/lib/mercadopago" after this
+// one — mock.module() replaces it process-wide, not just for this file.
+const realMercadoPago = await import("@/lib/mercadopago")
+mock.module("@/lib/mercadopago", () => ({
+  ...realMercadoPago,
+  verifyMercadoPagoWebhook: mockVerifyMercadoPagoWebhook,
+  getPayment: mockGetPayment,
+  getPreapproval: mockGetPreapproval,
 }))
 
 const mockPaymentEventCreate = mock((...args: [{ data: Record<string, unknown> }]) => {
@@ -73,64 +94,84 @@ mock.module("@/lib/email", () => ({
 
 const { POST } = await import("./route")
 
-function makeRequest(body: unknown): Request {
-  return { text: () => Promise.resolve(JSON.stringify(body)) } as unknown as Request
-}
-
 const userId = "cljabc123"
 const reference = `pro-${userId}-1700000000`
 
-function approvedEvent(overrides: Partial<{ status: string }> = {}) {
+function makeRequest(url: string, body: unknown): Request {
   return {
-    event: "transaction.updated",
-    data: {
-      transaction: {
-        id: "tx-1",
-        reference,
-        status: "APPROVED",
-        amount_in_cents: 9_999_900,
-        payment_source_id: 42,
-        ...overrides,
-      },
-    },
-    signature: { properties: [], checksum: "x" },
-    timestamp: 1700000000,
-  }
+    url,
+    headers: new Headers({ "x-signature": "ts=1,v1=x", "x-request-id": "req-1" }),
+    text: () => Promise.resolve(JSON.stringify(body)),
+  } as unknown as Request
 }
 
-describe("POST /api/webhooks/wompi", () => {
+function paymentWebhook(dataId = "pay-1") {
+  return makeRequest(`https://conexory.com/api/webhooks/mercadopago?type=payment&data.id=${dataId}`, {
+    type: "payment",
+    data: { id: dataId },
+  })
+}
+
+function preapprovalWebhook(dataId = "preapproval-1") {
+  return makeRequest(
+    `https://conexory.com/api/webhooks/mercadopago?type=subscription_preapproval&data.id=${dataId}`,
+    { type: "subscription_preapproval", data: { id: dataId } },
+  )
+}
+
+describe("POST /api/webhooks/mercadopago", () => {
   test("returns 400 for invalid JSON", async () => {
-    const res = await POST({ text: () => Promise.resolve("not json") } as unknown as Request)
+    const res = await POST({
+      url: "https://conexory.com/api/webhooks/mercadopago",
+      headers: new Headers(),
+      text: () => Promise.resolve("not json"),
+    } as unknown as Request)
     expect(res.status).toBe(400)
   })
 
   test("returns 401 when the signature is invalid", async () => {
-    mockVerifyWompiEvent.mockImplementationOnce(() => false)
-    const res = await POST(makeRequest(approvedEvent()))
+    mockVerifyMercadoPagoWebhook.mockImplementationOnce(() => false)
+    const res = await POST(paymentWebhook())
     expect(res.status).toBe(401)
   })
 
-  test("returns 200 silently on a duplicate event (idempotency)", async () => {
-    mockPaymentEventCreate.mockImplementationOnce(() =>
-      Promise.reject({ code: "P2002" })
-    )
+  test("returns 200 without touching anything when dataId is missing", async () => {
     mockUserUpdate.mockClear()
-    const res = await POST(makeRequest(approvedEvent()))
+    const res = await POST(
+      makeRequest("https://conexory.com/api/webhooks/mercadopago?type=payment", { type: "payment" }),
+    )
+    expect(res.status).toBe(200)
+    expect(mockUserUpdate).not.toHaveBeenCalled()
+  })
+
+  test("returns 200 silently on a duplicate event (idempotency)", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
+    mockPaymentEventCreate.mockImplementationOnce(() => Promise.reject({ code: "P2002" }))
+    mockUserUpdate.mockClear()
+    const res = await POST(paymentWebhook())
     expect(res.status).toBe(200)
     expect(mockUserUpdate).not.toHaveBeenCalled()
   })
 
   test("re-throws non-duplicate errors from paymentEvent.create", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
     mockPaymentEventCreate.mockImplementationOnce(() => Promise.reject(new Error("db down")))
-    await expect(POST(makeRequest(approvedEvent()))).rejects.toThrow("db down")
+    await expect(POST(paymentWebhook())).rejects.toThrow("db down")
   })
 
-  test("approved transaction activates the user and creates an active subscription", async () => {
+  test("approved payment activates the user and creates an active subscription", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
     mockSubscriptionFindUnique.mockImplementationOnce(() => Promise.resolve(null))
     mockUserUpdate.mockClear()
     mockSubscriptionUpsert.mockClear()
     mockSendSubscriptionConfirmation.mockClear()
-    const res = await POST(makeRequest(approvedEvent()))
+    const res = await POST(paymentWebhook())
     expect(res.status).toBe(200)
     expect(mockUserUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: userId }, data: { isPremium: true } })
@@ -140,56 +181,49 @@ describe("POST /api/webhooks/wompi", () => {
     expect(mockSendSubscriptionConfirmation).toHaveBeenCalledTimes(1)
   })
 
-  test("still returns 200 if linking the event to the user fails", async () => {
-    mockSubscriptionFindUnique.mockImplementationOnce(() => Promise.resolve(null))
-    mockPaymentEventUpdate.mockImplementationOnce(() => Promise.reject(new Error("db down")))
-    const res = await POST(makeRequest(approvedEvent()))
-    expect(res.status).toBe(200)
-  })
-
-  test("still returns 200 if the confirmation email fails to send", async () => {
-    mockSubscriptionFindUnique.mockImplementationOnce(() => Promise.resolve(null))
-    mockSendSubscriptionConfirmation.mockImplementationOnce(() =>
-      Promise.reject(new Error("resend down"))
-    )
-    const res = await POST(makeRequest(approvedEvent()))
-    expect(res.status).toBe(200)
-  })
-
   test("does not send a confirmation email for a renewal of an active subscription", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
     mockSubscriptionFindUnique.mockImplementationOnce(() =>
       Promise.resolve({ currentPeriodEnd: new Date(Date.now() + 86_400_000), status: "active" })
     )
     mockSendSubscriptionConfirmation.mockClear()
-    await POST(makeRequest(approvedEvent()))
+    await POST(paymentWebhook())
     expect(mockSendSubscriptionConfirmation).not.toHaveBeenCalled()
   })
 
   test("ignores a late approval for a subscription the user already cancelled", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
     mockSubscriptionFindUnique.mockImplementationOnce(() =>
       Promise.resolve({ currentPeriodEnd: null, status: "cancelled" })
     )
     mockUserUpdate.mockClear()
     mockSubscriptionUpsert.mockClear()
-    await POST(makeRequest(approvedEvent()))
+    await POST(paymentWebhook())
     expect(mockUserUpdate).not.toHaveBeenCalled()
     expect(mockSubscriptionUpsert).not.toHaveBeenCalled()
   })
 
   test("does nothing when the reference can't be resolved to a user", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: "not-a-valid-reference", preapprovalId: "pa-1" }),
+    )
     mockUserUpdate.mockClear()
-    const event = approvedEvent()
-    event.data.transaction.reference = "not-a-valid-reference"
-    const res = await POST(makeRequest(event))
+    const res = await POST(paymentWebhook())
     expect(res.status).toBe(200)
     expect(mockUserUpdate).not.toHaveBeenCalled()
   })
 
-  test("declined transaction marks the subscription past_due and emails the user", async () => {
+  test("rejected payment marks the subscription past_due and emails the user", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "rejected", externalReference: reference }),
+    )
     mockSubscriptionUpdateMany.mockImplementationOnce(() => Promise.resolve({ count: 1 }))
     mockSendPaymentFailed.mockClear()
-    const event = approvedEvent({ status: "DECLINED" })
-    const res = await POST(makeRequest(event))
+    const res = await POST(paymentWebhook())
     expect(res.status).toBe(200)
     expect(mockSubscriptionUpdateMany).toHaveBeenCalledWith({
       where: { userId, pastDueSince: null },
@@ -198,35 +232,37 @@ describe("POST /api/webhooks/wompi", () => {
     expect(mockSendPaymentFailed).toHaveBeenCalledTimes(1)
   })
 
-  test("still returns 200 if the payment-failed email fails to send", async () => {
-    mockSubscriptionUpdateMany.mockImplementationOnce(() => Promise.resolve({ count: 1 }))
-    mockSendPaymentFailed.mockImplementationOnce(() => Promise.reject(new Error("resend down")))
-    const event = approvedEvent({ status: "DECLINED" })
-    const res = await POST(makeRequest(event))
-    expect(res.status).toBe(200)
-  })
-
   test("does not resend the payment-failed email for a second decline in the same cycle", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "rejected", externalReference: reference }),
+    )
     mockSubscriptionUpdateMany.mockImplementationOnce(() => Promise.resolve({ count: 0 }))
     mockSendPaymentFailed.mockClear()
-    const event = approvedEvent({ status: "DECLINED" })
-    await POST(makeRequest(event))
+    await POST(paymentWebhook())
     expect(mockSendPaymentFailed).not.toHaveBeenCalled()
   })
 
-  test("subscription.cancelled moves an active subscription to canceling", async () => {
+  test("subscription_preapproval cancelled moves an active subscription to canceling", async () => {
+    mockGetPreapproval.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "cancelled", externalReference: reference }),
+    )
     mockSubscriptionUpdateMany.mockClear()
-    const event = {
-      event: "subscription.cancelled",
-      data: { subscription: { id: "sub-1", reference, status: "CANCELLED" } },
-      signature: { properties: [], checksum: "x" },
-      timestamp: 1700000001,
-    }
-    const res = await POST(makeRequest(event))
+    const res = await POST(preapprovalWebhook())
     expect(res.status).toBe(200)
     expect(mockSubscriptionUpdateMany).toHaveBeenCalledWith({
       where: { userId, status: { in: ["active", "past_due", "incomplete"] } },
       data: { status: "canceling" },
     })
+  })
+
+  test("subscription_preapproval paused marks the subscription past_due", async () => {
+    mockGetPreapproval.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "paused", externalReference: reference }),
+    )
+    mockSubscriptionUpdateMany.mockImplementationOnce(() => Promise.resolve({ count: 1 }))
+    mockSendPaymentFailed.mockClear()
+    const res = await POST(preapprovalWebhook())
+    expect(res.status).toBe(200)
+    expect(mockSendPaymentFailed).toHaveBeenCalledTimes(1)
   })
 })

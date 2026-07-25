@@ -1,11 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
-import {
-  createPaymentSource,
-  chargeRecurringPayment,
-  makeSubscriptionReference,
-  type PaymentSourceType,
-} from "@/lib/wompi"
+import { createPreapproval } from "@/lib/mercadopago"
 
 // Drop a user to Free: clear the premium flag and deactivate properties beyond
 // the Free limit (keeping the most recent ones). Used both when a canceled plan
@@ -31,62 +26,37 @@ export async function downgradeToFree(userId: string) {
   ])
 }
 
-export type ActivationResult =
-  | { ok: true }
-  | { ok: false; reason: "pending" | "source_failed" | "charge_failed" }
+export type StartSubscriptionResult =
+  | { ok: true; initPoint: string }
+  | { ok: false; reason: "preapproval_failed" }
 
-// Shared activation flow: turn a tokenized card/Nequi into a payment source,
-// store it (with its type, so renewals charge it the right way), and charge the
-// first month. The webhook flips isPremium / currentPeriodEnd once Wompi confirms
-// the charge as APPROVED.
-export async function activateSubscription({
+// Kicks off a subscription: create a pending preapproval and persist its id
+// so the webhook (which only carries an id, not a full payload) can find the
+// right user later. The buyer finishes entering their card on Mercado Pago's
+// own hosted page (initPoint) — we never see card data, and Mercado Pago
+// drives every future charge itself instead of us cron-charging a stored token.
+export async function startSubscription({
   userId,
   email,
-  token,
-  type,
+  backUrl,
 }: {
   userId: string
   email: string
-  token: string
-  type: PaymentSourceType
-}): Promise<ActivationResult> {
-  const source = await createPaymentSource({ token, customerEmail: email, type })
-  if (!source.ok || !source.paymentSourceId) {
-    return { ok: false, reason: "source_failed" }
+  backUrl: string
+}): Promise<StartSubscriptionResult> {
+  const result = await createPreapproval({ userId, email, backUrl })
+  if (!result.ok || !result.preapprovalId || !result.initPoint) {
+    return { ok: false, reason: "preapproval_failed" }
   }
 
-  // The source should come back AVAILABLE (the widget handles card 3DS / Nequi
-  // approval). If it's still PENDING we can't charge it, so bail out cleanly.
-  if (source.status && source.status !== "AVAILABLE") {
-    return { ok: false, reason: "pending" }
-  }
-
-  // Persist the reusable source before charging so a slow/lost webhook never
-  // leaves us without the token needed to bill next month. status "incomplete"
-  // keeps the cron from touching it until the first charge is confirmed.
+  // status "incomplete" until the webhook confirms the first charge — mirrors
+  // the Wompi flow so downstream cron logic (expireCanceled, downgradeExpired)
+  // didn't need to change.
   await prisma.subscription.upsert({
     where: { userId },
-    create: {
-      userId,
-      status: "incomplete",
-      wompiPaymentSourceId: source.paymentSourceId,
-      wompiPaymentSourceType: type,
-    },
-    update: {
-      status: "incomplete",
-      wompiPaymentSourceId: source.paymentSourceId,
-      wompiPaymentSourceType: type,
-      pastDueSince: null,
-    },
+    create: { userId, status: "incomplete", mpPreapprovalId: result.preapprovalId },
+    update: { status: "incomplete", mpPreapprovalId: result.preapprovalId, pastDueSince: null },
   })
 
-  const charge = await chargeRecurringPayment({
-    paymentSourceId: source.paymentSourceId,
-    reference: makeSubscriptionReference(userId),
-    customerEmail: email,
-    type,
-  })
-  if (!charge.ok) return { ok: false, reason: "charge_failed" }
-
-  return { ok: true }
+  return { ok: true, initPoint: result.initPoint }
 }

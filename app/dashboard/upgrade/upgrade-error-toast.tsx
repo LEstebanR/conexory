@@ -5,13 +5,10 @@ import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 
 const MESSAGES: Record<string, string> = {
-  card: "No pudimos registrar tu método de pago. Verifica los datos e intenta de nuevo.",
-  source_failed:
-    "No pudimos registrar tu método de pago. Verifica los datos e intenta de nuevo.",
-  pending:
-    "Tu método de pago quedó pendiente de confirmación. Intenta de nuevo.",
-  charge: "No pudimos procesar el primer cobro. Intenta más tarde.",
-  charge_failed: "No pudimos procesar el primer cobro. Intenta más tarde.",
+  preapproval_failed:
+    "No pudimos iniciar la suscripción con Mercado Pago. Intenta de nuevo.",
+  cancel_failed:
+    "No pudimos cancelar tu suscripción en Mercado Pago. Intenta de nuevo o escríbenos.",
 }
 
 export function UpgradeErrorToast() {

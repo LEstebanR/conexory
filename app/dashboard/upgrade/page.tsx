@@ -6,7 +6,7 @@ import { Check, Zap, ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-rea
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
-import { SubscribeWidget } from "./subscribe-widget"
+import { SubscribeButton } from "./subscribe-button"
 import { UpgradeErrorToast } from "./upgrade-error-toast"
 import { hasProAccess } from "@/lib/plans"
 import type { Metadata } from "next"
@@ -168,7 +168,7 @@ export default async function UpgradePage() {
           <p className="text-xs font-medium text-white/50 mb-3">
             Se renueva automáticamente cada mes · Cancela cuando quieras
           </p>
-          <SubscribeWidget publicKey={process.env.WOMPI_PUBLIC_KEY ?? ""} />
+          <SubscribeButton />
         </div>
 
         <Suspense fallback={null}>
@@ -177,7 +177,7 @@ export default async function UpgradePage() {
 
         <div className="flex items-center justify-center gap-2 mt-4 text-xs text-mute">
           <ShieldCheck className="w-3.5 h-3.5" strokeWidth={1.75} />
-          Pago seguro con Wompi ·{" "}
+          Pago seguro con Mercado Pago ·{" "}
           <a href={PLAN_SUPPORT_MAILTO} className="hover:text-ink transition-colors">
             Conexory@gmail.com
           </a>
