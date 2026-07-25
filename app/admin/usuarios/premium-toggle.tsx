@@ -28,11 +28,16 @@ export default function PremiumToggle({
   userName,
   initialIsPremium,
   initialPremiumUntil,
+  subscription,
 }: {
   userId: string
   userName: string
   initialIsPremium: boolean
   initialPremiumUntil?: string | null
+  // A real Mercado Pago subscription — its date lives in Subscription.currentPeriodEnd,
+  // a separate field from premiumUntil (which is only for admin-granted Pro without
+  // billing). When present, show it read-only instead of the editable premiumUntil UI.
+  subscription?: { currentPeriodEnd: string | null; status: string } | null
 }) {
   const [isPremium, setIsPremium] = useState(initialIsPremium)
   const [premiumUntil, setPremiumUntil] = useState(initialPremiumUntil ?? null)
@@ -112,17 +117,26 @@ export default function PremiumToggle({
             "Free → Pro"
           )}
         </button>
-        {isPremium && (
-          <button
-            type="button"
-            onClick={openEdit}
-            disabled={loading}
-            className="inline-flex items-center gap-1 text-[10px] text-mute font-medium whitespace-nowrap hover:text-ink transition-colors disabled:opacity-50"
-          >
+        {isPremium && subscription ? (
+          <span className="inline-flex items-center gap-1 text-[10px] text-mute font-medium whitespace-nowrap">
             <CalendarClock className="w-3 h-3" />
-            {premiumUntil ? `hasta ${formatDate(premiumUntil)}` : "sin fecha"}
-            <Pencil className="w-2.5 h-2.5" />
-          </button>
+            {subscription.currentPeriodEnd
+              ? `${subscription.status === "canceling" ? "cancela" : "renueva"} el ${formatDate(subscription.currentPeriodEnd)}`
+              : "suscripción Mercado Pago"}
+          </span>
+        ) : (
+          isPremium && (
+            <button
+              type="button"
+              onClick={openEdit}
+              disabled={loading}
+              className="inline-flex items-center gap-1 text-[10px] text-mute font-medium whitespace-nowrap hover:text-ink transition-colors disabled:opacity-50"
+            >
+              <CalendarClock className="w-3 h-3" />
+              {premiumUntil ? `hasta ${formatDate(premiumUntil)}` : "sin fecha"}
+              <Pencil className="w-2.5 h-2.5" />
+            </button>
+          )
         )}
       </div>
 
