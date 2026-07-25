@@ -44,7 +44,12 @@ async function handlePaymentNotification(paymentId: string, type: string, body: 
   const payment = await getPayment(paymentId)
   if (!payment.ok) return
 
-  const externalId = `${type}-${paymentId}`
+  // The status is part of the idempotency key, not just the id: a single
+  // payment/preapproval goes through several distinct statuses over its
+  // lifecycle (e.g. authorized -> cancelled), each arriving as its own
+  // notification. Keying only on type+id would make every notification
+  // after the first look like a duplicate of it and get silently dropped.
+  const externalId = `${type}-${paymentId}-${payment.status ?? "unknown"}`
   const isNew = await recordEvent(externalId, type, payment.status ?? "unknown", body)
   if (!isNew) return
 
@@ -66,7 +71,7 @@ async function handlePreapprovalNotification(preapprovalId: string, type: string
   const preapproval = await getPreapproval(preapprovalId)
   if (!preapproval.ok) return
 
-  const externalId = `${type}-${preapprovalId}`
+  const externalId = `${type}-${preapprovalId}-${preapproval.status ?? "unknown"}`
   const isNew = await recordEvent(externalId, type, preapproval.status ?? "unknown", body)
   if (!isNew) return
 

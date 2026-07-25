@@ -344,4 +344,22 @@ describe("POST /api/webhooks/mercadopago", () => {
     expect(res.status).toBe(200)
     expect(mockSendPaymentFailed).toHaveBeenCalledTimes(1)
   })
+
+  test("keys idempotency by status, not just id — a later status for the same preapproval isn't a duplicate of an earlier one", async () => {
+    // The same preapprovalId goes through multiple distinct notifications
+    // over its lifecycle (e.g. authorized -> cancelled). Keying the
+    // idempotency record only on type+id would make the second notification
+    // look like a duplicate of the first (same id) and get silently dropped
+    // — exactly what happened when a real cancellation never reached
+    // handleCancelled because an earlier "authorized" event for the same
+    // preapproval had already claimed that externalId.
+    mockGetPreapproval.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "cancelled", externalReference: reference }),
+    )
+    mockPaymentEventCreate.mockClear()
+    await POST(preapprovalWebhook("preapproval-1"))
+    const [[{ data }]] = mockPaymentEventCreate.mock.calls as [[{ data: { externalId: string } }]]
+    expect(data.externalId).toContain("cancelled")
+    expect(data.externalId).not.toBe("subscription_preapproval-preapproval-1")
+  })
 })
