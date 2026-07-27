@@ -210,7 +210,7 @@ export default function PremiumToggle({
                 </Dialog.Title>
                 <Dialog.Description className="text-sm text-body mt-1.5 leading-relaxed">
                   {hasSubscription
-                    ? "Ajuste manual de la suscripción real en Mercado Pago — el próximo cobro puede volver a mover esta fecha."
+                    ? "Ajuste manual de la suscripción real en Mercado Pago. El próximo cobro puede volver a mover esta fecha."
                     : "Cambia la fecha hasta la que tiene acceso Pro manual."}
                 </Dialog.Description>
                 <div className="mt-4 text-left">
