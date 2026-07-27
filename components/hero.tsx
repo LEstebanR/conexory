@@ -22,7 +22,7 @@ function BrowserMock() {
 
       {/* Floating: link copied */}
       <div
-        className="hidden sm:flex absolute -top-5 -left-10 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
+        className="hidden lg:flex absolute -top-5 -left-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
         style={{ animationDelay: "500ms" }}
       >
         <div className="w-5 h-5 rounded-full bg-ink flex items-center justify-center">
@@ -33,11 +33,39 @@ function BrowserMock() {
 
       {/* Floating: shares count */}
       <div
-        className="hidden sm:flex absolute -bottom-5 -right-10 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
+        className="hidden lg:flex absolute -bottom-5 -right-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
         style={{ animationDelay: "650ms" }}
       >
         <MessageCircle className="w-4 h-4 text-ink" />
         <span className="text-xs font-bold text-ink">+3 interesados hoy</span>
+      </div>
+    </div>
+  );
+}
+
+// Reuses the same screenshot as Features' portfolio block — see
+// components/features.tsx. Shown here as a browser card (vs. BrowserMock's
+// phone frame) since the agent profile screenshot is a wide desktop capture.
+function AgentProfileMock() {
+  return (
+    <div className="relative mx-auto w-full max-w-sm sm:max-w-md">
+      <div className="rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden">
+        <div className="flex items-center gap-1.5 border-b border-hairline bg-canvas-softer px-4 py-2.5">
+          <span className="w-2 h-2 rounded-full bg-hairline-strong" />
+          <span className="w-2 h-2 rounded-full bg-hairline-strong" />
+          <span className="w-2 h-2 rounded-full bg-hairline-strong" />
+          <span className="ml-2 text-[11px] font-medium text-mute truncate">
+            conexory.com/agente/tu-nombre
+          </span>
+        </div>
+        <Image
+          src="/marketing/agent-gallery.png"
+          alt="Perfil público de un agente en Conexory con su portafolio de propiedades activas"
+          width={2560}
+          height={1780}
+          sizes="(max-width: 640px) 320px, 448px"
+          className="w-full h-auto"
+        />
       </div>
     </div>
   );
@@ -146,12 +174,15 @@ export default function Hero() {
         </p>
       </div>
 
-      {/* Product mock */}
+      {/* Product mock — property ficha and agent profile side by side */}
       <div
         className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 mt-20 lg:mt-28 animate-fade-up"
         style={{ animationDelay: "360ms" }}
       >
-        <BrowserMock />
+        <div className="grid sm:grid-cols-2 gap-14 sm:gap-6 lg:gap-10 items-center">
+          <BrowserMock />
+          <AgentProfileMock />
+        </div>
       </div>
     </section>
   );
