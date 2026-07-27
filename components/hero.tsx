@@ -50,7 +50,7 @@ function BrowserMock() {
 // out more than a crop does.
 function AgentProfileMock() {
   return (
-    <div className="relative mx-auto w-full max-w-xs sm:max-w-sm h-72 sm:h-full">
+    <div className="relative mx-auto w-full max-w-xs sm:max-w-sm aspect-[860/1600] sm:aspect-auto sm:h-full">
       <div className="relative h-full rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden">
         <Image
           src="/marketing/agent-gallery.png"
