@@ -51,20 +51,22 @@ function BrowserMock() {
 function AgentProfileMock() {
   return (
     <div className="relative mx-auto w-full max-w-xs sm:max-w-sm h-72 sm:h-full">
-      <div className="relative h-full rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden p-3 sm:p-4">
-        <div className="relative w-full h-full rounded-lg overflow-hidden">
-          <Image
-            src="/marketing/agent-gallery.png"
-            alt="Perfil público de un agente en Conexory con su portafolio de propiedades activas"
-            fill
-            // object-cover scales this up well beyond the box's own width to
-            // cover its (taller) height, so `sizes` needs to reflect that
-            // effective rendered width, not the box width — otherwise Next.js
-            // serves too small a variant and the crop looks pixelated.
-            sizes="(max-width: 640px) 800px, 960px"
-            className="object-cover"
-          />
-        </div>
+      <div className="relative h-full rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden">
+        <Image
+          src="/marketing/agent-gallery.png"
+          alt="Perfil público de un agente en Conexory con su portafolio de propiedades activas"
+          fill
+          // object-cover scales this up well beyond the box's own width to
+          // cover its (taller) height, so `sizes` needs to reflect that
+          // effective rendered width, not the box width — otherwise Next.js
+          // serves too small a variant and the crop looks pixelated.
+          sizes="(max-width: 640px) 800px, 960px"
+          // scale-95 shrinks the already-covered image around its center,
+          // revealing a bit of the card's white background as a margin —
+          // padding the box itself before the object-cover fit (instead)
+          // shrinks the crop *area*, cutting into the button edges.
+          className="object-cover scale-95"
+        />
       </div>
     </div>
   );
