@@ -50,13 +50,17 @@ function BrowserMock() {
 // out more than a crop does.
 function AgentProfileMock() {
   return (
-    <div className="relative mx-auto w-full max-w-sm sm:max-w-md h-72 sm:h-full">
+    <div className="relative mx-auto w-full max-w-xs sm:max-w-sm h-72 sm:h-full">
       <div className="relative h-full rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden">
         <Image
           src="/marketing/agent-gallery.png"
           alt="Perfil público de un agente en Conexory con su portafolio de propiedades activas"
           fill
-          sizes="(max-width: 640px) 320px, 448px"
+          // object-cover scales this up well beyond the box's own width to
+          // cover its (taller) height, so `sizes` needs to reflect that
+          // effective rendered width, not the box width — otherwise Next.js
+          // serves too small a variant and the crop looks pixelated.
+          sizes="(max-width: 640px) 800px, 960px"
           className="object-cover"
         />
       </div>
