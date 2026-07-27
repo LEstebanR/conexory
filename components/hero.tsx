@@ -44,18 +44,20 @@ function BrowserMock() {
 }
 
 // Reuses the same screenshot as Features' portfolio block — see
-// components/features.tsx.
+// components/features.tsx. The screenshot is a wide desktop capture, so it's
+// cropped (object-cover) to match BrowserMock's height instead of rendered
+// at its own intrinsic aspect ratio — side by side, mismatched heights stood
+// out more than a crop does.
 function AgentProfileMock() {
   return (
-    <div className="relative mx-auto w-full max-w-sm sm:max-w-md">
-      <div className="rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden">
+    <div className="relative mx-auto w-full max-w-sm sm:max-w-md h-72 sm:h-full">
+      <div className="relative h-full rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden">
         <Image
           src="/marketing/agent-gallery.png"
           alt="Perfil público de un agente en Conexory con su portafolio de propiedades activas"
-          width={2560}
-          height={1780}
+          fill
           sizes="(max-width: 640px) 320px, 448px"
-          className="w-full h-auto"
+          className="object-cover"
         />
       </div>
     </div>
@@ -170,7 +172,7 @@ export default function Hero() {
         className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 mt-20 lg:mt-28 animate-fade-up"
         style={{ animationDelay: "360ms" }}
       >
-        <div className="grid sm:grid-cols-2 gap-14 sm:gap-6 lg:gap-10 items-center">
+        <div className="grid sm:grid-cols-2 gap-14 sm:gap-6 lg:gap-10 items-stretch">
           <BrowserMock />
           <AgentProfileMock />
         </div>
