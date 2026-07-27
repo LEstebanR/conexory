@@ -22,7 +22,7 @@ function BrowserMock() {
 
       {/* Floating: link copied */}
       <div
-        className="hidden sm:flex absolute -top-5 -left-10 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
+        className="hidden lg:flex absolute -top-5 -left-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
         style={{ animationDelay: "500ms" }}
       >
         <div className="w-5 h-5 rounded-full bg-ink flex items-center justify-center">
@@ -33,11 +33,40 @@ function BrowserMock() {
 
       {/* Floating: shares count */}
       <div
-        className="hidden sm:flex absolute -bottom-5 -right-10 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
+        className="hidden lg:flex absolute -bottom-5 -right-6 bg-white rounded-full shadow-xl border border-hairline px-4 py-2.5 items-center gap-2 z-10 animate-fade-up"
         style={{ animationDelay: "650ms" }}
       >
         <MessageCircle className="w-4 h-4 text-ink" />
         <span className="text-xs font-bold text-ink">+3 interesados hoy</span>
+      </div>
+    </div>
+  );
+}
+
+// Reuses the same screenshot as Features' portfolio block — see
+// components/features.tsx. The screenshot is a wide desktop capture, so it's
+// cropped (object-cover) to match BrowserMock's height instead of rendered
+// at its own intrinsic aspect ratio — side by side, mismatched heights stood
+// out more than a crop does.
+function AgentProfileMock() {
+  return (
+    <div className="relative mx-auto w-full max-w-xs sm:max-w-sm aspect-[860/1600] sm:aspect-auto sm:h-full">
+      <div className="relative h-full rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden">
+        <Image
+          src="/marketing/agent-gallery.png"
+          alt="Perfil público de un agente en Conexory con su portafolio de propiedades activas"
+          fill
+          // object-cover scales this up well beyond the box's own width to
+          // cover its (taller) height, so `sizes` needs to reflect that
+          // effective rendered width, not the box width — otherwise Next.js
+          // serves too small a variant and the crop looks pixelated.
+          sizes="(max-width: 640px) 800px, 960px"
+          // scale-95 shrinks the already-covered image around its center,
+          // revealing a bit of the card's white background as a margin —
+          // padding the box itself before the object-cover fit (instead)
+          // shrinks the crop *area*, cutting into the button edges.
+          className="object-cover scale-95"
+        />
       </div>
     </div>
   );
@@ -146,12 +175,15 @@ export default function Hero() {
         </p>
       </div>
 
-      {/* Product mock */}
+      {/* Product mock — property ficha and agent profile side by side */}
       <div
         className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 mt-20 lg:mt-28 animate-fade-up"
         style={{ animationDelay: "360ms" }}
       >
-        <BrowserMock />
+        <div className="grid sm:grid-cols-2 gap-14 sm:gap-6 lg:gap-10 items-stretch">
+          <BrowserMock />
+          <AgentProfileMock />
+        </div>
       </div>
     </section>
   );
