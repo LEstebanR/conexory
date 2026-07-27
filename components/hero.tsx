@@ -44,20 +44,11 @@ function BrowserMock() {
 }
 
 // Reuses the same screenshot as Features' portfolio block — see
-// components/features.tsx. Shown here as a browser card (vs. BrowserMock's
-// phone frame) since the agent profile screenshot is a wide desktop capture.
+// components/features.tsx.
 function AgentProfileMock() {
   return (
     <div className="relative mx-auto w-full max-w-sm sm:max-w-md">
       <div className="rounded-2xl border border-hairline bg-white shadow-2xl shadow-black/10 overflow-hidden">
-        <div className="flex items-center gap-1.5 border-b border-hairline bg-canvas-softer px-4 py-2.5">
-          <span className="w-2 h-2 rounded-full bg-hairline-strong" />
-          <span className="w-2 h-2 rounded-full bg-hairline-strong" />
-          <span className="w-2 h-2 rounded-full bg-hairline-strong" />
-          <span className="ml-2 text-[11px] font-medium text-mute truncate">
-            conexory.com/agente/tu-nombre
-          </span>
-        </div>
         <Image
           src="/marketing/agent-gallery.png"
           alt="Perfil público de un agente en Conexory con su portafolio de propiedades activas"
