@@ -8,8 +8,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
-    "test": "bun test",
-    "coverage": "bun test --coverage",
+    "test": "bun test --path-ignore-patterns='e2e/**'",
+    "coverage": "bun test --coverage --path-ignore-patterns='e2e/**'",
     "test:e2e": "playwright test",
     "postinstall": "prisma generate",
     "prepare": "git config core.hooksPath .githooks"
