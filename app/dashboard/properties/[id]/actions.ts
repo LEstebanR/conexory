@@ -1,5 +1,6 @@
 "use server"
 
+import * as Sentry from "@sentry/nextjs"
 import { headers } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -185,11 +186,17 @@ export async function deleteProperty(propertyId: string) {
   })
   if (!property) throw new Error("Propiedad no encontrada")
 
-  if (property.images.length > 0) {
-    await del(property.images)
-  }
+  try {
+    if (property.images.length > 0) {
+      await del(property.images)
+    }
 
-  await prisma.property.delete({
-    where: { id: propertyId, userId: session.user.id },
-  })
+    await prisma.property.delete({
+      where: { id: propertyId, userId: session.user.id },
+    })
+  } catch (err) {
+    Sentry.captureException(err, { tags: { action: "deleteProperty" } })
+    console.error("deleteProperty failed:", err)
+    throw err
+  }
 }
