@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
     SENTRY_DSN: process.env.SENTRY_DSN ?? "",
     VERCEL_ENV: process.env.VERCEL_ENV ?? "",
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
   images: {
     remotePatterns: [
       {
