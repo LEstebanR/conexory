@@ -6,6 +6,10 @@ import { ArrowLeft, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SUPPORT_EMAIL } from "@/lib/urls"
 
+// Set once we've already reloaded for this error, so a persistent failure
+// (not just a stale client bundle) doesn't reload in a loop.
+const STALE_ACTION_RELOAD_KEY = "conexory:stale-server-action-reload"
+
 export default function GlobalError({
   error,
   reset,
@@ -14,6 +18,13 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
+    if (error.message.includes("Failed to find Server Action")) {
+      if (!sessionStorage.getItem(STALE_ACTION_RELOAD_KEY)) {
+        sessionStorage.setItem(STALE_ACTION_RELOAD_KEY, "1")
+        window.location.reload()
+      }
+      return
+    }
     console.error(error)
   }, [error])
 
