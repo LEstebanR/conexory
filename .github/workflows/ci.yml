@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun test
+      - run: bun run test
 
   coverage:
     name: Coverage
@@ -41,4 +41,35 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun coverage
+      - run: bun run coverage
+
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: conexory_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/conexory_e2e
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/conexory_e2e
+      # Throwaway — signs sessions in the ephemeral Postgres container above.
+      BETTER_AUTH_SECRET: e2e-ci-only-throwaway-secret-not-used-anywhere-else
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bunx prisma migrate deploy
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run test:e2e
