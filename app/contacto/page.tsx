@@ -7,6 +7,7 @@ import Reveal from "@/components/reveal"
 export const metadata: Metadata = {
   title: "Contacto — Conexory",
   description: "Ponte en contacto con el equipo de Conexory.",
+  alternates: { canonical: "/contacto" },
 }
 
 const channels = [

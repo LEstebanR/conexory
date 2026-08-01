@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "Política de Cookies — Conexory",
   description: "Cómo usamos cookies y tecnologías similares en Conexory.",
   robots: { index: false, follow: true },
+  alternates: { canonical: "/cookies" },
 }
 
 const sections = [

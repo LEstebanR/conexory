@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   description:
     "Términos y condiciones de uso de la plataforma Conexory para asesores inmobiliarios en Colombia.",
   robots: { index: false, follow: true },
+  alternates: { canonical: "/terms" },
 }
 
 const sections = [

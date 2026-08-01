@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "Planes y precios — Conexory para asesores inmobiliarios",
   description:
     "Plan gratuito para siempre con 3 propiedades. Plan Pro a $99.999 COP/mes con hasta 50 propiedades. Sin permanencia, cancela cuando quieras. Diseñado para agentes colombianos.",
+  alternates: { canonical: "/precios" },
 }
 
 const plans = [
