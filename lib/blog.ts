@@ -8,6 +8,7 @@ export type PostMeta = {
   slug: string
   title: string
   date: string
+  dateModified?: string
   description: string
   tags: string[]
   readingTime: number
@@ -36,6 +37,7 @@ export function getAllPosts(): PostMeta[] {
         slug,
         title: data.title ?? slug,
         date: data.date ?? "",
+        dateModified: data.dateModified,
         description: data.description ?? "",
         tags: data.tags ?? [],
         readingTime: estimateReadingTime(content),
@@ -75,6 +77,7 @@ export function getPost(slug: string): Post | null {
     slug,
     title: data.title ?? slug,
     date: data.date ?? "",
+    dateModified: data.dateModified,
     description: data.description ?? "",
     tags: data.tags ?? [],
     readingTime: estimateReadingTime(content),

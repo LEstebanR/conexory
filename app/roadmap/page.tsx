@@ -8,6 +8,7 @@ import { SuggestionModal } from "./suggestion-modal"
 export const metadata: Metadata = {
   title: "Roadmap — Conexory",
   description: "Lo que viene en Conexory. Nuestro plan de funcionalidades.",
+  alternates: { canonical: "/roadmap" },
 }
 
 const items = [

@@ -104,6 +104,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: { canonical: `/agente/${slug}` },
     openGraph: {
       type: "profile",
       url: `${appUrl}/agente/${slug}`,
@@ -173,8 +174,26 @@ export default async function AgentProfilePage({
   const hasContact = !!(agent.phone || agent.email)
   const hasSocial = socialLinks.length > 0
 
+  const appUrl = getAppUrl()
+  const agentSchema = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    name: agent.name,
+    url: `${appUrl}/agente/${slug}`,
+    ...(agent.image && { image: agent.image }),
+    ...(agent.bio && { description: agent.bio }),
+    ...(agent.location && { areaServed: agent.location }),
+    ...(agent.phone && { telephone: agent.phone }),
+    ...(agent.email && { email: agent.email }),
+    ...(hasSocial && { sameAs: socialLinks.map(({ href }) => href) }),
+  }
+
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(agentSchema) }}
+      />
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="pt-12 pb-10 px-5">
