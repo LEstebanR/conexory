@@ -225,10 +225,11 @@ function AgentCard({ propertyId, user, whatsappMessage }: { propertyId: string; 
       {/* Avatar */}
       <div className="flex justify-center mb-4">
         {user.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={user.image}
             alt={user.name}
+            width={72}
+            height={72}
             className="w-[72px] h-[72px] rounded-full object-cover shadow-sm"
           />
         ) : (
