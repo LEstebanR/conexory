@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
+import { slugifyCity } from "@/lib/slug"
 import type { AgentProperty } from "@/app/agente/[slug]/agent-properties"
 import type { MapProperty } from "@/app/agente/[slug]/agent-map"
 
@@ -10,6 +11,7 @@ export type PropertySort = "recent" | "price-desc" | "price-asc"
 
 export interface PropertyFilters {
   type?: string
+  transactionType?: string
   priceMin?: number
   priceMax?: number
   areaMin?: number
@@ -65,6 +67,7 @@ function buildWhere(base: Prisma.PropertyWhereInput, filters: PropertyFilters): 
   const conditions: Prisma.PropertyWhereInput[] = [base]
 
   if (filters.type) conditions.push({ type: filters.type })
+  if (filters.transactionType) conditions.push({ transactionType: filters.transactionType })
 
   if (filters.priceMin != null || filters.priceMax != null) {
     conditions.push({
@@ -228,6 +231,7 @@ export function parsePropertyQuery(searchParams: SearchParamsRecord): {
   return {
     filters: {
       type: get("type") || undefined,
+      transactionType: get("transaccion") || undefined,
       priceMin: num("priceMin"),
       priceMax: num("priceMax"),
       areaMin: num("areaMin"),
@@ -240,4 +244,51 @@ export function parsePropertyQuery(searchParams: SearchParamsRecord): {
     sort,
     page,
   }
+}
+
+// Below this many published listings, a /propiedades/[ciudad] page is real
+// but too thin to index — noindex it rather than 404 (the URL still works
+// for anyone who lands on it directly).
+export const MIN_CITY_LISTINGS = 3
+
+export interface CityGroup {
+  slug: string
+  // Distinct raw `city` spellings (e.g. "Medellín" vs "medellin") that share
+  // this slug — properties.ts callers must filter with `city: { in: cities }`,
+  // never with the raw slug, since city is free text entered by agents.
+  cities: string[]
+  count: number
+}
+
+// Picks the best-looking spelling among a city's variants for display
+// (title case preferred over an all-lowercase agent typo).
+export function pickDisplayCity(cities: string[]): string {
+  const capitalized = cities.filter((c) => /^[A-ZÁÉÍÓÚÑ]/.test(c))
+  const pool = capitalized.length > 0 ? capitalized : cities
+  return pool.reduce((best, c) => (c.length > best.length ? c : best), pool[0])
+}
+
+// Groups published properties by city slug so free-text spelling variants
+// of the same city are treated as one page instead of splitting SEO value
+// (and, worse, creating near-duplicate /propiedades/[ciudad] pages).
+export async function getCityIndex(): Promise<CityGroup[]> {
+  const rows = await prisma.property.groupBy({
+    by: ["city"],
+    where: { published: true },
+    _count: { _all: true },
+  })
+
+  const bySlug = new Map<string, CityGroup>()
+  for (const row of rows) {
+    const slug = slugifyCity(row.city)
+    if (!slug) continue
+    const existing = bySlug.get(slug)
+    if (existing) {
+      existing.cities.push(row.city)
+      existing.count += row._count._all
+    } else {
+      bySlug.set(slug, { slug, cities: [row.city], count: row._count._all })
+    }
+  }
+  return [...bySlug.values()]
 }

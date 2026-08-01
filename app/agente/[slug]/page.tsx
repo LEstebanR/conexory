@@ -202,10 +202,11 @@ export default async function AgentProfilePage({
           {/* Avatar */}
           <div className="mb-5">
             {agent.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={agent.image}
                 alt={agent.name}
+                width={100}
+                height={100}
                 className="w-[100px] h-[100px] rounded-full object-cover shadow-md"
               />
             ) : (
