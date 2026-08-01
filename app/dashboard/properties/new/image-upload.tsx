@@ -34,7 +34,7 @@ export default function ImageUpload({
     onUploadingChangeRef.current = onUploadingChange
   })
 
-  // Sincroniza con el padre después de que el estado local se actualice
+  // Syncs with the parent after local state updates
   useEffect(() => {
     onUrlsChangeRef.current(items.filter((i) => i.url).map((i) => i.url!))
     onUploadingChangeRef.current(items.some((i) => i.uploading))
@@ -138,7 +138,7 @@ export default function ImageUpload({
         }}
       />
 
-      {/* Grid de previews */}
+      {/* Preview grid */}
       {items.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {items.map((item, index) => (

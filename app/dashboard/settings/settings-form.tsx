@@ -120,7 +120,7 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
         </div>
       </div>
 
-      {/* Nombre */}
+      {/* Name */}
       <div className="space-y-1.5">
         <label htmlFor="name" className="block text-sm font-semibold text-ink">
           Nombre completo
@@ -128,7 +128,7 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
         <Input id="name" name="name" defaultValue={name} required maxLength={80} className="h-11" />
       </div>
 
-      {/* Ubicación */}
+      {/* Location */}
       <div className="space-y-1.5">
         <label htmlFor="location" className="block text-sm font-semibold text-ink">
           Ciudad de trabajo
@@ -161,7 +161,7 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
         />
       </div>
 
-      {/* Teléfono */}
+      {/* Phone */}
       <div className="space-y-1.5">
         <label htmlFor="phone" className="block text-sm font-semibold text-ink">
           Teléfono de contacto
@@ -205,7 +205,7 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
         </label>
       </div>
 
-      {/* Redes sociales */}
+      {/* Social networks */}
       <div className="space-y-3 pt-2 border-t border-hairline">
         <p className="text-sm font-semibold text-ink pt-2">Redes sociales <span className="ml-1 text-xs font-normal text-mute">Opcional · solo el usuario, sin @</span></p>
         {([
@@ -232,7 +232,7 @@ export default function SettingsForm({ name, email, image, location, bio, phone,
         ))}
       </div>
 
-      {/* Color de marca */}
+      {/* Brand color */}
       <div className="space-y-1.5 pt-2 border-t border-hairline">
         <label htmlFor="brandColorPicker" className="block text-sm font-semibold text-ink pt-2">
           Color de marca

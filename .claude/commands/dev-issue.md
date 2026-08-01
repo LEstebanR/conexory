@@ -1,127 +1,127 @@
 ---
-description: Proceso completo para desarrollar un issue de Linear de Conexory, paso a paso — desde leerlo hasta el PR, escalando el rigor al tamaño real del cambio. Retoma desarrollos ya empezados.
+description: Full process for developing a Conexory Linear issue, step by step — from reading it to the PR, scaling rigor to the change's real size. Resumes work already started.
 argument-hint: [LES-XXX]
 ---
 
-# Desarrollar un issue de Linear
+# Develop a Linear issue
 
-Guía el desarrollo completo de un issue de Linear del proyecto Conexory (`LEstebanR/conexory`), desde leerlo hasta abrir el PR y dejar constancia en el vault. Sigue los pasos en orden, anuncia en qué paso vas, y respeta los checkpoints del usuario — pero **escala el rigor al tamaño real del cambio** (Paso 2): no todo issue necesita el flujo completo.
+Guides the complete development of a Conexory (`LEstebanR/conexory`) Linear issue, from reading it to opening the PR and leaving a record in the vault. Follow the steps in order, announce which step you're on, and respect the user's checkpoints — but **scale the rigor to the change's real size** (Step 2): not every issue needs the full flow.
 
-Usa `$ARGUMENTS` como ID del issue (`LES-XXX`). Si falta, intenta inferirlo de la rama actual (`git branch --show-current`, patrón `LES-\d+`); si tampoco es posible, pregúntale al usuario cuál es.
+Use `$ARGUMENTS` as the issue ID (`LES-XXX`). If missing, try to infer it from the current branch (`git branch --show-current`, pattern `LES-\d+`); if that's not possible either, ask the user what it is.
 
-Esta skill puede arrancar un desarrollo desde cero o retomar uno ya empezado en una sesión anterior — el Paso 0 decide por dónde entrar.
+This skill can start a development from scratch or resume one already started in a previous session — Step 0 decides where to enter.
 
 ## Guard
 
-Verifica que estás en el repo correcto: `git remote get-url origin` debe contener `LEstebanR/conexory`. Si no, avisa que esta skill es específica de Conexory y aborta.
+Verify you're in the right repo: `git remote get-url origin` must contain `LEstebanR/conexory`. If not, say this skill is Conexory-specific and abort.
 
-## Reglas transversales
+## Cross-cutting rules
 
-- Nunca hagas `git commit` ni `git push` sin autorización explícita del usuario en ese momento — ni siquiera dentro del flujo de `/create-pr` (Paso 8), y aunque ya haya aprobado algo similar antes en la misma conversación.
-- No inventes alcance, criterios de aceptación o decisiones de producto que no estén respaldados por el issue o por lo que diga el usuario. Si algo no está claro, pregunta antes de implementar — regla global de `CLAUDE.md`.
-- El issue de Linear es la única fuente de tracking de este proyecto: no hay una capa de GitHub Issues separada que sincronizar.
-- El vault de Obsidian (`01-projects/conexory/`) es el registro durable de este trabajo, además de (no en vez de) la memoria de Claude Code — ver Paso 10.
+- Never `git commit` or `git push` without the user's explicit authorization at that moment — not even inside the `/create-pr` flow (Step 8), and even if they already approved something similar earlier in the same conversation.
+- Don't invent scope, acceptance criteria, or product decisions that aren't backed by the issue or by what the user says. If something isn't clear, ask before implementing — global `CLAUDE.md` rule.
+- The Linear issue is this project's only tracking source: there's no separate GitHub Issues layer to sync.
+- The Obsidian vault (`01-projects/conexory/`) is the durable record of this work, in addition to (not instead of) Claude Code's memory — see Step 10.
 
-## Proceso
+## Process
 
-### Paso 0 — Detectar de dónde arrancar
+### Step 0 — Detect where to start from
 
-Resuelve el ID del issue y revisa si ya hay trabajo empezado:
-- Rama existente: `git branch -a | grep <LES-n>`
-- PR existente: `gh pr list --search "<LES-n>" --state all --json number,title,url,isDraft,state,baseRefName`
+Resolve the issue ID and check whether work has already started:
+- Existing branch: `git branch -a | grep <LES-n>`
+- Existing PR: `gh pr list --search "<LES-n>" --state all --json number,title,url,isDraft,state,baseRefName`
 
-Decide el punto de entrada:
-- Nada existe → Paso 1.
-- Rama con commits, sin PR, sin plan claro aprobado → retoma desde el Paso 3 usando el estado de la rama como contexto (no repitas preguntas ya respondidas si se pueden inferir de los commits).
-- Rama con commits que ya implementan un plan claro, sin PR → Paso 6 (code review pre-PR).
-- PR ya abierto sin el `/code-review` real corrido todavía → Paso 9.
-- PR ya abierto y revisado, o ya aprobado/mergeado y solo falta dejar constancia → Paso 10.
+Decide the entry point:
+- Nothing exists → Step 1.
+- Branch with commits, no PR, no clear approved plan → resume from Step 3 using the branch's state as context (don't repeat already-answered questions if they can be inferred from the commits).
+- Branch with commits that already implement a clear plan, no PR → Step 6 (pre-PR code review).
+- PR already open without the real `/code-review` run yet → Step 9.
+- PR already open and reviewed, or already approved/merged and only the record is missing → Step 10.
 
-Anuncia en una línea el punto de entrada elegido y por qué, antes de continuar.
+Announce in one line the chosen entry point and why, before continuing.
 
-### Paso 1 — Leer el issue
+### Step 1 — Read the issue
 
-`mcp__linear-server__get_issue({ id: "<LES-n>" })` + `mcp__linear-server__list_comments({ issueId: "<LES-n>" })` para contexto adicional. Si `get_issue` señala relaciones (bloqueadores, duplicados), tráelas también con `includeRelations: true`.
+`mcp__linear-server__get_issue({ id: "<LES-n>" })` + `mcp__linear-server__list_comments({ issueId: "<LES-n>" })` for extra context. If `get_issue` shows relations (blockers, duplicates), pull those too with `includeRelations: true`.
 
-### Paso 2 — Calibrar el rigor del proceso
+### Step 2 — Calibrate the process's rigor
 
-Antes de seguir, clasifica el issue:
-- **Pequeño y mecánico** (un archivo o cambio bien especificado, sin decisiones de arquitectura, sin ambigüedad real de alcance): salta las preguntas de aclaración y el checkpoint de plan (Pasos 3 y 4) — ve directo al Paso 5, avisando en una línea qué vas a hacer.
-- **Multi-archivo o con decisiones de diseño/arquitectura reales**: sigue el flujo completo (Pasos 3 y 4).
+Before continuing, classify the issue:
+- **Small and mechanical** (a single file or a well-specified change, no architecture decisions, no real scope ambiguity): skip the clarifying questions and the plan checkpoint (Steps 3 and 4) — go straight to Step 5, noting in one line what you're about to do.
+- **Multi-file or with real design/architecture decisions**: follow the full flow (Steps 3 and 4).
 
-Si tienes dudas sobre en qué categoría cae, trátalo como el caso grande. Esto no exime de preguntar si aparece una ambigüedad puntual real (ej. una inconsistencia en el propio issue) aunque el cambio en sí sea chico — eso se pregunta siempre, sin importar el tamaño.
+If you're unsure which category it falls into, treat it as the big case. This doesn't exempt you from asking if a real, specific ambiguity comes up (e.g. an inconsistency in the issue itself) even if the change itself is small — that's always asked, regardless of size.
 
-### Paso 3 — Checkpoint: preguntas de aclaración
+### Step 3 — Checkpoint: clarifying questions
 
-Solo si el Paso 2 lo marcó como no-trivial. Detecta qué falta para proponer un plan con confianza — alcance ambiguo, varias interpretaciones válidas, criterios de aceptación incompletos, dependencias no resueltas. Usa `AskUserQuestion`.
+Only if Step 2 marked it as non-trivial. Detect what's missing to propose a plan with confidence — ambiguous scope, several valid interpretations, incomplete acceptance criteria, unresolved dependencies. Use `AskUserQuestion`.
 
-Si el issue ya es completamente claro, dilo explícitamente y no preguntes por preguntar.
+If the issue is already completely clear, say so explicitly and don't ask just to ask.
 
-### Paso 4 — Checkpoint: proponer el plan
+### Step 4 — Checkpoint: propose the plan
 
-Solo si el Paso 2 lo marcó como no-trivial. Si conviene explorar el código antes de proponer el plan, hazlo — no adivines rutas de archivo ni reinventes utilidades que ya existen en el repo.
+Only if Step 2 marked it as non-trivial. If it helps to explore the code before proposing the plan, do it — don't guess file paths or reinvent utilities that already exist in the repo.
 
-Formato (regla global de `CLAUDE.md`):
+Format (global `CLAUDE.md` rule):
 ```
-1. [Paso] → verificar: [check]
-2. [Paso] → verificar: [check]
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
 ```
 
-Espera aprobación explícita del usuario antes de tocar código. Si pide cambios, ajusta y vuelve a preguntar.
+Wait for the user's explicit approval before touching code. If they ask for changes, adjust and ask again.
 
-### Paso 5 — Implementar
+### Step 5 — Implement
 
-Antes de tocar código, crea la rama desde `main` con la convención de `AGENTS.md`: `git checkout -b {type}/LES-{n}-{descripcion-en-kebab-case}` (`{type}` = `feat|fix|refactor|chore|docs`). Si ya existe rama para este issue (Paso 0), reusa esa en vez de crear una nueva.
+Before touching code, create the branch from `main` following `AGENTS.md`'s convention: `git checkout -b {type}/LES-{n}-{kebab-case-description}` (`{type}` = `feat|fix|refactor|chore|docs`). If a branch for this issue already exists (Step 0), reuse it instead of creating a new one.
 
-Implementa siguiendo las convenciones de `AGENTS.md`: Server Components por defecto, Zod en toda Server Action nueva, singleton de Prisma (`lib/prisma.ts`), tokens semánticos de Tailwind (nunca `tailwind.config.js`), `getAppUrl()` para cualquier URL absoluta. Si el cambio toca `prisma/schema.prisma`, usa la skill `/db` para generar la migración — nunca `prisma db push`.
+Implement following `AGENTS.md`'s conventions: Server Components by default, Zod on every new Server Action, the Prisma singleton (`lib/prisma.ts`), Tailwind's semantic tokens (never `tailwind.config.js`), `getAppUrl()` for any absolute URL. If the change touches `prisma/schema.prisma`, use the `/db` skill to generate the migration — never `prisma db push`.
 
-Para cambios de UI, valida el flujo real en `bun dev` antes de dar el paso por terminado (regla global de `CLAUDE.md`).
+For UI changes, validate the real flow in `bun dev` before considering the step done (global `CLAUDE.md` rule).
 
-Si aparece una desviación real del plan aprobado (algo no contemplado, un cambio de alcance), avísale al usuario — no la asumas en silencio como si fuera parte del plan original.
+If a real deviation from the approved plan comes up (something not accounted for, a scope change), tell the user — don't silently treat it as part of the original plan.
 
-### Paso 6 — Code review pre-PR
+### Step 6 — Pre-PR code review
 
-`/code-review` está pensada para revisar un PR ya abierto en GitHub (usa `gh`, comenta ahí) — todavía no existe en este punto del flujo, se crea recién en el Paso 8. No la invoques acá.
+`/code-review` is meant to review a PR already opened on GitHub (it uses `gh`, comments there) — it doesn't exist yet at this point in the flow, it's only created in Step 8. Don't invoke it here.
 
-Corre `/review-conexory` (invariantes propios del proyecto) sobre el diff local, y además hacé vos mismo una pasada de correctness genérica sobre el mismo diff (equivalente en espíritu a lo que haría `/code-review`, pero manual: bugs obvios, casos borde, nada específico de Conexory).
+Run `/review-conexory` (this project's own invariants) over the local diff, and also do your own pass of generic correctness over the same diff (equivalent in spirit to what `/code-review` would do, but manual: obvious bugs, edge cases, nothing Conexory-specific).
 
-Resuelve los hallazgos bloqueantes antes de seguir (con el mismo criterio de avisar antes de aplicar cambios no triviales). Las sugerencias menores, decídelas con el usuario: ahora o quedan para después.
+Resolve blocking findings before continuing (with the same criterion of announcing before applying non-trivial changes). Minor suggestions, decide with the user: now or leave for later.
 
-### Paso 7 — Checkpoint: revisión manual del usuario
+### Step 7 — Checkpoint: user's manual review
 
-El code review automatizado (Paso 6) no reemplaza que el usuario revise el código él mismo. Avísale que el diff está listo para su propia revisión y espera su aprobación explícita antes de seguir al Paso 8 — no asumas que pasar el Paso 6 sin hallazgos bloqueantes equivale a esta aprobación, son dos checkpoints distintos.
+The automated code review (Step 6) doesn't replace the user reviewing the code themselves. Tell them the diff is ready for their own review and wait for their explicit approval before moving to Step 8 — don't assume that passing Step 6 with no blocking findings is equivalent to this approval, they're two distinct checkpoints.
 
-Si el usuario pide cambios, ajusta y vuelve a esperar su aprobación antes de continuar.
+If the user asks for changes, adjust and wait for their approval again before continuing.
 
-### Paso 8 — PR: commit, checks, descripción y creación
+### Step 8 — PR: commit, checks, description and creation
 
-Sigue la skill `/create-pr` completa: valida/crea la rama, agrupa los cambios en commits siguiendo las convenciones del proyecto, corre en local lo mismo que CI (`bun install --frozen-lockfile`, `bunx prisma generate`, `bun typecheck`, `bun lint`), redacta la descripción del PR con la plantilla de `.github/pull_request_template.md` a partir del diff real.
+Follow the full `/create-pr` skill: validate/create the branch, group the changes into commits following the project's conventions, run locally the same checks as CI (`bun install --frozen-lockfile`, `bunx prisma generate`, `bun typecheck`, `bun lint`), draft the PR description with the `.github/pull_request_template.md` template from the real diff.
 
-Muéstrale al usuario la descripción propuesta (título + body) **antes** de crear el PR y espera su aprobación — es un checkpoint, no una formalidad. Recién después pushea y crea el PR.
+Show the user the proposed description (title + body) **before** creating the PR and wait for their approval — it's a checkpoint, not a formality. Only push and create the PR afterward.
 
-Muestra la URL del PR al usuario.
+Show the PR URL to the user.
 
-### Paso 9 — Code review post-PR
+### Step 9 — Post-PR code review
 
-`/code-review` (el multi-agente real: 5 agentes Sonnet en paralelo + scoring, comenta directamente en el PR de GitHub) es caro en tiempo y tokens — cada corrida completa puede tardar varios minutos y consumir cientos de miles de tokens. Escala este paso con el mismo criterio del Paso 2:
+`/code-review` (the real multi-agent one: 5 parallel Sonnet agents + scoring, comments directly on the GitHub PR) is expensive in time and tokens — a full run can take several minutes and consume hundreds of thousands of tokens. Scale this step with the same criterion as Step 2:
 
-- **Si el Paso 2 clasificó el cambio como pequeño y mecánico:** saltea este paso — la revisión manual del Paso 6 ya alcanza. Dilo en una línea y avanza al Paso 10.
-- **Si el Paso 2 lo marcó como multi-archivo o con decisiones de diseño reales:** corre `/code-review` sobre el PR ya abierto — recién acá tiene un PR sobre el que operar.
+- **If Step 2 classified the change as small and mechanical:** skip this step — the manual review from Step 6 is already enough. Say so in one line and move to Step 10.
+- **If Step 2 marked it as multi-file or with real design decisions:** run `/code-review` on the now-open PR — only here does it have a PR to operate on.
 
-Si en cualquier punto el usuario pide cortar la corrida (por costo, tiempo, o porque no lo justifica), usar `TaskStop` sobre los agentes en vuelo en vez de dejarlos terminar, y no comentar en el PR con resultados parciales.
+If at any point the user asks to cut the run short (cost, time, or because it isn't warranted), use `TaskStop` on the in-flight agents instead of letting them finish, and don't comment on the PR with partial results.
 
-Resuelve los hallazgos bloqueantes que reporte, con el mismo criterio de avisar antes de aplicar cambios no triviales; si hay que pushear un fix, es un commit nuevo sobre la misma rama, no un amend.
+Resolve the blocking findings it reports, with the same criterion of announcing before applying non-trivial changes; if a fix needs to be pushed, it's a new commit on the same branch, not an amend.
 
-### Paso 10 — Actualizar el vault y el issue de Linear
+### Step 10 — Update the vault and the Linear issue
 
-1. Actualiza el diario de desarrollo del vault: `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Esteban/01-projects/conexory/diario-desarrollo/2026/<YYYYMM>-desarrollo-conexory.md` — agrega un bullet bajo el encabezado del día de hoy (`### D NombreDía`) describiendo qué se hizo, en qué rama/PR, y decisiones o gotchas relevantes, en el mismo tono narrativo (español, primera persona, pasado) que las entradas existentes. Si el mes no existe todavía, créalo y enlázalo desde `diario-desarrollo/desarrollo-conexory.md`.
-2. Si el cambio es significativo (nueva feature, decisión de producto o arquitectura — no un fix menor), actualiza también `01-projects/conexory/conexory.md`: `en_progreso`, `Notas`, progreso de `milestones` si corresponde.
-3. Actualiza el estado del issue en Linear (`mcp__linear-server__save_issue`) al estado que corresponda del flujo del equipo (ej. "In Review") y deja el link del PR como comentario o link attachment.
+1. Update the vault's dev journal: `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Esteban/01-projects/conexory/diario-desarrollo/2026/<YYYYMM>-desarrollo-conexory.md` — add a bullet under today's heading (`### D DayName`) describing what was done, on which branch/PR, and relevant decisions or gotchas, in the same narrative tone (Spanish, first person, past tense) as the existing entries. If the month doesn't exist yet, create it and link it from `diario-desarrollo/desarrollo-conexory.md`.
+2. If the change is significant (new feature, product or architecture decision — not a minor fix), also update `01-projects/conexory/conexory.md`: `en_progreso`, `Notas`, `milestones` progress if applicable.
+3. Update the issue's status in Linear (`mcp__linear-server__save_issue`) to whatever state fits the team's workflow (e.g. "In Review") and leave the PR link as a comment or link attachment.
 
-### Paso 11 — Reflexión sobre la skill
+### Step 11 — Reflect on the skill
 
-Antes de cerrar, repasa cómo salió el proceso en esta corrida: fricción real, pasos redundantes, algo que debiste preguntar y no preguntaste, un paso que se pudo saltar o que en realidad necesitaba más rigor del que tuvo, información que faltó. Si encuentras algo concreto y accionable, pregúntale al usuario si quiere que ajustes esta skill (`.claude/commands/dev-issue.md`) antes de terminar — no la edites sin preguntar. Si no hay nada relevante, no digas nada al respecto.
+Before closing, review how the process went in this run: real friction, redundant steps, something you should have asked and didn't, a step that could have been skipped or that actually needed more rigor than it got, missing information. If you find something concrete and actionable, ask the user if they want you to adjust this skill (`.claude/commands/dev-issue.md`) before finishing — don't edit it without asking. If there's nothing relevant, don't say anything about it.
 
-### Paso 12 — Cierre
+### Step 12 — Close
 
-Resume en 2-3 líneas qué se hizo y en qué quedó: estado del PR (abierto/mergeado), si el vault quedó actualizado, y el estado final del issue en Linear.
+Summarize in 2-3 lines what was done and where it landed: PR status (open/merged), whether the vault was updated, and the issue's final status in Linear.

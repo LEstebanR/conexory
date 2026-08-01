@@ -78,7 +78,7 @@ export default function NewPropertyPage() {
   const [type, setType] = useState("")
   const [transactionType, setTransactionType] = useState(DEFAULT_TRANSACTION_TYPE)
   const [title, setTitle] = useState("")
-  const [price, setPrice] = useState("") // dígitos puros sin puntos
+  const [price, setPrice] = useState("") // plain digits, no thousand separators
   const [state, setState] = useState("")
   const [city, setCity] = useState("")
   const [neighborhood, setNeighborhood] = useState("")
@@ -185,7 +185,7 @@ export default function NewPropertyPage() {
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
-        {/* Tipo de propiedad */}
+        {/* Property type */}
         <SectionCard id="tour-type" title="Tipo de propiedad">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {PROPERTY_TYPES.map((pt) => {
@@ -215,7 +215,7 @@ export default function NewPropertyPage() {
           <FieldError message={fieldErrors.type} />
         </SectionCard>
 
-        {/* Tipo de operación */}
+        {/* Transaction type */}
         <SectionCard id="tour-transaction" title="Tipo de operación">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {TRANSACTION_TYPES.map((tt) => {
@@ -239,7 +239,7 @@ export default function NewPropertyPage() {
           </div>
         </SectionCard>
 
-        {/* Fotos */}
+        {/* Photos */}
         <SectionCard id="tour-photos" title="Fotos y video">
           <ImageUpload
             onUrlsChange={setImageUrls}
@@ -262,7 +262,7 @@ export default function NewPropertyPage() {
           </div>
         </SectionCard>
 
-        {/* Información básica */}
+        {/* Basic information */}
         <SectionCard id="tour-basic" title="Información básica">
           <div className="space-y-1.5">
             <FieldLabel>Título del anuncio</FieldLabel>
@@ -319,7 +319,7 @@ export default function NewPropertyPage() {
           </div>
         </SectionCard>
 
-        {/* Detalles */}
+        {/* Details */}
         <SectionCard id="tour-details" title="Detalles">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -414,7 +414,7 @@ export default function NewPropertyPage() {
           </label>
         </SectionCard>
 
-        {/* Descripción */}
+        {/* Description */}
         <SectionCard id="tour-description" title="Descripción">
           <div className="space-y-1.5">
             <FieldLabel optional>Descripción libre</FieldLabel>
@@ -431,7 +431,7 @@ export default function NewPropertyPage() {
           </div>
         </SectionCard>
 
-        {/* Ubicación en mapa */}
+        {/* Location on map */}
         <SectionCard id="tour-map" title="Ubicación en mapa">
           <p className="text-xs text-mute -mt-1">
             Opcional. Permite mostrar la ubicación exacta en la ficha pública.
@@ -444,7 +444,7 @@ export default function NewPropertyPage() {
           />
         </SectionCard>
 
-        {/* Datos de contacto */}
+        {/* Contact info */}
         <SectionCard id="tour-contact" title="Datos de contacto">
           <label className="flex items-start gap-3 cursor-pointer group select-none">
             <div className="relative flex-shrink-0 mt-0.5">

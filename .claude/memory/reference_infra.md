@@ -1,38 +1,38 @@
 ---
 name: reference-infra-conexory
-description: Infraestructura de Conexory — Neon (branches), Vercel (env scoping) y acceso git en este entorno
+description: Conexory infrastructure — Neon (branches), Vercel (env scoping) and git access in this environment
 metadata:
   type: reference
 ---
 
 ## Neon (PostgreSQL)
 
-Proyecto Neon: `conexory` (`late-shape-55166232`, org `org-dark-heart-49924774`). Dos branches:
-- **`production`** (`br-round-art-aqdl929i`, endpoint `ep-proud-unit-aqpl2g8k`) — primary/default, datos reales.
-- **`development`** (`br-wandering-tree-aqhqb7og`, endpoint `ep-fancy-violet-aqpmrxha`) — branch de dev persistente (se le quitó el TTL de 24h). Copia copy-on-write de prod con las migraciones ya aplicadas.
+Neon project: `conexory` (`late-shape-55166232`, org `org-dark-heart-49924774`). Two branches:
+- **`production`** (`br-round-art-aqdl929i`, endpoint `ep-proud-unit-aqpl2g8k`) — primary/default, real data.
+- **`development`** (`br-wandering-tree-aqhqb7og`, endpoint `ep-fancy-violet-aqpmrxha`) — persistent dev branch (had its 24h TTL removed). Copy-on-write copy of prod with migrations already applied.
 
-`neonctl` se autentica por OAuth en el navegador (no hay `NEON_API_KEY` cargada). DB role: `neondb_owner`, database `neondb`.
+`neonctl` authenticates via OAuth in the browser (no `NEON_API_KEY` loaded). DB role: `neondb_owner`, database `neondb`.
 
 ## Vercel
 
-Proyecto: `conexory` (team `lestebanrs-projects`, usuario `lestebanr`). El CLI `vercel` está instalado y autenticado.
+Project: `conexory` (team `lestebanrs-projects`, user `lestebanr`). The `vercel` CLI is installed and authenticated.
 
-**Scoping de `DATABASE_URL` / `DIRECT_URL` por entorno:**
+**`DATABASE_URL` / `DIRECT_URL` scoping per environment:**
 - **Production** → Neon branch `production`
 - **Preview** + **Development** → Neon branch `development`
 
-Esto es crítico porque el `build` corre `prisma migrate deploy`: así los preview deploys aplican migraciones contra **dev**, nunca contra producción. Al cambiar estas vars, Vercel guardaba un único valor para varios entornos — quitar un scope borra el valor completo, hay que re-agregar cada entorno por separado (`vercel env add NAME <env>`).
+This is critical because `build` runs `prisma migrate deploy`: so preview deploys apply migrations against **dev**, never against production. When changing these vars, Vercel used to store a single value across several environments — removing one scope deletes the whole value, so each environment has to be re-added separately (`vercel env add NAME <env>`).
 
-`.env` local apunta al branch `development` (tanto `DATABASE_URL` como `DIRECT_URL` — ambas deben coincidir de entorno, porque las migraciones usan `DIRECT_URL`).
+Local `.env` points at the `development` branch (both `DATABASE_URL` and `DIRECT_URL` — both must match environments, since migrations use `DIRECT_URL`).
 
-## Acceso git en este entorno
+## Git access in this environment
 
-El remoto `origin` es **SSH** (`git@github.com:LEstebanR/conexory.git`) pero **no hay llaves SSH cargadas** en el agente, así que `git fetch`/`push` por SSH fallan con `Permission denied (publickey)`. El CLI `gh` sí está autenticado (cuenta `LEstebanR`, protocolo ssh, vía keyring).
+The `origin` remote is **SSH** (`git@github.com:LEstebanR/conexory.git`) but there are **no SSH keys loaded** in the agent, so `git fetch`/`push` over SSH fail with `Permission denied (publickey)`. The `gh` CLI is authenticated though (account `LEstebanR`, ssh protocol, via keyring).
 
-**Workaround para fetch/push** — usar el credential helper de `gh` por HTTPS:
+**Workaround for fetch/push** — use `gh`'s credential helper over HTTPS:
 ```
 git -c credential.helper='!gh auth git-credential' push  https://github.com/LEstebanR/conexory.git HEAD:<branch>
 git -c credential.helper='!gh auth git-credential' fetch https://github.com/LEstebanR/conexory.git <branch>
 ```
 
-Ver [[reference-linear-conexory]] para Linear y [[project-conexory]] para contexto de producto.
+See [[reference-linear-conexory]] for Linear and [[project-conexory]] for product context.

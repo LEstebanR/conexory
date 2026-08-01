@@ -1,12 +1,12 @@
 # /retrospective
 
-Eres un agente de síntesis y memoria. Tu única misión es estudiar la sesión actual, extraer lo que vale la pena retener a largo plazo, y actualizar los archivos de Claude que correspondan. No hagas nada más.
+You are a synthesis and memory agent. Your only mission is to study the current session, extract what's worth retaining long-term, and update the relevant Claude files. Do nothing else.
 
 ---
 
-## Paso 1 — Lee el estado actual de la memoria
+## Step 1 — Read the current state of memory
 
-Lee estos archivos antes de hacer cualquier cambio:
+Read these files before making any changes:
 
 ```
 .claude/memory/MEMORY.md
@@ -16,141 +16,141 @@ Lee estos archivos antes de hacer cualquier cambio:
 .claude/memory/feedback_general.md
 ```
 
-Si alguno no existe, créalo desde cero con la estructura correcta (ver sección "Esquema de archivos" más abajo).
+If any doesn't exist, create it from scratch with the correct structure (see "File schema" section below).
 
 ---
 
-## Paso 2 — Estudia la sesión actual
+## Step 2 — Study the current session
 
-Revisa toda la conversación de esta sesión. Para cada intercambio, pregúntate:
+Review the whole conversation of this session. For each exchange, ask yourself:
 
-**¿Qué aprendí del usuario?**
-- ¿Cambió alguna preferencia sobre cómo quiere que trabaje con él?
-- ¿Corrigió algún comportamiento mío? ("no hagas X", "prefiero Y")
-- ¿Confirmó algún enfoque? ("perfecto", "exactamente así", aceptó sin pushback)
-- ¿Mostró expertise en algún tema nuevo?
+**What did I learn about the user?**
+- Did any preference about how they want me to work with them change?
+- Did they correct any of my behavior? ("don't do X", "I prefer Y")
+- Did they confirm any approach? ("perfect", "exactly like that", accepted without pushback)
+- Did they show expertise on a new topic?
 
-**¿Qué aprendí del proyecto?**
-- ¿Cambiaron los objetivos, el alcance o las prioridades?
-- ¿Se tomaron decisiones arquitectónicas o de producto?
-- ¿Se actualizó el roadmap o los milestones?
-- ¿Hay nuevos constraints (técnicos, de negocio, de fechas)?
+**What did I learn about the project?**
+- Did the goals, scope or priorities change?
+- Were architectural or product decisions made?
+- Was the roadmap or milestones updated?
+- Are there new constraints (technical, business, deadlines)?
 
-**¿Qué cambió en las referencias externas?**
-- ¿Se crearon o modificaron issues en Linear?
-- ¿Hay nuevas URLs, proyectos o recursos externos relevantes?
+**What changed in external references?**
+- Were Linear issues created or modified?
+- Are there new relevant URLs, projects or external resources?
 
-**¿Qué NO vale la pena guardar?**
-- Código que ya está en el repo
-- Detalles de implementación que se derivan del código
-- Contexto efímero de la sesión sin valor futuro
-- Cosas ya documentadas en CLAUDE.md / AGENTS.md
+**What is NOT worth saving?**
+- Code that's already in the repo
+- Implementation details that can be derived from the code
+- Ephemeral session context with no future value
+- Things already documented in CLAUDE.md / AGENTS.md
 
 ---
 
-## Paso 3 — Decide qué actualizar
+## Step 3 — Decide what to update
 
-Para cada hallazgo, determina el archivo correcto:
+For each finding, determine the correct file:
 
-| Tipo de hallazgo | Archivo |
+| Type of finding | File |
 |---|---|
-| Preferencia o corrección de comportamiento | `.claude/memory/feedback_general.md` |
-| Perfil, expertise, contexto del usuario | `.claude/memory/user_profile.md` |
-| Estado del proyecto, decisiones, prioridades | `.claude/memory/project_conexory.md` |
-| Referencias a sistemas externos (Linear, Vercel, etc.) | `.claude/memory/reference_linear.md` |
-| Nueva convención de código o arquitectura establecida | `AGENTS.md` |
+| Behavior preference or correction | `.claude/memory/feedback_general.md` |
+| User profile, expertise, context | `.claude/memory/user_profile.md` |
+| Project state, decisions, priorities | `.claude/memory/project_conexory.md` |
+| References to external systems (Linear, Vercel, etc.) | `.claude/memory/reference_linear.md` |
+| New established code convention or architecture | `AGENTS.md` |
 
-**Regla de oro:** Si el hallazgo no cambiaría cómo me comportaré en una sesión futura, no lo guardes.
-
----
-
-## Paso 4 — Aplica los cambios
-
-Para cada archivo a modificar:
-
-1. Léelo primero si no lo has leído ya
-2. Edita solo las secciones afectadas (no reescribas lo que no cambió)
-3. Si creas un archivo nuevo, agrégalo al índice `.claude/memory/MEMORY.md`
-4. Si modificas `AGENTS.md`, asegúrate de que los cambios sean reglas generalizables, no detalles de la sesión
+**Golden rule:** if the finding wouldn't change how I behave in a future session, don't save it.
 
 ---
 
-## Paso 5 — Muestra el reporte
+## Step 4 — Apply the changes
 
-Al terminar, muestra este resumen:
+For each file to modify:
+
+1. Read it first if you haven't already
+2. Edit only the affected sections (don't rewrite what didn't change)
+3. If you create a new file, add it to the `.claude/memory/MEMORY.md` index
+4. If you modify `AGENTS.md`, make sure the changes are generalizable rules, not session details
+
+---
+
+## Step 5 — Show the report
+
+When done, show this summary:
 
 ```
-🔁 RETROSPECTIVA — [fecha de hoy]
+🔁 RETROSPECTIVE — [today's date]
 
-ARCHIVOS ACTUALIZADOS
-  - [nombre-archivo.md]: [qué cambió en 1 línea]
+UPDATED FILES
+  - [file-name.md]: [what changed in 1 line]
   - ...
 
-APRENDIZAJES CLAVE
-  - [lista de 3-7 bullets con lo más importante extraído]
+KEY LEARNINGS
+  - [list of 3-7 bullets with the most important things extracted]
 
-SIN CAMBIOS (y por qué)
-  - [cosas que podrían parecer importantes pero no se guardaron, con razón]
+NO CHANGES (and why)
+  - [things that might seem important but weren't saved, with reason]
 ```
 
-Si no hay nada relevante que guardar, dilo directamente: "Sesión sin aprendizajes nuevos para persistir."
+If there's nothing relevant to save, say so directly: "Session with no new learnings to persist."
 
 ---
 
-## Esquema canónico de archivos
+## Canonical file schema
 
 ```
 .claude/
   commands/
-    retrospective.md          ← esta skill
+    retrospective.md          ← this skill
   memory/
-    MEMORY.md                 ← índice de todos los archivos
-    feedback_general.md       ← correcciones y preferencias de comportamiento
-    project_conexory.md       ← estado del proyecto, stack, decisiones
-    reference_linear.md       ← Linear: IDs, cómo consultar issues
+    MEMORY.md                 ← index of all files
+    feedback_general.md       ← behavior corrections and preferences
+    project_conexory.md       ← project state, stack, decisions
+    reference_linear.md       ← Linear: IDs, how to look up issues
 ```
 
-### `MEMORY.md` — índice
+### `MEMORY.md` — index
 ```markdown
 # Memory Index
 
-- [Feedback general](feedback_general.md) — correcciones y preferencias de comportamiento
-- [Proyecto Conexory](project_conexory.md) — estado del proyecto, stack, decisiones
-- [Linear — Conexory](reference_linear.md) — workspace, IDs, cómo consultar issues
+- [General feedback](feedback_general.md) — behavior corrections and preferences
+- [Conexory project](project_conexory.md) — project state, stack, decisions
+- [Linear — Conexory](reference_linear.md) — workspace, IDs, how to look up issues
 ```
 
 ### `feedback_general.md`
 ```markdown
 ---
 name: feedback-general
-description: Correcciones y preferencias de Luis sobre cómo debe comportarse Claude en este proyecto
+description: Luis's corrections and preferences on how Claude should behave in this project
 metadata:
   type: feedback
 ---
 
-[contenido]
+[content]
 ```
 
 ### `project_conexory.md`
 ```markdown
 ---
 name: project-conexory
-description: Estado del proyecto Conexory — stack, decisiones, prioridades actuales
+description: Conexory project state — stack, decisions, current priorities
 metadata:
   type: project
 ---
 
-[contenido]
+[content]
 ```
 
 ### `reference_linear.md`
 ```markdown
 ---
 name: reference-linear-conexory
-description: Linear workspace de Luis — IDs de proyecto, equipo, milestones
+description: Luis's Linear workspace — project ID, team, milestones
 metadata:
   type: reference
 ---
 
-[contenido]
+[content]
 ```

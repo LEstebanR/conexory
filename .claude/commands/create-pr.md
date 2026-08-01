@@ -1,160 +1,160 @@
 # /create-pr
 
-Crea un Pull Request completo para el proyecto Conexory: commitea los cambios siguiendo las convenciones, corre **localmente** lo mismo que valida CI (para no romper el PR), pushea y abre el PR con una descripción ya redactada.
+Creates a complete Pull Request for the Conexory project: commits the changes following the conventions, runs **locally** the same checks CI validates (so the PR doesn't break), pushes and opens the PR with an already-drafted description.
 
-No mergees nada. Tu trabajo termina cuando el PR está abierto y reportas su URL.
+Don't merge anything. Your job ends when the PR is open and you report its URL.
 
 ---
 
-## Paso 0 — Reúne el contexto
+## Step 0 — Gather context
 
-Corre en paralelo:
+Run in parallel:
 
 ```bash
 git branch --show-current
 git status -s
 git diff --stat HEAD
-git log main..HEAD --oneline   # commits ya hechos en esta rama
+git log main..HEAD --oneline   # commits already made on this branch
 ```
 
-Determina:
-- **Tipo de cambio:** `feat` · `fix` · `refactor` · `chore` · `docs` (según la naturaleza del diff).
-- **Número de issue de Linear (`LES-{n}`):** sácalo del nombre de la rama si ya lo tiene. Si no lo sabes, **pregúntale a Luis** — es obligatorio para el formato de rama y el PR.
-- **Descripción corta** en kebab-case, inglés, máximo 5 palabras.
+Determine:
+- **Type of change:** `feat` · `fix` · `refactor` · `chore` · `docs` (based on the nature of the diff).
+- **Linear issue number (`LES-{n}`):** get it from the branch name if it already has one. If you don't know it, **ask Luis** — it's required for the branch format and the PR.
+- **Short description** in kebab-case, English, max 5 words.
 
 ---
 
-## Paso 1 — Asegura una rama válida
+## Step 1 — Ensure a valid branch
 
-El workflow `branch-name.yml` valida este regex en cada PR y **falla** si no se cumple:
+The `branch-name.yml` workflow validates this regex on every PR and **fails** if it isn't met:
 
 ```
 ^(feat|fix|refactor|chore|docs)\/LES-[0-9]+-[a-z0-9-]+$
 ```
 
-- Si estás en `main`: crea la rama → `git checkout -b {type}/LES-{n}-{descripcion}`.
-- Si estás en una rama que **no** cumple el regex: renómbrala → `git branch -m {type}/LES-{n}-{descripcion}`.
-- Si ya cumple: continúa.
+- If you're on `main`: create the branch → `git checkout -b {type}/LES-{n}-{description}`.
+- If you're on a branch that **doesn't** match the regex: rename it → `git branch -m {type}/LES-{n}-{description}`.
+- If it already matches: continue.
 
-Valida el nombre contra el regex tú mismo antes de seguir; no dejes que falle en CI.
+Validate the name against the regex yourself before continuing; don't let it fail in CI.
 
 ---
 
-## Paso 2 — Commitea siguiendo las convenciones
+## Step 2 — Commit following the conventions
 
-Agrupa los cambios en commits lógicos (un cambio conceptual por commit; no mezcles refactor con feature). Para cada commit:
+Group the changes into logical commits (one conceptual change per commit; don't mix a refactor with a feature). For each commit:
 
 ```bash
-git add <archivos del cambio>   # evita `git add -A` a ciegas; revisa qué entra
+git add <files for this change>   # avoid blindly `git add -A`; review what goes in
 git commit -m "$(cat <<'EOF'
-{type}(LES-{n}): descripción en imperativo, minúscula, sin punto final
+{type}(LES-{n}): imperative-mood description, lowercase, no trailing period
 
-Cuerpo opcional explicando QUÉ y POR QUÉ (no el cómo — eso está en el diff).
-Para varios cambios, usa bullets:
-- cambio uno y su razón
-- cambio dos y su razón
+Optional body explaining WHAT and WHY (not how — that's in the diff).
+For several changes, use bullets:
+- change one and its reason
+- change two and its reason
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
 
-**Reglas de commit:**
-- **Asunto:** `{type}(LES-{n}): ...` — mismo `{type}` y `{n}` que la rama, en imperativo (“add”, “fix”, “validate”), ≤72 chars, sin punto final.
-- **Cuerpo:** solo si aporta — el *porqué* y el contexto que el diff no muestra. Omítelo en cambios triviales.
-- **Trailer:** termina siempre con la línea `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`.
-- **No commitees** secretos, `.env`, ni `.vercel` (están en `.gitignore` — verifica con `git status` que no se cuelen).
-- Si tocaste el schema de Prisma, la **migración debe ir en el mismo PR** (usa `/db` para generarla).
+**Commit rules:**
+- **Subject:** `{type}(LES-{n}): ...` — same `{type}` and `{n}` as the branch, in imperative mood ("add", "fix", "validate"), ≤72 chars, no trailing period.
+- **Body:** only if it adds value — the *why* and context the diff doesn't show. Omit it for trivial changes.
+- **Trailer:** always end with the line `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`.
+- **Don't commit** secrets, `.env`, or `.vercel` (they're in `.gitignore` — verify with `git status` that none slip in).
+- If you touched the Prisma schema, the **migration must go in the same PR** (use `/db` to generate it).
 
 ---
 
-## Paso 3 — Corre CI en local (antes de pushear)
+## Step 3 — Run CI locally (before pushing)
 
-Reproduce exactamente lo que corren los jobs de `ci.yml`. Si algo falla, **arréglalo y vuelve a empezar este paso** — no pushees con CI roja.
+Reproduce exactly what the `ci.yml` jobs run. If anything fails, **fix it and restart this step** — don't push with red CI.
 
 ```bash
-bun install --frozen-lockfile   # detecta drift de bun.lock (CI usa --frozen-lockfile y falla si no cuadra)
-bunx prisma generate            # job typecheck lo corre antes
+bun install --frozen-lockfile   # detects bun.lock drift (CI uses --frozen-lockfile and fails if it doesn't match)
+bunx prisma generate            # the typecheck job runs this first
 bun typecheck                   # tsc --noEmit
 bun lint                        # eslint
 ```
 
-- Si `bun install --frozen-lockfile` falla por lockfile desactualizado: corre `bun install` (sin flag), commitea el `bun.lock` actualizado, y repite.
-- No corras `bun build` solo para validar: ahora incluye `prisma migrate deploy`, que toca la base de datos. CI **no** corre build; con typecheck + lint basta para reproducir CI.
+- If `bun install --frozen-lockfile` fails because the lockfile is out of date: run `bun install` (no flag), commit the updated `bun.lock`, and repeat.
+- Don't run `bun build` just to validate: it now includes `prisma migrate deploy`, which touches the database. CI does **not** run build; typecheck + lint are enough to reproduce CI.
 
-Reporta el resultado de cada check antes de continuar.
+Report the result of each check before continuing.
 
 ---
 
-## Paso 4 — Pushea
+## Step 4 — Push
 
-En este entorno el remoto es SSH pero **no hay llaves SSH cargadas**, así que `git push` directo falla. Usa el credential helper de `gh` por HTTPS:
+In this environment the remote is SSH but **no SSH keys are loaded**, so a plain `git push` fails. Use `gh`'s credential helper over HTTPS:
 
 ```bash
 git -c credential.helper='!gh auth git-credential' push \
   https://github.com/LEstebanR/conexory.git HEAD:$(git branch --show-current)
 ```
 
-Si el push se rechaza porque la rama remota divergió, haz `fetch` con el mismo helper y rebasa antes de reintentar.
+If the push is rejected because the remote branch diverged, `fetch` with the same helper and rebase before retrying.
 
 ---
 
-## Paso 5 — Abre el PR con descripción redactada
+## Step 5 — Open the PR with a drafted description
 
-Redacta la descripción **a partir del diff real**, siguiendo la plantilla de `.github/pull_request_template.md`. No la dejes con placeholders: llena cada sección.
+Draft the description **from the real diff**, following the template in `.github/pull_request_template.md`. Don't leave placeholders: fill every section.
 
 ```bash
 gh pr create \
   --base main \
   --head "$(git branch --show-current)" \
-  --title "{type}(LES-{n}): descripción corta en imperativo" \
+  --title "{type}(LES-{n}): short description in imperative mood" \
   --body "$(cat <<'EOF'
-## ¿Qué hace este PR?
+## What does this PR do?
 
-(1-3 oraciones: qué problema resuelve o qué agrega.)
+(1-3 sentences: what problem it solves or what it adds.)
 
-## Issue de Linear
+## Linear issue
 
 Closes: https://linear.app/lesteban/issue/LES-{n}
 
-## Tipo de cambio
+## Type of change
 
-- [x] `{type}` — (marca solo el que aplica)
+- [x] `{type}` — (check only the one that applies)
 
-## Cambios principales
+## Main changes
 
-- `ruta/archivo`: qué cambió y por qué
+- `path/file`: what changed and why
 - ...
 
-## ¿Cómo probar?
+## How to test?
 
-1. (pasos concretos para verificar; si es UI, menciona qué mirar)
+1. (concrete steps to verify; if it's UI, mention what to look at)
 2.
 
 ## Checklist
 
-- [x] El código compila sin errores
-- [x] No hay errores de TypeScript (`bun typecheck`)
-- [x] Lint pasa (`bun lint`)
-- [ ] Las rutas protegidas siguen funcionando (auth) — si aplica
-- [ ] Si hay cambios en el schema de Prisma, la migración está incluida
-- [ ] Si hay nuevas variables de entorno, están en `.env.example`
+- [x] The code compiles with no errors
+- [x] No TypeScript errors (`bun typecheck`)
+- [x] Lint passes (`bun lint`)
+- [ ] Protected routes still work (auth) — if applicable
+- [ ] If there are Prisma schema changes, the migration is included
+- [ ] If there are new environment variables, they're in `.env.example`
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
 )"
 ```
 
-- **Título:** mismo formato que el commit principal — `{type}(LES-{n}): ...`.
-- Marca en el checklist solo lo que realmente verificaste; deja sin marcar lo que no aplica o no probaste, y dilo.
-- `gh` usa su token HTTPS, no necesita SSH.
+- **Title:** same format as the main commit — `{type}(LES-{n}): ...`.
+- Check off in the checklist only what you actually verified; leave unchecked what doesn't apply or wasn't tested, and say so.
+- `gh` uses its HTTPS token, no SSH needed.
 
 ---
 
-## Paso 6 — Reporta
+## Step 6 — Report
 
-Cierra con un resumen breve:
-- URL del PR.
-- Commits incluidos (asuntos).
-- Resultado de los checks locales (typecheck / lint / lockfile).
-- Cualquier ítem del checklist que quedó sin verificar y por qué.
+Close with a brief summary:
+- PR URL.
+- Included commits (subjects).
+- Result of the local checks (typecheck / lint / lockfile).
+- Any checklist item left unverified and why.

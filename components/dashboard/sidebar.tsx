@@ -222,7 +222,7 @@ function SidebarContent({
         <FeedbackModal userName={user.name} />
       </div>
 
-      {/* Admin + Configuración — encima del separador */}
+      {/* Admin + Settings — above the divider */}
       <div className="flex-shrink-0 px-3 pb-2 space-y-1">
         {user.role === "admin" && (
           <NavLink key={adminNavItem.href} {...adminNavItem} onClick={onClose} />
@@ -236,7 +236,7 @@ function SidebarContent({
         />
       </div>
 
-      {/* Cerrar sesión */}
+      {/* Log out */}
       <div className="flex-shrink-0 border-t border-hairline p-3">
         <button
           onClick={handleSignOut}

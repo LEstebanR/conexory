@@ -366,7 +366,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           </div>
         </SectionCard>
 
-        {/* Ubicación en mapa */}
+        {/* Location on map */}
         <SectionCard title="Ubicación en mapa">
           <p className="text-xs text-mute -mt-1">
             Opcional. Permite mostrar la ubicación exacta en la ficha pública.
@@ -379,7 +379,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           />
         </SectionCard>
 
-        {/* Datos de contacto */}
+        {/* Contact info */}
         <SectionCard title="Datos de contacto">
           <label className="flex items-start gap-3 cursor-pointer group select-none">
             <div className="relative flex-shrink-0 mt-0.5">

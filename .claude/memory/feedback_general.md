@@ -1,41 +1,41 @@
 ---
 name: feedback-general
-description: Correcciones y preferencias de Luis sobre cómo debe comportarse Claude en este proyecto
+description: Luis's corrections and preferences on how Claude should behave in this project
 metadata:
   type: feedback
 ---
 
-## Presentar un plan antes de ejecutar
+## Show a plan before executing
 
-Antes de hacer cualquier cambio, mostrar qué se va a hacer y por qué.
+Before making any change, show what's going to be done and why.
 
-**Why:** Luis quiere poder anticipar el impacto de lo que se va a hacer antes de que ocurra.
-**How to apply:** Listar los pasos o archivos que se van a tocar, con una línea de justificación por cada uno. No ejecutar hasta haber mostrado el plan. El plan no necesita aprobación explícita — si Luis no objeta, se procede.
+**Why:** Luis wants to be able to anticipate the impact of what's about to happen before it happens.
+**How to apply:** List the steps or files that will be touched, with one line of justification each. Don't execute until the plan has been shown. The plan doesn't need explicit approval — if Luis doesn't object, proceed.
 
-## Explicar al final lo que se hizo
+## Explain what was done at the end
 
-Al terminar una tarea, incluir un resumen de qué cambió y por qué.
+When finishing a task, include a summary of what changed and why.
 
-**Why:** Luis quiere entender el resultado sin tener que inferirlo del diff.
-**How to apply:** Cerrar cada respuesta con un resumen claro: qué archivos cambiaron, qué decisiones se tomaron y qué efecto tiene. Breve pero completo.
+**Why:** Luis wants to understand the result without having to infer it from the diff.
+**How to apply:** Close every response with a clear summary: which files changed, what decisions were made, and what effect it has. Brief but complete.
 
-## Al crear issues en Linear, incluir descripción técnica detallada
+## When creating Linear issues, include a detailed technical description
 
-Los issues deben tener contexto suficiente para implementarlos sin buscar más información: archivos relevantes, cambios de schema, consideraciones, dependencias.
+Issues must have enough context to be implemented without looking up more information: relevant files, schema changes, considerations, dependencies.
 
-**Why:** Luis quiere poder arrancar a trabajar desde Linear directamente.
-**How to apply:** Cada issue debe tener al menos: contexto, alcance con bullets específicos, y consideraciones técnicas.
+**Why:** Luis wants to be able to start working straight from Linear.
+**How to apply:** Every issue must have at least: context, scope with specific bullets, and technical considerations.
 
-## Los estilos a nivel de componente van en el componente, no en CSS global
+## Component-level styles go in the component, not in global CSS
 
-Si un estilo aplica a un elemento o componente concreto (p. ej. `cursor-pointer` en un botón), va en la definición de ese componente/clase, no como regla base en `globals.css`.
+If a style applies to a specific element or component (e.g. `cursor-pointer` on a button), it goes in that component/class's own definition, not as a base rule in `globals.css`.
 
-**Why:** Luis rechazó explícitamente meter una regla `button { cursor: pointer }` en `globals.css` — "ese estilo debe ir en la definición del componente".
-**How to apply:** Resolver inconsistencias de estilo en el componente afectado (o en el componente UI base reutilizable, como `components/ui/button.tsx`), no con reglas globales/`@layer base`. Reservar `globals.css` para tokens y resets reales, no para parchear comportamiento de componentes.
+**Why:** Luis explicitly rejected putting a `button { cursor: pointer }` rule in `globals.css` — "that style should go in the component's definition."
+**How to apply:** Resolve style inconsistencies in the affected component (or in the reusable base UI component, like `components/ui/button.tsx`), not with global rules/`@layer base`. Reserve `globals.css` for tokens and real resets, not for patching component behavior.
 
-## Los archivos de Claude son solo para desarrollo
+## Claude files are for development only
 
-No incluir en AGENTS.md, CLAUDE.md ni en los archivos de memoria: milestones, plazos, fechas target, estado de issues ni referencias a IDs de Linear (LES-xxx). Eso lo maneja Luis directamente en Linear.
+Don't include in AGENTS.md, CLAUDE.md, or the memory files: milestones, deadlines, target dates, issue status, or references to Linear IDs (LES-xxx). Luis manages that directly in Linear.
 
-**Why:** Luis lo indicó explícitamente — los archivos de Claude son guía técnica, no gestión de proyecto.
-**How to apply:** AGENTS.md = stack, convenciones, patrones, qué no hacer. Memoria = contexto de producto y feedback de comportamiento. Nada más.
+**Why:** Luis said so explicitly — Claude files are technical guidance, not project management.
+**How to apply:** AGENTS.md = stack, conventions, patterns, what not to do. Memory = product context and behavior feedback. Nothing else.

@@ -130,7 +130,7 @@ export default function LegalLayout({
   )
 }
 
-/* ── Helpers exportados para usar en las páginas ── */
+/* ── Helpers exported for use in pages ── */
 
 export function LegalSection({
   id,
