@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next"
 import { getAllPosts } from "@/lib/blog"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
+import { getCityIndex, MIN_CITY_LISTINGS } from "@/lib/properties"
 
 const BASE_URL = getAppUrl()
 
@@ -12,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/roadmap`, priority: 0.6, changeFrequency: "weekly" },
     { url: `${BASE_URL}/blog`, priority: 0.8, changeFrequency: "weekly" },
     { url: `${BASE_URL}/contacto`, priority: 0.5, changeFrequency: "monthly" },
+    { url: `${BASE_URL}/propiedades`, priority: 0.7, changeFrequency: "weekly" },
   ]
 
   const blogPosts = getAllPosts().map((post) => ({
@@ -45,5 +47,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly" as const,
   }))
 
-  return [...staticRoutes, ...blogPosts, ...propertyRoutes, ...agentRoutes]
+  const cityIndex = await getCityIndex()
+  const cityRoutes: MetadataRoute.Sitemap = cityIndex
+    .filter((g) => g.count >= MIN_CITY_LISTINGS)
+    .map((g) => ({
+      url: `${BASE_URL}/propiedades/${g.slug}`,
+      priority: 0.6,
+      changeFrequency: "weekly" as const,
+    }))
+
+  return [...staticRoutes, ...blogPosts, ...propertyRoutes, ...agentRoutes, ...cityRoutes]
 }

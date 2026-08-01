@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
-import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
+import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS, TRANSACTION_TYPES } from "@/lib/property-types"
 import { formatCOPCompact } from "@/lib/format"
 import type { PropertyFacets, PropertySort } from "@/lib/properties"
 import type { MapProperty } from "./agent-map"
@@ -141,6 +141,7 @@ export default function AgentProperties({
   }
 
   const typeFilter = searchParams.get("type") ?? "all"
+  const transactionFilter = searchParams.get("transaccion") ?? "all"
   const sort = ((): PropertySort => {
     const s = searchParams.get("sort")
     return s === "price-desc" || s === "price-asc" ? s : "recent"
@@ -214,6 +215,7 @@ export default function AgentProperties({
 
   const activeFilterCount =
     (typeFilter !== "all" ? 1 : 0) +
+    (transactionFilter !== "all" ? 1 : 0) +
     (priceRange ? 1 : 0) +
     (areaRange ? 1 : 0) +
     (minBeds ? 1 : 0) +
@@ -222,7 +224,7 @@ export default function AgentProperties({
 
   function clearAll() {
     updateParams({
-      type: null, priceMin: null, priceMax: null, areaMin: null, areaMax: null,
+      type: null, transaccion: null, priceMin: null, priceMax: null, areaMin: null, areaMax: null,
       beds: null, baths: null, parking: null,
     })
   }
@@ -303,6 +305,18 @@ export default function AgentProperties({
                   </select>
                 </div>
               )}
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-mute">Transacción</label>
+                <select
+                  value={transactionFilter}
+                  onChange={(e) => updateParams({ transaccion: e.target.value === "all" ? null : e.target.value })}
+                  className={cn(selectClass, "w-full")}
+                >
+                  <option value="all">Venta y arriendo</option>
+                  {TRANSACTION_TYPES.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
+                </select>
+              </div>
 
               {facets.priceBounds && facets.priceBounds[0] < facets.priceBounds[1] && (
                 <RangeSlider
