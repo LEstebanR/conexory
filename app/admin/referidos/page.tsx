@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { Users } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { hasProAccess } from "@/lib/plans"
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
   title: "Referidos — Admin — Conexory",
 }
 
+const PAGE_SIZE = 20
+
 function formatDate(date: Date): string {
   return date.toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })
 }
@@ -15,36 +18,53 @@ function formatDate(date: Date): string {
 export default async function AdminReferralsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ page?: string; q?: string }>
 }) {
   const sp = await searchParams
+  const page = Math.max(1, Number(sp.page) || 1)
   const q = sp.q?.trim() ?? ""
 
-  const referrals = await prisma.user.findMany({
-    where: {
-      referredById: { not: null },
-      ...(q
-        ? {
-            OR: [
-              { name: { contains: q, mode: "insensitive" as const } },
-              { email: { contains: q, mode: "insensitive" as const } },
-              { referredBy: { name: { contains: q, mode: "insensitive" as const } } },
-              { referredBy: { email: { contains: q, mode: "insensitive" as const } } },
-            ],
-          }
-        : {}),
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      isPremium: true,
-      role: true,
-      createdAt: true,
-      referredBy: { select: { name: true, email: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  })
+  const where = {
+    referredById: { not: null },
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { email: { contains: q, mode: "insensitive" as const } },
+            { referredBy: { name: { contains: q, mode: "insensitive" as const } } },
+            { referredBy: { email: { contains: q, mode: "insensitive" as const } } },
+          ],
+        }
+      : {}),
+  }
+
+  const [referrals, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        isPremium: true,
+        role: true,
+        createdAt: true,
+        referredBy: { select: { name: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.user.count({ where }),
+  ])
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  function pageHref(p: number) {
+    const params = new URLSearchParams()
+    if (q) params.set("q", q)
+    params.set("page", String(p))
+    return `/admin/referidos?${params.toString()}`
+  }
 
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
@@ -125,6 +145,30 @@ export default async function AdminReferralsPage({
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          {page > 1 && (
+            <Link
+              href={pageHref(page - 1)}
+              className="text-sm font-medium text-body hover:text-ink px-3 py-1.5 rounded-full border border-hairline-strong"
+            >
+              Anterior
+            </Link>
+          )}
+          <span className="text-sm text-mute px-2">
+            Página {page} de {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link
+              href={pageHref(page + 1)}
+              className="text-sm font-medium text-body hover:text-ink px-3 py-1.5 rounded-full border border-hairline-strong"
+            >
+              Siguiente
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   )
 }
