@@ -67,6 +67,17 @@ export const metadata: Metadata = {
   },
 }
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Conexory",
+  url: APP_URL,
+  logo: `${APP_URL}/logo.png`,
+  description:
+    "Herramienta para asesores inmobiliarios en Colombia. Crea fichas de propiedades y compártelas por WhatsApp en menos de 60 segundos.",
+  sameAs: ["https://www.instagram.com/conexory/", "https://www.facebook.com/conexory"],
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -75,6 +86,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
         {children}
         <Toaster position="top-center" />
         <Analytics />

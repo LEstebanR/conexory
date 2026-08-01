@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const blogPosts = getAllPosts().map((post) => ({
     url: `${BASE_URL}/blog/${post.slug}`,
-    lastModified: new Date(post.date),
+    lastModified: new Date(post.dateModified ?? post.date),
     priority: 0.7,
     changeFrequency: "monthly" as const,
   }))
@@ -33,5 +33,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly" as const,
   }))
 
-  return [...staticRoutes, ...blogPosts, ...propertyRoutes]
+  const agents = await prisma.user.findMany({
+    where: { profilePublished: true, agentSlug: { not: null } },
+    select: { agentSlug: true, updatedAt: true },
+  })
+
+  const agentRoutes: MetadataRoute.Sitemap = agents.map((a) => ({
+    url: `${BASE_URL}/agente/${a.agentSlug}`,
+    lastModified: a.updatedAt,
+    priority: 0.6,
+    changeFrequency: "weekly" as const,
+  }))
+
+  return [...staticRoutes, ...blogPosts, ...propertyRoutes, ...agentRoutes]
 }
