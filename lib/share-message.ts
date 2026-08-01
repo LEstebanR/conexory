@@ -68,9 +68,7 @@ async function callGemini(
   agentName: string | null | undefined
 ): Promise<string | null> {
   const response = await ai.models.generateContent({
-    // flash-lite: the plain 2.5-flash free tier is capped at ~20 req/day,
-    // too low for this feature; lite has a much higher daily quota.
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-2.5-flash",
     contents: prompt,
     config: {
       abortSignal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
