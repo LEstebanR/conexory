@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
 import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
-import { formatCOP as formatCOPFull, formatCOPMillions } from "@/lib/format"
+import { formatCOPCompact } from "@/lib/format"
 import type { PropertyFacets, PropertySort } from "@/lib/properties"
 import type { MapProperty } from "./agent-map"
 
@@ -53,10 +53,6 @@ const SORT_OPTIONS: { key: PropertySort; label: string }[] = [
 
 const selectClass =
   "h-9 rounded-full border border-hairline-strong bg-white pl-3.5 pr-8 text-sm font-semibold text-ink cursor-pointer focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors appearance-none bg-[length:16px] bg-[right_0.6rem_center] bg-no-repeat bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23afafaf%22 stroke-width=%222%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 d=%22M19 9l-7 7-7-7%22/></svg>')]"
-
-function formatCOP(amount: number): string {
-  return amount >= 1_000_000 ? formatCOPMillions(amount) : formatCOPFull(amount)
-}
 
 function priceLabel(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`
@@ -433,7 +429,7 @@ export default function AgentProperties({
                       <span className="text-xs text-mute truncate">{location}</span>
                     </div>
                   )}
-                  <p className="text-lg font-black text-ink tracking-tight mt-2.5">{formatCOP(property.price)}</p>
+                  <p className="text-lg font-black text-ink tracking-tight mt-2.5">{formatCOPCompact(property.price)}</p>
                   {hasStats && (
                     <p className="text-xs text-mute mt-1">
                       {[

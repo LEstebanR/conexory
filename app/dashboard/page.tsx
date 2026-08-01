@@ -16,6 +16,7 @@ import { readMetrics } from "@/lib/property-metrics"
 import PortfolioPanel from "./portfolio-panel"
 import { getAppUrl } from "@/lib/urls"
 import { daysAgo } from "@/lib/dates"
+import { formatCOPCompact } from "@/lib/format"
 
 function formatColombiaDate(date: Date): string {
   return date.toLocaleDateString("es-CO", {
@@ -24,18 +25,6 @@ function formatColombiaDate(date: Date): string {
     year: "numeric",
     timeZone: "America/Bogota",
   })
-}
-
-function formatCompactCOP(amount: number): string {
-  if (amount >= 1_000_000) {
-    const millions = Math.round(amount / 1_000_000)
-    return `$${millions.toLocaleString("es-CO")} M`
-  }
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    maximumFractionDigits: 0,
-  }).format(amount)
 }
 
 function greeting(name: string): string {
@@ -161,7 +150,7 @@ export default async function DashboardPage({
     published: p.published,
     pinned: p.pinnedAt != null,
     shares: p.shares,
-    price: formatCompactCOP(p.price.toNumber()),
+    price: formatCOPCompact(p.price.toNumber()),
     priceValue: p.price.toNumber(),
     location: [p.neighborhood, p.city].filter(Boolean).join(", "),
     area: p.area,

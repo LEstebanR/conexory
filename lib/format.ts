@@ -20,3 +20,9 @@ export function formatCOPMillionsValue(amount: number): string {
 export function formatCOPMillions(amount: number): string {
   return `${formatCOPMillionsValue(amount)} M`
 }
+
+// Millions-compact above 1M, full currency below — the price display used
+// across the dashboard, agent profile and map popups.
+export function formatCOPCompact(amount: number): string {
+  return amount >= 1_000_000 ? formatCOPMillions(amount) : formatCOP(amount)
+}
