@@ -56,7 +56,7 @@ export const PropertySchema = z.object({
   bathrooms: optionalNonNegativeInt,
   parking: optionalNonNegativeInt,
   description: optionalString(1000),
-  // Techo absoluto (plan Pro). El límite por plan (10 free / 20 pro) lo aplican las actions.
+  // Absolute ceiling (Pro plan). The per-plan limit (10 free / 20 pro) is enforced by the actions.
   images: z.array(z.string()).max(PRO_PHOTO_LIMIT, `Puedes subir máximo ${PRO_PHOTO_LIMIT} fotos por propiedad.`),
   videoUrl: z
     .string()

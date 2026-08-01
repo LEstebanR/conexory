@@ -1,42 +1,42 @@
-## ¿Qué hace este PR?
+## What does this PR do?
 
-<!-- Describe el cambio en 1-3 oraciones. Qué problema resuelve o qué funcionalidad agrega. -->
+<!-- Describe the change in 1-3 sentences. What problem it solves or what feature it adds. -->
 
-## Issue relacionado
+## Related issue
 
-<!-- Si el issue vive en Linear, pega el link. Ej: https://linear.app/lesteban/issue/LES-149/...
-     Si el issue vive en GitHub, usa la sintaxis de cierre automático. Ej: Closes #116 -->
+<!-- If the issue lives in Linear, paste the link. E.g.: https://linear.app/lesteban/issue/LES-149/...
+     If the issue lives in GitHub, use the auto-close syntax. E.g.: Closes #116 -->
 
 Closes: 
 
-## Tipo de cambio
+## Type of change
 
-<!-- Marca con una X lo que aplica -->
+<!-- Mark with an X whatever applies -->
 
-- [ ] `feat` — nueva funcionalidad
-- [ ] `fix` — corrección de bug
-- [ ] `refactor` — reorganización de código sin cambio de comportamiento
-- [ ] `chore` — cambios de configuración, dependencias, scripts
-- [ ] `docs` — solo documentación
+- [ ] `feat` — new feature
+- [ ] `fix` — bug fix
+- [ ] `refactor` — code reorganization with no behavior change
+- [ ] `chore` — config, dependency, or script changes
+- [ ] `docs` — documentation only
 
-## Cambios principales
+## Main changes
 
-<!-- Lista los archivos o módulos más importantes que cambiaron y por qué -->
+<!-- List the most important files or modules that changed and why -->
 
 -
 -
 
-## ¿Cómo probar?
+## How to test?
 
-<!-- Pasos concretos para verificar que el cambio funciona. Si es UI, incluye screenshots. -->
+<!-- Concrete steps to verify the change works. If it's UI, include screenshots. -->
 
 1.
 2.
 
 ## Checklist
 
-- [ ] El código compila sin errores (`bun build`)
-- [ ] No hay errores de TypeScript
-- [ ] Las rutas protegidas siguen funcionando (auth)
-- [ ] Si hay cambios en el schema de Prisma, la migración está incluida
-- [ ] Si hay nuevas variables de entorno, están en `.env.example`
+- [ ] The code compiles with no errors (`bun build`)
+- [ ] No TypeScript errors
+- [ ] Protected routes still work (auth)
+- [ ] If there are Prisma schema changes, the migration is included
+- [ ] If there are new environment variables, they're in `.env.example`

@@ -164,7 +164,7 @@ export default function LocationSelect({
 
   return (
     <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-3", className)}>
-      {/* Departamento — plain select, only 32 options */}
+      {/* Department (state) — plain select, only 32 options */}
       <div className="space-y-1.5">
         <label className="block text-sm font-semibold text-ink">Departamento</label>
         <div className="relative">
@@ -183,7 +183,7 @@ export default function LocationSelect({
         </div>
       </div>
 
-      {/* Ciudad — combobox with filtering */}
+      {/* City — combobox with filtering */}
       <div className="space-y-1.5">
         <label className="block text-sm font-semibold text-ink">Ciudad</label>
         <CityCombobox

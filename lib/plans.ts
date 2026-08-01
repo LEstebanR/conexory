@@ -1,7 +1,7 @@
-// Límites por plan. Fuente única de verdad para enforcement (server) y UI.
-// Free: 3 propiedades activas, 10 fotos por propiedad.
-// Pro:  50 propiedades activas, 20 fotos por propiedad.
-// Personalizado: sin límite — se gestiona por contacto, no tiene flag propio.
+// Per-plan limits. Single source of truth for enforcement (server) and UI.
+// Free: 3 active properties, 10 photos per property.
+// Pro:  50 active properties, 20 photos per property.
+// Custom: no limit — managed by contact, has no flag of its own.
 
 export const FREE_PROPERTY_LIMIT = 3
 export const PRO_PROPERTY_LIMIT = 50

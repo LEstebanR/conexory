@@ -1,33 +1,33 @@
 ---
 name: project-conexory
-description: Contexto del proyecto Conexory — qué es, stack y estado funcional actual
+description: Conexory project context — what it is, stack, and current functional state
 metadata:
   type: project
 ---
 
-Conexory es un SaaS para agentes inmobiliarios en Colombia. Freemium con tres planes:
-- **Free:** 3 propiedades activas, 10 fotos por propiedad.
-- **Pro ($99.999 COP/mes):** 50 propiedades, 20 fotos por propiedad.
-- **Personalizado:** equipos/agencias, sin límite, por contacto (`/contacto`).
+Conexory is a SaaS for real estate agents in Colombia. Freemium with three plans:
+- **Free:** 3 active properties, 10 photos per property.
+- **Pro ($99,999 COP/month):** 50 properties, 20 photos per property.
+- **Custom:** teams/agencies, no limit, by contact (`/contacto`).
 
 **Stack:** Next.js 16.2.6, React 19, TypeScript, Tailwind CSS 4, better-auth, Prisma 5 + Neon PostgreSQL, Vercel Blob, Bun, Vercel deploy.
 
-**Funcional hoy:** creación de propiedades, link único, WhatsApp sharing con OG preview, auth email+Google, blog, páginas de precios y roadmap.
+**Working today:** property creation, unique link, WhatsApp sharing with OG preview, email+Google auth, blog, pricing and roadmap pages.
 
-**Sistema de planes — estado actual (cambió):** ya existe el flag `User.isPremium` (boolean) en el modelo y expuesto en la sesión (server con `getSession`, client con `useSession` — el auth-client usa `inferAdditionalFields` para tiparlo). Los límites por plan viven en `lib/plans.ts` (`propertyLimit()`/`photoLimit()`, fuente única) y **se aplican (enforcement real) server-side en las server actions**, gateando por `isPremium`. Ya NO es "asumir free para todos": el código debe respetar el modelo por plan y derivar todo límite de `lib/plans.ts` (nunca hardcodear 3/50 ni 10/20).
+**Plan system — current state (changed):** the `User.isPremium` (boolean) flag already exists on the model and is exposed in the session (server-side via `getSession`, client-side via `useSession` — auth-client uses `inferAdditionalFields` to type it). Per-plan limits live in `lib/plans.ts` (`propertyLimit()`/`photoLimit()`, single source of truth) and **are enforced (real enforcement) server-side in the server actions**, gated on `isPremium`. It's NO LONGER "assume free for everyone": the code must respect the per-plan model and derive every limit from `lib/plans.ts` (never hardcode 3/50 or 10/20).
 
-**Decisión de producto:** los planes se presentan en la UI como **ya lanzados** (no "próximamente"); el CTA de Pro en `/precios` enlaza a registro.
+**Product decision:** plans are presented in the UI as **already launched** (not "coming soon"); the Pro CTA on `/precios` links to registration.
 
-**Pendiente para completar el MVP:** pasarela de pagos (Wompi o Stripe) y suscripciones. Hasta integrarla, **nadie es premium** (no hay forma de asignar `isPremium`), pero el enforcement por plan ya está en su lugar.
+**Pending to complete the MVP:** payment gateway (Wompi or Stripe) and subscriptions. Until it's integrated, **nobody is premium** (there's no way to assign `isPremium`), but per-plan enforcement is already in place.
 
-**Precios (mercado colombiano):** los valores inmobiliarios se manejan en millones/miles de millones de COP y ocupan mucho espacio. Convención: en UI de espacio reducido (cards/listas) usar formato compacto en millones (`$580 M`, `$1.250 M` — helper `formatCompactCOP` en `app/dashboard/page.tsx`); en detalle del dashboard y vista pública `/p/[slug]` mostrar el **valor exacto completo** (un comprador necesita el precio real).
+**Pricing (Colombian market):** real estate values are handled in millions/billions of COP and take up a lot of space. Convention: in tight-space UI (cards/lists) use compact millions format (`$580 M`, `$1,250 M` — `formatCompactCOP` helper in `app/dashboard/page.tsx`); in dashboard detail and the public view `/p/[slug]` show the **full exact value** (a buyer needs the real price).
 
-**No se va a hacer:** estadísticas de visitas, dominio personalizado, app móvil.
+**Not going to be built:** visit statistics, custom domain, mobile app.
 
-**Auth:** Google + email/contraseña es suficiente para el mercado colombiano. No se agregarán más providers OAuth.
+**Auth:** Google + email/password is enough for the Colombian market. No more OAuth providers will be added.
 
-**Infraestructura GitHub:** CI con typecheck y lint corre en cada PR. Branch protection en `main` requiere que pasen todos los checks. Formato de rama obligatorio: `{type}/LES-{número}-{descripción}`.
+**GitHub infrastructure:** CI with typecheck and lint runs on every PR. Branch protection on `main` requires all checks to pass. Mandatory branch format: `{type}/LES-{number}-{description}`.
 
-**Compresión de imágenes pendiente:** browser-image-compression en cliente + sharp en servidor, convertir a WebP, límite entrante 20 MB (resultado almacenado ~200–500 KB).
+**Pending image compression:** browser-image-compression client-side + sharp server-side, convert to WebP, incoming limit 20 MB (stored result ~200–500 KB).
 
-**How to apply:** Al proponer nuevas funciones o cambios, tener en cuenta que la pasarela de pagos es la prioridad del MVP (es lo único que falta para activar premium real). Todo límite por plan debe derivarse de `lib/plans.ts` y aplicarse server-side gateando por `isPremium` — nunca hardcodear los números ni asumir "free para todos".
+**How to apply:** When proposing new features or changes, keep in mind that the payment gateway is the MVP's priority (it's the only thing missing to activate real premium). Every per-plan limit must be derived from `lib/plans.ts` and enforced server-side gated on `isPremium` — never hardcode the numbers or assume "free for everyone."

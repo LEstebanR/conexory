@@ -321,7 +321,7 @@ export default function SharePanel({
   return (
     <div className="bg-white rounded-2xl border border-hairline p-6 space-y-5">
 
-      {/* Mensaje */}
+      {/* Message */}
       <div className="space-y-3">
         <p className="text-xs font-bold text-ink uppercase tracking-widest">Mensaje</p>
 
@@ -428,7 +428,7 @@ export default function SharePanel({
         </div>
       )}
 
-      {/* Enlace con tus datos */}
+      {/* Link with your info */}
       <div className="space-y-2.5">
         <div>
           <p className={`text-xs font-bold uppercase tracking-widest mb-0.5 ${showContact ? "text-ink" : "text-mute"}`}>
@@ -489,7 +489,7 @@ export default function SharePanel({
 
       <div className="border-t border-hairline" />
 
-      {/* Sin mis datos */}
+      {/* Without my info */}
       <div className="space-y-2.5">
         <div>
           <p className="text-xs font-bold text-ink uppercase tracking-widest mb-0.5">

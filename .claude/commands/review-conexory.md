@@ -1,95 +1,95 @@
 # /review-conexory
 
-Code-review **específico de Conexory**: revisa el diff contra los invariantes y gotchas propios de este proyecto. No reemplaza a `/code-review` (que caza bugs de correctness genéricos) — esto verifica las reglas que solo aplican aquí. Lo ideal es correr ambos.
+Code review **specific to Conexory**: checks the diff against this project's own invariants and gotchas. It doesn't replace `/code-review` (which hunts generic correctness bugs) — this checks the rules that only apply here. Ideally run both.
 
-No apliques cambios; reporta hallazgos. Cada uno con `archivo:línea`, qué regla del proyecto viola y el impacto concreto.
+Don't apply changes; report findings. Each with `file:line`, which project rule it violates, and the concrete impact.
 
 ---
 
-## Paso 0 — Reúne el diff
+## Step 0 — Gather the diff
 
 ```bash
-git diff main...HEAD          # rango del PR
-git diff HEAD                 # cambios sin commitear (si los hay, inclúyelos)
+git diff main...HEAD          # the PR's range
+git diff HEAD                 # uncommitted changes (include them if any)
 ```
 
-Si te pasan un PR/rama/archivo como argumento, revisa ese objetivo. Para cada hunk, lee también la función que lo rodea (un bug en una línea no tocada de una función modificada está en alcance).
+If you're given a PR/branch/file as an argument, review that target. For each hunk, also read the surrounding function (a bug on an untouched line of a modified function is in scope).
 
 ---
 
-## Paso 1 — Verifica los invariantes del proyecto
+## Step 1 — Verify the project's invariants
 
-Recorre el diff buscando violaciones de **cada** categoría. Marca solo lo que el diff realmente introduce o re-expone.
+Go through the diff looking for violations of **each** category. Flag only what the diff actually introduces or re-exposes.
 
-### 1. Next.js 16 — APIs asíncronas (el gotcha #1)
-`headers()`, `cookies()`, `params` y `searchParams` son **Promises**. Falta de `await` = bug.
-- ❌ `const { id } = params` / `headers()` sin `await` → `cookies()`, etc.
+### 1. Next.js 16 — async APIs (gotcha #1)
+`headers()`, `cookies()`, `params` and `searchParams` are **Promises**. Missing `await` = bug.
+- ❌ `const { id } = params` / `headers()` without `await` → `cookies()`, etc.
 - ✅ `const { id } = await params`, `await headers()`, `auth.api.getSession({ headers: await headers() })`.
-- Revisa también que no se asuma comportamiento de Next 15 en routing, metadata o caché.
+- Also check that Next 15 behavior isn't assumed in routing, metadata or caching.
 
-### 2. Server Actions — validación con Zod obligatoria
-Toda action de escritura (`"use server"`) debe validar su input con un schema de Zod (en `lib/validations/`), **antes** de tocar la BD.
-- ❌ Action nueva que usa `data.x` directo sin `safeParse`.
+### 2. Server Actions — Zod validation is mandatory
+Every write action (`"use server"`) must validate its input with a Zod schema (in `lib/validations/`), **before** touching the DB.
+- ❌ New action that uses `data.x` directly with no `safeParse`.
 - ✅ `const parsed = Schema.safeParse(data); if (!parsed.success) return { success: false, error: ... }`.
-- Verifica que se devuelva el patrón de resultado discriminado (`{ success: true ... } | { success: false; error }`) en vez de lanzar errores crudos al cliente.
+- Verify the discriminated result pattern is returned (`{ success: true ... } | { success: false; error }`) instead of throwing raw errors at the client.
 
-### 3. Rutas públicas — no filtrar datos del agente
-La vista pública `/p/[slug]` (y cualquier ruta sin login) **no debe exponer `userId`** ni datos privados del agente.
-- ❌ `select` que incluye `userId`, email del agente, o pasa el objeto `user` completo al cliente.
-- ✅ Solo los campos de la propiedad necesarios para el render público.
+### 3. Public routes — don't leak agent data
+The public view `/p/[slug]` (and any route with no login) **must not expose `userId`** or private agent data.
+- ❌ A `select` that includes `userId`, the agent's email, or passes the full `user` object to the client.
+- ✅ Only the property fields needed for the public render.
 
 ### 4. Prisma
-- ❌ Instanciar `new PrismaClient()` — usar siempre el singleton de `lib/prisma.ts`.
-- ❌ Operar el `price` como número sin convertir — es `Decimal(15,2)`, usar `.toNumber()`.
-- ✅ `onDelete: Cascade` en relaciones nuevas de `User`.
-- **Cambio de schema sin migración** = bug: si el diff toca `prisma/schema.prisma`, debe incluir la migración en `prisma/migrations/` (ver `/db`). Nunca `db push`.
+- ❌ Instantiating `new PrismaClient()` — always use the singleton from `lib/prisma.ts`.
+- ❌ Operating on `price` as a plain number without converting — it's `Decimal(15,2)`, use `.toNumber()`.
+- ✅ `onDelete: Cascade` on new `User` relations.
+- **Schema change without a migration** = bug: if the diff touches `prisma/schema.prisma`, it must include the migration in `prisma/migrations/` (see `/db`). Never `db push`.
 
 ### 5. Tailwind CSS 4
-- ❌ Crear o editar `tailwind.config.js` — la config va en `globals.css` vía `@theme`.
-- ❌ Colores hardcodeados fuera de la paleta — usar tokens `brand-*` (acciones/highlights) y `slate-*` (neutros).
-- ✅ Composición de clases con `cn()` de `lib/utils.ts`.
+- ❌ Creating or editing `tailwind.config.js` — config goes in `globals.css` via `@theme`.
+- ❌ Hardcoded colors outside the palette — use `brand-*` tokens (actions/highlights) and `slate-*` (neutrals).
+- ✅ Class composition with `cn()` from `lib/utils.ts`.
 
 ### 6. Server vs Client Components
-- ❌ `"use client"` innecesario (sin hooks, eventos ni interactividad real) — Server Component por defecto.
-- Si un componente nuevo es client solo por un detalle, evalúa si ese detalle puede aislarse.
+- ❌ Unnecessary `"use client"` (no hooks, events or real interactivity) — Server Component by default.
+- If a new component is client-only because of a single detail, evaluate whether that detail can be isolated.
 
-### 7. Dominio inmobiliario
-- ❌ Hardcodear `"En venta"` — una propiedad puede ser en arriendo o venta. Usar el campo/tipo correspondiente.
-- ❌ Texto de UI en inglés — el mercado es Colombia; strings visibles al usuario en **español**.
-- Tipos de propiedad válidos: `apartment | house | office | commercial | lot | warehouse`. Cualquier otro string es inválido.
+### 7. Real estate domain
+- ❌ Hardcoding `"En venta"` ("For sale") — a property can be for rent or for sale. Use the corresponding field/type.
+- ❌ UI text in English — the market is Colombia; user-visible strings in **Spanish**.
+- Valid property types: `apartment | house | office | commercial | lot | warehouse`. Any other string is invalid.
 
-### 8. Planes y límites
-Existe el flag `User.isPremium` (Free vs Pro) expuesto en la sesión. Los límites por plan viven en `lib/plans.ts` y se aplican server-side gateando por `isPremium`. Free: 3 propiedades / 10 fotos. Pro: 50 / 20. "Personalizado" no tiene flag (se gestiona por contacto).
-- ❌ Hardcodear los números de límite (3/50, 10/20) en vez de usar `propertyLimit()` / `photoLimit()` de `lib/plans.ts`.
-- ❌ Prometer en UI un límite que la action no aplica (mismatch copy↔enforcement).
-- ✅ Derivar límites de `lib/plans.ts`; validación Zod con el techo Pro y el límite por plan aplicado en la action.
-- Nota: aún no hay pasarela de pagos, así que nadie es premium todavía — pero el código ya debe respetar el modelo por plan.
+### 8. Plans and limits
+There's a `User.isPremium` flag (Free vs Pro) exposed in the session. Per-plan limits live in `lib/plans.ts` and are enforced server-side gated on `isPremium`. Free: 3 properties / 10 photos. Pro: 50 / 20. "Custom" has no flag (managed by contact).
+- ❌ Hardcoding the limit numbers (3/50, 10/20) instead of using `propertyLimit()` / `photoLimit()` from `lib/plans.ts`.
+- ❌ Promising a limit in the UI that the action doesn't enforce (copy↔enforcement mismatch).
+- ✅ Deriving limits from `lib/plans.ts`; Zod validation with the Pro ceiling and the per-plan limit applied in the action.
+- Note: there's still no payment gateway, so nobody is premium yet — but the code must already respect the per-plan model.
 
-### 9. Imágenes
-- Se suben a Vercel Blob vía `POST /api/upload` y se guardan como array de URLs en `Property.images`.
-- ❌ Usar `<img>` en vez de `next/image` (CI/ESLint lo marca como error).
-- Respetar el límite de 10 fotos.
+### 9. Images
+- Uploaded to Vercel Blob via `POST /api/upload` and stored as an array of URLs in `Property.images`.
+- ❌ Using `<img>` instead of `next/image` (CI/ESLint flags this as an error).
+- Respect the 10-photo limit.
 
 ### 10. Auth
-- ✅ Sesión vía `auth.api.getSession({ headers: await headers() })`.
-- ✅ Proteger rutas: redirigir a `/login` si no hay sesión, a `/dashboard` si ya la hay.
-- Nota: `emailVerified` existe pero **no se valida** actualmente — no construyas lógica que asuma que sí.
+- ✅ Session via `auth.api.getSession({ headers: await headers() })`.
+- ✅ Protect routes: redirect to `/login` if there's no session, to `/dashboard` if there already is one.
+- Note: `emailVerified` exists but is **not currently validated** — don't build logic that assumes it is.
 
-### 11. Variables de entorno
-- Si el diff introduce una env var nueva, debe estar documentada en `.env.example`.
-- ❌ Hardcodear secretos o URLs que deberían ser env vars.
+### 11. Environment variables
+- If the diff introduces a new env var, it must be documented in `.env.example`.
+- ❌ Hardcoding secrets or URLs that should be env vars.
 
 ---
 
-## Paso 2 — Reporta
+## Step 2 — Report
 
-Lista los hallazgos, **primero los más severos** (correctness/seguridad > convención > estilo). Para cada uno:
+List the findings, **most severe first** (correctness/security > convention > style). For each one:
 
 ```
-[categoría] archivo:línea
-  Regla: (qué invariante del proyecto viola)
-  Impacto: (qué se rompe concretamente — crash, fuga de datos, fallo de CI, deuda)
-  Fix: (la corrección concreta)
+[category] file:line
+  Rule: (which project invariant it violates)
+  Impact: (what concretely breaks — crash, data leak, CI failure, debt)
+  Fix: (the concrete correction)
 ```
 
-Si no hay violaciones de proyecto, dilo claramente y recuerda correr `/code-review` para la pasada de correctness genérica. Si encuentras bugs de correctness que no son específicos del proyecto, menciónalos pero aclara que `/code-review` es la herramienta indicada para esa capa.
+If there are no project-rule violations, say so clearly and remind to run `/code-review` for the generic correctness pass. If you find correctness bugs that aren't project-specific, mention them but clarify that `/code-review` is the right tool for that layer.

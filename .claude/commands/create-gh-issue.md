@@ -1,78 +1,78 @@
 ---
-description: Crea un issue bien formado en GitHub Issues para Conexory, usando la plantilla del proyecto y labels consistentes con la convención de tipos y prioridad.
-argument-hint: [descripción libre del issue]
+description: Creates a well-formed GitHub Issue for Conexory, using the project template and labels consistent with the type/priority convention.
+argument-hint: [free-form issue description]
 ---
 
-# Crear issue en GitHub
+# Create a GitHub issue
 
-Crea un issue en GitHub Issues (`LEstebanR/conexory`) siguiendo la plantilla del proyecto (`.github/ISSUE_TEMPLATE/tarea.md`). Este es el flujo de tracking para issues que gestiona Luis directamente — Linear sigue existiendo para issues previos y para lo que gestione su socio, pero no es la fuente de este comando (ver "Tracking de trabajo" en `AGENTS.md`).
+Creates an issue on GitHub Issues (`LEstebanR/conexory`) following the project template (`.github/ISSUE_TEMPLATE/tarea.md`). This is the tracking flow for issues Luis manages directly — Linear still exists for older issues and for whatever his partner manages, but it isn't the source for this command (see "Work tracking" in `AGENTS.md`).
 
-Usa `$ARGUMENTS` como punto de partida del issue (título/descripción libre). Si viene vacío o muy incompleto, pregunta.
+Use `$ARGUMENTS` as the issue's starting point (free-form title/description). If it's empty or too incomplete, ask.
 
 ## Guard
 
-Verifica el repo: `gh repo view --json nameWithOwner --jq .nameWithOwner` debe devolver `LEstebanR/conexory`. Si no, avisa que este comando es específico de Conexory y aborta.
+Check the repo: `gh repo view --json nameWithOwner --jq .nameWithOwner` must return `LEstebanR/conexory`. If not, say this command is Conexory-specific and abort.
 
-## Paso 1 — Reunir la información
+## Step 1 — Gather the information
 
-A partir de `$ARGUMENTS` y del contexto de la conversación, identifica:
+From `$ARGUMENTS` and the conversation's context, identify:
 
-- **Título**: corto, en imperativo o sustantivo claro (igual que un título de PR, sin prefijo de tipo).
-- **Contexto**: por qué hace falta esto — qué problema resuelve o qué lo motiva. Si no es evidente, pregúntalo antes de inventarlo (regla global de `CLAUDE.md`: no asumas alcance ni motivación no respaldada).
-- **Qué hay que hacer**: alcance concreto.
-- **Criterios de aceptación**: cómo se sabe que está terminado. Si el usuario no los da explícitamente, propón un borrador a partir del contexto y dile que los ajuste — no los des por buenos en silencio si son una suposición tuya.
-- **Notas técnicas** (opcional): decisiones de diseño, archivos relevantes, alternativas descartadas, si ya se discutieron en la conversación.
+- **Title**: short, in imperative mood or a clear noun phrase (like a PR title, no type prefix).
+- **Context**: why this is needed — what problem it solves or what's motivating it. If it isn't obvious, ask before making it up (global `CLAUDE.md` rule: don't assume unsupported scope or motivation).
+- **What needs to be done**: concrete scope.
+- **Acceptance criteria**: how you know it's done. If the user doesn't give them explicitly, propose a draft from the context and tell them to adjust it — don't silently treat your own assumption as settled.
+- **Technical notes** (optional): design decisions, relevant files, discarded alternatives, if already discussed in the conversation.
 
-No preguntes por preguntar: si la conversación ya tiene todo esto (p. ej. viene de una investigación o discusión previa), redacta el borrador directamente y pasa al Paso 2.
+Don't ask just to ask: if the conversation already has all of this (e.g. it comes from prior research or discussion), draft it directly and move to Step 2.
 
-## Paso 2 — Clasificar tipo y prioridad
+## Step 2 — Classify type and priority
 
-**Tipo** (determina el label, mapeo fijo — no inventes labels nuevos):
+**Type** (determines the label, fixed mapping — don't invent new labels):
 
-| Naturaleza del issue | Label |
+| Nature of the issue | Label |
 |---|---|
-| Nueva funcionalidad | `enhancement` |
-| Bug / algo roto | `bug` |
-| Reorganización sin cambio de comportamiento | `refactor` |
-| Config, dependencias, infraestructura, migraciones de proveedor | `chore` |
-| Documentación | `documentation` |
+| New feature | `enhancement` |
+| Bug / something broken | `bug` |
+| Reorganization with no behavior change | `refactor` |
+| Config, dependencies, infrastructure, provider migrations | `chore` |
+| Documentation | `documentation` |
 
-Si el issue abarca más de un tipo (p. ej. una migración grande que después se partirá en varios PRs de distinto `{type}`), usa el label que mejor describa el issue **como iniciativa completa**, y dilo explícitamente en "Notas técnicas".
+If the issue spans more than one type (e.g. a big migration that will later be split into several PRs of different `{type}`), use the label that best describes the issue **as a whole initiative**, and say so explicitly in "Technical notes".
 
-**Prioridad** — aplica uno de `priority: alta` / `priority: media` / `priority: baja`. Si no es obvio por el contexto (p. ej. algo bloqueando a un usuario real vs. mejora de fondo), pregúntale a Luis en vez de asumir.
+**Priority** — apply one of `priority: alta` / `priority: media` / `priority: baja`. If it isn't obvious from context (e.g. something blocking a real user vs. a background improvement), ask Luis instead of assuming.
 
-## Paso 3 — Checkpoint: mostrar el borrador
+## Step 3 — Checkpoint: show the draft
 
-Muestra el título, body completo (con la estructura de la plantilla) y los labels elegidos **antes** de crear el issue. Espera aprobación explícita — igual que el checkpoint de descripción de PR en `/create-pr`. Si pide cambios, ajusta y vuelve a mostrar.
+Show the title, full body (with the template's structure) and chosen labels **before** creating the issue. Wait for explicit approval — same as the PR description checkpoint in `/create-pr`. If they ask for changes, adjust and show again.
 
-## Paso 4 — Crear el issue
+## Step 4 — Create the issue
 
 ```bash
 gh issue create \
   --repo LEstebanR/conexory \
-  --title "<título>" \
-  --label "<tipo>,priority: <prioridad>" \
+  --title "<title>" \
+  --label "<type>,priority: <priority>" \
   --body "$(cat <<'EOF'
-## Contexto
+## Context
 
-<contexto>
+<context>
 
-## Qué hay que hacer
+## What needs to be done
 
-<alcance>
+<scope>
 
-## Criterios de aceptación
+## Acceptance criteria
 
-- [ ] <criterio 1>
-- [ ] <criterio 2>
+- [ ] <criterion 1>
+- [ ] <criterion 2>
 
-## Notas técnicas
+## Technical notes
 
-<notas, si aplica — omitir la sección si no hay nada>
+<notes, if applicable — omit the section if there's nothing>
 EOF
 )"
 ```
 
-## Paso 5 — Reportar
+## Step 5 — Report
 
-Devuelve el número y URL del issue creado. Recuerda en una línea que, al empezar a trabajarlo, la rama va **sin número** (`{type}/{descripción-corta}`, ver `AGENTS.md`) y el PR debe llevar `Closes #<número>` para que se cierre solo al mergear.
+Return the number and URL of the created issue. Note in one line that, when work starts on it, the branch has **no number** (`{type}/{short-description}`, see `AGENTS.md`) and the PR must carry `Closes #<number>` so it auto-closes on merge.

@@ -114,7 +114,7 @@ export default async function PropertyDetailPage({
         </div>
       </div>
 
-      {/* Banner de desactivada */}
+      {/* Deactivated banner */}
       {!property.published && (
         <div className="flex items-center gap-3 bg-warning-50 border border-warning-200 rounded-2xl px-4 py-3 mb-4">
           <EyeOff className="w-4 h-4 text-warning-600 flex-shrink-0" />
@@ -125,7 +125,7 @@ export default async function PropertyDetailPage({
       )}
 
       <div className="space-y-4">
-        {/* Analytics — Estadísticas */}
+        {/* Analytics */}
         <div className="bg-white rounded-2xl border border-hairline p-6">
           <p className="text-xs font-bold text-mute uppercase tracking-wide mb-5">Estadísticas</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -228,7 +228,7 @@ export default async function PropertyDetailPage({
           agentBrandColor={agent?.brandColor ?? DEFAULT_ACCENT_COLOR}
         />
 
-        {/* Carrusel */}
+        {/* Carousel */}
         {property.images.length > 0 && (
           <PropertyCarousel
             images={property.images}
@@ -236,7 +236,7 @@ export default async function PropertyDetailPage({
           />
         )}
 
-        {/* Resumen */}
+        {/* Summary */}
         <div className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="min-w-0 sm:flex-1">

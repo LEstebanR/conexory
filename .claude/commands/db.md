@@ -1,106 +1,106 @@
 # /db
 
-Maneja la base de datos de Conexory: crear migraciones de Prisma, revisar estado/drift, inspeccionar datos y administrar los branches de Neon. La BD está bajo control de **Prisma Migrations** (baselined con `0_init`).
+Manages Conexory's database: creating Prisma migrations, checking status/drift, inspecting data, and administering Neon branches. The DB is under **Prisma Migrations** control (baselined with `0_init`).
 
-**Regla número uno:** nunca corras una migración, `reset` o `db push` contra **producción** desde local. Verifica siempre a qué base estás conectado antes de escribir.
+**Rule number one:** never run a migration, `reset` or `db push` against **production** from local. Always verify which database you're connected to before writing.
 
 ---
 
-## Paso 0 — Verifica a qué base estás conectado (SIEMPRE primero)
+## Step 0 — Verify which database you're connected to (ALWAYS first)
 
 ```bash
 bunx prisma migrate status 2>&1 | grep Datasource
 ```
 
-- `ep-fancy-violet-...` → branch **`development`** ✅ seguro para migrar.
-- `ep-proud-unit-...`  → branch **`production`** ⛔ DETENTE. No migres aquí desde local.
+- `ep-fancy-violet-...` → **`development`** branch ✅ safe to migrate.
+- `ep-proud-unit-...`  → **`production`** branch ⛔ STOP. Don't migrate here from local.
 
-El `.env` local debe apuntar al branch `development` en **ambas** vars (`DATABASE_URL` *y* `DIRECT_URL` — las migraciones usan `DIRECT_URL`). Si no coinciden o apuntan a prod, corrígelo antes de seguir (las URLs de cada branch se obtienen con `neonctl connection-string`, ver más abajo).
+The local `.env` must point at the `development` branch in **both** vars (`DATABASE_URL` *and* `DIRECT_URL` — migrations use `DIRECT_URL`). If they don't match or point at prod, fix it before continuing (get each branch's URLs with `neonctl connection-string`, see below).
 
 ---
 
-## Crear una migración (cambio de schema)
+## Creating a migration (schema change)
 
-1. Edita `prisma/schema.prisma`. Respeta las convenciones del proyecto:
-   - precio = `Decimal(15,2)`; `onDelete: Cascade` en relaciones de `User`.
-   - Para tipos de propiedad usa el enum existente: `apartment | house | office | commercial | lot | warehouse`.
+1. Edit `prisma/schema.prisma`. Follow the project's conventions:
+   - price = `Decimal(15,2)`; `onDelete: Cascade` on `User` relations.
+   - For property types use the existing enum: `apartment | house | office | commercial | lot | warehouse`.
 
-2. Genera y aplica la migración contra **dev**:
+2. Generate and apply the migration against **dev**:
    ```bash
-   bunx prisma migrate dev --name descripcion_en_snake_case
+   bunx prisma migrate dev --name description_in_snake_case
    ```
-   Esto: crea `prisma/migrations/{timestamp}_descripcion/migration.sql`, lo aplica al branch dev, y regenera el client. Nombre en `snake_case`, descriptivo (`add_user_phone`, `add_property_status`).
+   This: creates `prisma/migrations/{timestamp}_description/migration.sql`, applies it to the dev branch, and regenerates the client. Name in `snake_case`, descriptive (`add_user_phone`, `add_property_status`).
 
-3. Revisa el SQL generado (`prisma/migrations/.../migration.sql`) antes de commitear — confirma que el `ALTER`/`CREATE` es lo que esperabas y no hay un `DROP` accidental que pierda datos.
+3. Review the generated SQL (`prisma/migrations/.../migration.sql`) before committing — confirm the `ALTER`/`CREATE` is what you expected and there's no accidental `DROP` that would lose data.
 
-4. **Commitea la migración junto con el cambio de `schema.prisma`** en el mismo PR (usa `/create-pr`). Nunca mergees un cambio de schema sin su migración.
+4. **Commit the migration together with the `schema.prisma` change** in the same PR (use `/create-pr`). Never merge a schema change without its migration.
 
-> En cada deploy de Vercel corre `prisma migrate deploy` automáticamente (está en el `build`), así que la migración se aplica sola: a **dev** en preview deploys y a **prod** en el deploy de producción. No la apliques a prod a mano.
-
----
-
-## Prohibido
-
-- **`prisma db push`** — rompe el historial de migraciones. La BD ya está baselined; todo cambio va por `migrate dev`.
-- **`migrate reset` / `migrate deploy` / `migrate dev` contra prod** desde local. `reset` borra datos.
-- Editar a mano una migración ya aplicada/mergeada. Si te equivocaste, crea una migración nueva que corrija.
+> On every Vercel deploy, `prisma migrate deploy` runs automatically (it's in `build`), so the migration applies itself: to **dev** on preview deploys and to **prod** on the production deploy. Don't apply it to prod by hand.
 
 ---
 
-## Comandos útiles
+## Forbidden
+
+- **`prisma db push`** — breaks the migration history. The DB is already baselined; every change goes through `migrate dev`.
+- **`migrate reset` / `migrate deploy` / `migrate dev` against prod** from local. `reset` deletes data.
+- Manually editing an already-applied/merged migration. If you made a mistake, create a new migration that corrects it.
+
+---
+
+## Useful commands
 
 ```bash
-bunx prisma migrate status     # ¿qué migraciones están aplicadas? ¿hay pendientes?
-bunx prisma studio             # GUI para inspeccionar/editar datos (abre en el browser)
-bunx prisma generate           # regenera el client tras editar el schema sin migrar
+bunx prisma migrate status     # which migrations are applied? any pending?
+bunx prisma studio             # GUI to inspect/edit data (opens in the browser)
+bunx prisma generate            # regenerates the client after editing the schema without migrating
 ```
 
-**Detectar drift** (la BD no coincide con `schema.prisma`):
+**Detecting drift** (the DB doesn't match `schema.prisma`):
 ```bash
 bunx prisma migrate diff \
   --from-schema-datasource prisma/schema.prisma \
   --to-schema-datamodel prisma/schema.prisma \
   --exit-code
-# exit 0 = sin diferencias; exit 2 = hay drift (imprime el SQL de la diferencia)
+# exit 0 = no differences; exit 2 = there's drift (prints the diff's SQL)
 ```
 
 ---
 
-## Administrar branches de Neon
+## Administering Neon branches
 
-Proyecto Neon: `conexory` (`late-shape-55166232`). `neonctl` se autentica por OAuth en el navegador (no hay `NEON_API_KEY`); si pide auth, deja que abra el navegador.
+Neon project: `conexory` (`late-shape-55166232`). `neonctl` authenticates via OAuth in the browser (there's no `NEON_API_KEY`); if it asks for auth, let it open the browser.
 
 ```bash
-# Listar branches (production = primary, development = dev persistente)
+# List branches (production = primary, development = persistent dev)
 bunx neonctl branches list --project-id late-shape-55166232
 
-# Connection strings de un branch (pooled = DATABASE_URL, sin --pooled = DIRECT_URL)
+# Connection strings for a branch (pooled = DATABASE_URL, without --pooled = DIRECT_URL)
 bunx neonctl connection-string development --project-id late-shape-55166232 --pooled
 bunx neonctl connection-string development --project-id late-shape-55166232
 
-# Refrescar el branch dev con datos/esquema actuales de prod: borra y recrea sin TTL
+# Refresh the dev branch with prod's current data/schema: delete and recreate with no TTL
 bunx neonctl branches delete development --project-id late-shape-55166232
 bunx neonctl branches create --project-id late-shape-55166232 --name development --parent production
-bunx neonctl branches set-expiration <branch-id> --project-id late-shape-55166232   # sin --expires-at = quita el TTL (lo vuelve persistente)
+bunx neonctl branches set-expiration <branch-id> --project-id late-shape-55166232   # no --expires-at = removes the TTL (makes it persistent)
 ```
 
-> Al crear un branch nuevo de dev, **actualiza el `.env` local** con sus nuevos connection strings (el endpoint cambia). Si cambian las credenciales de dev, actualiza también las vars de Vercel en scope *Preview + Development*.
+> When creating a new dev branch, **update the local `.env`** with its new connection strings (the endpoint changes). If dev's credentials change, also update the Vercel vars in the *Preview + Development* scope.
 
 ---
 
-## Baseline (referencia — solo si la BD pierde el historial)
+## Baseline (reference — only if the DB loses its history)
 
-Si alguna vez `migrate deploy` falla con **P3005** ("schema is not empty") en una base sin tabla `_prisma_migrations` (p. ej. creada con `db push`):
+If `migrate deploy` ever fails with **P3005** ("schema is not empty") on a database with no `_prisma_migrations` table (e.g. created with `db push`):
 
 ```bash
-# 1. Generar init desde el estado REAL de la base (introspección, no el datamodel)
+# 1. Generate init from the database's REAL state (introspection, not the datamodel)
 mkdir -p prisma/migrations/0_init
 bunx prisma migrate diff --from-empty \
   --to-schema-datasource prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
-# 2. Marcar init como aplicada SIN ejecutarla
+# 2. Mark init as applied WITHOUT running it
 bunx prisma migrate resolve --applied 0_init
-# 3. Aplicar las migraciones posteriores normalmente
+# 3. Apply the later migrations normally
 bunx prisma migrate deploy
 ```
 
-Asegúrate de que exista `prisma/migrations/migration_lock.toml` con `provider = "postgresql"`.
+Make sure `prisma/migrations/migration_lock.toml` exists with `provider = "postgresql"`.

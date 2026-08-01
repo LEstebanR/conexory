@@ -9,8 +9,8 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
-  // En previews de Vercel la URL es dinámica: si no hay BETTER_AUTH_URL fijo,
-  // derivamos la base del deploy actual para que el origin check no falle.
+  // On Vercel previews the URL is dynamic: if there's no fixed BETTER_AUTH_URL,
+  // derive the base from the current deploy so the origin check doesn't fail.
   baseURL:
     process.env.BETTER_AUTH_URL ??
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined),
@@ -67,8 +67,8 @@ export const auth = betterAuth({
   },
 
   session: {
-    expiresIn: 60 * 60 * 24 * 7,   // 7 días
-    updateAge: 60 * 60 * 24,        // renueva si la sesión tiene > 1 día
+    expiresIn: 60 * 60 * 24 * 7,   // 7 days
+    updateAge: 60 * 60 * 24,        // refreshes if the session is older than 1 day
     cookieCache: {
       enabled: false,               // disabled: plan changes (isPremium) must reflect immediately
     },

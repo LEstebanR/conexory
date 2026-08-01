@@ -81,7 +81,7 @@ export default async function SettingsPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6 items-start">
-        {/* Perfil — ocupa 2 columnas */}
+        {/* Profile — spans 2 columns */}
         <div id="tour-settings-profile" className="lg:col-span-2 bg-white rounded-2xl border border-hairline p-6 sm:p-8">
           <h2 className="text-base font-bold text-ink mb-6">Perfil</h2>
           <SettingsForm
@@ -102,7 +102,7 @@ export default async function SettingsPage() {
         </div>
 
         <div className="space-y-4">
-          {/* Perfil público */}
+          {/* Public profile */}
           <div id="tour-settings-public" className="bg-white rounded-2xl border border-hairline p-6">
             <div className="flex items-center gap-2 mb-3">
               <Globe className="w-4 h-4 text-ink" strokeWidth={1.75} />
@@ -191,7 +191,7 @@ export default async function SettingsPage() {
             )}
           </div>
 
-          {/* Referidos */}
+          {/* Referrals */}
           {referralUrl && <ReferralLinkCard url={referralUrl} />}
         </div>
       </div>
