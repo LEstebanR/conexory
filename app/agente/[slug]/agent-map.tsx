@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import L from "leaflet"
 import Link from "next/link"
 import "leaflet/dist/leaflet.css"
-import { formatCOP as formatCOPFull, formatCOPMillions } from "@/lib/format"
+import { formatCOPCompact } from "@/lib/format"
 
 function FitBounds({ positions }: { positions: [number, number][] }) {
   const map = useMap()
@@ -123,10 +123,6 @@ export interface MapProperty {
   longitude: number | null
 }
 
-function formatCOP(n: number): string {
-  return n >= 1_000_000 ? formatCOPMillions(n) : formatCOPFull(n)
-}
-
 type PositionedProperty = MapProperty & { lat: number; lng: number }
 
 // Hover opens the preview; a short grace period on close lets the cursor
@@ -178,7 +174,7 @@ function PropertyMarker({ p }: { p: PositionedProperty }) {
             <div style={{ padding: "10px 12px 12px" }}>
               <p style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.3, margin: "0 0 4px", color: "#000" }}>{p.title}</p>
               <p style={{ fontSize: 11, color: "#afafaf", margin: "0 0 8px" }}>{p.city}</p>
-              <p style={{ fontWeight: 900, fontSize: 15, margin: "0 0 10px", color: "#000" }}>{formatCOP(p.price)}</p>
+              <p style={{ fontWeight: 900, fontSize: 15, margin: "0 0 10px", color: "#000" }}>{formatCOPCompact(p.price)}</p>
               <span style={{ display: "block", textAlign: "center", fontSize: 12, fontWeight: 700, background: "#000", color: "#fff", borderRadius: 999, padding: "6px 14px" }}>
                 Ver propiedad
               </span>

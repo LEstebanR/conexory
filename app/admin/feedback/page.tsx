@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { MessageSquareHeart } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import AdminNav from "../admin-nav"
@@ -6,6 +7,8 @@ import AdminNav from "../admin-nav"
 export const metadata: Metadata = {
   title: "Feedback — Admin — Conexory",
 }
+
+const PAGE_SIZE = 20
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("es-CO", {
@@ -17,17 +20,31 @@ function formatDate(date: Date): string {
   })
 }
 
-export default async function AdminFeedbackPage() {
-  const feedback = await prisma.feedback.findMany({
-    select: {
-      id: true,
-      name: true,
-      message: true,
-      createdAt: true,
-      user: { select: { name: true, email: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  })
+export default async function AdminFeedbackPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
+  const sp = await searchParams
+  const page = Math.max(1, Number(sp.page) || 1)
+
+  const [feedback, total] = await Promise.all([
+    prisma.feedback.findMany({
+      select: {
+        id: true,
+        name: true,
+        message: true,
+        createdAt: true,
+        user: { select: { name: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.feedback.count(),
+  ])
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
@@ -68,6 +85,30 @@ export default async function AdminFeedbackPage() {
               <p className="text-sm text-body leading-relaxed whitespace-pre-wrap">{f.message}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          {page > 1 && (
+            <Link
+              href={`/admin/feedback?page=${page - 1}`}
+              className="text-sm font-medium text-body hover:text-ink px-3 py-1.5 rounded-full border border-hairline-strong"
+            >
+              Anterior
+            </Link>
+          )}
+          <span className="text-sm text-mute px-2">
+            Página {page} de {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link
+              href={`/admin/feedback?page=${page + 1}`}
+              className="text-sm font-medium text-body hover:text-ink px-3 py-1.5 rounded-full border border-hairline-strong"
+            >
+              Siguiente
+            </Link>
+          )}
         </div>
       )}
     </div>
