@@ -1,19 +1,50 @@
 // Options the agent picks in the flyer modal before generating.
 // Shared between the client form and the server renderer.
 
-export const FLYER_TEMPLATE_IDS = ["clasica", "ficha", "fotos"] as const
+export const FLYER_TEMPLATE_IDS = [
+  "clasica",
+  "ficha",
+  "fotos",
+  "editorial",
+  "poster",
+  "split",
+  "gallery",
+  "minimal",
+  "brutalist",
+  "panorama",
+] as const
 export type FlyerTemplate = (typeof FLYER_TEMPLATE_IDS)[number]
 
 export const FLYER_TEMPLATE_LABELS: Record<FlyerTemplate, string> = {
   clasica: "Clásica",
   ficha: "Ficha técnica",
   fotos: "Fotos",
+  editorial: "Editorial",
+  poster: "Póster",
+  split: "En dos",
+  gallery: "Galería",
+  minimal: "Minimal",
+  brutalist: "Brutalista",
+  panorama: "Panorama",
+}
+
+export const FLYER_TEMPLATE_DESCRIPTIONS: Record<FlyerTemplate, string> = {
+  clasica: "Equilibrio entre foto, precio y datos",
+  ficha: "Información técnica con lectura rápida",
+  fotos: "La propiedad como protagonista",
+  editorial: "Composición de revista inmobiliaria",
+  poster: "Impacto visual para compartir",
+  split: "Contraste de imagen y contenido",
+  gallery: "Más fotos, menos ruido",
+  minimal: "Aire, tipografía y elegancia",
+  brutalist: "Geometría fuerte y alto contraste",
+  panorama: "Una portada cinematográfica",
 }
 
 export const FLYER_INFO_IDS = ["precio", "caracteristicas", "descripcion", "contacto"] as const
 export type FlyerInfo = (typeof FLYER_INFO_IDS)[number]
 
-export const FLYER_HIGHLIGHT_MAX_LENGTH = 120
+export const FLYER_HIGHLIGHT_MAX_LENGTH = 80
 
 export const FLYER_INFO_LABELS: Record<FlyerInfo, string> = {
   precio: "Precio",
@@ -27,6 +58,7 @@ export type FlyerOptions = {
   highlight?: string
   include: FlyerInfo[]
   accentColor?: string
+  photos?: string[]
 }
 
 export const DEFAULT_FLYER_OPTIONS: FlyerOptions = {
