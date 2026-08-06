@@ -38,14 +38,22 @@ export async function registerUser(
 
   // No inbox to click a real verification link from — flip the same DB
   // field it would set (app/dashboard/verify-email-gate.tsx).
-  await prisma.user.update({ where: { id: user.id }, data: { emailVerified: true } })
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      emailVerified: true,
+      onboarding: {
+        welcomeModalSeen: true,
+        dashboardTourCompleted: true,
+        propertyTourCompleted: true,
+        settingsTourCompleted: true,
+        firstPropertyCreated: false,
+        firstPropertyShared: false,
+      },
+    },
+  })
   await page.reload()
 
-  // Dismiss the first-time "Ver tour inicial" welcome modal if it shows.
-  await page
-    .getByRole("button", { name: "Ver tour inicial" })
-    .click({ timeout: 5_000 })
-    .catch(() => {})
   await page.waitForLoadState("networkidle")
 
   return { name, email, password: E2E_PASSWORD, userId: user.id }

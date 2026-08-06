@@ -13,6 +13,7 @@ mock.module("@/lib/auth", () => ({
 const baseProperty = {
   id: "p1",
   showContact: true,
+  images: ["https://blob.example.com/one.jpg", "https://blob.example.com/two.jpg"],
   updatedAt: new Date("2026-01-01T00:00:00Z"),
   user: { name: "Luis", image: null, phone: "3001234567", brandColor: "#0a0a0a" },
 }
@@ -122,6 +123,19 @@ describe("GET /api/properties/[id]/flyer.jpg", () => {
       { accentColor: string },
     ]
     expect(options.accentColor).toBe("#0a0a0a")
+  })
+
+  test("keeps only selected photos that belong to the property", async () => {
+    await GET(
+      makeRequest("?photos=https%3A%2F%2Fblob.example.com%2Ftwo.jpg%2Chttps%3A%2F%2Felsewhere.example%2Fother.jpg"),
+      ctx("p1")
+    )
+    const [, , options] = mockGenerateFlyerJpeg.mock.calls[0] as unknown as [
+      unknown,
+      unknown,
+      { photos: string[] },
+    ]
+    expect(options.photos).toEqual(["https://blob.example.com/two.jpg"])
   })
 
   test("still returns the image even if caching the blob fails", async () => {
