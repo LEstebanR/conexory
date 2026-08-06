@@ -226,6 +226,7 @@ export default async function PropertyDetailPage({
           description={property.description}
           isPremium={isPremium}
           agentBrandColor={agent?.brandColor ?? DEFAULT_ACCENT_COLOR}
+          images={property.images}
         />
 
         {/* Carousel */}

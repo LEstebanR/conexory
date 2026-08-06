@@ -153,6 +153,7 @@ export default function SharePanel({
   description,
   isPremium,
   agentBrandColor,
+  images,
 }: {
   url: string
   urlNoContact: string
@@ -173,6 +174,7 @@ export default function SharePanel({
   description?: string | null
   isPremium: boolean
   agentBrandColor: string
+  images: string[]
 }) {
   const [copied, setCopied] = useState(false)
   const [copiedNoContact, setCopiedNoContact] = useState(false)
@@ -552,7 +554,7 @@ export default function SharePanel({
           </p>
         </div>
 
-        <FlyerModal propertyId={propertyId} slug={slug} showContact={showContact} agentBrandColor={agentBrandColor}>
+        <FlyerModal propertyId={propertyId} slug={slug} showContact={showContact} agentBrandColor={agentBrandColor} images={images}>
           <button
             disabled={!published}
             className="flex items-center justify-center gap-2 w-full bg-ink text-white text-sm font-semibold px-4 py-2.5 rounded-full hover:bg-elevated transition-colors disabled:opacity-40 disabled:pointer-events-none"

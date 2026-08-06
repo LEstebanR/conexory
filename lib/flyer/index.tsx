@@ -1,8 +1,9 @@
 import { ImageResponse } from "next/og"
 import sharp from "sharp"
+import type { ReactElement } from "react"
 import type { Property } from "@prisma/client"
 import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
-import { DEFAULT_FLYER_OPTIONS, type FlyerOptions } from "@/lib/flyer-options"
+import { DEFAULT_FLYER_OPTIONS, type FlyerOptions, type FlyerTemplate } from "@/lib/flyer-options"
 import { getAppUrl } from "@/lib/urls"
 import {
   W,
@@ -23,8 +24,30 @@ import { templateClasica } from "./clasica"
 import { templateFicha } from "./ficha"
 import { templateFotos } from "./fotos"
 import { templateSinFotos } from "./sin-fotos"
+import {
+  templateBrutalist,
+  templateEditorial,
+  templateGallery,
+  templateMinimal,
+  templatePanorama,
+  templatePoster,
+  templateSplit,
+} from "./extra"
 
 export { FLYER_RENDER_VERSION }
+
+const templateRenderers: Record<FlyerTemplate, (data: FlyerData) => ReactElement> = {
+  clasica: templateClasica,
+  ficha: templateFicha,
+  fotos: templateFotos,
+  editorial: templateEditorial,
+  poster: templatePoster,
+  split: templateSplit,
+  gallery: templateGallery,
+  minimal: templateMinimal,
+  brutalist: templateBrutalist,
+  panorama: templatePanorama,
+}
 
 // Read once at module load, not per request — matches the markWhite/markBlack
 // pattern in shared.tsx instead of blocking the event loop on every render.
@@ -44,7 +67,9 @@ export async function generateFlyerJpeg(
 
   const photos = (
     await Promise.all(
-      property.images.slice(0, 4).map((url, i) => photoAsDataUrl(url, i === 0 ? 1400 : 800))
+    (options.photos?.length ? options.photos : property.images.slice(0, 6)).map((url, i) =>
+      photoAsDataUrl(url, i === 0 ? 1400 : 800)
+    )
     )
   ).filter((p): p is string => p !== null)
 
@@ -64,14 +89,7 @@ export async function generateFlyerJpeg(
     mutedOnAccentColor: ensureContrastAgainst(MUTE, relativeLuminance(accentColor)),
   }
 
-  const node =
-    photos.length === 0
-      ? templateSinFotos(data)
-      : options.template === "ficha"
-        ? templateFicha(data)
-        : options.template === "fotos"
-          ? templateFotos(data)
-          : templateClasica(data)
+  const node = photos.length === 0 ? templateSinFotos(data) : templateRenderers[options.template](data)
 
   const fonts = [
     { name: "Inter", data: fontBold, weight: 700 as const, style: "normal" as const },
