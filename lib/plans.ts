@@ -11,6 +11,21 @@ export const PINNED_LIMIT = 3
 export const FREE_AI_MESSAGE_LIMIT = 0
 export const PRO_AI_MESSAGE_LIMIT = 10
 
+export const PRO_VALUE_POINTS = [
+  {
+    title: "Comparte en menos tiempo",
+    description: "Genera mensajes de WhatsApp personalizados con IA según cada propiedad.",
+  },
+  {
+    title: "Crece sin cambiar de herramienta",
+    description: "Organiza un inventario más grande y presenta cada propiedad con más fotos.",
+  },
+  {
+    title: "Trabaja sin permanencia",
+    description: "Cancela cuando quieras, sin contratos ni compromisos de largo plazo.",
+  },
+] as const
+
 export function propertyLimit(isPremium: boolean): number {
   return isPremium ? PRO_PROPERTY_LIMIT : FREE_PROPERTY_LIMIT
 }
