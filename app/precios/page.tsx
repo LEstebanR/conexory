@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Check, Minus } from "lucide-react"
+import { Check, Minus, Sparkles } from "lucide-react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Reveal from "@/components/reveal"
 import { Button } from "@/components/ui/button"
+import { PRO_AI_MESSAGE_LIMIT, PRO_VALUE_POINTS } from "@/lib/plans"
 
 export const metadata: Metadata = {
   title: "Planes y precios — Conexory para asesores inmobiliarios",
@@ -49,7 +50,6 @@ const plans = [
       "Vista pública para tus clientes",
       "Contador de veces compartida",
       "Perfil de agente con galería",
-      "Sin permanencia — cancela cuando quieras",
     ],
   },
   {
@@ -100,6 +100,7 @@ const comparison: FeatureGroup[] = [
       { label: "Vista pública para clientes", free: true, pro: true, custom: true },
       { label: "Contador de veces compartida", free: true, pro: true, custom: true },
       { label: "Perfil de agente con galería", free: true, pro: true, custom: true },
+      { label: "Mensajes personalizados con IA al día", free: "0", pro: `Hasta ${PRO_AI_MESSAGE_LIMIT}`, custom: "A definir" },
     ],
   },
   {
@@ -215,6 +216,27 @@ export default function PreciosPage() {
                     </li>
                   ))}
                 </ul>
+
+                {plan.name === "Pro" && (
+                  <div className="mb-8 border-t border-white/10 pt-6">
+                    <p className="mb-4 text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
+                      Por qué Pro
+                    </p>
+                    <div className="space-y-4">
+                      {PRO_VALUE_POINTS.map((point, pointIndex) => (
+                        <div key={point.title} className="flex gap-3">
+                          <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white text-ink">
+                            {pointIndex === 0 ? <Sparkles className="h-3 w-3" strokeWidth={2.5} /> : <span className="text-[10px] font-black">0{pointIndex + 1}</span>}
+                          </span>
+                          <div>
+                            <p className="text-sm font-bold text-white">{point.title}</p>
+                            <p className="mt-0.5 text-xs leading-relaxed text-white/55">{point.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <Button
                   variant={plan.dark ? "secondary" : "outline"}

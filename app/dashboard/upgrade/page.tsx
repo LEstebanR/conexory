@@ -2,14 +2,14 @@ import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 import Link from "next/link"
 import { Suspense } from "react"
-import { Check, CreditCard, Zap, ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-react"
+import { Check, CreditCard, Zap, ShieldCheck, CheckCircle2, AlertTriangle, Sparkles } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import { SubscribeCardForm } from "./subscribe-card-form"
 import { ChangeCardForm } from "./change-card-form"
 import { UpgradeErrorToast } from "./upgrade-error-toast"
-import { hasProAccess } from "@/lib/plans"
+import { hasProAccess, PRO_VALUE_POINTS } from "@/lib/plans"
 import type { Metadata } from "next"
 
 const CARD_BRAND_NAMES: Record<string, string> = {
@@ -194,13 +194,32 @@ export default async function UpgradePage() {
                 </span>
                 {f}
               </li>
-            ))}
-          </ul>
+              ))}
+            </ul>
 
-          <p className="text-xs font-medium text-white/50 mb-3">
-            Se renueva automáticamente cada mes · Cancela cuando quieras
-          </p>
-          <SubscribeCardForm email={session.user.email} />
+            <div className="mb-7 border-t border-white/10 pt-6">
+              <p className="mb-4 text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
+                Lo que cambia con Pro
+              </p>
+              <div className="space-y-4">
+                {PRO_VALUE_POINTS.map((point, pointIndex) => (
+                  <div key={point.title} className="flex gap-3">
+                    <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white text-ink">
+                      {pointIndex === 0 ? <Sparkles className="h-3 w-3" strokeWidth={2.5} /> : <span className="text-[10px] font-black">0{pointIndex + 1}</span>}
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-white">{point.title}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-white/55">{point.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-xs font-medium text-white/50 mb-3">
+              Se renueva automáticamente cada mes · Cancela cuando quieras
+            </p>
+            <SubscribeCardForm email={session.user.email} />
         </div>
 
         <Suspense fallback={null}>
