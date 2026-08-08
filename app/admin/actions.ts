@@ -1,9 +1,8 @@
 "use server"
 
-import { headers } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 const ActivateSchema = z.object({
@@ -36,7 +35,7 @@ export async function toggleUserIsPremium(
   isPremium: boolean,
   premiumUntil?: string | null
 ): Promise<{ success: true } | { success: false; error: string }> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session || session.user.role !== "admin") {
     return { success: false, error: "No autorizado" }
   }
@@ -67,7 +66,7 @@ export async function updatePremiumUntil(
   userId: string,
   premiumUntil: string
 ): Promise<{ success: true } | { success: false; error: string }> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session || session.user.role !== "admin") {
     return { success: false, error: "No autorizado" }
   }
@@ -93,7 +92,7 @@ export async function updateSubscriptionPeriodEnd(
   userId: string,
   currentPeriodEnd: string
 ): Promise<{ success: true } | { success: false; error: string }> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session || session.user.role !== "admin") {
     return { success: false, error: "No autorizado" }
   }

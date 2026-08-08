@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation"
-import { headers } from "next/headers"
 import Link from "next/link"
 import { Zap, Globe, ExternalLink } from "lucide-react"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import SettingsForm from "./settings-form"
@@ -28,7 +27,7 @@ function formatDate(date: Date) {
 }
 
 export default async function SettingsPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) redirect("/login")
 
   const user = await prisma.user.findUnique({

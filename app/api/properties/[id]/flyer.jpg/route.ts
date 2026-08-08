@@ -1,8 +1,7 @@
 import { createHash } from "crypto"
-import { headers } from "next/headers"
 import { list, put } from "@vercel/blob"
 import { z } from "zod"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateFlyerJpeg, FLYER_RENDER_VERSION } from "@/lib/flyer"
 import {
@@ -39,7 +38,7 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return new Response("Unauthorized", { status: 401 })
 
   const { id } = await params

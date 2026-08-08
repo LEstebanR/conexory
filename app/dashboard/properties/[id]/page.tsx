@@ -1,8 +1,7 @@
 import { notFound, redirect } from "next/navigation"
-import { headers } from "next/headers"
 import Link from "next/link"
 import { ArrowLeft, BedDouble, Bath, Ruler, Car, MapPin, EyeOff, LandPlot, ShieldCheck, Eye, MessageCircle, TrendingUp, TrendingDown, Users, Contact } from "lucide-react"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
@@ -25,7 +24,7 @@ export default async function PropertyDetailPage({
 }) {
   const { id } = await params
 
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) redirect("/login")
 
   const weekAgo = daysAgo(7)

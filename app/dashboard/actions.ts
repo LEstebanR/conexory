@@ -1,13 +1,12 @@
 "use server"
 
-import { headers } from "next/headers"
 import { z } from "zod"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 
 export async function getIsPremium(): Promise<boolean> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return false
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -17,13 +16,13 @@ export async function getIsPremium(): Promise<boolean> {
 }
 
 export async function markWelcomeModalSeen(): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return
   await setOnboardingFlag(session.user.id, "welcomeModalSeen")
 }
 
 export async function completeDashboardTour(): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return
   await setOnboardingFlag(session.user.id, "dashboardTourCompleted")
 }
@@ -43,7 +42,7 @@ export async function submitFeedback(
   _prev: FeedbackState,
   formData: FormData,
 ): Promise<FeedbackState> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return { error: "Sesión expirada. Vuelve a iniciar sesión." }
 
   const result = feedbackSchema.safeParse({

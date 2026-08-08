@@ -7,6 +7,7 @@ const mockSignUpEmail = mock((...args: [unknown]) => {
 })
 mock.module("@/lib/auth", () => ({
   auth: { api: { signUpEmail: mockSignUpEmail } },
+  getSession: () => Promise.resolve(null),
 }))
 
 const mockUserFindUnique = mock((args: { where: { email?: string; agentSlug?: string } }) => {

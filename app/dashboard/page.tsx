@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon, Eye, Share2, CalendarClock } from "lucide-react"
@@ -39,7 +38,7 @@ export default async function DashboardPage({
   searchParams: Promise<{ upgrade?: string; id?: string }>
 }) {
   const [session, sp] = await Promise.all([
-    auth.api.getSession({ headers: await headers() }),
+    getSession(),
     searchParams,
   ])
   if (!session) redirect("/login")

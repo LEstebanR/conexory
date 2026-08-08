@@ -7,6 +7,7 @@ const mockSignInEmail = mock((...args: [unknown]) => {
 })
 mock.module("@/lib/auth", () => ({
   auth: { api: { signInEmail: mockSignInEmail } },
+  getSession: () => Promise.resolve(null),
 }))
 
 // next/headers and next/navigation are mocked globally in test-setup.ts —

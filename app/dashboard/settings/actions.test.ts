@@ -7,7 +7,8 @@ const mockGetSession = mock((...args: [unknown]) => {
   return Promise.resolve<Session>({ user: { id: "u1", name: "Luis Ramirez" } })
 })
 mock.module("@/lib/auth", () => ({
-  auth: { api: { getSession: mockGetSession } },
+  getSession: mockGetSession,
+  auth: { api: {} },
 }))
 
 const mockUserFindUnique = mock((...args: [unknown]) => {

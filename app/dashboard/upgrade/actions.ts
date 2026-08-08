@@ -1,9 +1,8 @@
 "use server"
 
-import { headers } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { startSubscription } from "@/lib/subscription"
 import { updatePreapprovalCard, getCardToken } from "@/lib/mercadopago"
@@ -31,7 +30,7 @@ export async function subscribeAction(cardTokenId: string): Promise<SubscribeRes
   const parsed = cardTokenSchema.safeParse({ cardTokenId })
   if (!parsed.success) return { ok: false, reason: "preapproval_failed" }
 
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return { ok: false, reason: "unauthenticated" }
   if (session.user.isPremium) return { ok: false, reason: "already_premium" }
 
@@ -61,7 +60,7 @@ export async function changeCardAction(cardTokenId: string): Promise<ChangeCardR
   const parsed = cardTokenSchema.safeParse({ cardTokenId })
   if (!parsed.success) return { ok: false, reason: "update_failed" }
 
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return { ok: false, reason: "unauthenticated" }
 
   const subscription = await prisma.subscription.findUnique({
