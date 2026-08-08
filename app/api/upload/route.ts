@@ -1,13 +1,12 @@
 import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
 import sharp from "sharp"
-import { auth } from "@/lib/auth"
-import { headers } from "next/headers"
+import { getSession } from "@/lib/auth"
 
 const MAX_SIZE_BYTES = 20 * 1024 * 1024
 
 export async function POST(request: Request) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const form = await request.formData()

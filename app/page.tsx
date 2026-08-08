@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation"
-import { headers } from "next/headers"
 import * as Sentry from "@sentry/nextjs"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getAppUrl } from "@/lib/urls"
 import { faqs } from "@/lib/faq-data"
@@ -18,7 +17,7 @@ import SignupCTA from "@/components/signup-cta"
 import Footer from "@/components/footer"
 
 export default async function Home() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (session) redirect("/dashboard")
 
   const appUrl = getAppUrl()

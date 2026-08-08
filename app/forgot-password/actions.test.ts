@@ -6,6 +6,7 @@ const mockRequestPasswordReset = mock((...args: [unknown]) => {
 })
 mock.module("@/lib/auth", () => ({
   auth: { api: { requestPasswordReset: mockRequestPasswordReset } },
+  getSession: () => Promise.resolve(null),
 }))
 
 // next/headers is mocked globally in test-setup.ts.

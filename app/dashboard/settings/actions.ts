@@ -1,10 +1,9 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { headers } from "next/headers"
 import { z } from "zod"
 import { del } from "@vercel/blob"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { ensureAgentSlug } from "@/lib/agent-slug"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
@@ -13,7 +12,7 @@ import { HEX_COLOR_REGEX } from "@/lib/flyer-options"
 import { sanitizePhoneInput } from "@/lib/phone"
 
 export async function isSettingsTourPending(): Promise<boolean> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return false
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -23,7 +22,7 @@ export async function isSettingsTourPending(): Promise<boolean> {
 }
 
 export async function completeSettingsTour(): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return
   await setOnboardingFlag(session.user.id, "settingsTourCompleted")
 }
@@ -57,7 +56,7 @@ export async function updateProfile(
   _prev: ProfileState,
   formData: FormData
 ): Promise<ProfileState> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return { error: "Sesión expirada." }
 
   const parsed = profileSchema.safeParse({
@@ -115,7 +114,7 @@ export async function updateProfile(
 }
 
 export async function updateBrandColor(color: string): Promise<{ error?: string }> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return { error: "Sesión expirada." }
 
   const parsed = z.string().trim().regex(HEX_COLOR_REGEX).safeParse(color)
@@ -131,7 +130,7 @@ export async function updateBrandColor(color: string): Promise<{ error?: string 
 }
 
 export async function toggleProfilePublished(): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return
 
   await ensureAgentSlug(session.user.id, session.user.name, prisma)

@@ -1,4 +1,6 @@
-import type { PrismaClient } from "@prisma/client"
+import type { prisma } from "@/lib/prisma"
+
+type PrismaClient = typeof prisma
 
 function nameToSlug(name: string): string {
   return name

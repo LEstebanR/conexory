@@ -1,8 +1,7 @@
 "use server"
 
 import * as Sentry from "@sentry/nextjs"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { propertyLimit, photoLimit, hasProAccess, PRO_PROPERTY_LIMIT } from "@/lib/plans"
@@ -22,7 +21,7 @@ async function generateUniqueSlug(): Promise<string> {
 }
 
 export async function isPropertyTourPending(): Promise<boolean> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return false
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -32,7 +31,7 @@ export async function isPropertyTourPending(): Promise<boolean> {
 }
 
 export async function completePropertyTour(): Promise<void> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return
   await setOnboardingFlag(session.user.id, "propertyTourCompleted")
 }
@@ -41,7 +40,7 @@ type CreateResult = { success: true; id: string } | { success: false; error: str
 
 export async function createProperty(data: PropertyInput): Promise<CreateResult> {
   try {
-    const session = await auth.api.getSession({ headers: await headers() })
+    const session = await getSession()
     if (!session) return { success: false, error: "Sesión expirada. Vuelve a iniciar sesión." }
 
     const parsed = PropertySchema.safeParse(data)

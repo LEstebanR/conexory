@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation"
-import { headers } from "next/headers"
 import Link from "next/link"
 import { AlertTriangle } from "lucide-react"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { cancelSubscription } from "./actions"
 import type { Metadata } from "next"
@@ -18,7 +17,7 @@ const LOSSES = [
 ]
 
 export default async function CancelPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) redirect("/login")
   if (!session.user.isPremium) redirect("/dashboard")
 

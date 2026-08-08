@@ -1,6 +1,8 @@
 import { describe, test, expect, mock } from "bun:test"
-import type { PrismaClient } from "@prisma/client"
+import type { prisma } from "@/lib/prisma"
 import { generateAgentSlug, ensureAgentSlug } from "./agent-slug"
+
+type PrismaClient = typeof prisma
 
 function fakePrisma(opts: {
   taken?: string[]

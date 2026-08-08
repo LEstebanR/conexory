@@ -2,8 +2,7 @@
 
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { cancelPreapproval } from "@/lib/mercadopago"
 
@@ -18,7 +17,7 @@ import { cancelPreapproval } from "@/lib/mercadopago"
 // if that call fails, so we never tell the user "cancelled" while Mercado
 // Pago might still charge them next cycle.
 export async function cancelSubscription() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) redirect("/login")
   if (!session.user.isPremium) redirect("/dashboard")
 

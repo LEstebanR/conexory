@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation"
-import { headers } from "next/headers"
 import Link from "next/link"
 import { Suspense } from "react"
 import { Check, CreditCard, Zap, ShieldCheck, CheckCircle2, AlertTriangle, Sparkles } from "lucide-react"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import { SubscribeCardForm } from "./subscribe-card-form"
@@ -50,7 +49,7 @@ function formatDate(date: Date) {
 }
 
 export default async function UpgradePage() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) redirect("/login")
 
   if (hasProAccess(session.user)) {

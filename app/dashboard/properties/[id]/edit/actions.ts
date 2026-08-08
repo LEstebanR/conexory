@@ -1,8 +1,7 @@
 "use server"
 
 import * as Sentry from "@sentry/nextjs"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { photoLimit, hasProAccess } from "@/lib/plans"
@@ -14,7 +13,7 @@ export async function updateProperty(
   data: PropertyInput
 ): Promise<UpdateResult> {
   try {
-    const session = await auth.api.getSession({ headers: await headers() })
+    const session = await getSession()
     if (!session) return { success: false, error: "Sesión expirada. Vuelve a iniciar sesión." }
 
     const parsed = PropertySchema.safeParse(data)

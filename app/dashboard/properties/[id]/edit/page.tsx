@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import EditForm, { type InitialData } from "./edit-form"
 import { DEFAULT_TRANSACTION_TYPE } from "@/lib/property-types"
@@ -13,7 +12,7 @@ export default async function EditPropertyPage({
 }) {
   const { id } = await params
 
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) redirect("/login")
 
   const property = await prisma.property.findUnique({

@@ -7,7 +7,8 @@ const mockGetSession = mock(() =>
 )
 
 mock.module("@/lib/auth", () => ({
-  auth: { api: { getSession: mockGetSession } },
+  getSession: mockGetSession,
+  auth: { api: {} },
 }))
 
 // next/headers is mocked globally in test-setup.ts

@@ -1,10 +1,9 @@
 "use server"
 
 import * as Sentry from "@sentry/nextjs"
-import { headers } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
@@ -16,7 +15,7 @@ export async function togglePublished(
   propertyId: string,
   published: boolean
 ): Promise<{ success: true } | { success: false; error: string }> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return { success: false, error: "Sesión expirada. Vuelve a iniciar sesión." }
 
   if (published) {
@@ -46,7 +45,7 @@ export async function togglePublished(
 export async function togglePinned(
   propertyId: string
 ): Promise<{ success: true } | { success: false; error: string }> {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return { success: false, error: "Sesión expirada. Vuelve a iniciar sesión." }
 
   const property = await prisma.property.findUnique({
@@ -82,7 +81,7 @@ export async function togglePinned(
 }
 
 export async function toggleShowContact(propertyId: string, showContact: boolean) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) throw new Error("No autenticado")
 
   await prisma.property.update({
@@ -92,7 +91,7 @@ export async function toggleShowContact(propertyId: string, showContact: boolean
 }
 
 export async function incrementShares(propertyId: string) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) return
   // Scope to the owner so the counter can't be inflated for someone else's property.
   const { count } = await prisma.property.updateMany({
@@ -116,7 +115,7 @@ export async function generateShareMessage(input: {
   include?: string[]
 }): Promise<{ message: string; usedToday?: number; limit?: number } | { error: string }> {
   try {
-    const session = await auth.api.getSession({ headers: await headers() })
+    const session = await getSession()
     if (!session) return { error: "No autenticado" }
     if (!hasProAccess(session.user)) return { error: "Generar con IA es una función Pro" }
 
@@ -177,7 +176,7 @@ export async function generateShareMessage(input: {
 }
 
 export async function deleteProperty(propertyId: string) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getSession()
   if (!session) throw new Error("No autenticado")
 
   const property = await prisma.property.findUnique({

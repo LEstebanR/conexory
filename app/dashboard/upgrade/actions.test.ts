@@ -7,7 +7,8 @@ const mockGetSession = mock((...args: [unknown]) => {
   return Promise.resolve<Session>({ user: { id: "u1", email: "a@b.com", isPremium: false } })
 })
 mock.module("@/lib/auth", () => ({
-  auth: { api: { getSession: mockGetSession } },
+  getSession: mockGetSession,
+  auth: { api: {} },
 }))
 
 type StartSubscriptionResult = { ok: true } | { ok: false; reason: "preapproval_failed" }

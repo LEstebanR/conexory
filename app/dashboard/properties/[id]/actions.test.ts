@@ -9,7 +9,8 @@ const mockGetSession = mock((...args: [unknown]) => {
   })
 })
 mock.module("@/lib/auth", () => ({
-  auth: { api: { getSession: mockGetSession } },
+  getSession: mockGetSession,
+  auth: { api: {} },
 }))
 
 const mockPropertyCount = mock((...args: [unknown]) => {

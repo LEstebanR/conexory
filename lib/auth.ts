@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { nextCookies } from "better-auth/next-js"
+import { headers } from "next/headers"
 import { prisma } from "@/lib/prisma"
 import { sendResetPasswordEmail, sendVerificationEmail, sendWelcome } from "@/lib/email"
 
@@ -112,3 +113,14 @@ export const auth = betterAuth({
 
 export type Session = typeof auth.$Infer.Session
 export type User = typeof auth.$Infer.Session.user
+
+// better-auth throws instead of resolving to null when it can't reach the
+// session store (e.g. a transient DB blip) — treat that the same as "no
+// session" so callers redirect to /login instead of the request crashing.
+export async function getSession() {
+  try {
+    return await auth.api.getSession({ headers: await headers() })
+  } catch {
+    return null
+  }
+}
