@@ -1,3 +1,4 @@
+import { mockRevalidateTag } from "@/test-setup"
 import { describe, test, expect, mock, beforeEach } from "bun:test"
 
 type Session = { user: { id: string; isPremium: boolean; role: string } } | null
@@ -88,9 +89,11 @@ describe("updateProperty", () => {
   })
 
   test("sets previousPrice when the new price is lower than the current one", async () => {
+    mockRevalidateTag.mockClear()
     mockPropertyFindUnique.mockImplementation(() => Promise.resolve({ price: "400000000" }))
     const result = await updateProperty("p1", { ...validInput, price: "350000000" })
     expect(result.success).toBe(true)
+    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
     expect(mockPropertyUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ previousPrice: "400000000" }) })
     )

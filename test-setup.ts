@@ -5,6 +5,17 @@ process.env.MERCADOPAGO_ACCESS_TOKEN = "test_access_token_stub"
 process.env.MERCADOPAGO_WEBHOOK_SECRET = "test_webhook_secret"
 
 import { mock } from "bun:test"
+import { AsyncLocalStorage } from "node:async_hooks"
+
+Object.assign(globalThis, { AsyncLocalStorage })
+
+const realCache = await import("next/cache")
+export const mockRevalidateTag = mock((...args: unknown[]) => void args)
+mock.module("next/cache", () => ({
+  ...realCache,
+  revalidatePath: mock((...args: unknown[]) => void args),
+  revalidateTag: mockRevalidateTag,
+}))
 
 // Centralized here (rather than per test file) for the same reason as the env
 // vars above: mock.module() replaces a module process-wide, not per file, so

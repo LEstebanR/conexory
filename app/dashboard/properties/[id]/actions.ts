@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { invalidateFeaturedProperties } from "@/lib/featured-properties"
 import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-message"
@@ -38,6 +39,8 @@ export async function togglePublished(
     where: { id: propertyId, userId: session.user.id },
     data: { published },
   })
+
+  invalidateFeaturedProperties()
 
   return { success: true }
 }
@@ -193,6 +196,7 @@ export async function deleteProperty(propertyId: string) {
     await prisma.property.delete({
       where: { id: propertyId, userId: session.user.id },
     })
+    invalidateFeaturedProperties()
   } catch (err) {
     Sentry.captureException(err, { tags: { action: "deleteProperty" } })
     console.error("deleteProperty failed:", err)
