@@ -1,3 +1,4 @@
+import { mockRevalidateTag } from "@/test-setup"
 import { describe, test, expect, mock, beforeEach } from "bun:test"
 
 type Session = { user: { id: string; isPremium: boolean; role: string; name: string } } | null
@@ -60,6 +61,7 @@ mock.module("@/lib/prisma", () => ({
 
 mock.module("next/cache", () => ({
   revalidatePath: mock((...args: [unknown]) => void args),
+  revalidateTag: mockRevalidateTag,
 }))
 
 const mockDel = mock((...args: [unknown]) => {
@@ -102,6 +104,7 @@ const {
 const authedSession: Session = { user: { id: "u1", isPremium: true, role: "user", name: "Luis" } }
 
 beforeEach(() => {
+  mockRevalidateTag.mockClear()
   mockGetSession.mockImplementation(() => Promise.resolve(authedSession))
   mockPropertyCount.mockClear()
   mockPropertyCount.mockImplementation(() => Promise.resolve(0))
@@ -132,6 +135,7 @@ describe("togglePublished", () => {
     const result = await togglePublished("p1", false)
     expect(result.success).toBe(true)
     expect(mockPropertyCount).not.toHaveBeenCalled()
+    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
   })
 
   test("blocks publishing past the plan's active-property limit", async () => {
@@ -339,6 +343,7 @@ describe("deleteProperty", () => {
     await deleteProperty("p1")
     expect(mockDel).toHaveBeenCalledWith(["https://blob.example.com/a.jpg"])
     expect(mockPropertyDelete).toHaveBeenCalledWith({ where: { id: "p1", userId: "u1" } })
+    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
   })
 
   test("skips the blob deletion when there are no images", async () => {

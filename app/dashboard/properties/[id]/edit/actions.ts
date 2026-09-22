@@ -3,6 +3,7 @@
 import * as Sentry from "@sentry/nextjs"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { invalidateFeaturedProperties } from "@/lib/featured-properties"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { photoLimit, hasProAccess } from "@/lib/plans"
 
@@ -63,6 +64,8 @@ export async function updateProperty(
         showContact: parsed.data.showContact,
       },
     })
+
+    invalidateFeaturedProperties()
 
     return { success: true }
   } catch (err) {

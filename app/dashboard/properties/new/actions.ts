@@ -3,6 +3,7 @@
 import * as Sentry from "@sentry/nextjs"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { invalidateFeaturedProperties } from "@/lib/featured-properties"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { propertyLimit, photoLimit, hasProAccess, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
@@ -104,6 +105,8 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
         showContact: parsed.data.showContact,
       },
     })
+
+    invalidateFeaturedProperties()
 
     // Best-effort: a flag-write failure must not fail the (already committed) create.
     await setOnboardingFlag(session.user.id, "firstPropertyCreated").catch(() => {})

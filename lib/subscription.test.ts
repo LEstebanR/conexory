@@ -1,3 +1,4 @@
+import { mockRevalidateTag } from "@/test-setup"
 import { describe, test, expect, mock } from "bun:test"
 
 const mockUserUpdate = mock(
@@ -106,15 +107,18 @@ describe("downgradeToFree", () => {
   })
 
   test("does not deactivate properties when at or under the free limit", async () => {
+    mockRevalidateTag.mockClear()
     mockPropertyFindMany.mockImplementation(() =>
       Promise.resolve([{ id: "p1" }, { id: "p2" }, { id: "p3" }])
     )
     mockPropertyUpdateMany.mockClear()
     await downgradeToFree("u1")
     expect(mockPropertyUpdateMany).not.toHaveBeenCalled()
+    expect(mockRevalidateTag).not.toHaveBeenCalled()
   })
 
   test("deactivates properties beyond the free limit, keeping the most recent", async () => {
+    mockRevalidateTag.mockClear()
     mockPropertyFindMany.mockImplementation(() =>
       Promise.resolve([{ id: "newest" }, { id: "p2" }, { id: "p3" }, { id: "oldest1" }, { id: "oldest2" }])
     )
@@ -124,6 +128,7 @@ describe("downgradeToFree", () => {
       where: { id: { in: ["oldest1", "oldest2"] } },
       data: { published: false },
     })
+    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
     mockPropertyFindMany.mockImplementation(() => Promise.resolve([]))
   })
 })

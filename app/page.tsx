@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import * as Sentry from "@sentry/nextjs"
 import { getSession } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { getFeaturedProperties } from "@/lib/featured-properties"
 import { getAppUrl } from "@/lib/urls"
 import { faqs } from "@/lib/faq-data"
 import Navbar from "@/components/navbar"
@@ -22,28 +22,10 @@ export default async function Home() {
 
   const appUrl = getAppUrl()
 
-  const topProperties = await prisma.property
-    .findMany({
-      where: { published: true },
-      orderBy: { shares: "desc" },
-      take: 10,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        price: true,
-        type: true,
-        transactionType: true,
-        city: true,
-        neighborhood: true,
-        images: true,
-      },
-    })
-    .catch((err) => {
-      Sentry.captureException(err, { tags: { route: "/", query: "topProperties" } })
-      return []
-    })
-  const featuredProperties = topProperties.map((p) => ({ ...p, price: Number(p.price) }))
+  const featuredProperties = await getFeaturedProperties().catch((err) => {
+    Sentry.captureException(err, { tags: { route: "/", query: "topProperties" } })
+    return []
+  })
 
   const softwareAppSchema = {
     "@context": "https://schema.org",

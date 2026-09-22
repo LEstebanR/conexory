@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { invalidateFeaturedProperties } from "@/lib/featured-properties"
 import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
 import { createPreapproval, getCardToken } from "@/lib/mercadopago"
 import { cancelOrphanPreapproval } from "@/lib/orphan-subscriptions"
@@ -22,6 +23,9 @@ export async function downgradeToFree(userId: string) {
       ? prisma.property.updateMany({
           where: { id: { in: idsToDeactivate } },
           data: { published: false },
+        }).then((result) => {
+          invalidateFeaturedProperties()
+          return result
         })
       : Promise.resolve(),
   ])

@@ -1,3 +1,4 @@
+import { mockRevalidateTag } from "@/test-setup"
 import { describe, test, expect, mock } from "bun:test"
 
 const mockGetSession = mock(() =>
@@ -114,9 +115,11 @@ describe("createProperty", () => {
   })
 
   test("calls prisma.property.create with correct userId", async () => {
+    mockRevalidateTag.mockClear()
     mockPropertyCreate.mockClear()
     await createProperty(validInput)
     expect(mockPropertyCreate).toHaveBeenCalledTimes(1)
+    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
     const [call] = mockPropertyCreate.mock.calls
     expect(call[0].data.userId).toBe("u1")
   })
