@@ -1,9 +1,4 @@
 {
   "framework": "nextjs",
-  "crons": [
-    {
-      "path": "/api/cron/billing",
-      "schedule": "0 9 * * *"
-    }
-  ]
+  "crons": []
 }
