@@ -9,6 +9,13 @@ import {
 } from "@/lib/orphan-subscriptions"
 import { sendRenewalReminder, sendSubscriptionCancelled } from "@/lib/email"
 
+// NOTE: Cron temporarily paused (2026-09-24) until Neon CU reset on 2026-10-01
+// to conserve compute units. Restore by uncommenting the cron entry in vercel.json:
+// {
+//   "path": "/api/cron/billing",
+//   "schedule": "0 9 * * *"
+// }
+
 // Daily billing job (scheduled in vercel.json). Mercado Pago drives the
 // recurring charges itself (unlike Wompi) and reports outcomes via
 // /api/webhooks/mercadopago, so this route no longer charges anything — it's
