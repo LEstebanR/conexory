@@ -77,7 +77,6 @@ export async function togglePinned(
   })
 
   invalidatePublicListings()
-  revalidatePath("/agente", "layout")
   revalidatePath(`/dashboard/properties/${propertyId}`)
 
   return { success: true }

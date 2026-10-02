@@ -3,8 +3,7 @@ import sharp from "sharp"
 import fs from "fs"
 import path from "path"
 import type { ReactElement } from "react"
-import { prisma } from "@/lib/prisma"
-import { cachePublicQuery } from "@/lib/public-cache"
+import { getPublicProperty } from "@/lib/public-pages"
 import { youtubeId, youtubeThumb } from "@/lib/youtube"
 
 export const runtime = "nodejs"
@@ -107,19 +106,12 @@ function brandCard(): ReactElement {
   )
 }
 
-const getOgProperty = cachePublicQuery(async (slug: string) => {
-  return prisma.property.findUnique({
-    where: { slug },
-    select: { published: true, videoUrl: true, images: true },
-  })
-}, "public-property-og")
-
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Response> {
   const { slug } = await params
-  const property = await getOgProperty(slug)
+  const property = await getPublicProperty(slug)
 
   if (!property || !property.published) {
     return render(brandCard())

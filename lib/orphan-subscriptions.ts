@@ -119,19 +119,18 @@ export async function cancelOrphanPreapproval(
 
   await recordOrphanEvent(input, result.ok)
 
-  const log = result.ok ? console.warn : console.error
-  log(
-    result.ok
-      ? `Orphan subscription cancelled (${input.reason})`
-      : `Orphan subscription could NOT be cancelled (${input.reason})`,
-    {
-      source: input.source,
-      preapprovalId: input.preapprovalId,
-      userId: input.userId,
-      payerEmail: input.payerEmail,
-      ...input.detail,
-    },
-  )
+  const context = {
+    source: input.source,
+    preapprovalId: input.preapprovalId,
+    userId: input.userId,
+    payerEmail: input.payerEmail,
+    ...input.detail,
+  }
+  if (result.ok) {
+    console.warn(`Orphan subscription cancelled (${input.reason})`, context)
+  } else {
+    console.error(`Orphan subscription could NOT be cancelled (${input.reason})`, context)
+  }
 
   return { cancelled: result.ok }
 }

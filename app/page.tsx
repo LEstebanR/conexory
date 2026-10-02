@@ -13,6 +13,8 @@ import PricingTeaser from "@/components/pricing-teaser"
 import SignupCTA from "@/components/signup-cta"
 import Footer from "@/components/footer"
 
+// Explicit so a build-time DB failure (featured falls back to []) can't
+// freeze an empty landing until the next deploy.
 export const revalidate = 86400
 
 export default async function Home() {

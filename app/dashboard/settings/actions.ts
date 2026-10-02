@@ -153,5 +153,4 @@ export async function toggleProfilePublished(): Promise<void> {
 
   invalidatePublicListings()
   revalidatePath("/dashboard/settings")
-  revalidatePath("/agente", "layout")
 }

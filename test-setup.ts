@@ -30,6 +30,7 @@ mock.module("next/navigation", () => ({
   redirect: (path: string) => {
     throw new Error(`REDIRECT:${path}`)
   },
+  unstable_rethrow: () => {},
 }))
 
 mock.module("next/server", () => ({

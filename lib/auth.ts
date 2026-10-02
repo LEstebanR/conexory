@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { nextCookies } from "better-auth/next-js"
 import { headers } from "next/headers"
+import { unstable_rethrow } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { sendResetPasswordEmail, sendVerificationEmail, sendWelcome } from "@/lib/email"
 
@@ -121,6 +122,7 @@ export async function getSession() {
   try {
     return await auth.api.getSession({ headers: await headers() })
   } catch (error) {
+    unstable_rethrow(error)
     // Degrading to "no session" logs the agent out silently, so keep a trail:
     // a spike here is people being kicked to /login, not people not logged in.
     console.warn("getSession failed, treating as signed out:", error)

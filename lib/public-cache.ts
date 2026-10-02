@@ -1,8 +1,8 @@
 import { revalidateTag, unstable_cache } from "next/cache"
 
-export const PUBLIC_LISTINGS_TAG = "public-listings"
+const PUBLIC_LISTINGS_TAG = "public-listings"
 
-// Public surfaces (landing, /p, /agente, /propiedades, OG images, sitemap) are
+// Public surfaces (landing, /p, /agente, /propiedades, OG images) are
 // hit by crawlers and uptime pings around the clock. Every uncached query
 // keeps the Neon compute from autosuspending, so their reads go through this
 // cache and every write that changes what they show must call
