@@ -1,6 +1,3 @@
-import { redirect } from "next/navigation"
-import * as Sentry from "@sentry/nextjs"
-import { getSession } from "@/lib/auth"
 import { getFeaturedProperties } from "@/lib/featured-properties"
 import { getAppUrl } from "@/lib/urls"
 import { faqs } from "@/lib/faq-data"
@@ -16,14 +13,15 @@ import PricingTeaser from "@/components/pricing-teaser"
 import SignupCTA from "@/components/signup-cta"
 import Footer from "@/components/footer"
 
-export default async function Home() {
-  const session = await getSession()
-  if (session) redirect("/dashboard")
+// Explicit so a build-time DB failure (featured falls back to []) can't
+// freeze an empty landing until the next deploy.
+export const revalidate = 86400
 
+export default async function Home() {
   const appUrl = getAppUrl()
 
   const featuredProperties = await getFeaturedProperties().catch((err) => {
-    Sentry.captureException(err, { tags: { route: "/", query: "topProperties" } })
+    console.error("getFeaturedProperties failed:", err)
     return []
   })
 

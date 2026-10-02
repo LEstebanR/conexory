@@ -135,7 +135,7 @@ describe("togglePublished", () => {
     const result = await togglePublished("p1", false)
     expect(result.success).toBe(true)
     expect(mockPropertyCount).not.toHaveBeenCalled()
-    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
+    expect(mockRevalidateTag).toHaveBeenCalledWith("public-listings", { expire: 0 })
   })
 
   test("blocks publishing past the plan's active-property limit", async () => {
@@ -343,7 +343,7 @@ describe("deleteProperty", () => {
     await deleteProperty("p1")
     expect(mockDel).toHaveBeenCalledWith(["https://blob.example.com/a.jpg"])
     expect(mockPropertyDelete).toHaveBeenCalledWith({ where: { id: "p1", userId: "u1" } })
-    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
+    expect(mockRevalidateTag).toHaveBeenCalledWith("public-listings", { expire: 0 })
   })
 
   test("skips the blob deletion when there are no images", async () => {

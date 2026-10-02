@@ -16,6 +16,7 @@ const TYPE_TO_PATH: Record<string, string> = {
 
 const schema = z.object({
   type: z.enum([
+    "visit",
     "whatsapp_click",
     "social_instagram_click",
     "social_facebook_click",
@@ -46,6 +47,11 @@ export async function POST(
   })
   if (!property || !property.published) {
     return NextResponse.json({ ok: false }, { status: 404 })
+  }
+
+  if (parsed.data.type === "visit") {
+    await prisma.propertyVisit.create({ data: { propertyId: id } })
+    return NextResponse.json({ ok: true })
   }
 
   const path = TYPE_TO_PATH[parsed.data.type]

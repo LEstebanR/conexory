@@ -3,7 +3,7 @@ import sharp from "sharp"
 import fs from "fs"
 import path from "path"
 import type { ReactElement } from "react"
-import { prisma } from "@/lib/prisma"
+import { getPublicProperty } from "@/lib/public-pages"
 import { youtubeId, youtubeThumb } from "@/lib/youtube"
 
 export const runtime = "nodejs"
@@ -111,7 +111,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Response> {
   const { slug } = await params
-  const property = await prisma.property.findUnique({ where: { slug } })
+  const property = await getPublicProperty(slug)
 
   if (!property || !property.published) {
     return render(brandCard())

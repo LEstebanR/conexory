@@ -1,5 +1,5 @@
 import { mockRevalidateTag } from "@/test-setup"
-import { describe, test, expect, mock } from "bun:test"
+import { describe, test, expect, mock, spyOn } from "bun:test"
 
 const mockGetSession = mock(() =>
   Promise.resolve<{ user: { id: string; isPremium: boolean; role: string } } | null>({
@@ -35,14 +35,7 @@ mock.module("@/lib/prisma", () => ({
   },
 }))
 
-const mockCaptureException = mock(() => {})
-// mock.module() replaces "@sentry/nextjs" process-wide, so this stub must
-// carry every Sentry function any other module reaches for — a partial one
-// makes unrelated code throw "is not a function" in the full-suite run.
-mock.module("@sentry/nextjs", () => ({
-  captureException: mockCaptureException,
-  captureMessage: () => undefined,
-}))
+const mockConsoleError = spyOn(console, "error").mockImplementation(() => {})
 
 const mockSetOnboardingFlag = mock(() => Promise.resolve())
 mock.module("@/lib/onboarding-server", () => ({
@@ -119,7 +112,7 @@ describe("createProperty", () => {
     mockPropertyCreate.mockClear()
     await createProperty(validInput)
     expect(mockPropertyCreate).toHaveBeenCalledTimes(1)
-    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
+    expect(mockRevalidateTag).toHaveBeenCalledWith("public-listings", { expire: 0 })
     const [call] = mockPropertyCreate.mock.calls
     expect(call[0].data.userId).toBe("u1")
   })
@@ -130,12 +123,12 @@ describe("createProperty", () => {
     expect(mockSetOnboardingFlag).toHaveBeenCalledWith("u1", "firstPropertyCreated")
   })
 
-  test("captures exception with Sentry and returns error on unexpected failure", async () => {
+  test("logs the exception and returns error on unexpected failure", async () => {
     mockPropertyCreate.mockImplementation(() => { throw new Error("DB down") })
-    mockCaptureException.mockClear()
+    mockConsoleError.mockClear()
     const result = await createProperty(validInput)
     expect(result.success).toBe(false)
-    expect(mockCaptureException).toHaveBeenCalledTimes(1)
+    expect(mockConsoleError).toHaveBeenCalledTimes(1)
     mockPropertyCreate.mockImplementation(() => Promise.resolve({ id: "prop-1" }))
   })
 

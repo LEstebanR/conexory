@@ -1,11 +1,9 @@
-import { cache } from "react"
 import { notFound } from "next/navigation"
-import { after } from "next/server"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { MapPin, BedDouble, Bath, Ruler, Car, LandPlot, ShieldCheck, EyeOff, ArrowUpRight } from "lucide-react"
-import { prisma } from "@/lib/prisma"
+import { getPublicProperty } from "@/lib/public-pages"
 import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
 import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
@@ -17,6 +15,7 @@ import PropertyMap from "@/components/property-map-client"
 import ContactButtons from "./contact-buttons"
 import SocialLinkButton from "./social-link-button"
 import WhatsAppFab from "./whatsapp-fab"
+import TrackVisit from "./track-visit"
 
 const TYPE_LABELS_EN: Record<string, string> = {
   apartment: "Apartment", house: "House", office: "Office", commercial: "Commercial property",
@@ -70,23 +69,6 @@ function YouTubeIcon({ className }: { className?: string }) {
   )
 }
 
-// ── Data ───────────────────────────────────────────────────────────────────
-
-const getProperty = cache(async (slug: string) => {
-  return prisma.property.findUnique({
-    where: { slug },
-    include: {
-      user: {
-        select: {
-          name: true, email: true, image: true, location: true, bio: true, bioEn: true,
-          phone: true, phoneIsWhatsapp: true,
-          instagram: true, facebook: true, tiktok: true, linkedin: true, youtube: true,
-        },
-      },
-    },
-  })
-})
-
 // ── Metadata ───────────────────────────────────────────────────────────────
 
 export async function generateMetadata({
@@ -102,7 +84,7 @@ export async function generateMetadata({
   // metadata, so a DB blip would title the page "Propiedad no encontrada" and
   // tell the visitor (and Google) that a live listing is gone. Degrade to the
   // layout defaults instead and let the page render surface the real failure.
-  const property = await getProperty(slug).catch(() => undefined)
+  const property = await getPublicProperty(slug).catch(() => undefined)
   if (property === undefined) return {}
   if (!property) return { title: "Propiedad no encontrada" }
 
@@ -126,7 +108,7 @@ export async function generateMetadata({
     .filter(Boolean)
     .join(" · ")
 
-  const price = formatCOP(Number(property.price))
+  const price = formatCOP(property.price)
   const descParts = [
     `${type}${location ? english ? ` in ${location}` : ` en ${location}` : ""}`,
     price,
@@ -312,18 +294,13 @@ export default async function PublicPropertyPage({
   const { c, lang } = await searchParams
   const hideContact = c === "0"
 
-  const property = await getProperty(slug)
+  const property = await getPublicProperty(slug)
 
   if (!property) notFound()
 
   const english = lang === "en" && property.englishAvailable
   const title = english ? property.titleEn ?? property.title : property.title
   const description = english ? property.descriptionEn ?? property.description : property.description
-
-  // Track visit fire-and-forget after response is sent
-  if (property.published) {
-    after(() => prisma.propertyVisit.create({ data: { propertyId: property.id } }))
-  }
 
   const typeLabel = (english ? TYPE_LABELS_EN : TYPE_LABELS)[property.type] ?? property.type
 
@@ -348,11 +325,12 @@ export default async function PublicPropertyPage({
     )
   }
 
-  const price = formatCOP(Number(property.price))
-  const priceReduced =
-    property.previousPrice != null &&
-    Number(property.previousPrice) > Number(property.price)
-  const previousPrice = priceReduced ? formatCOP(Number(property.previousPrice)) : null
+  const price = formatCOP(property.price)
+  const previousPrice =
+    property.previousPrice != null && property.previousPrice > property.price
+      ? formatCOP(property.previousPrice)
+      : null
+  const priceReduced = previousPrice != null
   const videoId = youtubeId(property.videoUrl)
   const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
   const transactionLabel = property.transactionType
@@ -370,11 +348,11 @@ export default async function PublicPropertyPage({
     name: title,
     description: description ?? undefined,
     url: `${propertyUrl}${english ? "?lang=en" : ""}`,
-    datePosted: property.createdAt.toISOString(),
+    datePosted: property.createdAt,
     ...(property.images.length > 0 && { image: property.images }),
     offers: {
       "@type": "Offer",
-      price: Number(property.price),
+      price: property.price,
       priceCurrency: "COP",
       availability: "https://schema.org/InStock",
     },
@@ -552,6 +530,7 @@ export default async function PublicPropertyPage({
         />
       )}
 
+      <TrackVisit propertyId={property.id} />
       <PageFooter english={english} />
     </div>
   )

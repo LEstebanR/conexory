@@ -5,6 +5,7 @@ import { z } from "zod"
 import { del } from "@vercel/blob"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { invalidatePublicListings } from "@/lib/public-cache"
 import { ensureAgentSlug } from "@/lib/agent-slug"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { parseOnboarding } from "@/lib/onboarding"
@@ -112,6 +113,7 @@ export async function updateProfile(
     },
   })
 
+  invalidatePublicListings()
   revalidatePath("/dashboard", "layout")
   revalidatePath("/dashboard/settings")
   return { success: true }
@@ -149,6 +151,6 @@ export async function toggleProfilePublished(): Promise<void> {
     data: { profilePublished: !current?.profilePublished },
   })
 
+  invalidatePublicListings()
   revalidatePath("/dashboard/settings")
-  revalidatePath("/agente", "layout")
 }

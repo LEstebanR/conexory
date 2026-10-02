@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { MapPin, Phone, MessageCircle, Mail, ArrowUpRight } from "lucide-react"
-import { prisma } from "@/lib/prisma"
+import { getPublicAgent } from "@/lib/public-pages"
 import { getAppUrl } from "@/lib/urls"
 import { toWhatsAppNumber } from "@/lib/phone"
 import {
@@ -58,28 +58,6 @@ function YouTubeIcon({ className }: { className?: string }) {
 
 // ── Data ───────────────────────────────────────────────────────────────────
 
-const getAgent = cache(async (slug: string) => {
-  return prisma.user.findUnique({
-    where: { agentSlug: slug },
-    select: {
-      id: true,
-      name: true,
-      image: true,
-      email: true,
-      location: true,
-      bio: true,
-      phone: true,
-      phoneIsWhatsapp: true,
-      instagram: true,
-      facebook: true,
-      tiktok: true,
-      linkedin: true,
-      youtube: true,
-      profilePublished: true,
-    },
-  })
-})
-
 // Cached per userId so generateMetadata and the page body share one query —
 // this is the agent's full (unfiltered) property count/bounds, independent
 // of whatever filters the visitor currently has applied via searchParams.
@@ -91,7 +69,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const agent = await getAgent(slug)
+  const agent = await getPublicAgent(slug)
   if (!agent || !agent.profilePublished) return {}
 
   const { totalCount } = await getAgentFacets(agent.id)
@@ -136,7 +114,7 @@ export default async function AgentProfilePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const { slug } = await params
-  const agent = await getAgent(slug)
+  const agent = await getPublicAgent(slug)
 
   if (!agent || !agent.profilePublished) notFound()
 

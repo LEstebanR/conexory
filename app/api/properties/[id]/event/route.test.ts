@@ -12,8 +12,16 @@ const mockExecuteRaw = mock((...args: unknown[]) => {
   void args
   return Promise.resolve(1)
 })
+const mockVisitCreate = mock((...args: [unknown]) => {
+  void args
+  return Promise.resolve({})
+})
 mock.module("@/lib/prisma", () => ({
-  prisma: { property: { findUnique: mockPropertyFindUnique }, $executeRaw: mockExecuteRaw },
+  prisma: {
+    property: { findUnique: mockPropertyFindUnique },
+    propertyVisit: { create: mockVisitCreate },
+    $executeRaw: mockExecuteRaw,
+  },
 }))
 
 // next/server (NextResponse.json) is mocked globally in test-setup.ts.
@@ -33,6 +41,7 @@ function ctx(id: string) {
 beforeEach(() => {
   mockPropertyFindUnique.mockImplementation(() => Promise.resolve({ id: "p1", published: true }))
   mockExecuteRaw.mockClear()
+  mockVisitCreate.mockClear()
 })
 
 describe("POST /api/properties/[id]/event", () => {
@@ -78,5 +87,19 @@ describe("POST /api/properties/[id]/event", () => {
     await POST(makeRequest({ type: "contact_whatsapp_click" }), ctx("p1"))
     const [, path] = mockExecuteRaw.mock.calls[0] as unknown as [unknown, string]
     expect(path).toBe("{contact,whatsapp}")
+  })
+
+  test("records a visit row instead of touching metrics", async () => {
+    const res = await POST(makeRequest({ type: "visit" }), ctx("p1"))
+    expect(res.status).toBe(200)
+    expect(mockVisitCreate).toHaveBeenCalledWith({ data: { propertyId: "p1" } })
+    expect(mockExecuteRaw).not.toHaveBeenCalled()
+  })
+
+  test("does not record a visit for an unpublished property", async () => {
+    mockPropertyFindUnique.mockImplementation(() => Promise.resolve({ id: "p1", published: false }))
+    const res = await POST(makeRequest({ type: "visit" }), ctx("p1"))
+    expect(res.status).toBe(404)
+    expect(mockVisitCreate).not.toHaveBeenCalled()
   })
 })

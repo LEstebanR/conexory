@@ -1,11 +1,10 @@
 "use server"
 
-import * as Sentry from "@sentry/nextjs"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { invalidateFeaturedProperties } from "@/lib/featured-properties"
+import { invalidatePublicListings } from "@/lib/public-cache"
 import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-message"
@@ -40,7 +39,7 @@ export async function togglePublished(
     data: { published },
   })
 
-  invalidateFeaturedProperties()
+  invalidatePublicListings()
 
   return { success: true }
 }
@@ -77,7 +76,7 @@ export async function togglePinned(
     data: { pinnedAt: willPin ? new Date() : null },
   })
 
-  revalidatePath("/agente", "layout")
+  invalidatePublicListings()
   revalidatePath(`/dashboard/properties/${propertyId}`)
 
   return { success: true }
@@ -91,6 +90,7 @@ export async function toggleShowContact(propertyId: string, showContact: boolean
     where: { id: propertyId, userId: session.user.id },
     data: { showContact },
   })
+  invalidatePublicListings()
 }
 
 export async function incrementShares(propertyId: string) {
@@ -196,9 +196,8 @@ export async function deleteProperty(propertyId: string) {
     await prisma.property.delete({
       where: { id: propertyId, userId: session.user.id },
     })
-    invalidateFeaturedProperties()
+    invalidatePublicListings()
   } catch (err) {
-    Sentry.captureException(err, { tags: { action: "deleteProperty" } })
     console.error("deleteProperty failed:", err)
     throw err
   }

@@ -1,9 +1,7 @@
-import { revalidateTag, unstable_cache } from "next/cache"
 import { prisma } from "@/lib/prisma"
+import { cachePublicQuery } from "@/lib/public-cache"
 
-const FEATURED_PROPERTIES_TAG = "featured-properties"
-
-export const getFeaturedProperties = unstable_cache(
+export const getFeaturedProperties = cachePublicQuery(
   async () => {
     const properties = await prisma.property.findMany({
       where: { published: true },
@@ -24,10 +22,5 @@ export const getFeaturedProperties = unstable_cache(
 
     return properties.map((property) => ({ ...property, price: Number(property.price) }))
   },
-  [FEATURED_PROPERTIES_TAG],
-  { tags: [FEATURED_PROPERTIES_TAG], revalidate: 60 * 60 * 24 },
+  "featured-properties",
 )
-
-export function invalidateFeaturedProperties() {
-  revalidateTag(FEATURED_PROPERTIES_TAG, { expire: 0 })
-}
