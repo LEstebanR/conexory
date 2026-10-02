@@ -1,9 +1,8 @@
 "use server"
 
-import * as Sentry from "@sentry/nextjs"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { invalidateFeaturedProperties } from "@/lib/featured-properties"
+import { invalidatePublicListings } from "@/lib/public-cache"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { photoLimit, hasProAccess } from "@/lib/plans"
 
@@ -65,11 +64,10 @@ export async function updateProperty(
       },
     })
 
-    invalidateFeaturedProperties()
+    invalidatePublicListings()
 
     return { success: true }
   } catch (err) {
-    Sentry.captureException(err, { tags: { action: "updateProperty" } })
     console.error("updateProperty failed:", err)
     return {
       success: false,

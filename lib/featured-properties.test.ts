@@ -20,7 +20,8 @@ const findMany = mock((...args: [unknown]) => {
 })
 mock.module("@/lib/prisma", () => ({ prisma: { property: { findMany } } }))
 
-const { getFeaturedProperties, invalidateFeaturedProperties } = await import("./featured-properties")
+const { getFeaturedProperties } = await import("./featured-properties")
+const { invalidatePublicListings } = await import("./public-cache")
 const cacheGlobal = globalThis as typeof globalThis & { __incrementalCache?: IncrementalCache }
 let previousCache: IncrementalCache | undefined
 let cache: IncrementalCache
@@ -86,9 +87,9 @@ describe("featured properties cache", () => {
     await getFeaturedProperties()
     setSystemTime(Date.now() + 1000)
     findMany.mockImplementation(() => Promise.resolve([]))
-    invalidateFeaturedProperties()
-    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
-    await cache.revalidateTag("featured-properties", { expire: 0 })
+    invalidatePublicListings()
+    expect(mockRevalidateTag).toHaveBeenCalledWith("public-listings", { expire: 0 })
+    await cache.revalidateTag("public-listings", { expire: 0 })
     expect(await getFeaturedProperties()).toEqual([])
     expect(findMany).toHaveBeenCalledTimes(2)
   })

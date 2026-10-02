@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/nextjs"
 import { prisma } from "@/lib/prisma"
 import { downgradeToFree } from "@/lib/subscription"
 import { searchLivePreapprovals } from "@/lib/mercadopago"
@@ -8,13 +7,6 @@ import {
   type OrphanReason,
 } from "@/lib/orphan-subscriptions"
 import { sendRenewalReminder, sendSubscriptionCancelled } from "@/lib/email"
-
-// NOTE: Cron temporarily paused (2026-09-24) until Neon CU reset on 2026-10-01
-// to conserve compute units. Restore by uncommenting the cron entry in vercel.json:
-// {
-//   "path": "/api/cron/billing",
-//   "schedule": "0 9 * * *"
-// }
 
 // Daily billing job (scheduled in vercel.json). Mercado Pago drives the
 // recurring charges itself (unlike Wompi) and reports outcomes via
@@ -188,10 +180,8 @@ async function cancelOrphanSubscriptions(summary: { orphansCanceled: number }) {
   const live = await searchLivePreapprovals()
   if (!live.ok || !live.results) {
     // Never infer "no live subscriptions" from a failed lookup.
-    Sentry.captureMessage("Orphan reconciliation skipped: preapproval search failed", {
-      level: "error",
-      tags: { area: "billing" },
-      extra: { error: live.error },
+    console.error("Orphan reconciliation skipped: preapproval search failed", {
+      error: live.error,
     })
     return
   }
@@ -211,9 +201,9 @@ async function cancelOrphanSubscriptions(summary: { orphansCanceled: number }) {
       externalReference: preapproval.externalReference,
       dateCreated: preapproval.dateCreated,
     }).catch((err) => {
-      Sentry.captureException(err, {
-        tags: { area: "billing", job: "orphan-reconciliation" },
-        extra: { preapprovalId: preapproval.id },
+      console.error("Orphan reconciliation aborted: classification failed", {
+        preapprovalId: preapproval.id,
+        err,
       })
       return null
     })
@@ -224,14 +214,10 @@ async function cancelOrphanSubscriptions(summary: { orphansCanceled: number }) {
   }
 
   if (orphans.length > MAX_ORPHAN_CANCELS_PER_RUN) {
-    Sentry.captureMessage("Orphan reconciliation aborted: too many candidates", {
-      level: "error",
-      tags: { area: "billing" },
-      extra: {
-        candidates: orphans.length,
-        limit: MAX_ORPHAN_CANCELS_PER_RUN,
-        preapprovalIds: orphans.map((o) => o.preapproval.id),
-      },
+    console.error("Orphan reconciliation aborted: too many candidates", {
+      candidates: orphans.length,
+      limit: MAX_ORPHAN_CANCELS_PER_RUN,
+      preapprovalIds: orphans.map((o) => o.preapproval.id),
     })
     return
   }

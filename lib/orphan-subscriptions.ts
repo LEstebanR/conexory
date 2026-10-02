@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/nextjs"
 import { prisma } from "@/lib/prisma"
 import { cancelPreapproval, referenceToUserId } from "@/lib/mercadopago"
 
@@ -120,19 +119,17 @@ export async function cancelOrphanPreapproval(
 
   await recordOrphanEvent(input, result.ok)
 
-  Sentry.captureMessage(
+  const log = result.ok ? console.warn : console.error
+  log(
     result.ok
       ? `Orphan subscription cancelled (${input.reason})`
       : `Orphan subscription could NOT be cancelled (${input.reason})`,
     {
-      level: result.ok ? "warning" : "error",
-      tags: { area: "billing", reason: input.reason, source: input.source },
-      extra: {
-        preapprovalId: input.preapprovalId,
-        userId: input.userId,
-        payerEmail: input.payerEmail,
-        ...input.detail,
-      },
+      source: input.source,
+      preapprovalId: input.preapprovalId,
+      userId: input.userId,
+      payerEmail: input.payerEmail,
+      ...input.detail,
     },
   )
 

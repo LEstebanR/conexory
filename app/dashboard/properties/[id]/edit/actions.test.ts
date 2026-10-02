@@ -1,5 +1,5 @@
 import { mockRevalidateTag } from "@/test-setup"
-import { describe, test, expect, mock, beforeEach } from "bun:test"
+import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
 
 type Session = { user: { id: string; isPremium: boolean; role: string } } | null
 
@@ -24,16 +24,7 @@ mock.module("@/lib/prisma", () => ({
   prisma: { property: { findUnique: mockPropertyFindUnique, update: mockPropertyUpdate } },
 }))
 
-const mockCaptureException = mock((...args: [unknown, unknown]) => {
-  void args
-})
-// mock.module() replaces "@sentry/nextjs" process-wide, so this stub must
-// carry every Sentry function any other module reaches for — a partial one
-// makes unrelated code throw "is not a function" in the full-suite run.
-mock.module("@sentry/nextjs", () => ({
-  captureException: mockCaptureException,
-  captureMessage: () => undefined,
-}))
+const mockConsoleError = spyOn(console, "error").mockImplementation(() => {})
 
 // next/headers is mocked globally in test-setup.ts.
 
@@ -65,7 +56,7 @@ beforeEach(() => {
   )
   mockPropertyFindUnique.mockImplementation(() => Promise.resolve(null))
   mockPropertyUpdate.mockClear()
-  mockCaptureException.mockClear()
+  mockConsoleError.mockClear()
 })
 
 describe("updateProperty", () => {
@@ -93,7 +84,7 @@ describe("updateProperty", () => {
     mockPropertyFindUnique.mockImplementation(() => Promise.resolve({ price: "400000000" }))
     const result = await updateProperty("p1", { ...validInput, price: "350000000" })
     expect(result.success).toBe(true)
-    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
+    expect(mockRevalidateTag).toHaveBeenCalledWith("public-listings", { expire: 0 })
     expect(mockPropertyUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ previousPrice: "400000000" }) })
     )
@@ -134,12 +125,12 @@ describe("updateProperty", () => {
     expect(result.success).toBe(true)
   })
 
-  test("captures the exception with Sentry and returns a generic error on failure", async () => {
+  test("logs the exception and returns a generic error on failure", async () => {
     mockPropertyUpdate.mockImplementation(() => {
       throw new Error("DB down")
     })
     const result = await updateProperty("p1", validInput)
     expect(result.success).toBe(false)
-    expect(mockCaptureException).toHaveBeenCalledTimes(1)
+    expect(mockConsoleError).toHaveBeenCalledTimes(1)
   })
 })

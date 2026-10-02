@@ -1,9 +1,8 @@
 "use server"
 
-import * as Sentry from "@sentry/nextjs"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { invalidateFeaturedProperties } from "@/lib/featured-properties"
+import { invalidatePublicListings } from "@/lib/public-cache"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { propertyLimit, photoLimit, hasProAccess, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
@@ -106,14 +105,13 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
       },
     })
 
-    invalidateFeaturedProperties()
+    invalidatePublicListings()
 
     // Best-effort: a flag-write failure must not fail the (already committed) create.
     await setOnboardingFlag(session.user.id, "firstPropertyCreated").catch(() => {})
 
     return { success: true, id: property.id }
   } catch (err) {
-    Sentry.captureException(err, { tags: { action: "createProperty" } })
     console.error("createProperty failed:", err)
     return {
       success: false,

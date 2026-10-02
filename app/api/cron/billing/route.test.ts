@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach } from "bun:test"
+import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
 
 process.env.CRON_SECRET = "test-cron-secret"
 
@@ -64,16 +64,7 @@ mock.module("@/lib/mercadopago", () => ({
   cancelPreapproval: mockCancelPreapproval,
 }))
 
-const mockCaptureMessage = mock((...args: [unknown, unknown]) => {
-  void args
-})
-const mockCaptureException = mock((...args: [unknown, unknown]) => {
-  void args
-})
-mock.module("@sentry/nextjs", () => ({
-  captureMessage: mockCaptureMessage,
-  captureException: mockCaptureException,
-}))
+const mockConsoleError = spyOn(console, "error").mockImplementation(() => {})
 
 const mockDowngradeToFree = mock((...args: [string]) => {
   void args
@@ -126,8 +117,7 @@ beforeEach(() => {
   mockUserFindUnique.mockImplementation(() => Promise.resolve(null))
   mockUserFindUnique.mockClear()
   mockPaymentEventUpsert.mockClear()
-  mockCaptureMessage.mockClear()
-  mockCaptureException.mockClear()
+  mockConsoleError.mockClear()
 })
 
 describe("GET /api/cron/billing — auth", () => {
@@ -370,7 +360,7 @@ describe("cancelOrphanSubscriptions", () => {
 
     await GET(authedRequest())
     expect(mockCancelPreapproval).not.toHaveBeenCalled()
-    expect(mockCaptureMessage).toHaveBeenCalled()
+    expect(mockConsoleError).toHaveBeenCalled()
   })
 
   test("aborts the sweep instead of cancelling when the database errors out", async () => {
@@ -387,7 +377,7 @@ describe("cancelOrphanSubscriptions", () => {
 
     expect(mockCancelPreapproval).not.toHaveBeenCalled()
     expect(body.orphansCanceled).toBe(0)
-    expect(mockCaptureException).toHaveBeenCalled()
+    expect(mockConsoleError).toHaveBeenCalled()
   })
 
   test("aborts instead of mass-cancelling when too many candidates show up at once", async () => {
@@ -400,7 +390,7 @@ describe("cancelOrphanSubscriptions", () => {
 
     expect(mockCancelPreapproval).not.toHaveBeenCalled()
     expect(body.orphansCanceled).toBe(0)
-    expect(mockCaptureMessage).toHaveBeenCalled()
+    expect(mockConsoleError).toHaveBeenCalled()
   })
 
   test("does not count a cancellation Mercado Pago refused", async () => {

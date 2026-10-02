@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { cachePublicQuery } from "@/lib/public-cache"
 import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
 import { slugifyCity } from "@/lib/slug"
 import type { AgentProperty } from "@/app/agente/[slug]/agent-properties"
@@ -112,7 +113,7 @@ function buildOrderBy(sort: PropertySort): Prisma.PropertyOrderByWithRelationInp
   return [{ pinnedAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }]
 }
 
-export async function getProperties(
+export const getProperties = cachePublicQuery(async function getProperties(
   base: Prisma.PropertyWhereInput,
   filters: PropertyFilters,
   sort: PropertySort,
@@ -135,9 +136,9 @@ export async function getProperties(
   ])
 
   return { properties: rows.map(toAgentProperty), total }
-}
+}, "properties")
 
-export async function getPropertiesForMap(
+export const getPropertiesForMap = cachePublicQuery(async function getPropertiesForMap(
   base: Prisma.PropertyWhereInput,
   filters: PropertyFilters
 ): Promise<MapProperty[]> {
@@ -150,12 +151,12 @@ export async function getPropertiesForMap(
     },
   })
   return rows.map((p) => ({ ...p, price: Number(p.price) }))
-}
+}, "properties-map")
 
 // Facets describe the *unfiltered* scope (all published properties in base) —
 // used for filter-bar bounds/options and header stats, so they don't shift as
 // the user filters. `total` from getProperties is the filtered/paginated count.
-export async function getPropertyFacets(base: Prisma.PropertyWhereInput): Promise<PropertyFacets> {
+export const getPropertyFacets = cachePublicQuery(async function getPropertyFacets(base: Prisma.PropertyWhereInput): Promise<PropertyFacets> {
   const [agg, cities, types, totalCount] = await Promise.all([
     prisma.property.aggregate({
       where: base,
@@ -184,7 +185,7 @@ export async function getPropertyFacets(base: Prisma.PropertyWhereInput): Promis
     areaBounds,
     types: types.map((t): [string, string] => [t.type, PROPERTY_TYPE_LABELS[t.type] ?? t.type]),
   }
-}
+}, "property-facets")
 
 export type SearchParamsRecord = Record<string, string | string[] | undefined>
 
@@ -271,7 +272,7 @@ export function pickDisplayCity(cities: string[]): string {
 // Groups published properties by city slug so free-text spelling variants
 // of the same city are treated as one page instead of splitting SEO value
 // (and, worse, creating near-duplicate /propiedades/[ciudad] pages).
-export async function getCityIndex(): Promise<CityGroup[]> {
+export const getCityIndex = cachePublicQuery(async function getCityIndex(): Promise<CityGroup[]> {
   const rows = await prisma.property.groupBy({
     by: ["city"],
     where: { published: true },
@@ -291,4 +292,4 @@ export async function getCityIndex(): Promise<CityGroup[]> {
     }
   }
   return [...bySlug.values()]
-}
+}, "city-index")

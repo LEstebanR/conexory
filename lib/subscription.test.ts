@@ -87,13 +87,6 @@ mock.module("@/lib/mercadopago", () => ({
   cancelPreapproval: mockCancelPreapproval,
 }))
 
-// mock.module() replaces "@sentry/nextjs" process-wide, so this stub must
-// carry every Sentry function any other module reaches for.
-mock.module("@sentry/nextjs", () => ({
-  captureException: () => undefined,
-  captureMessage: () => undefined,
-}))
-
 const { downgradeToFree, startSubscription } = await import("./subscription")
 
 describe("downgradeToFree", () => {
@@ -128,7 +121,7 @@ describe("downgradeToFree", () => {
       where: { id: { in: ["oldest1", "oldest2"] } },
       data: { published: false },
     })
-    expect(mockRevalidateTag).toHaveBeenCalledWith("featured-properties", { expire: 0 })
+    expect(mockRevalidateTag).toHaveBeenCalledWith("public-listings", { expire: 0 })
     mockPropertyFindMany.mockImplementation(() => Promise.resolve([]))
   })
 })

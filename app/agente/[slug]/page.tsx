@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { MapPin, Phone, MessageCircle, Mail, ArrowUpRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { cachePublicQuery } from "@/lib/public-cache"
 import { getAppUrl } from "@/lib/urls"
 import { toWhatsAppNumber } from "@/lib/phone"
 import {
@@ -58,7 +59,7 @@ function YouTubeIcon({ className }: { className?: string }) {
 
 // ── Data ───────────────────────────────────────────────────────────────────
 
-const getAgent = cache(async (slug: string) => {
+const getAgent = cache(cachePublicQuery(async (slug: string) => {
   return prisma.user.findUnique({
     where: { agentSlug: slug },
     select: {
@@ -78,7 +79,7 @@ const getAgent = cache(async (slug: string) => {
       profilePublished: true,
     },
   })
-})
+}, "public-agent"))
 
 // Cached per userId so generateMetadata and the page body share one query —
 // this is the agent's full (unfiltered) property count/bounds, independent

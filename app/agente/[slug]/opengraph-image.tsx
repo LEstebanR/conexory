@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og"
 import fs from "fs"
 import path from "path"
 import { prisma } from "@/lib/prisma"
+import { cachePublicQuery } from "@/lib/public-cache"
 
 export const runtime = "nodejs"
 export const size = { width: 1200, height: 630 }
@@ -13,7 +14,7 @@ function loadFont(filename: string): Buffer {
 
 const markBlack = `data:image/png;base64,${fs.readFileSync(path.join(process.cwd(), "public/mark-black.png")).toString("base64")}`
 
-async function getAgent(slug: string) {
+const getAgent = cachePublicQuery(async (slug: string) => {
   return prisma.user.findUnique({
     where: { agentSlug: slug },
     select: {
@@ -21,7 +22,7 @@ async function getAgent(slug: string) {
       profilePublished: true,
     },
   })
-}
+}, "public-agent-og")
 
 // Google profile photo URLs (lh3.googleusercontent.com/...=s96-c) embed a
 // pixel size in the URL — the default is tiny, so bump it before rendering
