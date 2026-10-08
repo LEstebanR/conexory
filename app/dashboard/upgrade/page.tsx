@@ -23,7 +23,7 @@ function formatCardBrand(brand: string): string {
 }
 
 export const metadata: Metadata = {
-  title: "Plan Pro — Conexory",
+  title: "Plan Pro",
 }
 
 const PRO_FEATURES = [

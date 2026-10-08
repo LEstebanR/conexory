@@ -1,16 +1,16 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import { Clock, Tag, ArrowUpRight } from "lucide-react"
 import { getAllPosts } from "@/lib/blog"
+import { pageMetadata } from "@/lib/page-metadata"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Reveal from "@/components/reveal"
 
-export const metadata: Metadata = {
-  title: "Blog — Conexory",
+export const metadata = pageMetadata({
+  title: "Blog",
   description: "Consejos, guías y estrategias para asesores inmobiliarios en Colombia. Aprende a compartir propiedades por WhatsApp, mejorar tus fichas y cerrar más negocios.",
-  alternates: { canonical: "/blog" },
-}
+  path: "/blog",
+})
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("es-CO", {

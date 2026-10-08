@@ -19,15 +19,29 @@ const MAX_H = size.height - PAD - BRAND_H
 // Soft, neutral, monochrome gradient — elegant without competing with the photo.
 const BACKGROUND = "linear-gradient(145deg, #fbfbfb 0%, #efefef 52%, #e2e2e2 100%)"
 
+const CACHE_CONTROL = "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800"
+
+function imageResponse(body: Buffer, contentType: string): Response {
+  return new Response(new Uint8Array(body), {
+    headers: {
+      "Content-Type": contentType,
+      "Cache-Control": CACHE_CONTROL,
+      // max-age alone is a browser hint. These tell the Vercel CDN to store the
+      // JPEG and keep serving it while a cold render runs, so WhatsApp doesn't
+      // time out on a multi-second miss after the entry expires.
+      "CDN-Cache-Control": CACHE_CONTROL,
+      "Vercel-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+    },
+  })
+}
+
 async function render(node: ReactElement): Promise<Response> {
   const png = Buffer.from(await new ImageResponse(node, size).arrayBuffer())
   try {
     const jpeg = await sharp(png).jpeg({ quality: 85, mozjpeg: true }).toBuffer()
-    return new Response(new Uint8Array(jpeg), {
-      headers: { "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=86400" },
-    })
+    return imageResponse(jpeg, "image/jpeg")
   } catch {
-    return new Response(new Uint8Array(png), { headers: { "Content-Type": "image/png" } })
+    return imageResponse(png, "image/png")
   }
 }
 

@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import AgentProperties from "@/app/agente/[slug]/agent-properties"
 import { getAppUrl } from "@/lib/urls"
+import { pageMetadata } from "@/lib/page-metadata"
 import { buildCityTitle, buildCityDescription } from "@/lib/city-seo"
 import {
   getProperties, getPropertyFacets, getPropertiesForMap, parsePropertyQuery,
@@ -21,16 +22,16 @@ export async function generateMetadata({
   const { ciudad } = await params
   const cityIndex = await getCityIndex()
   const group = cityIndex.find((g) => g.slug === ciudad)
-  if (!group) return {}
+  if (!group) notFound()
 
   const sp = await searchParams
   const { filters } = parsePropertyQuery(sp)
   const cityLabel = pickDisplayCity(group.cities)
+  const title = buildCityTitle(cityLabel, filters.type, filters.transactionType)
+  const description = buildCityDescription(cityLabel, filters.type, filters.transactionType)
 
   return {
-    title: buildCityTitle(cityLabel, filters.type, filters.transactionType),
-    description: buildCityDescription(cityLabel, filters.type, filters.transactionType),
-    alternates: { canonical: `/propiedades/${ciudad}` },
+    ...pageMetadata({ title, description, path: `/propiedades/${ciudad}` }),
     ...(group.count < MIN_CITY_LISTINGS ? { robots: { index: false, follow: true } } : {}),
   }
 }

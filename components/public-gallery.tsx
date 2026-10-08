@@ -45,6 +45,11 @@ export default function PublicGallery({
 
   if (total === 0) return null
 
+  function photoAlt(i: number) {
+    if (total === 1) return title
+    return english ? `${title} — photo ${i + 1} of ${total}` : `${title} — foto ${i + 1} de ${total}`
+  }
+
   function onTouchStart(e: React.TouchEvent) {
     setTouchStartX(e.targetTouches[0].clientX)
   }
@@ -82,7 +87,7 @@ export default function PublicGallery({
                 <Image
                   fill
                   src={url}
-                  alt=""
+                  alt={photoAlt(i)}
                   aria-hidden
                   priority={i === 0}
                   className="object-cover scale-110 blur-2xl opacity-50"
@@ -91,7 +96,7 @@ export default function PublicGallery({
                 <Image
                   fill
                   src={url}
-                  alt={i === 0 ? title : ""}
+                  alt={photoAlt(i)}
                   priority={i === 0}
                   className="object-contain"
                   draggable={false}
@@ -176,7 +181,7 @@ export default function PublicGallery({
               key={images[index]}
               fill
               src={images[index]}
-              alt={title}
+              alt={photoAlt(index)}
               className="object-contain drop-shadow-2xl"
               sizes="100vw"
               priority

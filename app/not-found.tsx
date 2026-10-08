@@ -1,6 +1,24 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { MapPinOff } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Página no encontrada",
+  description: "La página que buscas no existe o fue movida.",
+  openGraph: {
+    title: { absolute: "Página no encontrada — Conexory" },
+    description: "La página que buscas no existe o fue movida.",
+    locale: "es_CO",
+    siteName: "Conexory",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: { absolute: "Página no encontrada — Conexory" },
+    description: "La página que buscas no existe o fue movida.",
+  },
+}
 
 export default function NotFound() {
   return (

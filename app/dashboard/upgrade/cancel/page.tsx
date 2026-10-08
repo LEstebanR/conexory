@@ -7,7 +7,7 @@ import { cancelSubscription } from "./actions"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Cancelar suscripción — Conexory",
+  title: "Cancelar suscripción",
 }
 
 const LOSSES = [

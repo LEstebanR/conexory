@@ -6,7 +6,7 @@ import { hasProAccess } from "@/lib/plans"
 import AdminNav from "../admin-nav"
 
 export const metadata: Metadata = {
-  title: "Referidos — Admin — Conexory",
+  title: "Referidos — Admin",
 }
 
 const PAGE_SIZE = 20

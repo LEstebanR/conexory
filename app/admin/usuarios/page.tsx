@@ -7,7 +7,7 @@ import AdminNav from "../admin-nav"
 import PremiumToggle from "./premium-toggle"
 
 export const metadata: Metadata = {
-  title: "Usuarios — Admin — Conexory",
+  title: "Usuarios — Admin",
 }
 
 const PAGE_SIZE = 20

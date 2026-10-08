@@ -2,7 +2,8 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, BedDouble, Bath, Ruler, Car, LandPlot, ShieldCheck, EyeOff, ArrowUpRight } from "lucide-react"
+import { MapPin, BedDouble, Bath, Ruler, Car, LandPlot, ShieldCheck, ArrowUpRight } from "lucide-react"
+import { listingOffer } from "@/lib/listing-seo"
 import { getPublicProperty } from "@/lib/public-pages"
 import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
@@ -86,7 +87,7 @@ export async function generateMetadata({
   // layout defaults instead and let the page render surface the real failure.
   const property = await getPublicProperty(slug).catch(() => undefined)
   if (property === undefined) return {}
-  if (!property) return { title: "Propiedad no encontrada" }
+  if (!property || !property.published) notFound()
 
   const english = lang === "en" && property.englishAvailable
   const type = (english ? TYPE_LABELS_EN : TYPE_LABELS)[property.type] ?? property.type
@@ -118,22 +119,26 @@ export async function generateMetadata({
   const description = descParts.join(". ")
 
   const ogTitle = `${type}${location ? english ? ` in ${location}` : ` en ${location}` : ""} — ${price}`
+  const listingTitle = english ? property.titleEn ?? property.title : property.title
   const ogImage = {
     url: `/p/${slug}/og.jpg${english ? "?lang=en" : ""}`,
     width: 1200,
     height: 630,
-    alt: "Propiedad en Conexory",
+    type: "image/jpeg",
+    alt: listingTitle,
   }
 
   const meta: Metadata = {
-    title: `${type}${location ? english ? ` in ${location}` : ` en ${location}` : ""} — ${price}`,
+    title: ogTitle,
     description,
+    robots: { index: true, follow: true },
     alternates: { canonical: `/p/${slug}${english ? "?lang=en" : ""}` },
     openGraph: {
       type: "website",
       url: `/p/${slug}${english ? "?lang=en" : ""}`,
       title: ogTitle,
       description,
+      locale: english ? "en_US" : "es_CO",
       siteName: "Conexory",
       images: [ogImage],
     },
@@ -296,34 +301,13 @@ export default async function PublicPropertyPage({
 
   const property = await getPublicProperty(slug)
 
-  if (!property) notFound()
+  if (!property || !property.published) notFound()
 
   const english = lang === "en" && property.englishAvailable
   const title = english ? property.titleEn ?? property.title : property.title
   const description = english ? property.descriptionEn ?? property.description : property.description
 
   const typeLabel = (english ? TYPE_LABELS_EN : TYPE_LABELS)[property.type] ?? property.type
-
-  if (!property.published) {
-    return (
-      <div className="min-h-screen bg-canvas flex flex-col">
-        <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-canvas-soft flex items-center justify-center mb-6">
-            <EyeOff className="w-9 h-9 text-mute" strokeWidth={1.5} />
-          </div>
-          <h1 className="text-xl font-black text-ink tracking-tight mb-2">
-            {english ? "Property unavailable" : "Propiedad no disponible"}
-          </h1>
-          <p className="text-body text-sm leading-relaxed max-w-xs">
-            {english
-              ? "This property was temporarily deactivated by the agent and may no longer be available."
-              : "Esta propiedad fue desactivada temporalmente por el agente. Es posible que ya no esté disponible."}
-          </p>
-        </main>
-        <PageFooter english={english} />
-      </div>
-    )
-  }
 
   const price = formatCOP(property.price)
   const previousPrice =
@@ -350,12 +334,7 @@ export default async function PublicPropertyPage({
     url: `${propertyUrl}${english ? "?lang=en" : ""}`,
     datePosted: property.createdAt,
     ...(property.images.length > 0 && { image: property.images }),
-    offers: {
-      "@type": "Offer",
-      price: property.price,
-      priceCurrency: "COP",
-      availability: "https://schema.org/InStock",
-    },
+    offers: listingOffer(property.transactionType, property.price),
     address: {
       "@type": "PostalAddress",
       ...(property.city && { addressLocality: property.city }),

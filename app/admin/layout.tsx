@@ -4,7 +4,8 @@ import { getSession } from "@/lib/auth"
 import Sidebar from "@/components/dashboard/sidebar"
 
 export const metadata: Metadata = {
-  title: "Admin — Conexory",
+  title: "Admin",
+  robots: { index: false, follow: false },
 }
 
 export default async function AdminLayout({

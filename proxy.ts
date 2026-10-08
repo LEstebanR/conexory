@@ -1,5 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { getSessionCookie } from "better-auth/cookies"
+import { publicListingSlug } from "@/lib/listing-seo"
+
+async function isPublishedListing(slug: string): Promise<boolean | null> {
+  try {
+    const { getPublicProperty } = await import("@/lib/public-pages")
+    const property = await getPublicProperty(slug)
+    return Boolean(property?.published)
+  } catch {
+    return null
+  }
+}
 
 const SESSION_COOKIES = ["better-auth.session_token", "__Secure-better-auth.session_token"]
 const LANDING_BOUNCE_COOKIE = "landing_bounce"
@@ -10,8 +21,18 @@ const LANDING_BOUNCE_COOKIE = "landing_bounce"
 // visit to / through /dashboard to /login forever, so the redirect leaves a
 // short-lived marker and, if the user lands on /login right after, the dead
 // cookie is cleared there.
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const slug = publicListingSlug(pathname)
+  if (slug) {
+    const published = await isPublishedListing(slug)
+    if (published === false) {
+      const url = request.nextUrl.clone()
+      url.pathname = "/__missing"
+      return NextResponse.rewrite(url)
+    }
+    return NextResponse.next()
+  }
 
   if (pathname === "/login") {
     if (!request.cookies.has(LANDING_BOUNCE_COOKIE)) return NextResponse.next()
@@ -31,5 +52,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login"],
+  matcher: ["/", "/login", "/p/:slug"],
 }

@@ -8,7 +8,7 @@ import LegalLayout, {
 } from "@/components/legal-layout"
 
 export const metadata: Metadata = {
-  title: "Términos de Uso — Conexory",
+  title: "Términos de Uso",
   description:
     "Términos y condiciones de uso de la plataforma Conexory para asesores inmobiliarios en Colombia.",
   robots: { index: false, follow: true },
