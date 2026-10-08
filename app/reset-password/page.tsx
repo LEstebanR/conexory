@@ -1,7 +1,15 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, ArrowRight } from "lucide-react"
+import { pageMetadata } from "@/lib/page-metadata"
 import ResetForm from "./reset-form"
+
+export const metadata = pageMetadata({
+  title: "Nueva contraseña",
+  description: "Elige una nueva contraseña para tu cuenta de Conexory.",
+  path: "/reset-password",
+  noindex: true,
+})
 
 export default async function ResetPasswordPage({
   searchParams,

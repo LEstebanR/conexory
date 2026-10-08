@@ -34,15 +34,11 @@ export const metadata: Metadata = {
   authors: [{ name: "Conexory" }],
   creator: "Conexory",
   publisher: "Conexory",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true },
-  },
   openGraph: {
     title: "Conexory — Crea. Comparte. Vende.",
     description:
       "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para asesores inmobiliarios colombianos.",
+    url: APP_URL,
     type: "website",
     locale: "es_CO",
     siteName: "Conexory",
@@ -52,9 +48,6 @@ export const metadata: Metadata = {
     title: "Conexory — Comparte propiedades por WhatsApp",
     description:
       "Crea la ficha de tu propiedad en 60 segundos y compártela por WhatsApp. Diseñado para agentes colombianos.",
-  },
-  alternates: {
-    canonical: APP_URL,
   },
   verification: {
     google: "3L9SqbwkEe2EMtjeK8_ife3MMmCukkGx1us6Z0f65WA",

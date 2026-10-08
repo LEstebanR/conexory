@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 import AdminNav from "../admin-nav"
 
 export const metadata: Metadata = {
-  title: "Feedback — Admin — Conexory",
+  title: "Feedback — Admin",
 }
 
 const PAGE_SIZE = 20

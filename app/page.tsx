@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { getFeaturedProperties } from "@/lib/featured-properties"
 import { getAppUrl } from "@/lib/urls"
 import { faqs } from "@/lib/faq-data"
@@ -12,6 +13,11 @@ import FAQ from "@/components/faq"
 import PricingTeaser from "@/components/pricing-teaser"
 import SignupCTA from "@/components/signup-cta"
 import Footer from "@/components/footer"
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
+}
 
 // Explicit so a build-time DB failure (featured falls back to []) can't
 // freeze an empty landing until the next deploy.

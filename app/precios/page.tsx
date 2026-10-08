@@ -1,4 +1,3 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import { Check, Minus, Sparkles } from "lucide-react"
 import Navbar from "@/components/navbar"
@@ -6,13 +5,15 @@ import Footer from "@/components/footer"
 import Reveal from "@/components/reveal"
 import { Button } from "@/components/ui/button"
 import { PRO_AI_MESSAGE_LIMIT, PRO_VALUE_POINTS } from "@/lib/plans"
+import { pageMetadata } from "@/lib/page-metadata"
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Planes y precios — Conexory para asesores inmobiliarios",
   description:
     "Plan gratuito para siempre con 3 propiedades. Plan Pro a $99.999 COP/mes con hasta 50 propiedades. Sin permanencia, cancela cuando quieras. Diseñado para agentes colombianos.",
-  alternates: { canonical: "/precios" },
-}
+  path: "/precios",
+  absoluteTitle: true,
+})
 
 const plans = [
   {

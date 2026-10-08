@@ -5,7 +5,8 @@ import Sidebar from "@/components/dashboard/sidebar"
 import VerifyEmailGate from "./verify-email-gate"
 
 export const metadata: Metadata = {
-  title: "Dashboard — Conexory",
+  title: "Dashboard",
+  robots: { index: false, follow: false },
 }
 
 export default async function DashboardLayout({

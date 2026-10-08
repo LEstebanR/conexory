@@ -19,10 +19,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const post = getPost(slug)
-  if (!post) return { title: "Artículo no encontrado — Conexory" }
+  if (!post) return { title: "Artículo no encontrado", robots: { index: false, follow: false } }
   return {
-    title: `${post.title} — Conexory`,
+    title: post.title,
     description: post.description,
+    robots: { index: true, follow: true },
     alternates: { canonical: `/blog/${slug}` },
     openGraph: {
       type: "article",
@@ -30,6 +31,7 @@ export async function generateMetadata({
       title: post.title,
       description: post.description,
       publishedTime: post.date,
+      locale: "es_CO",
       siteName: "Conexory",
     },
     twitter: {

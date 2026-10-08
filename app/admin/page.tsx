@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 import AdminNav from "./admin-nav"
 
 export const metadata: Metadata = {
-  title: "Admin — Conexory",
+  title: "Admin",
 }
 
 function HeroStat({

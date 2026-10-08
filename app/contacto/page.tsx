@@ -1,14 +1,14 @@
-import type { Metadata } from "next"
 import { Mail, MessageCircle, MapPin } from "lucide-react"
+import { pageMetadata } from "@/lib/page-metadata"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Reveal from "@/components/reveal"
 
-export const metadata: Metadata = {
-  title: "Contacto — Conexory",
+export const metadata = pageMetadata({
+  title: "Contacto",
   description: "Ponte en contacto con el equipo de Conexory.",
-  alternates: { canonical: "/contacto" },
-}
+  path: "/contacto",
+})
 
 const channels = [
   { icon: Mail, title: "Email general", value: "Conexory@gmail.com", note: "Para cualquier consulta", href: "mailto:Conexory@gmail.com" },

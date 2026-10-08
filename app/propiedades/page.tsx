@@ -1,15 +1,15 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowUpRight, MapPin } from "lucide-react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
+import { pageMetadata } from "@/lib/page-metadata"
 import { getCityIndex, pickDisplayCity, MIN_CITY_LISTINGS } from "@/lib/properties"
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Propiedades por ciudad",
   description: "Explora propiedades publicadas por agentes inmobiliarios en Conexory, organizadas por ciudad.",
-  alternates: { canonical: "/propiedades" },
-}
+  path: "/propiedades",
+})
 
 export default async function PropertiesIndexPage() {
   const cityIndex = await getCityIndex()

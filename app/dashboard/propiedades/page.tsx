@@ -9,7 +9,7 @@ import {
 import AgentProperties from "@/app/agente/[slug]/agent-properties"
 
 export const metadata: Metadata = {
-  title: "Propiedades disponibles — Conexory",
+  title: "Propiedades disponibles",
 }
 
 export default async function DashboardPropertiesPage({

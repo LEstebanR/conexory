@@ -13,7 +13,7 @@ import { hasProAccess } from "@/lib/plans"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Configuración — Conexory",
+  title: "Configuración",
 }
 
 function formatDate(date: Date) {
