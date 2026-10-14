@@ -14,6 +14,7 @@ import {
   Settings,
   Shield,
   Loader2,
+  Sparkles,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { signOut } from "@/lib/auth-client"
@@ -220,6 +221,16 @@ function SidebarContent({
           />
         ))}
         <FeedbackModal userName={user.name} />
+        {process.env.NEXT_PUBLIC_USECHANGELOG_WIDGET_KEY && (
+          <button
+            type="button"
+            data-whats-new
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-body hover:bg-canvas-softer hover:text-ink transition-all duration-150"
+          >
+            <Sparkles className="w-4.5 h-4.5 flex-shrink-0" strokeWidth={1.75} />
+            <span className="text-sm font-medium flex-1 text-left">Novedades</span>
+          </button>
+        )}
       </div>
 
       {/* Admin + Settings — above the divider */}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+import Script from "next/script"
 import { getSession } from "@/lib/auth"
 import Sidebar from "@/components/dashboard/sidebar"
 import VerifyEmailGate from "./verify-email-gate"
@@ -38,6 +39,16 @@ export default async function DashboardLayout({
       <div className="lg:pl-60 pt-14 lg:pt-0 min-h-screen flex flex-col">
         {children}
       </div>
+
+      {process.env.NEXT_PUBLIC_USECHANGELOG_WIDGET_KEY && (
+        <Script
+          src="https://www.usechangelog.com/widget.js"
+          data-key={process.env.NEXT_PUBLIC_USECHANGELOG_WIDGET_KEY}
+          data-trigger="[data-whats-new]"
+          lang="es"
+          strategy="afterInteractive"
+        />
+      )}
     </div>
   )
 }
