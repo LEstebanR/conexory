@@ -5,7 +5,6 @@ import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import SettingsForm from "./settings-form"
-import SettingsTour from "./settings-tour"
 import ReferralLinkCard from "./referral-link-card"
 import { toggleProfilePublished } from "./actions"
 import { getAppUrl } from "@/lib/urls"
@@ -74,8 +73,6 @@ export default async function SettingsPage() {
 
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
-      <SettingsTour />
-
       {/* Header */}
       <div className="mb-8">
         <p className="text-sm font-medium text-mute mb-1">Cuenta</p>
@@ -86,7 +83,7 @@ export default async function SettingsPage() {
 
       <div className="grid lg:grid-cols-3 gap-6 items-start">
         {/* Profile — spans 2 columns */}
-        <div id="tour-settings-profile" className="lg:col-span-2 bg-white rounded-2xl border border-hairline p-6 sm:p-8">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-hairline p-6 sm:p-8">
           <h2 className="text-base font-bold text-ink mb-6">Perfil</h2>
           <SettingsForm
             name={user.name}
@@ -110,7 +107,7 @@ export default async function SettingsPage() {
 
         <div className="space-y-4">
           {/* Public profile */}
-          <div id="tour-settings-public" className="bg-white rounded-2xl border border-hairline p-6">
+          <div className="bg-white rounded-2xl border border-hairline p-6">
             <div className="flex items-center gap-2 mb-3">
               <Globe className="w-4 h-4 text-ink" strokeWidth={1.75} />
               <h2 className="text-base font-bold text-ink">Perfil público</h2>
