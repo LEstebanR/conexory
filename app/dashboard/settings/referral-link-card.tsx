@@ -19,7 +19,7 @@ export default function ReferralLinkCard({ url }: { url: string }) {
         <h2 className="text-base font-bold text-ink">Refiere y gana</h2>
       </div>
       <p className="text-xs text-mute leading-relaxed mb-4">
-        Comparte tu link. Cuando alguien se registre con él y pase a Pro, recibes un descuento.
+        Comparte tu link. Cuando alguien se registre con él y pase a Pro, recibes un mes de Pro gratis.
       </p>
 
       <div className="flex items-center gap-2 bg-canvas-soft rounded-xl px-3 py-2">
