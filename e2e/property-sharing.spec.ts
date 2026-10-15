@@ -32,6 +32,23 @@ test("registro → crear propiedad → compartir", async ({ page }) => {
   expect(property.title).toBe(title)
   expect(property.published).toBe(true)
 
+  await page.context().route("https://wa.me/**", (route) => route.fulfill({ body: "ok" }))
+  const whatsapp = page.getByTitle("Compartir por WhatsApp")
+  await expect(whatsapp).toHaveAttribute("href", new RegExp(`^https://wa\\.me/\\?text=.*%2Fp%2F${property.slug}`))
+  const popup = page.waitForEvent("popup")
+  await whatsapp.click()
+  await (await popup).close()
+
+  await expect
+    .poll(async () => {
+      const row = await prisma.user.findUniqueOrThrow({
+        where: { id: user.userId },
+        select: { onboarding: true, properties: { select: { shares: true } } },
+      })
+      return { shares: row.properties[0]?.shares, onboarding: row.onboarding }
+    })
+    .toMatchObject({ shares: 1, onboarding: { firstPropertyCreated: true, firstPropertyShared: true } })
+
   await page.goto(`/p/${property.slug}`)
   await expect(page.getByText(title)).toBeVisible()
 })
