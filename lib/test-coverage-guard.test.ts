@@ -17,7 +17,6 @@ const UNTESTED_ALLOWLIST: Record<string, string> = {
   "lib/flyer-options.ts": "static options, exercised by the flyer route test",
   "lib/public-cache.ts": "exercised end to end by featured-properties, properties and public-pages tests",
   "lib/orphan-subscriptions.ts": "exercised by the billing cron and Mercado Pago webhook route tests",
-  "lib/tour.ts": "driver.js UI glue; removed with the onboarding cleanup (#182)",
   "lib/flyer/index.tsx": "image rendering; mocked by the flyer route test, checked visually",
   "lib/flyer/shared.tsx": "image rendering; mocked by the flyer route test, checked visually",
   "lib/flyer/clasica.tsx": "image rendering template",
