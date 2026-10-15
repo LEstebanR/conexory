@@ -12,6 +12,7 @@ import { readMetrics, socialTotal, contactTotal } from "@/lib/property-metrics"
 import { hasProAccess, propertyLimit, pinnedLimit } from "@/lib/plans"
 import { DEFAULT_ACCENT_COLOR } from "@/lib/flyer-options"
 import SharePanel from "./share-panel"
+import ShareReadyBanner from "./share-ready-banner"
 import PropertyCarousel from "@/components/property-carousel"
 import PropertyVideo from "@/components/property-video"
 import PropertyActions from "./property-actions"
@@ -19,10 +20,12 @@ import PropertyMap from "@/components/property-map-client"
 
 export default async function PropertyDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ nueva?: string }>
 }) {
-  const { id } = await params
+  const [{ id }, { nueva }] = await Promise.all([params, searchParams])
 
   const session = await getSession()
   if (!session) redirect("/login")
@@ -114,6 +117,26 @@ export default async function PropertyDetailPage({
           />
         </div>
       </div>
+
+      {nueva === "1" && property.published && (
+        <ShareReadyBanner
+          propertyId={property.id}
+          url={property.showContact ? publicUrl : publicUrlNoContact}
+          property={{
+            title: property.title,
+            type: typeLabel,
+            location: location || undefined,
+            price,
+            bedrooms: property.bedrooms,
+            bathrooms: property.bathrooms,
+            area: property.area,
+            landArea: property.landArea,
+            parking: property.parking,
+            gatedCommunity: property.gatedCommunity,
+            description: property.description,
+          }}
+        />
+      )}
 
       {/* Deactivated banner */}
       {!property.published && (

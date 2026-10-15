@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect, useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -24,7 +24,6 @@ import { createProperty, getEnglishProfileStatus } from "./actions"
 import { FieldError, validatePropertyInput } from "../property-form"
 import ImageUpload from "@/components/image-upload"
 import LocationSelect from "@/components/location-select"
-import PropertyTour from "./property-tour"
 import { useSession } from "@/lib/auth-client"
 import { photoLimit, hasProAccess } from "@/lib/plans"
 import { PROPERTY_TYPES, TRANSACTION_TYPES, DEFAULT_TRANSACTION_TYPE } from "@/lib/property-types"
@@ -52,14 +51,19 @@ function SectionCard({
   title,
   children,
   id,
+  optional,
 }: {
   title: string
   children: React.ReactNode
   id?: string
+  optional?: boolean
 }) {
   return (
     <div id={id} className="bg-white rounded-2xl border border-hairline p-6 space-y-4">
-      <h2 className="text-sm font-bold text-ink uppercase tracking-wide">{title}</h2>
+      <h2 className="text-sm font-bold text-ink uppercase tracking-wide">
+        {title}
+        {optional && <span className="ml-2 text-xs font-medium normal-case tracking-normal text-mute">Opcional</span>}
+      </h2>
       {children}
     </div>
   )
@@ -162,25 +166,18 @@ export default function NewPropertyPage() {
 
     setFieldErrors({})
 
-    // Validation passed and we're publishing — now it's safe to end the form tour.
-    window.dispatchEvent(new Event("conexory:finish-property-tour"))
-
     startTransition(async () => {
       const result = await createProperty(data)
       if (!result.success) {
         setError(result.error)
         return
       }
-      router.push(`/dashboard/properties/${result.id}`)
+      router.push(`/dashboard/properties/${result.id}?nueva=1`)
     })
   }
 
   return (
     <div className="flex-1 p-6 lg:p-8 max-w-3xl w-full mx-auto">
-      <Suspense fallback={null}>
-        <PropertyTour />
-      </Suspense>
-
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <Link
@@ -331,10 +328,10 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Details */}
-        <SectionCard id="tour-details" title="Detalles">
+        <SectionCard id="tour-details" title="Detalles" optional>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <FieldLabel optional>Área (m²)</FieldLabel>
+              <FieldLabel>Área (m²)</FieldLabel>
               <Input
                 placeholder="65"
                 value={area}
@@ -347,7 +344,7 @@ export default function NewPropertyPage() {
               <FieldError message={fieldErrors.area} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel optional>Terreno (m²)</FieldLabel>
+              <FieldLabel>Terreno (m²)</FieldLabel>
               <Input
                 placeholder="120"
                 value={landArea}
@@ -363,7 +360,7 @@ export default function NewPropertyPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <FieldLabel optional>Habitaciones</FieldLabel>
+              <FieldLabel>Habitaciones</FieldLabel>
               <Input
                 placeholder="2"
                 value={bedrooms}
@@ -376,7 +373,7 @@ export default function NewPropertyPage() {
               <FieldError message={fieldErrors.bedrooms} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel optional>Baños</FieldLabel>
+              <FieldLabel>Baños</FieldLabel>
               <Input
                 placeholder="1"
                 value={bathrooms}
@@ -389,7 +386,7 @@ export default function NewPropertyPage() {
               <FieldError message={fieldErrors.bathrooms} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel optional>Parqueaderos</FieldLabel>
+              <FieldLabel>Parqueaderos</FieldLabel>
               <Input
                 placeholder="1"
                 value={parking}
@@ -426,9 +423,9 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Description */}
-        <SectionCard id="tour-description" title="Descripción">
+        <SectionCard id="tour-description" title="Descripción" optional>
           <div className="space-y-1.5">
-            <FieldLabel optional>Descripción libre</FieldLabel>
+            <FieldLabel>Descripción libre</FieldLabel>
             <textarea
               placeholder="Describe la propiedad: características, acabados, ubicación, puntos de interés cercanos..."
               value={description}
@@ -442,7 +439,7 @@ export default function NewPropertyPage() {
           </div>
         </SectionCard>
 
-        <SectionCard id="tour-language" title="Disponibilidad en inglés">
+        <SectionCard id="tour-language" title="Disponibilidad en inglés" optional>
           <label className="flex items-start gap-3 cursor-pointer group select-none">
             <div className="relative flex-shrink-0 mt-0.5">
               <input
@@ -503,9 +500,9 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Location on map */}
-        <SectionCard id="tour-map" title="Ubicación en mapa">
+        <SectionCard title="Ubicación en mapa" optional>
           <p className="text-xs text-mute -mt-1">
-            Opcional. Permite mostrar la ubicación exacta en la ficha pública.
+            Permite mostrar la ubicación exacta en la ficha pública.
           </p>
           <MapPicker
             latitude={latitude}
@@ -516,7 +513,7 @@ export default function NewPropertyPage() {
         </SectionCard>
 
         {/* Contact info */}
-        <SectionCard id="tour-contact" title="Datos de contacto">
+        <SectionCard title="Datos de contacto">
           <label className="flex items-start gap-3 cursor-pointer group select-none">
             <div className="relative flex-shrink-0 mt-0.5">
               <input
@@ -552,7 +549,7 @@ export default function NewPropertyPage() {
         )}
 
         {/* Actions */}
-        <div id="tour-submit" className="flex gap-3 pb-8">
+        <div className="flex gap-3 pb-8">
           <Button type="button" variant="outline" className="flex-1" asChild>
             <Link href="/dashboard">Cancelar</Link>
           </Button>
