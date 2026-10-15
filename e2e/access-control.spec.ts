@@ -15,8 +15,11 @@ test("un agente no puede abrir la propiedad de otro agente", async ({ page, brow
   const property = await seedProperty(owner.userId)
 
   await registerUser(page, { prefix: "intruder" })
-  const response = await page.goto(`/dashboard/properties/${property.id}`)
-  expect(response?.status()).toBe(404)
+  // dashboard/loading.tsx streams the response, so notFound() can't change
+  // the already-sent 200 status — assert on what's rendered instead.
+  await page.goto(`/dashboard/properties/${property.id}`)
+  await expect(page.getByText("Error 404")).toBeVisible()
+  await expect(page.getByText(property.title)).toHaveCount(0)
 })
 
 test("la ficha pública no expone el id del agente", async ({ page }) => {

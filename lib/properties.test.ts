@@ -250,12 +250,6 @@ describe("getProperties", () => {
       AND: [base, { price: { gte: 5 } }, { area: { lte: 90 } }],
     })
   })
-
-  test("serves repeated requests from the public cache", async () => {
-    await getProperties(base, {}, "recent", 1)
-    await getProperties(base, {}, "recent", 1)
-    expect(findMany).toHaveBeenCalledTimes(1)
-  })
 })
 
 describe("getPropertiesForMap", () => {

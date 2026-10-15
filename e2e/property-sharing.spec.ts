@@ -33,7 +33,10 @@ test("registro → crear propiedad → compartir", async ({ page }) => {
   expect(property.published).toBe(true)
 
   await page.context().route("https://wa.me/**", (route) => route.fulfill({ body: "ok" }))
+  // The message starts empty and the WhatsApp link stays disabled until it's filled.
+  await page.getByRole("button", { name: "Usar plantilla" }).click()
   const whatsapp = page.getByTitle("Compartir por WhatsApp")
+  await expect(whatsapp).not.toHaveClass(/pointer-events-none/)
   await expect(whatsapp).toHaveAttribute("href", new RegExp(`^https://wa\\.me/\\?text=.*%2Fp%2F${property.slug}`))
   const popup = page.waitForEvent("popup")
   await whatsapp.click()
