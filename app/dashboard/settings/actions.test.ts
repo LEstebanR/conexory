@@ -14,7 +14,6 @@ mock.module("@/lib/auth", () => ({
 const mockUserFindUnique = mock((...args: [unknown]) => {
   void args
   return Promise.resolve<Record<string, unknown> | null>({
-    onboarding: { settingsTourCompleted: false },
     profilePublished: false,
     agentSlug: "luis-ramirez",
   })
@@ -41,21 +40,11 @@ const mockDel = mock((...args: [unknown]) => {
 const realBlob = await import("@vercel/blob")
 mock.module("@vercel/blob", () => ({ ...realBlob, del: mockDel }))
 
-const mockSetOnboardingFlag = mock((...args: [unknown, unknown]) => {
-  void args
-  return Promise.resolve()
-})
-mock.module("@/lib/onboarding-server", () => ({
-  setOnboardingFlag: mockSetOnboardingFlag,
-}))
-
-// @/lib/onboarding and @/lib/agent-slug run for real (both are already
-// directly tested, pure/DI-based, and safe to exercise through the mocked
-// prisma above) — next/headers is mocked globally in test-setup.ts.
+// @/lib/agent-slug runs for real (already directly tested, pure/DI-based,
+// and safe to exercise through the mocked prisma above) — next/headers is
+// mocked globally in test-setup.ts.
 
 const {
-  isSettingsTourPending,
-  completeSettingsTour,
   updateProfile,
   updateBrandColor,
   toggleProfilePublished,
@@ -78,40 +67,12 @@ beforeEach(() => {
   )
   mockUserFindUnique.mockImplementation(() =>
     Promise.resolve({
-      onboarding: { settingsTourCompleted: false },
-      profilePublished: false,
+        profilePublished: false,
       agentSlug: "luis-ramirez",
     })
   )
   mockUserUpdate.mockClear()
   mockDel.mockClear()
-  mockSetOnboardingFlag.mockClear()
-})
-
-describe("isSettingsTourPending / completeSettingsTour", () => {
-  test("isSettingsTourPending returns false when unauthenticated", async () => {
-    mockGetSession.mockImplementation(() => Promise.resolve(null))
-    expect(await isSettingsTourPending()).toBe(false)
-  })
-
-  test("isSettingsTourPending reflects the real onboarding flag", async () => {
-    expect(await isSettingsTourPending()).toBe(true)
-    mockUserFindUnique.mockImplementation(() =>
-      Promise.resolve({ onboarding: { settingsTourCompleted: true } })
-    )
-    expect(await isSettingsTourPending()).toBe(false)
-  })
-
-  test("completeSettingsTour does nothing when unauthenticated", async () => {
-    mockGetSession.mockImplementation(() => Promise.resolve(null))
-    await completeSettingsTour()
-    expect(mockSetOnboardingFlag).not.toHaveBeenCalled()
-  })
-
-  test("completeSettingsTour sets the flag", async () => {
-    await completeSettingsTour()
-    expect(mockSetOnboardingFlag).toHaveBeenCalledWith("u1", "settingsTourCompleted")
-  })
 })
 
 describe("updateProfile", () => {

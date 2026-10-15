@@ -13,9 +13,8 @@ export function WelcomeEmail({
     <EmailLayout preview="Bienvenido a Conexory" appUrl={appUrl}>
       <Text style={emailStyles.heading}>Hola, {firstName} 👋</Text>
       <Text style={emailStyles.text}>
-        Tu cuenta de Conexory ya está lista. Crea tu primera propiedad, obtén
-        un link único con vista previa enriquecida y compártelo por WhatsApp —
-        todo en menos de un minuto, sin nada técnico de por medio.
+        Tu cuenta ya está lista. Crea tu primera propiedad y compártela por
+        WhatsApp en menos de un minuto.
       </Text>
       <EmailButton href={`${appUrl}/dashboard/properties/new`}>
         Crear mi primera propiedad

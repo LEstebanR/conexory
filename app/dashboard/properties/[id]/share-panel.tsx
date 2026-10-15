@@ -16,7 +16,7 @@ import {
 } from "@/lib/share-message-options"
 import { incrementShares, generateShareMessage } from "./actions"
 
-type TemplateCtx = {
+export type TemplateCtx = {
   title: string
   type: string
   location?: string
@@ -31,7 +31,7 @@ type TemplateCtx = {
   include: ShareInfo[]
 }
 
-function stripEmojis(text: string): string {
+export function stripEmojis(text: string): string {
   return text
     .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
     .replace(/[ \t]+\n/gm, "\n")
@@ -39,8 +39,8 @@ function stripEmojis(text: string): string {
     .trim()
 }
 
-// Static templates: only used as fallback when the AI call fails.
-function buildBody(templateId: ShareMessageKind, ctx: TemplateCtx): string {
+// Static templates: the free-plan message, the AI fallback, and the post-publish banner.
+export function buildBody(templateId: ShareMessageKind, ctx: TemplateCtx): string {
   const has = (info: ShareInfo) => ctx.include.includes(info)
   const featureParts = [
     has("habitaciones") && ctx.bedrooms != null

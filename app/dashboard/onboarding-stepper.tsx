@@ -13,7 +13,9 @@ export default function OnboardingStepper({
   firstPropertyCreated,
   firstPropertyShared,
   firstPropertyId,
+  className,
 }: {
+  className?: string
   firstPropertyCreated: boolean
   firstPropertyShared: boolean
   firstPropertyId: string | null
@@ -22,7 +24,7 @@ export default function OnboardingStepper({
     {
       n: 1,
       label: "Crear mi primera propiedad",
-      href: "/dashboard/properties/new?tour=1",
+      href: "/dashboard/properties/new",
       done: firstPropertyCreated,
     },
     {
@@ -38,7 +40,7 @@ export default function OnboardingStepper({
   const currentIndex = steps.findIndex((s) => !s.done)
 
   return (
-    <div className="mb-8">
+    <div className={className}>
       <h2 className="mb-4 text-center text-xs font-bold text-ink uppercase tracking-wide">
         Primeros pasos
       </h2>

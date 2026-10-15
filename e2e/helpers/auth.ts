@@ -45,8 +45,6 @@ export async function registerUser(
       onboarding: {
         welcomeModalSeen: true,
         dashboardTourCompleted: true,
-        propertyTourCompleted: true,
-        settingsTourCompleted: true,
         firstPropertyCreated: false,
         firstPropertyShared: false,
       },
