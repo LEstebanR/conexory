@@ -1,13 +1,17 @@
 ---
-description: Full process for developing a Conexory Linear issue, step by step — from reading it to the PR, scaling rigor to the change's real size. Resumes work already started.
-argument-hint: [LES-XXX]
+description: Full process for developing a Conexory issue (Linear or GitHub), step by step — from reading it to the PR, scaling rigor to the change's real size. Resumes work already started.
+argument-hint: [LES-XXX | #N]
 ---
 
-# Develop a Linear issue
+# Develop a Conexory issue
 
-Guides the complete development of a Conexory (`LEstebanR/conexory`) Linear issue, from reading it to opening the PR and leaving a record in the vault. Follow the steps in order, announce which step you're on, and respect the user's checkpoints — but **scale the rigor to the change's real size** (Step 2): not every issue needs the full flow.
+Guides the complete development of a Conexory (`LEstebanR/conexory`) issue, from reading it to opening the PR and leaving a record in the vault. Follow the steps in order, announce which step you're on, and respect the user's checkpoints — but **scale the rigor to the change's real size** (Step 2): not every issue needs the full flow.
 
-Use `$ARGUMENTS` as the issue ID (`LES-XXX`). If missing, try to infer it from the current branch (`git branch --show-current`, pattern `LES-\d+`); if that's not possible either, ask the user what it is.
+Use `$ARGUMENTS` as the issue ID and resolve its **source** (it decides which tools Steps 1 and 10 use):
+- `LES-XXX` → **Linear** issue.
+- A bare number or `#N` → **GitHub** issue (`gh issue view N`). New issues live on GitHub since the Linear free plan hit its cap — see `AGENTS.md`.
+
+If missing, try to infer it from the current branch (`git branch --show-current`, pattern `LES-\d+`; a branch without `LES-` points to a GitHub issue, so look it up with `gh issue list --search`); if that's not possible either, ask the user what it is.
 
 This skill can start a development from scratch or resume one already started in a previous session — Step 0 decides where to enter.
 
@@ -19,7 +23,7 @@ Verify you're in the right repo: `git remote get-url origin` must contain `LEste
 
 - Never `git commit` or `git push` without the user's explicit authorization at that moment — not even inside the `/create-pr` flow (Step 8), and even if they already approved something similar earlier in the same conversation.
 - Don't invent scope, acceptance criteria, or product decisions that aren't backed by the issue or by what the user says. If something isn't clear, ask before implementing — global `CLAUDE.md` rule.
-- The Linear issue is this project's only tracking source: there's no separate GitHub Issues layer to sync.
+- Each issue lives in exactly one tracker (Linear or GitHub) — update only that one, never mirror it into the other.
 - The Obsidian vault (`01-projects/conexory/`) is the durable record of this work, in addition to (not instead of) Claude Code's memory — see Step 10.
 
 ## Process
@@ -27,8 +31,8 @@ Verify you're in the right repo: `git remote get-url origin` must contain `LEste
 ### Step 0 — Detect where to start from
 
 Resolve the issue ID and check whether work has already started:
-- Existing branch: `git branch -a | grep <LES-n>`
-- Existing PR: `gh pr list --search "<LES-n>" --state all --json number,title,url,isDraft,state,baseRefName`
+- Existing branch: `git branch -a | grep <LES-n>` (GitHub issues have no number in the branch: also check the current branch and `git log main..HEAD`)
+- Existing PR: `gh pr list --search "<LES-n>" --state all --json number,title,url,isDraft,state,baseRefName` (for GitHub issues search `"Closes #N"`; matches by bare number are noisy, discard PRs unrelated to the issue)
 
 Decide the entry point:
 - Nothing exists → Step 1.
@@ -41,13 +45,18 @@ Announce in one line the chosen entry point and why, before continuing.
 
 ### Step 1 — Read the issue
 
-`mcp__linear-server__get_issue({ id: "<LES-n>" })` + `mcp__linear-server__list_comments({ issueId: "<LES-n>" })` for extra context. If `get_issue` shows relations (blockers, duplicates), pull those too with `includeRelations: true`.
+- **Linear:** `mcp__linear-server__get_issue({ id: "<LES-n>" })` + `mcp__linear-server__list_comments({ issueId: "<LES-n>" })` for extra context. If `get_issue` shows relations (blockers, duplicates), pull those too with `includeRelations: true`.
+- **GitHub:** `gh issue view N --json number,title,body,state,labels,comments`.
+
+Don't take the issue's premises as facts: if it describes the current state of the system ("the setting X exists and has value Y"), verify it before acting. If it doesn't hold, tell the user and propose the adjusted approach before changing anything.
 
 ### Step 2 — Calibrate the process's rigor
 
 Before continuing, classify the issue:
 - **Small and mechanical** (a single file or a well-specified change, no architecture decisions, no real scope ambiguity): skip the clarifying questions and the plan checkpoint (Steps 3 and 4) — go straight to Step 5, noting in one line what you're about to do.
 - **Multi-file or with real design/architecture decisions**: follow the full flow (Steps 3 and 4).
+
+- **No code (infra/config only)** — e.g. Vercel domains, env vars, DNS, dashboards of external services: skip Steps 3–9 (no branch diff, no PR, no code review). Instead: verify the current state, **confirm with the user before any production change** (it's outward-facing even if small), apply it, and verify against the issue's acceptance criteria with real checks (`curl`, API reads). If the MCP returns 403 on a write, it's a scope limit of the integration, not of the account: the CLI with the user's own login is the fallback (`vercel api` needs a recent CLI version) — ask before upgrading global tools. Then go to Step 10.
 
 If you're unsure which category it falls into, treat it as the big case. This doesn't exempt you from asking if a real, specific ambiguity comes up (e.g. an inconsistency in the issue itself) even if the change itself is small — that's always asked, regardless of size.
 
@@ -71,11 +80,15 @@ Wait for the user's explicit approval before touching code. If they ask for chan
 
 ### Step 5 — Implement
 
-Before touching code, create the branch from `main` following `AGENTS.md`'s convention: `git checkout -b {type}/LES-{n}-{kebab-case-description}` (`{type}` = `feat|fix|refactor|chore|docs`). If a branch for this issue already exists (Step 0), reuse it instead of creating a new one.
+Before touching code, create the branch from `main` following `AGENTS.md`'s convention (`{type}` = `feat|fix|refactor|chore|docs`):
+- **Linear:** `git checkout -b {type}/LES-{n}-{kebab-case-description}`
+- **GitHub:** `git checkout -b {type}/{kebab-case-description}` (no issue number in the branch)
+
+If a branch for this issue already exists (Step 0), reuse it instead of creating a new one.
 
 Implement following `AGENTS.md`'s conventions: Server Components by default, Zod on every new Server Action, the Prisma singleton (`lib/prisma.ts`), Tailwind's semantic tokens (never `tailwind.config.js`), `getAppUrl()` for any absolute URL. If the change touches `prisma/schema.prisma`, use the `/db` skill to generate the migration — never `prisma db push`.
 
-For UI changes, validate the real flow in `bun dev` before considering the step done (global `CLAUDE.md` rule).
+For UI changes, validate the real flow in `bun dev` before considering the step done (global `CLAUDE.md` rule). Run it on port **3000**: better-auth rejects any other origin than `BETTER_AUTH_URL` (`Invalid origin`), so sign-in/sign-up/sign-out silently fail on another port. Before creating test accounts or data, confirm with the user that the local `.env` points at the dev database, and delete what you created when you're done.
 
 If a real deviation from the approved plan comes up (something not accounted for, a scope change), tell the user — don't silently treat it as part of the original plan.
 
@@ -106,17 +119,21 @@ Show the PR URL to the user.
 `/code-review` (the real multi-agent one: 5 parallel Sonnet agents + scoring, comments directly on the GitHub PR) is expensive in time and tokens — a full run can take several minutes and consume hundreds of thousands of tokens. Scale this step with the same criterion as Step 2:
 
 - **If Step 2 classified the change as small and mechanical:** skip this step — the manual review from Step 6 is already enough. Say so in one line and move to Step 10.
-- **If Step 2 marked it as multi-file or with real design decisions:** run `/code-review` on the now-open PR — only here does it have a PR to operate on.
+- **If Step 2 marked it as multi-file or with real design decisions:** run `/code-review` (the `code-review:code-review` skill) on the now-open PR — only here does it have a PR to operate on.
+
+It only comments on the PR for findings scoring ≥80. Findings below that can still be real (e.g. a cleanup edge case): report them to the user with your own assessment and let them decide whether to fix them, instead of silently dropping them.
 
 If at any point the user asks to cut the run short (cost, time, or because it isn't warranted), use `TaskStop` on the in-flight agents instead of letting them finish, and don't comment on the PR with partial results.
 
 Resolve the blocking findings it reports, with the same criterion of announcing before applying non-trivial changes; if a fix needs to be pushed, it's a new commit on the same branch, not an amend.
 
-### Step 10 — Update the vault and the Linear issue
+### Step 10 — Update the vault and the issue
 
 1. Update the vault's dev journal: `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Esteban/01-projects/conexory/diario-desarrollo/2026/<YYYYMM>-desarrollo-conexory.md` — add a bullet under today's heading (`### D DayName`) describing what was done, on which branch/PR, and relevant decisions or gotchas, in the same narrative tone (Spanish, first person, past tense) as the existing entries. If the month doesn't exist yet, create it and link it from `diario-desarrollo/desarrollo-conexory.md`.
 2. If the change is significant (new feature, product or architecture decision — not a minor fix), also update `01-projects/conexory/conexory.md`: `en_progreso`, `Notas`, `milestones` progress if applicable.
-3. Update the issue's status in Linear (`mcp__linear-server__save_issue`) to whatever state fits the team's workflow (e.g. "In Review") and leave the PR link as a comment or link attachment.
+3. Update the issue in its own tracker:
+   - **Linear:** `mcp__linear-server__save_issue` to whatever state fits the team's workflow (e.g. "In Review") and leave the PR link as a comment or link attachment.
+   - **GitHub:** if there's a PR, its `Closes #N` closes the issue on merge — nothing else to do. If there's no PR (no-code issue), `gh issue comment N` with what was done and the verification output, then `gh issue close N`.
 
 ### Step 11 — Reflect on the skill
 
@@ -124,4 +141,4 @@ Before closing, review how the process went in this run: real friction, redundan
 
 ### Step 12 — Close
 
-Summarize in 2-3 lines what was done and where it landed: PR status (open/merged), whether the vault was updated, and the issue's final status in Linear.
+Summarize in 2-3 lines what was done and where it landed: PR status (open/merged, or none for no-code issues), whether the vault was updated, and the issue's final status in its tracker.
