@@ -80,11 +80,15 @@ Wait for the user's explicit approval before touching code. If they ask for chan
 
 ### Step 5 — Implement
 
-Before touching code, create the branch from `main` following `AGENTS.md`'s convention: `git checkout -b {type}/LES-{n}-{kebab-case-description}` (`{type}` = `feat|fix|refactor|chore|docs`). If a branch for this issue already exists (Step 0), reuse it instead of creating a new one.
+Before touching code, create the branch from `main` following `AGENTS.md`'s convention (`{type}` = `feat|fix|refactor|chore|docs`):
+- **Linear:** `git checkout -b {type}/LES-{n}-{kebab-case-description}`
+- **GitHub:** `git checkout -b {type}/{kebab-case-description}` (no issue number in the branch)
+
+If a branch for this issue already exists (Step 0), reuse it instead of creating a new one.
 
 Implement following `AGENTS.md`'s conventions: Server Components by default, Zod on every new Server Action, the Prisma singleton (`lib/prisma.ts`), Tailwind's semantic tokens (never `tailwind.config.js`), `getAppUrl()` for any absolute URL. If the change touches `prisma/schema.prisma`, use the `/db` skill to generate the migration — never `prisma db push`.
 
-For UI changes, validate the real flow in `bun dev` before considering the step done (global `CLAUDE.md` rule).
+For UI changes, validate the real flow in `bun dev` before considering the step done (global `CLAUDE.md` rule). Run it on port **3000**: better-auth rejects any other origin than `BETTER_AUTH_URL` (`Invalid origin`), so sign-in/sign-up/sign-out silently fail on another port. Before creating test accounts or data, confirm with the user that the local `.env` points at the dev database, and delete what you created when you're done.
 
 If a real deviation from the approved plan comes up (something not accounted for, a scope change), tell the user — don't silently treat it as part of the original plan.
 
@@ -115,7 +119,9 @@ Show the PR URL to the user.
 `/code-review` (the real multi-agent one: 5 parallel Sonnet agents + scoring, comments directly on the GitHub PR) is expensive in time and tokens — a full run can take several minutes and consume hundreds of thousands of tokens. Scale this step with the same criterion as Step 2:
 
 - **If Step 2 classified the change as small and mechanical:** skip this step — the manual review from Step 6 is already enough. Say so in one line and move to Step 10.
-- **If Step 2 marked it as multi-file or with real design decisions:** run `/code-review` on the now-open PR — only here does it have a PR to operate on.
+- **If Step 2 marked it as multi-file or with real design decisions:** run `/code-review` (the `code-review:code-review` skill) on the now-open PR — only here does it have a PR to operate on.
+
+It only comments on the PR for findings scoring ≥80. Findings below that can still be real (e.g. a cleanup edge case): report them to the user with your own assessment and let them decide whether to fix them, instead of silently dropping them.
 
 If at any point the user asks to cut the run short (cost, time, or because it isn't warranted), use `TaskStop` on the in-flight agents instead of letting them finish, and don't comment on the PR with partial results.
 
