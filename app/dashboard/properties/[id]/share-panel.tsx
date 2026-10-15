@@ -39,7 +39,7 @@ export function stripEmojis(text: string): string {
     .trim()
 }
 
-// Static templates: only used as fallback when the AI call fails.
+// Static templates: the free-plan message, the AI fallback, and the post-publish banner.
 export function buildBody(templateId: ShareMessageKind, ctx: TemplateCtx): string {
   const has = (info: ShareInfo) => ctx.include.includes(info)
   const featureParts = [

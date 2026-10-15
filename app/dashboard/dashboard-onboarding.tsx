@@ -83,6 +83,8 @@ export default function DashboardOnboarding({
 
     return () => {
       window.clearTimeout(timer)
+      // destroy() is a no-op before drive(), so onDestroyed won't close the drawer.
+      if (isMobile && !driven) toggleSidebar(false)
       driverObj.destroy()
     }
   }, [modalDone, dashboardTourCompleted])
