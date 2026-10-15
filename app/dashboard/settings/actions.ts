@@ -7,26 +7,8 @@ import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { invalidatePublicListings } from "@/lib/public-cache"
 import { ensureAgentSlug } from "@/lib/agent-slug"
-import { setOnboardingFlag } from "@/lib/onboarding-server"
-import { parseOnboarding } from "@/lib/onboarding"
 import { HEX_COLOR_REGEX } from "@/lib/flyer-options"
 import { sanitizePhoneInput } from "@/lib/phone"
-
-export async function isSettingsTourPending(): Promise<boolean> {
-  const session = await getSession()
-  if (!session) return false
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { onboarding: true },
-  })
-  return !parseOnboarding(user?.onboarding).settingsTourCompleted
-}
-
-export async function completeSettingsTour(): Promise<void> {
-  const session = await getSession()
-  if (!session) return
-  await setOnboardingFlag(session.user.id, "settingsTourCompleted")
-}
 
 const handle = z.string().trim().max(50).optional().or(z.literal(""))
 

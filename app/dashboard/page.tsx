@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
-import { Plus, Building2, Zap, DollarSign, FileText, LinkIcon, Eye, Share2, CalendarClock } from "lucide-react"
+import { Plus, Building2, Zap, LinkIcon, Eye, Share2, CalendarClock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { propertyLimit, hasProAccess, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import PropertiesList, { type PropertyItem } from "./properties-list"
@@ -183,8 +183,9 @@ export default async function DashboardPage({
         />
       )}
 
-      {!onboardingComplete && (
+      {!onboardingComplete && hasProperty && (
         <OnboardingStepper
+          className="mb-8"
           firstPropertyCreated={onboarding.firstPropertyCreated}
           firstPropertyShared={onboarding.firstPropertyShared}
           firstPropertyId={firstPropertyId}
@@ -235,7 +236,7 @@ export default async function DashboardPage({
           )}
           {!atLimit && (
             <Button size="sm" asChild>
-              <Link id="tour-new-property" href="/dashboard/properties/new">
+              <Link href="/dashboard/properties/new">
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">Nueva propiedad</span>
                 <span className="sm:hidden">Nueva</span>
@@ -245,10 +246,7 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      {/* Stats band — hidden until the initial dashboard tour is completed.
-          Also shown once the agent has any property, so a dropped tour-complete
-          write can never hide stats forever. */}
-      {(onboarding.dashboardTourCompleted || hasProperty) && (
+      {hasProperty && (
         <div className="rounded-2xl bg-elevated grid grid-cols-3 divide-x divide-white/10 mb-6">
           {stats.map((stat) => (
             <div key={stat.label} className="min-w-0 px-3 py-6 sm:px-7 sm:py-7">
@@ -308,7 +306,7 @@ export default async function DashboardPage({
 
       {/* Properties */}
       {count === 0 ? (
-        <div className="bg-white rounded-3xl border border-dashed border-hairline-strong flex flex-col items-center justify-center py-20 px-6 text-center">
+        <div className="bg-white rounded-3xl border border-dashed border-hairline-strong flex flex-col items-center justify-center py-16 px-6 text-center">
           <div className="relative mb-6">
             <div className="w-20 h-20 rounded-3xl bg-canvas-soft flex items-center justify-center">
               <Building2 className="w-9 h-9 text-mute" strokeWidth={1.5} />
@@ -317,32 +315,28 @@ export default async function DashboardPage({
               <Plus className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
           </div>
-          <h3 className="text-xl font-black text-ink tracking-tight mb-2">
-            Todavía no tienes propiedades
+          <h3 className="text-xl font-black text-ink tracking-tight text-balance max-w-sm mb-2">
+            {onboardingComplete
+              ? "Todavía no tienes propiedades"
+              : "Crea tu primera propiedad y compártela por WhatsApp"}
           </h3>
           <p className="text-body text-sm leading-relaxed max-w-xs mb-8">
-            Crea tu primera propiedad, obtén tu link único y compártelo por WhatsApp en menos de 60 segundos.
+            Obtén tu link único con vista previa en menos de 60 segundos.
           </p>
           <Button size="default" asChild>
-            <Link href="/dashboard/properties/new?tour=1">
+            <Link href="/dashboard/properties/new">
               <Plus className="w-4 h-4" />
               Crear primera propiedad
             </Link>
           </Button>
-          <div className="flex items-center gap-6 mt-8">
-            {[
-              { icon: DollarSign, label: "Escribe el precio" },
-              { icon: FileText, label: "Completa los datos" },
-              { icon: LinkIcon, label: "Obtén tu link" },
-            ].map((step) => (
-              <div key={step.label} className="flex flex-col items-center gap-2">
-                <span className="w-9 h-9 rounded-xl bg-canvas-soft flex items-center justify-center">
-                  <step.icon className="w-4 h-4 text-ink" strokeWidth={1.75} />
-                </span>
-                <span className="text-xs text-mute font-medium">{step.label}</span>
-              </div>
-            ))}
-          </div>
+          {!onboardingComplete && (
+            <OnboardingStepper
+              className="mt-10 w-full max-w-md"
+              firstPropertyCreated={onboarding.firstPropertyCreated}
+              firstPropertyShared={onboarding.firstPropertyShared}
+              firstPropertyId={firstPropertyId}
+            />
+          )}
         </div>
       ) : (
         <PropertiesList items={items} />
