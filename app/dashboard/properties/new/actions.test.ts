@@ -20,7 +20,7 @@ const mockPropertyCreate = mock((...args: [{ data: { userId: string } }]) => {
   void args
   return Promise.resolve({ id: "prop-1" })
 })
-const mockUserFindUnique = mock(() => Promise.resolve(null))
+const mockUserFindUnique = mock(() => Promise.resolve<{ bioEn: string | null } | null>(null))
 
 mock.module("@/lib/prisma", () => ({
   prisma: {
@@ -40,7 +40,7 @@ mock.module("@/lib/onboarding-server", () => ({
   setOnboardingFlag: mockSetOnboardingFlag,
 }))
 
-const { createProperty } = await import("./actions")
+const { createProperty, getEnglishProfileStatus } = await import("./actions")
 
 const validInput = {
   title: "Apartamento en Laureles",
@@ -135,5 +135,23 @@ describe("createProperty", () => {
     mockGetSession.mockImplementation(() =>
       Promise.resolve({ user: { id: "u1", isPremium: false, role: "user" } })
     )
+  })
+})
+
+describe("getEnglishProfileStatus", () => {
+  test("returns false when unauthenticated", async () => {
+    mockGetSession.mockImplementation(() => Promise.resolve(null))
+    expect(await getEnglishProfileStatus()).toBe(false)
+    mockGetSession.mockImplementation(() =>
+      Promise.resolve({ user: { id: "u1", isPremium: false, role: "user" } })
+    )
+  })
+
+  test("reflects whether the agent has an English bio", async () => {
+    mockUserFindUnique.mockImplementation(() => Promise.resolve({ bioEn: "Real estate agent" }))
+    expect(await getEnglishProfileStatus()).toBe(true)
+    mockUserFindUnique.mockImplementation(() => Promise.resolve({ bioEn: null }))
+    expect(await getEnglishProfileStatus()).toBe(false)
+    mockUserFindUnique.mockImplementation(() => Promise.resolve(null))
   })
 })
