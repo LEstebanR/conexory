@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/marketing/hero-ficha.png" alt="Ficha pública de una propiedad en Conexory: fotos, tipo, ubicación, precio y características." width="320">
+  <img src="public/logo.png" alt="Logo de Conexory" width="200">
 </p>
 
 <h1 align="center">Conexory</h1>
