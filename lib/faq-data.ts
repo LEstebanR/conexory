@@ -33,6 +33,6 @@ export const faqs = [
   },
   {
     q: "¿Hay alguna forma de conseguir el plan Pro más barato?",
-    a: "Sí. Desde tu perfil obtienes un link de referido para compartir con otros agentes. Cuando alguien se registra con tu link y pasa a Pro, recibes un descuento.",
+    a: "Sí. Desde tu perfil obtienes un link de referido para compartir con otros agentes. Cuando alguien se registra con tu link y pasa a Pro, recibes un mes de Pro gratis.",
   },
 ]
