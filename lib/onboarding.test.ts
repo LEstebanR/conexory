@@ -17,15 +17,21 @@ describe("parseOnboarding", () => {
   })
 
   test("merges known boolean flags over the defaults", () => {
-    expect(parseOnboarding({ welcomeModalSeen: true, propertyTourCompleted: true })).toEqual({
+    expect(parseOnboarding({ welcomeModalSeen: true, dashboardTourCompleted: true })).toEqual({
       ...DEFAULT_ONBOARDING,
       welcomeModalSeen: true,
-      propertyTourCompleted: true,
+      dashboardTourCompleted: true,
     })
   })
 
   test("ignores unknown keys", () => {
     expect(parseOnboarding({ notARealFlag: true })).toEqual(DEFAULT_ONBOARDING)
+  })
+
+  test("drops flags left over from the removed tours", () => {
+    expect(
+      parseOnboarding({ propertyTourCompleted: true, settingsTourCompleted: true }),
+    ).toEqual(DEFAULT_ONBOARDING)
   })
 
   test("ignores non-boolean values for known keys", () => {
