@@ -32,9 +32,9 @@ export default function ContactButtons({ propertyId, phone, phoneIsWhatsapp, ema
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trackPropertyEvent(propertyId, "contact_whatsapp_click")}
-          className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-ink text-base font-medium text-white hover:bg-elevated transition-colors"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-canvas-soft text-sm font-medium text-ink hover:bg-surface-pressed transition-colors"
         >
-          <WhatsAppIcon className="h-6 w-6 shrink-0" />
+          <WhatsAppIcon className="h-5 w-5 shrink-0" />
           {english ? "Message on WhatsApp" : "Escribir por WhatsApp"}
         </a>
       )}

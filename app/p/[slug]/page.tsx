@@ -241,25 +241,23 @@ function AgentCard({ propertyId, user, whatsappMessage, english }: { propertyId:
 
   return (
     <div className="bg-white border border-hairline rounded-2xl p-6">
-      <div className="flex items-center gap-4 mb-4">
-        <AgentAvatar user={user} size={64} />
-        <div className="min-w-0">
-          <h2 className="text-xl font-bold text-ink leading-tight">{user.name}</h2>
-          {user.location && (
-            <p className="flex items-center gap-1 mt-1 text-sm text-body">
-              <MapPin className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-              <span className="truncate">{user.location}</span>
-            </p>
-          )}
-        </div>
+      <div className="flex flex-col items-center text-center mb-4">
+        <AgentAvatar user={user} size={72} />
+        <h2 className="mt-4 text-lg font-bold text-ink leading-tight">{user.name}</h2>
+        {user.location && (
+          <p className="flex items-center justify-center gap-1 mt-1 text-sm text-body">
+            <MapPin className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+            <span>{user.location}</span>
+          </p>
+        )}
       </div>
 
       {(english ? user.bioEn ?? user.bio : user.bio) && (
-        <p className="text-sm text-body leading-relaxed mb-4">{english ? user.bioEn ?? user.bio : user.bio}</p>
+        <p className="text-sm text-body leading-relaxed text-center mb-4">{english ? user.bioEn ?? user.bio : user.bio}</p>
       )}
 
       {hasSocial && (
-        <div className="flex items-center gap-2 mb-5 flex-wrap">
+        <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
           {socialLinks.map(({ href, label, Icon, eventType }) => (
             <SocialLinkButton key={label} propertyId={propertyId} href={href} label={label} eventType={eventType}>
               <Icon className="w-4 h-4" />
@@ -267,6 +265,8 @@ function AgentCard({ propertyId, user, whatsappMessage, english }: { propertyId:
           ))}
         </div>
       )}
+
+      <div className="border-t border-hairline mb-4" />
 
       <ContactButtons
         propertyId={propertyId}
