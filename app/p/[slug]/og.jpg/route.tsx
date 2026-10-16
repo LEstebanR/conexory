@@ -57,6 +57,17 @@ async function render(node: ReactElement): Promise<Response> {
   }
 }
 
+// A portrait photo cropped to fill a landscape card keeps only a thin middle
+// band and usually loses the subject. Show it whole over a blurred copy of
+// itself instead, the same treatment the public gallery uses.
+async function fitToCard(jpeg: Buffer): Promise<Buffer> {
+  const meta = await sharp(jpeg).metadata()
+  if (!meta.width || !meta.height || meta.width / meta.height >= 1.2) return jpeg
+  const backdrop = await sharp(jpeg).resize(size.width, size.height, { fit: "cover" }).blur(40).modulate({ brightness: 0.85 }).toBuffer()
+  const whole = await sharp(jpeg).resize(size.width, size.height, { fit: "inside" }).toBuffer()
+  return sharp(backdrop).composite([{ input: whole, gravity: "center" }]).jpeg({ quality: 90 }).toBuffer()
+}
+
 // Returns the photo as a base64 JPEG plus its (orientation-corrected) dimensions.
 async function loadPhoto(
   url: string
@@ -256,5 +267,6 @@ export async function GET(
     return render(textCard({ kind, price, location }, agent))
   }
 
-  return render(photoCard(photo.dataUrl, offer, agent))
+  const card = await fitToCard(Buffer.from(photo.dataUrl.split(",")[1], "base64"))
+  return render(photoCard(`data:image/jpeg;base64,${card.toString("base64")}`, offer, agent))
 }

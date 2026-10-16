@@ -344,8 +344,8 @@ export default async function PublicPropertyPage({
   }
 
   const stats = [
-    property.area != null && { icon: Ruler, value: property.area, label: english ? "Built m²" : "m² construidos" },
-    property.landArea != null && { icon: LandPlot, value: property.landArea, label: english ? "Lot m²" : "m² de lote" },
+    property.area != null && { icon: Ruler, value: property.area, unit: "m²", label: english ? "Area" : "Área" },
+    property.landArea != null && { icon: LandPlot, value: property.landArea, unit: "m²", label: english ? "Lot" : "Lote" },
     property.bedrooms != null && {
       icon: BedDouble,
       value: property.bedrooms,
@@ -361,7 +361,7 @@ export default async function PublicPropertyPage({
       value: property.parking,
       label: english ? property.parking === 1 ? "Parking space" : "Parking spaces" : property.parking === 1 ? "Parqueadero" : "Parqueaderos",
     },
-  ].filter(Boolean) as { icon: typeof Ruler; value: number; label: string }[]
+  ].filter(Boolean) as { icon: typeof Ruler; value: number; unit?: string; label: string }[]
 
   const showContactCard = property.showContact && !hideContact
 
@@ -445,10 +445,13 @@ export default async function PublicPropertyPage({
 
             {stats.length > 0 && (
               <div className="flex divide-x divide-hairline border-y border-hairline -mx-4 sm:mx-0 xl:mx-0 sm:rounded-2xl sm:border">
-                {stats.map(({ icon: Icon, value, label }) => (
-                  <div key={label} className="flex-1 flex flex-col items-center py-4 px-1 gap-1 min-w-0">
+                {stats.map(({ icon: Icon, value, unit, label }) => (
+                  <div key={label} className="flex-1 flex flex-col items-center py-4 px-0.5 gap-1 min-w-0">
                     <Icon className="w-4 h-4 text-body" strokeWidth={1.75} />
-                    <p className="text-lg font-bold text-ink leading-none">{value.toLocaleString("es-CO")}</p>
+                    <p className="text-lg font-bold text-ink leading-none whitespace-nowrap">
+                      {value.toLocaleString("es-CO")}
+                      {unit && <span className="text-sm font-medium"> {unit}</span>}
+                    </p>
                     <p className="text-xs text-body text-center leading-tight">{label}</p>
                   </div>
                 ))}
