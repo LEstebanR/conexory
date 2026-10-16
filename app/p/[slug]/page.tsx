@@ -2,12 +2,17 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, BedDouble, Bath, Ruler, Car, LandPlot, ShieldCheck, ArrowUpRight } from "lucide-react"
+import { MapPin, BedDouble, Bath, Ruler, Car, LandPlot, ShieldCheck, MessageCircle } from "lucide-react"
 import { listingOffer } from "@/lib/listing-seo"
 import { getPublicProperty } from "@/lib/public-pages"
 import { getAppUrl } from "@/lib/urls"
 import { youtubeId } from "@/lib/youtube"
-import { PROPERTY_TYPE_LABELS as TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
+import {
+  PROPERTY_TYPE_LABELS as TYPE_LABELS,
+  PROPERTY_TYPE_LABELS_EN as TYPE_LABELS_EN,
+  TRANSACTION_TYPE_LABELS_EN as TRANSACTION_LABELS_EN,
+  TRANSACTION_TYPE_PHRASES,
+} from "@/lib/property-types"
 import { formatCOP } from "@/lib/format"
 import PublicGallery from "@/components/public-gallery"
 import PropertyVideo from "@/components/property-video"
@@ -15,17 +20,9 @@ import Reveal from "@/components/reveal"
 import PropertyMap from "@/components/property-map-client"
 import ContactButtons from "./contact-buttons"
 import SocialLinkButton from "./social-link-button"
-import WhatsAppFab from "./whatsapp-fab"
+import ContactBar from "./contact-bar"
 import TrackVisit from "./track-visit"
 
-const TYPE_LABELS_EN: Record<string, string> = {
-  apartment: "Apartment", house: "House", office: "Office", commercial: "Commercial property",
-  lot: "Lot", warehouse: "Warehouse", house_lot: "House with lot", farm: "Farm", aparta_suite: "Aparta suite",
-}
-
-const TRANSACTION_LABELS_EN: Record<string, string> = {
-  sale: "For sale", rent: "For rent", rent_furnished: "Furnished rental", exchange: "Exchange",
-}
 
 // ── Social icon SVGs (same as agent page) ─────────────────────────────────
 
@@ -109,19 +106,25 @@ export async function generateMetadata({
     .filter(Boolean)
     .join(" · ")
 
-  const price = formatCOP(property.price)
+  const price = `${formatCOP(property.price)}${priceSuffix(property.transactionType, english)}`
+  const reachableOnWhatsapp =
+    c !== "0" && property.showContact && !!property.user.phone && property.user.phoneIsWhatsapp
   const descParts = [
     `${type}${location ? english ? ` in ${location}` : ` en ${location}` : ""}`,
     price,
     features || null,
-    english ? "Contact the agent directly by WhatsApp." : "Contacta al asesor directamente por WhatsApp.",
+    reachableOnWhatsapp
+      ? english ? "Contact the agent directly by WhatsApp." : "Contacta al asesor directamente por WhatsApp."
+      : null,
   ].filter(Boolean)
   const description = descParts.join(". ")
 
   const ogTitle = `${type}${location ? english ? ` in ${location}` : ` en ${location}` : ""} — ${price}`
   const listingTitle = english ? property.titleEn ?? property.title : property.title
+  const ogQuery = new URLSearchParams({ ...(english && { lang: "en" }), ...(c === "0" && { c: "0" }) }).toString()
+  const ogImageUrl = `/p/${slug}/og.jpg${ogQuery ? `?${ogQuery}` : ""}`
   const ogImage = {
-    url: `/p/${slug}/og.jpg${english ? "?lang=en" : ""}`,
+    url: ogImageUrl,
     width: 1200,
     height: 630,
     type: "image/jpeg",
@@ -146,7 +149,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: ogTitle,
       description,
-      images: [`/p/${slug}/og.jpg${english ? "?lang=en" : ""}`],
+      images: [ogImageUrl],
     },
   }
 
@@ -161,29 +164,49 @@ export async function generateMetadata({
 
 function PageFooter({ english }: { english: boolean }) {
   return (
-    <footer className="border-t border-hairline mt-2">
+    <footer className="border-t border-hairline">
       <Link
         href="/"
-        className="group flex items-center justify-center gap-2.5 py-6 px-4 hover:bg-canvas-softer transition-colors"
+        className="flex items-center justify-center gap-2 py-5 px-4 text-xs text-body hover:text-ink transition-colors"
       >
-        <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center shadow-sm transition-transform group-hover:scale-105">
-          <Image
-            src="/mark-white.png"
-            alt="Conexory"
-            width={20}
-            height={20}
-            className="w-5 h-5"
-          />
-        </div>
-        <div className="leading-tight">
-          <p className="text-[11px] text-mute font-medium">{english ? "Published with" : "Publicado con"}</p>
-          <p className="inline-flex items-center gap-0.5 text-sm font-black text-ink tracking-tight">
-            Conexory
-            <ArrowUpRight className="w-3.5 h-3.5 text-mute transition-all group-hover:text-ink group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </p>
-        </div>
+        <Image src="/mark-black.png" alt="" width={14} height={14} className="h-3.5 w-3.5" />
+        {english ? "Listing made with Conexory" : "Ficha creada con Conexory"}
       </Link>
     </footer>
+  )
+}
+
+function priceSuffix(transactionType: string | null, english: boolean): string {
+  if (transactionType !== "rent" && transactionType !== "rent_furnished") return ""
+  return english ? " / month" : " / mes"
+}
+
+function initialsOf(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+function AgentAvatar({ user, size }: { user: AgentUser; size: number }) {
+  return user.image ? (
+    <Image
+      src={user.image}
+      alt=""
+      width={size}
+      height={size}
+      className="shrink-0 rounded-full object-cover"
+      style={{ width: size, height: size }}
+    />
+  ) : (
+    <span
+      className="flex shrink-0 items-center justify-center rounded-full bg-ink font-bold text-white select-none"
+      style={{ width: size, height: size, fontSize: size * 0.32 }}
+    >
+      {initialsOf(user.name)}
+    </span>
   )
 }
 
@@ -206,13 +229,6 @@ type AgentUser = {
 }
 
 function AgentCard({ propertyId, user, whatsappMessage, english }: { propertyId: string; user: AgentUser; whatsappMessage: string; english: boolean }) {
-  const initials = user.name
-    .split(" ")
-    .map((n: string) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
-
   const socialLinks = [
     { handle: user.instagram, href: `https://instagram.com/${user.instagram}`,   label: "Instagram", Icon: InstagramIcon, eventType: "social_instagram_click" },
     { handle: user.tiktok,    href: `https://tiktok.com/@${user.tiktok}`,         label: "TikTok",    Icon: TikTokIcon,    eventType: "social_tiktok_click" },
@@ -225,62 +241,40 @@ function AgentCard({ propertyId, user, whatsappMessage, english }: { propertyId:
 
   return (
     <div className="bg-white border border-hairline rounded-2xl p-6">
-
-      {/* Avatar */}
-      <div className="flex justify-center mb-4">
-        {user.image ? (
-          <Image
-            src={user.image}
-            alt={user.name}
-            width={72}
-            height={72}
-            className="w-[72px] h-[72px] rounded-full object-cover shadow-sm"
-          />
-        ) : (
-          <div className="w-[72px] h-[72px] rounded-full bg-ink flex items-center justify-center text-white text-lg font-black select-none shadow-sm">
-            {initials}
-          </div>
-        )}
-      </div>
-
-      {/* Name + role + location */}
-      <div className="text-center mb-4">
-        <p className="text-base font-black text-ink tracking-tight leading-tight">{user.name}</p>
-        <p className="text-xs text-mute font-medium mt-0.5">{english ? "Real estate agent" : "Asesor inmobiliario"}</p>
+      <div className="flex flex-col items-center text-center mb-4">
+        <AgentAvatar user={user} size={72} />
+        <h2 className="mt-4 text-lg font-bold text-ink leading-tight">{user.name}</h2>
         {user.location && (
-          <div className="flex items-center justify-center gap-1 mt-2">
-            <MapPin className="w-3 h-3 text-mute flex-shrink-0" strokeWidth={2} />
-            <span className="text-xs text-mute">{user.location}</span>
-          </div>
+          <p className="flex items-center justify-center gap-1 mt-1 text-sm text-body">
+            <MapPin className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+            <span>{user.location}</span>
+          </p>
         )}
       </div>
 
-      {/* Bio */}
       {(english ? user.bioEn ?? user.bio : user.bio) && (
-        <p className="text-xs text-body leading-relaxed text-center mb-4">{english ? user.bioEn ?? user.bio : user.bio}</p>
+        <p className="text-sm text-body leading-relaxed text-center mb-4">{english ? user.bioEn ?? user.bio : user.bio}</p>
       )}
 
-      {/* Social icons */}
       {hasSocial && (
         <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
           {socialLinks.map(({ href, label, Icon, eventType }) => (
             <SocialLinkButton key={label} propertyId={propertyId} href={href} label={label} eventType={eventType}>
-              <Icon className="w-[15px] h-[15px]" />
+              <Icon className="w-4 h-4" />
             </SocialLinkButton>
           ))}
         </div>
       )}
 
-      {/* Divider */}
       <div className="border-t border-hairline mb-4" />
 
-      {/* Contact buttons — equal width, icon-only, tooltip on hover */}
       <ContactButtons
         propertyId={propertyId}
         phone={user.phone}
         phoneIsWhatsapp={user.phoneIsWhatsapp}
         email={user.email}
         whatsappMessage={whatsappMessage}
+        english={english}
       />
     </div>
   )
@@ -310,6 +304,7 @@ export default async function PublicPropertyPage({
   const typeLabel = (english ? TYPE_LABELS_EN : TYPE_LABELS)[property.type] ?? property.type
 
   const price = formatCOP(property.price)
+  const suffix = priceSuffix(property.transactionType, english)
   const previousPrice =
     property.previousPrice != null && property.previousPrice > property.price
       ? formatCOP(property.previousPrice)
@@ -317,14 +312,11 @@ export default async function PublicPropertyPage({
   const priceReduced = previousPrice != null
   const videoId = youtubeId(property.videoUrl)
   const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(", ")
-  const transactionLabel = property.transactionType
-    ? (english ? TRANSACTION_LABELS_EN : TRANSACTION_TYPE_LABELS)[property.transactionType] ?? null
-    : null
 
   const propertyUrl = `${getAppUrl()}/p/${property.slug}`
   const whatsappMessage = english
-    ? `Hello, I am interested in this property: ${title}\n${propertyUrl}?lang=en`
-    : `Hola, estoy interesado en esta propiedad: ${title}\n${propertyUrl}`
+    ? `Hello, I'm interested in this property: ${title}\n${propertyUrl}?lang=en`
+    : `Hola, me interesa esta propiedad: ${title}\n${propertyUrl}`
 
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -352,8 +344,8 @@ export default async function PublicPropertyPage({
   }
 
   const stats = [
-    property.area != null && { icon: Ruler, value: property.area, label: "m²" },
-    property.landArea != null && { icon: LandPlot, value: property.landArea, label: english ? "lot m²" : "m² lote" },
+    property.area != null && { icon: Ruler, value: property.area, unit: "m²", label: english ? "Area" : "Área" },
+    property.landArea != null && { icon: LandPlot, value: property.landArea, unit: "m²", label: english ? "Lot" : "Lote" },
     property.bedrooms != null && {
       icon: BedDouble,
       value: property.bedrooms,
@@ -369,141 +361,166 @@ export default async function PublicPropertyPage({
       value: property.parking,
       label: english ? property.parking === 1 ? "Parking space" : "Parking spaces" : property.parking === 1 ? "Parqueadero" : "Parqueaderos",
     },
-  ].filter(Boolean) as { icon: typeof Ruler; value: number; label: string }[]
+  ].filter(Boolean) as { icon: typeof Ruler; value: number; unit?: string; label: string }[]
 
   const showContactCard = property.showContact && !hideContact
 
+  const offerPhrase = property.transactionType
+    ? english
+      ? TRANSACTION_LABELS_EN[property.transactionType]?.toLowerCase()
+      : TRANSACTION_TYPE_PHRASES[property.transactionType]
+    : null
+  const offerLine = [typeLabel, offerPhrase].filter(Boolean).join(" ")
+
   return (
-    <div className="min-h-screen bg-canvas flex flex-col">
+    <div className={`min-h-screen bg-canvas flex flex-col${showContactCard ? " pb-[76px] xl:pb-0" : ""}`}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Gallery — edge-to-edge on mobile */}
-      {property.images.length > 0 && (
-        <div className="w-full sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5">
-          <PublicGallery
-            images={property.images}
-            title={title}
-            english={english}
-            className="sm:rounded-2xl"
-          />
-        </div>
-      )}
-
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 pt-5 pb-8 space-y-6">
-        {/* Headline + price */}
-        <Reveal>
-          <div className="space-y-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-mute mb-1.5">
-                {typeLabel}{transactionLabel ? ` · ${transactionLabel}` : ""}
-              </p>
-              <h1 className="text-2xl sm:text-3xl font-black text-ink tracking-tight leading-tight">
-                {title}
-              </h1>
-              {location && (
-                <div className="flex items-center gap-1.5 text-body text-sm mt-2">
-                  <MapPin className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
-                  <span>{location}</span>
-                </div>
-              )}
-              {property.gatedCommunity && (
-                <div className="inline-flex items-center gap-1.5 mt-3 bg-canvas-soft text-ink text-xs font-semibold px-2.5 py-1 rounded-full">
-                  <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2} />
-                  {english ? "Gated community" : "Unidad cerrada"}
-                </div>
-              )}
+      <div className="flex-1 w-full xl:max-w-6xl xl:mx-auto xl:px-6 xl:grid xl:grid-cols-[minmax(0,42rem)_18rem] xl:justify-center xl:gap-12">
+        <div className="min-w-0">
+          {property.images.length > 0 && (
+            <div className="w-full sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5 xl:px-0">
+              <PublicGallery
+                images={property.images}
+                title={title}
+                english={english}
+                className="sm:rounded-2xl"
+              />
             </div>
-            <div className="space-y-1.5">
-              {priceReduced && (
-                <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full bg-ink text-white">
-                  {english ? "Price reduced" : "Precio reducido"}
-                </span>
-              )}
-              <p className="text-4xl sm:text-5xl font-black text-ink tracking-tighter">
-                {price}
-              </p>
-              {priceReduced && previousPrice && (
-                <p className="text-base text-mute line-through">{previousPrice}</p>
-              )}
-            </div>
-          </div>
-        </Reveal>
+          )}
 
-        {/* Stats — horizontal row */}
-        {stats.length > 0 && (
-          <Reveal delay={80}>
-            <div className="flex items-center divide-x divide-hairline border-y border-hairline -mx-4 sm:mx-0 sm:rounded-2xl sm:border">
-              {stats.map(({ icon: Icon, value, label }) => (
-                <div
-                  key={label}
-                  className="flex-1 flex flex-col items-center py-4 gap-1 min-w-0"
+          <main className="max-w-2xl mx-auto w-full px-4 xl:px-0 pt-5 pb-8 space-y-6">
+            {/* First viewport renders visible from the server HTML — no entrance animation. */}
+            <div className="space-y-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-ink leading-tight text-balance">
+                  {title}
+                </h1>
+                <p className="mt-2 text-sm text-body">{offerLine}</p>
+                {location && (
+                  <p className="flex items-center gap-1.5 mt-1 text-sm text-body">
+                    <MapPin className="w-4 h-4 shrink-0" strokeWidth={2} />
+                    <span>{location}</span>
+                  </p>
+                )}
+                {property.gatedCommunity && (
+                  <p className="inline-flex items-center gap-1.5 mt-3 bg-canvas-soft text-ink text-xs font-medium px-3 py-1.5 rounded-full">
+                    <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2} />
+                    {english ? "Gated community" : "Unidad cerrada"}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                {priceReduced && (
+                  <span className="inline-flex items-center text-xs font-medium px-3 py-1 rounded-full bg-ink text-white">
+                    {english ? "Price reduced" : "Precio reducido"}
+                  </span>
+                )}
+                <p className="font-bold text-ink">
+                  <span className="text-4xl sm:text-5xl">{price}</span>
+                  {suffix && <span className="text-lg font-medium text-body">{suffix}</span>}
+                </p>
+                {priceReduced && previousPrice && (
+                  <p className="text-base text-body line-through">{previousPrice}</p>
+                )}
+              </div>
+
+              {showContactCard && (
+                <a
+                  href="#agente"
+                  className="xl:hidden flex items-center gap-3 rounded-2xl bg-canvas-softer px-4 py-3 hover:bg-canvas-soft transition-colors"
                 >
-                  <Icon className="w-4 h-4 text-mute" strokeWidth={1.75} />
-                  <p className="text-lg font-black text-ink leading-none">{value}</p>
-                  <p className="text-[11px] text-mute font-medium truncate px-1">{label}</p>
-                </div>
-              ))}
+                  <AgentAvatar user={property.user} size={36} />
+                  <span className="min-w-0 text-sm text-body">
+                    {english ? "Listed by " : "Publicada por "}
+                    <span className="font-medium text-ink">{property.user.name}</span>
+                  </span>
+                </a>
+              )}
             </div>
-          </Reveal>
-        )}
 
-        {/* Description */}
-        {description && (
-          <Reveal delay={140}>
-            <div>
-              <h2 className="text-xs font-bold text-mute uppercase tracking-widest mb-3">
-                {english ? "Description" : "Descripción"}
-              </h2>
-              <p className="text-[15px] text-body leading-relaxed whitespace-pre-wrap">
-                {description}
+            {stats.length > 0 && (
+              <div className="flex divide-x divide-hairline border-y border-hairline -mx-4 sm:mx-0 xl:mx-0 sm:rounded-2xl sm:border">
+                {stats.map(({ icon: Icon, value, unit, label }) => (
+                  <div key={label} className="flex-1 flex flex-col items-center py-4 px-0.5 gap-1 min-w-0">
+                    <Icon className="w-4 h-4 text-body" strokeWidth={1.75} />
+                    <p className="text-lg font-bold text-ink leading-none whitespace-nowrap">
+                      {value.toLocaleString("es-CO")}
+                      {unit && <span className="text-sm font-medium"> {unit}</span>}
+                    </p>
+                    <p className="text-xs text-body text-center leading-tight">{label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {description && (
+              <Reveal>
+                <section>
+                  <h2 className="text-xl font-bold text-ink mb-3">
+                    {english ? "Description" : "Descripción"}
+                  </h2>
+                  <p className="text-base text-body leading-relaxed whitespace-pre-wrap">
+                    {description}
+                  </p>
+                </section>
+              </Reveal>
+            )}
+
+            {videoId && (
+              <Reveal>
+                <PropertyVideo videoId={videoId} title={title} />
+              </Reveal>
+            )}
+
+            {property.latitude != null && property.longitude != null && (
+              <Reveal>
+                <PropertyMap
+                  latitude={property.latitude}
+                  longitude={property.longitude}
+                  label={location || undefined}
+                  directionsLabel={english ? "Get directions" : "Cómo llegar"}
+                />
+              </Reveal>
+            )}
+
+            {showContactCard ? (
+              <div id="agente" className="xl:hidden scroll-mt-6">
+                <AgentCard propertyId={property.id} user={property.user} whatsappMessage={whatsappMessage} english={english} />
+              </div>
+            ) : (
+              <p className="flex items-start gap-3 rounded-2xl bg-canvas-softer px-5 py-4 text-sm text-body">
+                <MessageCircle className="w-5 h-5 shrink-0 text-ink" strokeWidth={2} />
+                {english
+                  ? "Interested? Reply to the message where you got this link and the agent will help you."
+                  : "¿Te interesa? Responde al mensaje en el que recibiste este link y el agente te atiende."}
               </p>
-            </div>
-          </Reveal>
-        )}
-
-        {/* Video — separate from the photo gallery, between description and map */}
-        {videoId && (
-          <Reveal delay={150}>
-            <PropertyVideo videoId={videoId} title={title} />
-          </Reveal>
-        )}
-
-        {/* Map */}
-        {property.latitude != null && property.longitude != null && (
-          <Reveal delay={180}>
-            <PropertyMap
-              latitude={property.latitude}
-              longitude={property.longitude}
-              label={location || undefined}
-            />
-          </Reveal>
-        )}
-
-        {/* Contact card — mobile only; desktop uses the fixed floating card */}
-        {showContactCard && (
-          <div className="xl:hidden">
-            <Reveal delay={200}>
-              <AgentCard propertyId={property.id} user={property.user} whatsappMessage={whatsappMessage} english={english} />
-            </Reveal>
-          </div>
-        )}
-      </main>
-
-      {/* Fixed floating card — xl+ only, positioned in the right margin */}
-      {showContactCard && (
-        <div className="hidden xl:block fixed right-10 top-5 w-64 z-10">
-          <AgentCard propertyId={property.id} user={property.user} whatsappMessage={whatsappMessage} english={english} />
+            )}
+          </main>
         </div>
-      )}
+
+        {showContactCard && (
+          <aside className="hidden xl:block pt-5">
+            <div className="sticky top-5">
+              <AgentCard propertyId={property.id} user={property.user} whatsappMessage={whatsappMessage} english={english} />
+            </div>
+          </aside>
+        )}
+      </div>
 
       {showContactCard && (
-        <WhatsAppFab
+        <ContactBar
           propertyId={property.id}
+          name={property.user.name}
+          image={property.user.image}
+          initials={initialsOf(property.user.name)}
           phone={property.user.phone}
           phoneIsWhatsapp={property.user.phoneIsWhatsapp}
+          email={property.user.email}
           whatsappMessage={whatsappMessage}
           english={english}
         />
