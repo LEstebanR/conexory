@@ -26,6 +26,18 @@ export const PROPERTY_TYPE_LABELS: Record<string, string> = {
   aparta_suite: "Aparta suite",
 }
 
+export const PROPERTY_TYPE_LABELS_EN: Record<string, string> = {
+  apartment: "Apartment",
+  house: "House",
+  office: "Office",
+  commercial: "Commercial property",
+  lot: "Lot",
+  warehouse: "Warehouse",
+  house_lot: "House with lot",
+  farm: "Farm",
+  aparta_suite: "Aparta suite",
+}
+
 export const PROPERTY_TYPES = PROPERTY_TYPE_IDS.map((id) => ({
   id,
   label: PROPERTY_TYPE_LABELS[id],
@@ -53,6 +65,13 @@ export const TRANSACTION_TYPE_LABELS: Record<string, string> = {
   rent: "Arriendo",
   rent_furnished: "Arriendo amoblado",
   exchange: "Permuta",
+}
+
+export const TRANSACTION_TYPE_LABELS_EN: Record<string, string> = {
+  sale: "For sale",
+  rent: "For rent",
+  rent_furnished: "Furnished rental",
+  exchange: "Exchange",
 }
 
 export const TRANSACTION_TYPES = TRANSACTION_TYPE_IDS.map((id) => ({

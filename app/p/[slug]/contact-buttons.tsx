@@ -1,6 +1,7 @@
 "use client"
 
-import { Phone, Mail, MessageCircle } from "lucide-react"
+import { Phone, Mail } from "lucide-react"
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon"
 import { trackPropertyEvent } from "@/lib/track-property-event"
 import { toWhatsAppNumber } from "@/lib/phone"
 
@@ -10,55 +11,52 @@ type Props = {
   phoneIsWhatsapp: boolean
   email: string
   whatsappMessage: string
+  english: boolean
 }
 
-export default function ContactButtons({ propertyId, phone, phoneIsWhatsapp, email, whatsappMessage }: Props) {
+export function whatsappHref(phone: string, message: string) {
+  return `https://wa.me/${toWhatsAppNumber(phone)}?text=${encodeURIComponent(message)}`
+}
+
+const secondaryButton =
+  "flex h-11 flex-1 items-center justify-center gap-2 rounded-full border border-hairline-strong bg-white text-sm font-medium text-ink hover:border-ink transition-colors"
+
+export default function ContactButtons({ propertyId, phone, phoneIsWhatsapp, email, whatsappMessage, english }: Props) {
+  const hasWhatsapp = !!phone && phoneIsWhatsapp
+
   return (
-    <div className="flex gap-2">
-      {phone && phoneIsWhatsapp && (
-        <div className="relative group flex-1">
-          <a
-            href={`https://wa.me/${toWhatsAppNumber(phone)}?text=${encodeURIComponent(whatsappMessage)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackPropertyEvent(propertyId, "contact_whatsapp_click")}
-            className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
-          >
-            <MessageCircle className="w-[18px] h-[18px]" strokeWidth={2} />
-          </a>
-          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
-            {phone}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-ink" />
-          </div>
-        </div>
+    <div className="space-y-2">
+      {hasWhatsapp && (
+        <a
+          href={whatsappHref(phone, whatsappMessage)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackPropertyEvent(propertyId, "contact_whatsapp_click")}
+          className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-ink text-base font-medium text-white hover:bg-elevated transition-colors"
+        >
+          <WhatsAppIcon className="h-6 w-6 shrink-0" />
+          {english ? "Message on WhatsApp" : "Escribir por WhatsApp"}
+        </a>
       )}
-      {phone && (
-        <div className="relative group flex-1">
+      <div className="flex gap-2">
+        {phone && (
           <a
             href={`tel:${phone}`}
             onClick={() => trackPropertyEvent(propertyId, "contact_phone_click")}
-            className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
+            className={secondaryButton}
           >
-            <Phone className="w-[18px] h-[18px]" strokeWidth={2} />
+            <Phone className="h-4 w-4" strokeWidth={2} />
+            {english ? "Call" : "Llamar"}
           </a>
-          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
-            {phone}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-ink" />
-          </div>
-        </div>
-      )}
-      <div className="relative group flex-1">
+        )}
         <a
           href={`mailto:${email}`}
           onClick={() => trackPropertyEvent(propertyId, "contact_email_click")}
-          className="flex w-full h-11 items-center justify-center rounded-full border border-hairline-strong bg-white text-body hover:text-ink hover:border-ink transition-colors"
+          className={secondaryButton}
         >
-          <Mail className="w-[18px] h-[18px]" strokeWidth={2} />
+          <Mail className="h-4 w-4" strokeWidth={2} />
+          {english ? "Email" : "Correo"}
         </a>
-        <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-ink text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-10">
-          {email}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-ink" />
-        </div>
       </div>
     </div>
   )
