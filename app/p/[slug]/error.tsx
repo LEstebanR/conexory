@@ -40,7 +40,7 @@ export default function PropertyError({
           Intentar de nuevo
         </button>
         {error.digest && (
-          <p className="text-[11px] text-mute mt-6 font-mono">Código: {error.digest}</p>
+          <p className="text-xs text-body mt-6 font-mono">Código: {error.digest}</p>
         )}
       </main>
 

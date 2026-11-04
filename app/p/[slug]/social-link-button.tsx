@@ -19,7 +19,7 @@ export default function SocialLinkButton({ propertyId, href, label, eventType, c
       rel="noopener noreferrer"
       aria-label={label}
       onClick={() => trackPropertyEvent(propertyId, eventType)}
-      className="w-8 h-8 rounded-full bg-white border border-hairline-strong flex items-center justify-center text-body hover:text-ink hover:border-ink transition-colors"
+      className="w-11 h-11 rounded-full bg-white border border-hairline-strong flex items-center justify-center text-body hover:text-ink hover:border-ink transition-colors"
     >
       {children}
     </a>
