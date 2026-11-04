@@ -481,12 +481,14 @@ export default function AgentProperties({
 
       {/* Map — shows every property matching the current filters, not just
           the loaded page, so it doesn't jump around as the user paginates */}
-      <div className="pt-4">
-        <h2 className="text-base font-black text-ink mb-3">Ubicación de propiedades</h2>
-        <div className="relative isolate rounded-2xl overflow-hidden border border-hairline" style={{ height: 340 }}>
-          <AgentMap properties={mapProperties} />
+      {mapProperties.length > 0 && (
+        <div className="pt-4">
+          <h2 className="text-base font-black text-ink mb-3">Ubicación de propiedades</h2>
+          <div className="relative isolate rounded-2xl overflow-hidden border border-hairline" style={{ height: 340 }}>
+            <AgentMap properties={mapProperties} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
