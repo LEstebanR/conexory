@@ -14,20 +14,11 @@ import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
 import { readMetrics } from "@/lib/property-metrics"
 import PortfolioPanel from "./portfolio-panel"
 import { getAppUrl } from "@/lib/urls"
-import { daysAgo } from "@/lib/dates"
+import { daysAgo, formatColombiaDate, colombiaHour } from "@/lib/dates"
 import { formatCOPCompact } from "@/lib/format"
 
-function formatColombiaDate(date: Date): string {
-  return date.toLocaleDateString("es-CO", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "America/Bogota",
-  })
-}
-
 function greeting(name: string): string {
-  const hour = new Date().getHours()
+  const hour = colombiaHour()
   const saludo = hour < 12 ? "Buenos días" : hour < 18 ? "Buenas tardes" : "Buenas noches"
   return `${saludo}, ${name.split(" ")[0]}`
 }
@@ -201,7 +192,7 @@ export default async function DashboardPage({
           <p className="text-sm text-body">
             Cancelaste tu plan Pro. Conservas los beneficios hasta el{" "}
             <span className="font-semibold text-ink">
-              {formatColombiaDate(cancelingUntil)}
+              {formatColombiaDate(cancelingUntil, { day: "numeric", month: "long", year: "numeric" })}
             </span>
             .
           </p>

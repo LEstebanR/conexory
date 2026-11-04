@@ -10,19 +10,14 @@ import { toggleProfilePublished } from "./actions"
 import { getAppUrl } from "@/lib/urls"
 import { hasProAccess } from "@/lib/plans"
 import type { Metadata } from "next"
+import { formatColombiaDate } from "@/lib/dates"
 
 export const metadata: Metadata = {
   title: "Configuración",
 }
 
 function formatDate(date: Date) {
-  // Render in Colombia time (UTC-5) so the date the user sees matches their day.
-  return date.toLocaleDateString("es-CO", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "America/Bogota",
-  })
+  return formatColombiaDate(date, { day: "numeric", month: "long", year: "numeric" })
 }
 
 export default async function SettingsPage() {

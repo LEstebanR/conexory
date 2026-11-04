@@ -7,6 +7,7 @@ import { AlertTriangle, CalendarClock, Loader2, Pencil } from "lucide-react"
 import * as Dialog from "@radix-ui/react-dialog"
 import { Button } from "@/components/ui/button"
 import { toggleUserIsPremium, updatePremiumUntil, updateSubscriptionPeriodEnd } from "../actions"
+import { formatColombiaDate } from "@/lib/dates"
 
 function tomorrowISO(): string {
   const d = new Date()
@@ -15,12 +16,7 @@ function tomorrowISO(): string {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("es-CO", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "America/Bogota",
-  })
+  return formatColombiaDate(iso, { day: "numeric", month: "long", year: "numeric" })
 }
 
 export default function PremiumToggle({

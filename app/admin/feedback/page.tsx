@@ -3,6 +3,7 @@ import Link from "next/link"
 import { MessageSquareHeart } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import AdminNav from "../admin-nav"
+import { formatColombiaDate } from "@/lib/dates"
 
 export const metadata: Metadata = {
   title: "Feedback — Admin",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 const PAGE_SIZE = 20
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString("es-CO", {
+  return formatColombiaDate(date, {
     day: "numeric",
     month: "short",
     year: "numeric",

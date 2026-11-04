@@ -10,6 +10,7 @@ import { ChangeCardForm } from "./change-card-form"
 import { UpgradeErrorToast } from "./upgrade-error-toast"
 import { hasProAccess, PRO_VALUE_POINTS } from "@/lib/plans"
 import type { Metadata } from "next"
+import { formatColombiaDate } from "@/lib/dates"
 
 const CARD_BRAND_NAMES: Record<string, string> = {
   master: "Mastercard",
@@ -39,13 +40,7 @@ const PRO_FEATURES = [
 const PLAN_SUPPORT_MAILTO = `mailto:conexory@gmail.com?cc=leramirezca@gmail.com&subject=${encodeURIComponent("Ayuda con mi plan Conexory")}`
 
 function formatDate(date: Date) {
-  // Render in Colombia time (UTC-5) so the date the user sees matches their day.
-  return date.toLocaleDateString("es-CO", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "America/Bogota",
-  })
+  return formatColombiaDate(date, { day: "numeric", month: "long", year: "numeric" })
 }
 
 export default async function UpgradePage() {
