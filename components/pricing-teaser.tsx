@@ -1,5 +1,10 @@
 import Link from "next/link"
-import { FREE_PROPERTY_LIMIT, PRO_PROPERTY_LIMIT } from "@/lib/plans"
+import {
+  FREE_PHOTO_LIMIT,
+  FREE_PROPERTY_LIMIT,
+  PRO_PHOTO_LIMIT,
+  PRO_PROPERTY_LIMIT,
+} from "@/lib/plans"
 import Reveal from "@/components/reveal"
 
 const plans = [
@@ -9,8 +14,8 @@ const plans = [
     cadence: "Para siempre",
     dark: false,
     features: [
-      "3 propiedades activas",
-      "10 fotos por propiedad",
+      `${FREE_PROPERTY_LIMIT} propiedades activas`,
+      `${FREE_PHOTO_LIMIT} fotos por propiedad`,
       "Link único por propiedad",
       "Preview profesional al compartir",
     ],
@@ -23,8 +28,8 @@ const plans = [
     cadence: "COP / mes",
     dark: true,
     features: [
-      "50 propiedades activas",
-      "20 fotos por propiedad",
+      `${PRO_PROPERTY_LIMIT} propiedades activas`,
+      `${PRO_PHOTO_LIMIT} fotos por propiedad`,
       "Todo lo del plan gratuito",
       "Sin permanencia — cancela cuando quieras",
     ],

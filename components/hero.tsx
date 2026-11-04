@@ -49,13 +49,7 @@ export default function Hero() {
           >
             Publica y comparte propiedades en{" "}
             <span className="relative whitespace-nowrap">
-              {/* Highlighter — behind text, slightly tilted */}
-              <span
-                aria-hidden="true"
-                className="absolute -inset-x-1 top-[10%] bottom-[5%] -rotate-[0.6deg] rounded-[4px]"
-                style={{ backgroundColor: "rgba(253, 224, 71, 0.45)" }}
-              />
-              <span className="relative">segundos</span>
+              segundos
               <svg
                 aria-hidden="true"
                 className="absolute -bottom-2 sm:-bottom-3 left-0 w-full text-ink"
