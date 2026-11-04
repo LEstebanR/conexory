@@ -17,6 +17,8 @@ export type FeaturedProperty = {
   images: string[]
 }
 
+const VISIBLE_COUNT = 6
+
 function PropertyCard({ property }: { property: FeaturedProperty }) {
   const typeLabel = PROPERTY_TYPE_LABELS[property.type] ?? property.type
   const transactionLabel = property.transactionType
@@ -30,7 +32,7 @@ function PropertyCard({ property }: { property: FeaturedProperty }) {
       href={`/p/${property.slug}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex-shrink-0 w-64 sm:w-72 rounded-2xl overflow-hidden border border-hairline bg-white shadow-sm hover:shadow-xl hover:shadow-black/10 transition-shadow duration-300"
+      className="group rounded-2xl overflow-hidden border border-hairline bg-white shadow-sm hover:shadow-xl hover:shadow-black/10 transition-shadow duration-300"
     >
       <div className="relative aspect-[4/3] bg-canvas-soft overflow-hidden">
         {image ? (
@@ -38,7 +40,7 @@ function PropertyCard({ property }: { property: FeaturedProperty }) {
             src={image}
             alt={property.title}
             fill
-            sizes="288px"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -54,7 +56,7 @@ function PropertyCard({ property }: { property: FeaturedProperty }) {
       <div className="bg-ink px-4 py-3.5">
         <p className="text-white text-sm font-black truncate tracking-tight">{property.title}</p>
         {location && (
-          <p className="text-white/60 text-xs mt-0.5 truncate">{location}</p>
+          <p className="text-white/80 text-xs mt-0.5 truncate">{location}</p>
         )}
         <p className="text-white text-base font-black mt-1.5 tracking-tight">
           {formatCOP(property.price)}
@@ -67,27 +69,20 @@ function PropertyCard({ property }: { property: FeaturedProperty }) {
 export default function FeaturedProperties({ properties }: { properties: FeaturedProperty[] }) {
   if (properties.length === 0) return null
 
-  const items = [...properties, ...properties]
-
   return (
-    <section id="featured" className="py-24 bg-canvas-softer overflow-hidden">
+    <section id="featured" className="py-24 bg-canvas-softer">
       <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
         <Reveal className="max-w-2xl mb-14">
-          <p className="text-body font-semibold text-sm uppercase tracking-[0.2em] mb-4">
-            Propiedades destacadas
-          </p>
-          <h2 className="text-4xl sm:text-5xl font-black text-ink tracking-tighter leading-none">
+          <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink tracking-tight leading-none">
             Así lucen las fichas
             <br />
             <span className="text-mute">de nuestros agentes.</span>
           </h2>
         </Reveal>
-      </div>
 
-      <div className="relative [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
-        <div className="flex w-max gap-5 px-5 animate-[marquee_50s_linear_infinite] hover:[animation-play-state:paused]">
-          {items.map((property, i) => (
-            <PropertyCard key={`${property.id}-${i}`} property={property} />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {properties.slice(0, VISIBLE_COUNT).map((property) => (
+            <PropertyCard key={property.id} property={property} />
           ))}
         </div>
       </div>

@@ -4,9 +4,7 @@ import { getAppUrl } from "@/lib/urls"
 import { faqs } from "@/lib/faq-data"
 import Navbar from "@/components/navbar"
 import Hero from "@/components/hero"
-import Marquee from "@/components/marquee"
 import Features from "@/components/features"
-import HowItWorks from "@/components/how-it-works"
 import FeaturedProperties from "@/components/featured-properties"
 import Stats from "@/components/stats"
 import FAQ from "@/components/faq"
@@ -79,9 +77,7 @@ export default async function Home() {
       />
       <Navbar />
       <Hero />
-      <Marquee />
       <Features />
-      <HowItWorks />
       <FeaturedProperties properties={featuredProperties} />
       <Stats />
       <FAQ />

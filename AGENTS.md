@@ -180,7 +180,8 @@ The system is **monochrome white/black/grays**, inspired by Uber (see `DESIGN.md
 - **Primary CTAs/actions are always black** (`bg-ink`; the `default` `Button` already is). Signature shape: **pill** (`rounded-full`) on every interactive element. Cards in `rounded-2xl`.
 - **Do not introduce accent colors** (green, blue, etc.). WhatsApp green (`#25D366`) is only allowed in a real product context (contact button in the app/public view), **never in the landing/marketing pages** — there, WhatsApp buttons are black.
 - Warning/limit states use the `warning-*` token (an amber scale in `@theme`) for the **surface/notice**, not for the button. Don't hardcode `amber-*`, `blue-*`, `violet-*` or colors outside the palette.
-- **Marketing animations**: `animate-fade-up`/`animate-fade-in` (entrance) and `animate-marquee`; the `components/reveal.tsx` component applies fade-up on entering the viewport (respects `prefers-reduced-motion`).
+- **Typography**: headlines on marketing pages use `font-display` (Bricolage Grotesque, `font-extrabold`); running text stays on `font-sans` (Inter).
+- **Marketing animations**: `animate-fade-up`/`animate-fade-in` (entrance); the `components/reveal.tsx` component applies fade-up on entering the viewport (respects `prefers-reduced-motion`).
 - **Don't use `tailwind.config.js`** — Tailwind 4 config lives in the CSS via `@theme`
 - Composition utility classes: use `cn()` from `lib/utils.ts` (clsx + tailwind-merge)
 

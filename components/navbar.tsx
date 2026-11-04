@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 
 const navLinks = [
-  { label: "Cómo funciona", href: "/#how-it-works" },
+  { label: "Funciones", href: "/#features" },
   { label: "Precios", href: "/#pricing" },
 ]
 
@@ -51,7 +51,7 @@ export default function Navbar() {
               <Link href="/login">Iniciar sesión</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/register">Empezar gratis</Link>
+              <Link href="/register">Crear cuenta gratis</Link>
             </Button>
           </div>
 
@@ -88,7 +88,7 @@ export default function Navbar() {
             </Button>
             <Button size="sm" className="w-full" asChild>
               <Link href="/register" onClick={() => setIsOpen(false)}>
-                Empezar gratis
+                Crear cuenta gratis
               </Link>
             </Button>
           </div>
