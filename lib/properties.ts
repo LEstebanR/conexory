@@ -142,15 +142,19 @@ export const getPropertiesForMap = cachePublicQuery(async function getProperties
   base: Prisma.PropertyWhereInput,
   filters: PropertyFilters
 ): Promise<MapProperty[]> {
-  const where = buildWhere(base, filters)
+  // Only listings the agent pinned on the map: an approximate pin (e.g. the
+  // city center) reads as the property's real location to buyers.
+  const where = { AND: [buildWhere(base, filters), { latitude: { not: null }, longitude: { not: null } }] }
   const rows = await prisma.property.findMany({
     where,
     select: {
-      id: true, slug: true, title: true, city: true, state: true, price: true,
+      id: true, slug: true, title: true, city: true, price: true,
       images: true, latitude: true, longitude: true,
     },
   })
-  return rows.map((p) => ({ ...p, price: Number(p.price) }))
+  return rows.flatMap(({ latitude, longitude, ...p }) =>
+    latitude != null && longitude != null ? [{ ...p, latitude, longitude, price: Number(p.price) }] : []
+  )
 }, "properties-map")
 
 // Facets describe the *unfiltered* scope (all published properties in base) —

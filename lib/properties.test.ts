@@ -253,11 +253,25 @@ describe("getProperties", () => {
 })
 
 describe("getPropertiesForMap", () => {
-  test("returns every matching listing with a numeric price", async () => {
+  test("returns every matching listing pinned on the map, with a numeric price", async () => {
+    findMany.mockImplementationOnce(() => Promise.resolve([{ ...row, latitude: 6.21, longitude: -75.57 }]))
     const pins = await getPropertiesForMap(base, { type: "house" })
-    expect(pins[0].price).toBe(450000000)
-    expect(findMany.mock.calls[0][0].where).toEqual({ AND: [base, { type: "house" }] })
+    expect(pins).toHaveLength(1)
+    expect(pins[0]).toMatchObject({ price: 450000000, latitude: 6.21, longitude: -75.57 })
+    expect(findMany.mock.calls[0][0].where).toEqual({
+      AND: [{ AND: [base, { type: "house" }] }, { latitude: { not: null }, longitude: { not: null } }],
+    })
     expect(findMany.mock.calls[0][0].take).toBeUndefined()
+  })
+
+  test("never returns a listing without coordinates, so the map can't invent a location", async () => {
+    findMany.mockImplementationOnce(() =>
+      Promise.resolve([
+        { ...row, latitude: null, longitude: null },
+        { ...row, id: "p2", latitude: 6.21, longitude: null },
+      ])
+    )
+    expect(await getPropertiesForMap(base, {})).toEqual([])
   })
 })
 
