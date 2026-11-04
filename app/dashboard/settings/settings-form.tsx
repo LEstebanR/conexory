@@ -227,7 +227,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
 
       {/* Social networks */}
       <div className="space-y-3 pt-2 border-t border-hairline">
-        <p className="text-sm font-semibold text-ink pt-2">Redes sociales <span className="ml-1 text-xs font-normal text-mute">Opcional · solo el usuario, sin @</span></p>
+        <p className="text-sm font-semibold text-ink pt-2">Redes sociales <span className="ml-1 text-xs font-normal text-mute">Opcional · tu usuario o el link de tu perfil</span></p>
         {([
           { id: "instagram", name: "instagram", label: "Instagram", placeholder: "tu_usuario", value: instagram },
           { id: "tiktok",    name: "tiktok",    label: "TikTok",    placeholder: "tu_usuario", value: tiktok },
@@ -244,7 +244,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
                 name={field.name}
                 defaultValue={(field.value ?? "").replace(/^@/, "")}
                 placeholder={field.placeholder}
-                maxLength={50}
+                maxLength={300}
                 className="h-9 pl-7 text-sm"
               />
             </div>

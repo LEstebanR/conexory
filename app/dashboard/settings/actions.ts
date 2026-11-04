@@ -9,8 +9,18 @@ import { invalidatePublicListings } from "@/lib/public-cache"
 import { ensureAgentSlug } from "@/lib/agent-slug"
 import { HEX_COLOR_REGEX } from "@/lib/flyer-options"
 import { sanitizePhoneInput } from "@/lib/phone"
+import { normalizeSocialHandle, type SocialNetwork } from "@/lib/social"
 
-const handle = z.string().trim().max(50).optional().or(z.literal(""))
+// Accepts a pasted profile URL (hence the generous raw length) and stores
+// only the bare handle.
+const socialHandle = (network: SocialNetwork) =>
+  z
+    .string()
+    .trim()
+    .max(300)
+    .optional()
+    .transform((value) => normalizeSocialHandle(network, value))
+    .refine((value) => !value || value.length <= 100, { message: "Revisa tus redes sociales: el usuario quedó muy largo." })
 
 const profileSchema = z.object({
   name: z.string().trim().min(1, "El nombre no puede estar vacío.").max(80, "Máximo 80 caracteres."),
@@ -21,20 +31,15 @@ const profileSchema = z.object({
   bioEn: z.string().trim().max(300, "Máximo 300 caracteres.").optional().or(z.literal("")),
   phone: z.string().trim().max(15, "Máximo 15 caracteres.").optional().or(z.literal("")),
   phoneIsWhatsapp: z.enum(["true", "false"]).optional(),
-  instagram: handle,
-  facebook: handle,
-  tiktok: handle,
-  linkedin: handle,
-  youtube: handle,
+  instagram: socialHandle("instagram"),
+  facebook: socialHandle("facebook"),
+  tiktok: socialHandle("tiktok"),
+  linkedin: socialHandle("linkedin"),
+  youtube: socialHandle("youtube"),
   brandColor: z.string().trim().regex(HEX_COLOR_REGEX, "Color inválido."),
 })
 
 export type ProfileState = { error?: string; success?: boolean }
-
-function stripAt(value: string | undefined | null): string | null {
-  if (!value) return null
-  return value.replace(/^@/, "") || null
-}
 
 export async function updateProfile(
   _prev: ProfileState,
@@ -86,11 +91,11 @@ export async function updateProfile(
       bioEn: bioEn || null,
       phone: sanitizedPhone || null,
       phoneIsWhatsapp: phoneIsWhatsapp === "true",
-      instagram: stripAt(instagram),
-      facebook: stripAt(facebook),
-      tiktok: stripAt(tiktok),
-      linkedin: stripAt(linkedin),
-      youtube: stripAt(youtube),
+      instagram,
+      facebook,
+      tiktok,
+      linkedin,
+      youtube,
       brandColor,
     },
   })

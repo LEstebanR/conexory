@@ -100,6 +100,23 @@ describe("updateProfile", () => {
     })
   })
 
+  test("stores only the handle when the agent pastes a full profile URL", async () => {
+    const result = await updateProfile(
+      {},
+      formData({
+        ...validProfileFields,
+        instagram: "https://www.instagram.com/cs.inversiones?rpxt=dm44",
+        tiktok: "https://www.tiktok.com/@cs.inversiones",
+        facebook: "",
+      })
+    )
+    expect(result.success).toBe(true)
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: "u1" },
+      data: expect.objectContaining({ instagram: "cs.inversiones", tiktok: "cs.inversiones", facebook: null }),
+    })
+  })
+
   test("deletes the old blob image when it's replaced with a new one", async () => {
     await updateProfile(
       {},
