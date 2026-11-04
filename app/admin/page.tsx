@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Users, Building2, Zap, TrendingUp, Layers, ListChecks, Eye, Inbox } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { daysAgo } from "@/lib/dates"
+import { startOfColombiaMonth, colombiaMonthName } from "@/lib/colombia-month"
 import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
 import { PROPERTY_TYPE_LABELS } from "@/lib/property-types"
 import { cn } from "@/lib/utils"
@@ -102,6 +103,7 @@ function Card({
 export default async function AdminPage() {
   const week = daysAgo(7)
   const month = daysAgo(30)
+  const calendarMonthStart = startOfColombiaMonth()
 
   const [
     totalUsers,
@@ -128,6 +130,7 @@ export default async function AdminPage() {
     prisma.property.groupBy({ by: ["type"], _count: { id: true } }),
     prisma.propertyVisit.groupBy({
       by: ["propertyId"],
+      where: { createdAt: { gte: calendarMonthStart } },
       _count: { propertyId: true },
       orderBy: { _count: { propertyId: "desc" } },
       take: 10,
@@ -231,7 +234,7 @@ export default async function AdminPage() {
       {/* Top propiedades */}
       <div className="mb-8">
         <h2 className="text-sm font-bold text-ink uppercase tracking-wider mb-3">
-          Top 10 propiedades por visitas
+          Top 10 propiedades por visitas de {colombiaMonthName()}
         </h2>
         <div className="bg-white rounded-2xl border border-hairline divide-y divide-hairline">
           {topVisitedProperties.length === 0 ? (
@@ -240,8 +243,8 @@ export default async function AdminPage() {
                 <Inbox className="w-5 h-5 text-mute" strokeWidth={1.75} />
               </span>
               <div>
-                <p className="text-sm font-semibold text-ink">Sin visitas todavía</p>
-                <p className="text-xs text-mute mt-0.5">Cuando las propiedades reciban visitas, el top aparecerá aquí.</p>
+                <p className="text-sm font-semibold text-ink">Sin visitas este mes</p>
+                <p className="text-xs text-mute mt-0.5">Cuando las propiedades reciban visitas en el mes, el top aparecerá aquí.</p>
               </div>
             </div>
           ) : (
