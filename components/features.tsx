@@ -1,37 +1,20 @@
 import Image from "next/image"
-import {
-  Camera,
-  Link2,
-  LayoutGrid,
-  Check,
-  ImagePlus,
-  MessageCircle,
-  Copy,
-  Sparkles,
-  BarChart3,
-} from "lucide-react"
 import Reveal from "@/components/reveal"
 
-const img = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=500&q=70`
-
-const PHOTOS = {
-  laureles: img("1600596542815-ffad4c1539a9"),
-  poblado: img("1545324418-cc1a3fa10c00"),
-}
+const LISTING_PHOTO = "/marketing/ficha-photo.jpg"
 
 function FormMock() {
   return (
     <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 p-6 space-y-4">
       <div className="grid grid-cols-3 gap-2">
         <div className="relative aspect-square rounded-xl overflow-hidden">
-          <Image src={PHOTOS.laureles} alt="Foto de propiedad" fill sizes="120px" className="object-cover" />
+          <Image src={LISTING_PHOTO} alt="Foto de propiedad" fill sizes="120px" className="object-cover object-left" />
         </div>
         <div className="relative aspect-square rounded-xl overflow-hidden">
-          <Image src={PHOTOS.poblado} alt="Foto de propiedad" fill sizes="120px" className="object-cover" />
+          <Image src={LISTING_PHOTO} alt="Foto de propiedad" fill sizes="120px" className="object-cover object-right" />
         </div>
-        <div className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong flex items-center justify-center">
-          <ImagePlus className="w-5 h-5 text-mute" />
+        <div className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong flex items-center justify-center text-2xl font-light text-mute">
+          +
         </div>
       </div>
       <div className="space-y-1.5">
@@ -58,22 +41,20 @@ function ShareMock() {
   return (
     <div className="rounded-2xl border border-hairline bg-white shadow-xl shadow-black/5 p-6 space-y-4">
       <div className="flex flex-col gap-2.5 rounded-2xl border border-hairline-strong px-4 py-3 sm:flex-row sm:items-center sm:gap-2 sm:rounded-full">
-        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
-          <Link2 className="w-4 h-4 text-body flex-shrink-0" />
+        <div className="flex items-center min-w-0 sm:flex-1">
           <span className="text-sm text-ink truncate">conexory.com/p/casa-laureles</span>
         </div>
         <span className="flex items-center justify-center gap-1 bg-canvas-soft rounded-full px-3 py-1.5 text-xs font-semibold text-ink flex-shrink-0">
-          <Copy className="w-3 h-3" /> Copiar
+          Copiar
         </span>
       </div>
-      <div className="h-11 rounded-full bg-ink flex items-center justify-center gap-2 text-sm font-semibold text-white">
-        <MessageCircle className="w-4 h-4" />
+      <div className="h-11 rounded-full bg-ink flex items-center justify-center text-sm font-semibold text-white">
         Compartir link
       </div>
       {/* OG image preview — split layout matching real design */}
       <div className="rounded-xl overflow-hidden border border-hairline flex h-24">
         <div className="relative w-[45%] flex-shrink-0">
-          <Image src={PHOTOS.laureles} alt="Preview de la propiedad" fill sizes="160px" className="object-cover" />
+          <Image src={LISTING_PHOTO} alt="Preview de la propiedad" fill sizes="160px" className="object-cover" />
         </div>
         <div className="flex-1 bg-black px-3 py-2.5 flex flex-col justify-between">
           <span className="text-[9px] font-black text-white tracking-tight">Conexory</span>
@@ -141,8 +122,6 @@ function AnalyticsMock() {
 
 const blocks = [
   {
-    eyebrow: "Crea en 60 segundos",
-    icon: Camera,
     title: "Un formulario, nada más.",
     description:
       "Solo fotos, precio y una breve descripción. Sin campos innecesarios ni formularios eternos. Sube las fotos directo desde la cámara de tu celular y publica al instante.",
@@ -150,8 +129,6 @@ const blocks = [
     mock: <FormMock />,
   },
   {
-    eyebrow: "Escribe menos, vende más",
-    icon: Sparkles,
     title: "Mensajes de WhatsApp con IA.",
     description:
       "Elige el tipo de mensaje —presentación, seguimiento, rebaja de precio, invitación a visita— y la IA lo redacta con los datos reales de la propiedad. Tú editas antes de enviar.",
@@ -159,8 +136,6 @@ const blocks = [
     mock: <AIMessageMock />,
   },
   {
-    eyebrow: "Comparte donde sea",
-    icon: Link2,
     title: "Un link, una preview perfecta.",
     description:
       "Cada propiedad tiene su URL única. Compártela por cualquier canal y se ve siempre profesional, con foto, precio y detalles en la preview.",
@@ -168,8 +143,6 @@ const blocks = [
     mock: <ShareMock />,
   },
   {
-    eyebrow: "Mide lo que funciona",
-    icon: BarChart3,
     title: "Analytics por propiedad.",
     description:
       "Cuántas personas vieron cada ficha, cuántas escribieron por WhatsApp y cuántas llegaron por redes o contacto directo. Sabes qué propiedad está funcionando sin adivinar.",
@@ -177,8 +150,6 @@ const blocks = [
     mock: <AnalyticsMock />,
   },
   {
-    eyebrow: "Luce profesional",
-    icon: LayoutGrid,
     title: "Tu portafolio en una página.",
     description:
       "Todas tus propiedades activas en un solo lugar, con tu nombre y tu foto. Una galería que comparte tu marca personal y genera confianza con cada cliente.",
@@ -193,13 +164,10 @@ export default function Features() {
       <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
         {/* Header */}
         <Reveal className="max-w-2xl mb-20">
-          <p className="text-body font-semibold text-sm uppercase tracking-[0.2em] mb-4">
-            Funciones
-          </p>
-          <h2 className="text-4xl sm:text-5xl font-black text-ink tracking-tighter leading-none">
-            Todo lo que necesitas.
+          <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink tracking-tight leading-none">
+            De las fotos en tu celular
             <br />
-            <span className="text-mute">Nada que no uses.</span>
+            <span className="text-mute">al chat de tu cliente.</span>
           </h2>
         </Reveal>
 
@@ -211,24 +179,15 @@ export default function Features() {
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                   {/* Copy */}
                   <div className={reversed ? "lg:order-2" : ""}>
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-ink mb-6">
-                      <block.icon className="w-6 h-6 text-white" strokeWidth={1.75} />
-                    </div>
-                    <p className="text-body font-semibold text-xs uppercase tracking-[0.2em] mb-3">
-                      {block.eyebrow}
-                    </p>
-                    <h3 className="text-3xl sm:text-4xl font-black text-ink tracking-tight leading-tight mb-4">
+                    <h3 className="font-display text-3xl sm:text-4xl font-extrabold text-ink tracking-tight leading-tight mb-4">
                       {block.title}
                     </h3>
                     <p className="text-body leading-relaxed mb-6 max-w-md">
                       {block.description}
                     </p>
-                    <ul className="space-y-3">
+                    <ul className="space-y-2 border-l-2 border-ink pl-4">
                       {block.points.map((point) => (
-                        <li key={point} className="flex items-center gap-3 text-sm font-medium text-ink">
-                          <span className="w-5 h-5 rounded-full bg-ink flex items-center justify-center flex-shrink-0">
-                            <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                          </span>
+                        <li key={point} className="text-sm font-medium text-ink">
                           {point}
                         </li>
                       ))}

@@ -14,7 +14,9 @@ const markBlack = `data:image/png;base64,${fs.readFileSync(
   path.join(process.cwd(), "public/mark-black.png")
 ).toString("base64")}`
 
-const PROPERTY_IMAGE = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=680&q=85&fit=crop&crop=center"
+const PROPERTY_IMAGE = `data:image/jpeg;base64,${fs.readFileSync(
+  path.join(process.cwd(), "public/marketing/ficha-photo.jpg")
+).toString("base64")}`
 
 export default async function Image() {
   const fontBold = loadFont("inter-bold.woff")

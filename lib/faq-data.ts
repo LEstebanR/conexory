@@ -1,3 +1,5 @@
+import { FREE_PROPERTY_LIMIT, PRO_PROPERTY_LIMIT } from "@/lib/plans"
+
 export const faqs = [
   {
     q: "¿Mis clientes necesitan registrarse para ver la propiedad?",
@@ -17,7 +19,7 @@ export const faqs = [
   },
   {
     q: "¿Puedo usar Conexory si tengo muchas propiedades?",
-    a: "El plan gratuito incluye hasta 3 propiedades activas, ideal para empezar. Si manejas más propiedades, el plan Pro soporta hasta 50 por $99.999 COP al mes. Para agencias o equipos grandes, contáctanos para un plan personalizado.",
+    a: `El plan gratuito incluye hasta ${FREE_PROPERTY_LIMIT} propiedades activas, ideal para empezar. Si manejas más propiedades, el plan Pro soporta hasta ${PRO_PROPERTY_LIMIT} por $99.999 COP al mes. Para agencias o equipos grandes, contáctanos para un plan personalizado.`,
   },
   {
     q: "¿Puedo saber cuántas personas visitan mis propiedades?",

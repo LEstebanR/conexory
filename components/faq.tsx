@@ -6,13 +6,10 @@ export default function FAQ() {
     <section id="faq" className="py-24 bg-white">
       <div className="max-w-3xl mx-auto px-5 sm:px-6 lg:px-8">
         <Reveal className="mb-16">
-          <p className="text-body font-semibold text-sm uppercase tracking-[0.2em] mb-4">
-            Preguntas frecuentes
-          </p>
-          <h2 className="text-4xl sm:text-5xl font-black text-ink tracking-tighter leading-none">
-            Resolvemos tus dudas.
+          <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink tracking-tight leading-none">
+            Lo que nos preguntan
             <br />
-            <span className="text-mute">Antes de que las tengas.</span>
+            <span className="text-mute">los asesores antes de empezar.</span>
           </h2>
         </Reveal>
 

@@ -121,7 +121,7 @@ export default function Footer() {
           <p className="text-xs text-mute">
             © 2026 Conexory · Hecho en Colombia
           </p>
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-mute">
             En proceso de registro · Colombia
           </p>
         </div>
