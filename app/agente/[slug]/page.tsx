@@ -12,6 +12,7 @@ import {
   parsePropertyQuery, withPropertyPage, PROPERTIES_PAGE_SIZE,
 } from "@/lib/properties"
 import AgentProperties from "./agent-properties"
+import { socialProfileUrl } from "@/lib/social"
 
 // ── Inline SVG brand icons ─────────────────────────────────────────────────
 
@@ -142,12 +143,12 @@ export default async function AgentProfilePage({
     .slice(0, 2)
 
   const socialLinks = [
-    { handle: agent.instagram, href: `https://instagram.com/${agent.instagram}`,     label: "Instagram", Icon: InstagramIcon },
-    { handle: agent.tiktok,    href: `https://tiktok.com/@${agent.tiktok}`,           label: "TikTok",    Icon: TikTokIcon },
-    { handle: agent.facebook,  href: `https://facebook.com/${agent.facebook}`,        label: "Facebook",  Icon: FacebookIcon },
-    { handle: agent.linkedin,  href: `https://linkedin.com/in/${agent.linkedin}`,     label: "LinkedIn",  Icon: LinkedInIcon },
-    { handle: agent.youtube,   href: `https://youtube.com/@${agent.youtube}`,         label: "YouTube",   Icon: YouTubeIcon },
-  ].filter(({ handle }) => !!handle)
+    { href: socialProfileUrl("instagram", agent.instagram), label: "Instagram", Icon: InstagramIcon },
+    { href: socialProfileUrl("tiktok", agent.tiktok), label: "TikTok",    Icon: TikTokIcon },
+    { href: socialProfileUrl("facebook", agent.facebook), label: "Facebook",  Icon: FacebookIcon },
+    { href: socialProfileUrl("linkedin", agent.linkedin), label: "LinkedIn",  Icon: LinkedInIcon },
+    { href: socialProfileUrl("youtube", agent.youtube), label: "YouTube",   Icon: YouTubeIcon },
+  ].filter((link): link is typeof link & { href: string } => !!link.href)
 
   const hasContact = !!(agent.phone || agent.email)
   const hasSocial = socialLinks.length > 0

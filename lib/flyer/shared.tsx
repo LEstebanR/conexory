@@ -4,7 +4,7 @@ import path from "path"
 import type { ReactElement } from "react"
 import type { Property } from "@prisma/client"
 import type { FlyerOptions, FlyerInfo } from "@/lib/flyer-options"
-import { formatCOP, formatCOPMillionsValue } from "@/lib/format"
+import { formatCOP, formatCOPMillionsValue, PRICE_ABBREVIATION_THRESHOLD } from "@/lib/format"
 
 // Bump when template rendering logic changes so cached flyers (keyed in part
 // on this) get regenerated instead of serving a stale pre-deploy image.
@@ -28,12 +28,6 @@ import { formatCOP, formatCOPMillionsValue } from "@/lib/format"
 // v8: the "M" suffix on abbreviated prices ($12.5 M) matches the price
 // value's own color instead of a fixed gray.
 export const FLYER_RENDER_VERSION = 8
-
-// Above this amount the full peso figure ("$ 12.500.000.000") no longer fits
-// the price boxes, so every template switches to the compact "$ 12.500 M"
-// form instead. Note: "M" is millones — Colombian Spanish "billón" means
-// 10^12 (not the English "billion" = 10^9), so we never use that word here.
-const PRICE_ABBREVIATION_THRESHOLD = 1_000_000_000
 
 // Deterministic flyer templates (4:5, like the reference real-estate flyers),
 // rendered with Satori + sharp using only the property's real data.

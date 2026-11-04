@@ -22,6 +22,7 @@ import ContactButtons from "./contact-buttons"
 import SocialLinkButton from "./social-link-button"
 import ContactBar from "./contact-bar"
 import TrackVisit from "./track-visit"
+import { socialProfileUrl } from "@/lib/social"
 
 
 // ── Social icon SVGs (same as agent page) ─────────────────────────────────
@@ -230,12 +231,12 @@ type AgentUser = {
 
 function AgentCard({ propertyId, user, whatsappMessage, english }: { propertyId: string; user: AgentUser; whatsappMessage: string; english: boolean }) {
   const socialLinks = [
-    { handle: user.instagram, href: `https://instagram.com/${user.instagram}`,   label: "Instagram", Icon: InstagramIcon, eventType: "social_instagram_click" },
-    { handle: user.tiktok,    href: `https://tiktok.com/@${user.tiktok}`,         label: "TikTok",    Icon: TikTokIcon,    eventType: "social_tiktok_click" },
-    { handle: user.facebook,  href: `https://facebook.com/${user.facebook}`,      label: "Facebook",  Icon: FacebookIcon,  eventType: "social_facebook_click" },
-    { handle: user.linkedin,  href: `https://linkedin.com/in/${user.linkedin}`,   label: "LinkedIn",  Icon: LinkedInIcon,  eventType: "social_linkedin_click" },
-    { handle: user.youtube,   href: `https://youtube.com/@${user.youtube}`,       label: "YouTube",   Icon: YouTubeIcon,   eventType: "social_youtube_click" },
-  ].filter(({ handle }) => !!handle)
+    { href: socialProfileUrl("instagram", user.instagram), label: "Instagram", Icon: InstagramIcon, eventType: "social_instagram_click" },
+    { href: socialProfileUrl("tiktok", user.tiktok), label: "TikTok",    Icon: TikTokIcon,    eventType: "social_tiktok_click" },
+    { href: socialProfileUrl("facebook", user.facebook), label: "Facebook",  Icon: FacebookIcon,  eventType: "social_facebook_click" },
+    { href: socialProfileUrl("linkedin", user.linkedin), label: "LinkedIn",  Icon: LinkedInIcon,  eventType: "social_linkedin_click" },
+    { href: socialProfileUrl("youtube", user.youtube), label: "YouTube",   Icon: YouTubeIcon,   eventType: "social_youtube_click" },
+  ].filter((link): link is typeof link & { href: string } => !!link.href)
 
   const hasSocial = socialLinks.length > 0
 

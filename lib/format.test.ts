@@ -12,24 +12,37 @@ describe("formatCOP", () => {
 })
 
 describe("formatCOPMillionsValue", () => {
-  test("rounds to the nearest million with no suffix", () => {
-    expect(formatCOPMillionsValue(451_400_000)).toBe("$451")
+  test("shows whole millions with no suffix", () => {
+    expect(formatCOPMillionsValue(451_000_000)).toBe("$451")
   })
 
-  test("rounds up at the midpoint", () => {
-    expect(formatCOPMillionsValue(1_500_000)).toBe("$2")
+  test("keeps decimals instead of rounding to the nearest million", () => {
+    expect(formatCOPMillionsValue(1_500_000)).toBe("$1,5")
+    expect(formatCOPMillionsValue(2_850_000)).toBe("$2,85")
+    expect(formatCOPMillionsValue(451_400_000)).toBe("$451,4")
+  })
+
+  test("groups thousands of millions", () => {
+    expect(formatCOPMillionsValue(1_250_000_000)).toBe("$1.250")
   })
 })
 
 describe("formatCOPMillions", () => {
   test("appends the M suffix", () => {
-    expect(formatCOPMillions(451_400_000)).toBe("$451 M")
+    expect(formatCOPMillions(451_400_000)).toBe("$451,4 M")
   })
 })
 
 describe("formatCOPCompact", () => {
-  test("uses the millions form at or above 1,000,000", () => {
-    expect(formatCOPCompact(1_500_000)).toBe("$2 M")
+  test("shows the full price below 1.000 millones", () => {
+    expect(formatCOPCompact(2_850_000)).toBe(formatCOP(2_850_000))
+    expect(formatCOPCompact(450_500_000)).toBe(formatCOP(450_500_000))
+    expect(formatCOPCompact(999_999_999)).toBe(formatCOP(999_999_999))
+  })
+
+  test("uses the millions form from 1.000 millones up", () => {
+    expect(formatCOPCompact(1_000_000_000)).toBe("$1.000 M")
+    expect(formatCOPCompact(1_250_500_000)).toBe("$1.250,5 M")
   })
 
   test("uses the full currency form below 1,000,000", () => {
