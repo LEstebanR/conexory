@@ -4,6 +4,7 @@ import { Users } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { hasProAccess } from "@/lib/plans"
 import AdminNav from "../admin-nav"
+import { formatColombiaDate } from "@/lib/dates"
 
 export const metadata: Metadata = {
   title: "Referidos — Admin",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 const PAGE_SIZE = 20
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })
+  return formatColombiaDate(date, { day: "numeric", month: "short", year: "numeric" })
 }
 
 export default async function AdminReferralsPage({

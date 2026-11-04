@@ -7,6 +7,7 @@ import { RenewalReminderEmail } from "@/emails/renewal-reminder"
 import { ResetPasswordEmail } from "@/emails/reset-password"
 import { VerifyEmailEmail } from "@/emails/verify-email"
 import { WelcomeEmail } from "@/emails/welcome"
+import { formatColombiaDate } from "@/lib/dates"
 
 // Instantiated lazily inside each function so the build doesn't require
 // RESEND_API_KEY at module-load time (Next.js collects route data during build).
@@ -55,7 +56,7 @@ export async function sendRenewalReminder(
   hasPaymentMethod: boolean,
 ) {
   const appUrl = getAppUrl()
-  const date = periodEnd.toLocaleDateString("es-CO", {
+  const date = formatColombiaDate(periodEnd, {
     day: "numeric",
     month: "long",
   })

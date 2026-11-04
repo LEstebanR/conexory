@@ -17,6 +17,9 @@ function formatDate(dateStr: string) {
     year: "numeric",
     month: "long",
     day: "numeric",
+    // Post dates are calendar days ("2026-10-29" parses as UTC midnight);
+    // formatting them in Colombia time would show the previous day.
+    timeZone: "UTC",
   })
 }
 
