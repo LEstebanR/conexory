@@ -432,6 +432,39 @@ describe("POST /api/webhooks/mercadopago", () => {
     expect(mockSendPaymentFailed).toHaveBeenCalledTimes(1)
   })
 
+  test("still activates the subscription when the confirmation email fails", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
+    mockSubscriptionFindUnique.mockImplementationOnce(() => Promise.resolve(null))
+    mockSendSubscriptionConfirmation.mockImplementationOnce(() => Promise.reject(new Error("resend down")))
+    mockSubscriptionUpsert.mockClear()
+    const res = await POST(paymentWebhook())
+    expect(res.status).toBe(200)
+    expect(mockSubscriptionUpsert).toHaveBeenCalledTimes(1)
+  })
+
+  test("still marks the subscription past_due when the payment-failed email fails", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "rejected", externalReference: reference }),
+    )
+    mockSubscriptionUpdateMany.mockImplementationOnce(() => Promise.resolve({ count: 1 }))
+    mockSendPaymentFailed.mockImplementationOnce(() => Promise.reject(new Error("resend down")))
+    const res = await POST(paymentWebhook())
+    expect(res.status).toBe(200)
+  })
+
+  test("still processes the event when linking it to the user fails", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "rejected", externalReference: reference }),
+    )
+    mockPaymentEventUpdate.mockImplementationOnce(() => Promise.reject(new Error("row gone")))
+    mockSubscriptionUpdateMany.mockClear()
+    const res = await POST(paymentWebhook())
+    expect(res.status).toBe(200)
+    expect(mockSubscriptionUpdateMany).toHaveBeenCalled()
+  })
+
   test("does not resend the payment-failed email for a second decline in the same cycle", async () => {
     mockGetPayment.mockImplementationOnce(() =>
       Promise.resolve({ ok: true, status: "rejected", externalReference: reference }),
