@@ -34,14 +34,15 @@ describe("formatCOPMillions", () => {
 })
 
 describe("formatCOPCompact", () => {
-  test("uses the millions form when it represents the amount exactly", () => {
-    expect(formatCOPCompact(1_500_000)).toBe("$1,5 M")
-    expect(formatCOPCompact(350_000_000)).toBe("$350 M")
+  test("shows the full price below 1.000 millones", () => {
+    expect(formatCOPCompact(2_850_000)).toBe(formatCOP(2_850_000))
+    expect(formatCOPCompact(450_500_000)).toBe(formatCOP(450_500_000))
+    expect(formatCOPCompact(999_999_999)).toBe(formatCOP(999_999_999))
   })
 
-  test("falls back to the full price when the millions form would round", () => {
-    expect(formatCOPCompact(1_234_567)).toBe(formatCOP(1_234_567))
-    expect(formatCOPCompact(2_855_000)).toBe(formatCOP(2_855_000))
+  test("uses the millions form from 1.000 millones up", () => {
+    expect(formatCOPCompact(1_000_000_000)).toBe("$1.000 M")
+    expect(formatCOPCompact(1_250_500_000)).toBe("$1.250,5 M")
   })
 
   test("uses the full currency form below 1,000,000", () => {

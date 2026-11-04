@@ -23,11 +23,15 @@ export function formatCOPMillions(amount: number): string {
   return `${formatCOPMillionsValue(amount)} M`
 }
 
-// Millions-compact only when it's lossless (a multiple of $10.000, so two
-// decimals in millions represent it exactly); otherwise the full currency,
-// so the shown price always matches what the agent typed. Used across the
-// dashboard, agent profile and map popups.
+// Above this amount the full peso figure ("$ 12.500.000.000") no longer fits
+// cards or flyer price boxes, so we switch to the compact "$ 12.500 M" form.
+// Note: "M" is millones — Colombian Spanish "billón" means 10^12 (not the
+// English "billion" = 10^9), so we never use that word here.
+export const PRICE_ABBREVIATION_THRESHOLD = 1_000_000_000
+
+// Full price below the threshold, so what the agent typed is what buyers see;
+// millions-compact only for very large amounts. Used across the dashboard,
+// agent profile and map popups.
 export function formatCOPCompact(amount: number): string {
-  const lossless = Number.isInteger(amount / 10_000)
-  return amount >= 1_000_000 && lossless ? formatCOPMillions(amount) : formatCOP(amount)
+  return amount >= PRICE_ABBREVIATION_THRESHOLD ? formatCOPMillions(amount) : formatCOP(amount)
 }
