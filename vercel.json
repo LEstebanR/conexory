@@ -1,5 +1,6 @@
 {
   "framework": "nextjs",
+  "ignoreCommand": "sh scripts/vercel-ignore-build.sh",
   "crons": [
     {
       "path": "/api/cron/billing",
