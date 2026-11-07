@@ -68,9 +68,17 @@ function SectionCard({
   )
 }
 
-function FieldLabel({ children, optional }: { children: React.ReactNode; optional?: boolean }) {
+function FieldLabel({
+  htmlFor,
+  children,
+  optional,
+}: {
+  htmlFor: string
+  children: React.ReactNode
+  optional?: boolean
+}) {
   return (
-    <label className="block text-sm font-semibold text-ink">
+    <label htmlFor={htmlFor} className="block text-sm font-semibold text-ink">
       {children}
       {optional && <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>}
     </label>
@@ -251,8 +259,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
             maxImages={maxImages}
           />
           <div className="space-y-1.5 pt-4 border-t border-hairline">
-            <FieldLabel optional>Video de YouTube</FieldLabel>
+            <FieldLabel htmlFor="property-video-url" optional>Video de YouTube</FieldLabel>
             <Input
+              id="property-video-url"
               placeholder="https://youtube.com/watch?v=..."
               value={videoUrl}
               onChange={(e) => { setVideoUrl(e.target.value); clearError("videoUrl") }}
@@ -269,8 +278,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
         {/* Basic information */}
         <SectionCard id="tour-basic" title="Información básica">
           <div className="space-y-1.5">
-            <FieldLabel>Título del anuncio</FieldLabel>
+            <FieldLabel htmlFor="property-title">Título del anuncio</FieldLabel>
             <Input
+              id="property-title"
               placeholder="Ej: Apartamento moderno con vista al parque"
               value={title}
               onChange={(e) => { setTitle(e.target.value); clearError("title") }}
@@ -282,12 +292,13 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
           </div>
 
           <div className="space-y-1.5">
-            <FieldLabel>Precio</FieldLabel>
+            <FieldLabel htmlFor="property-price">Precio</FieldLabel>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-mute select-none">
                 $
               </span>
               <input
+                id="property-price"
                 type="text"
                 inputMode="numeric"
                 placeholder="2.800.000"
@@ -313,8 +324,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
           </div>
 
           <div className="space-y-1.5">
-            <FieldLabel optional>Barrio / Zona</FieldLabel>
+            <FieldLabel htmlFor="property-neighborhood" optional>Barrio / Zona</FieldLabel>
             <Input
+              id="property-neighborhood"
               placeholder="Chapinero"
               value={neighborhood}
               onChange={(e) => setNeighborhood(e.target.value)}
@@ -327,8 +339,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
         <SectionCard id="tour-details" title="Detalles" optional>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <FieldLabel>Área (m²)</FieldLabel>
+              <FieldLabel htmlFor="property-area">Área (m²)</FieldLabel>
               <Input
+                id="property-area"
                 placeholder="65"
                 value={area}
                 onChange={(e) => { setArea(e.target.value); clearError("area") }}
@@ -340,8 +353,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
               <FieldError message={fieldErrors.area} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Terreno (m²)</FieldLabel>
+              <FieldLabel htmlFor="property-land-area">Terreno (m²)</FieldLabel>
               <Input
+                id="property-land-area"
                 placeholder="120"
                 value={landArea}
                 onChange={(e) => { setLandArea(e.target.value); clearError("landArea") }}
@@ -356,8 +370,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <FieldLabel>Habitaciones</FieldLabel>
+              <FieldLabel htmlFor="property-bedrooms">Habitaciones</FieldLabel>
               <Input
+                id="property-bedrooms"
                 placeholder="2"
                 value={bedrooms}
                 onChange={(e) => { setBedrooms(e.target.value); clearError("bedrooms") }}
@@ -369,8 +384,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
               <FieldError message={fieldErrors.bedrooms} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Baños</FieldLabel>
+              <FieldLabel htmlFor="property-bathrooms">Baños</FieldLabel>
               <Input
+                id="property-bathrooms"
                 placeholder="1"
                 value={bathrooms}
                 onChange={(e) => { setBathrooms(e.target.value); clearError("bathrooms") }}
@@ -382,8 +398,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
               <FieldError message={fieldErrors.bathrooms} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Parqueaderos</FieldLabel>
+              <FieldLabel htmlFor="property-parking">Parqueaderos</FieldLabel>
               <Input
+                id="property-parking"
                 placeholder="1"
                 value={parking}
                 onChange={(e) => { setParking(e.target.value); clearError("parking") }}
@@ -421,8 +438,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
         {/* Description */}
         <SectionCard id="tour-description" title="Descripción" optional>
           <div className="space-y-1.5">
-            <FieldLabel>Descripción libre</FieldLabel>
+            <FieldLabel htmlFor="property-description">Descripción libre</FieldLabel>
             <textarea
+              id="property-description"
               placeholder="Describe la propiedad: características, acabados, ubicación, puntos de interés cercanos..."
               value={description}
               onChange={(e) => { setDescription(e.target.value); clearError("description") }}
@@ -467,8 +485,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
                 </div>
               )}
               <div className="space-y-1.5">
-                <FieldLabel>Título en inglés</FieldLabel>
+                <FieldLabel htmlFor="property-title-en">Título en inglés</FieldLabel>
                 <Input
+                  id="property-title-en"
                   placeholder="E.g. Modern apartment with park view"
                   value={titleEn}
                   onChange={(e) => { setTitleEn(e.target.value); clearError("titleEn") }}
@@ -479,8 +498,9 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
                 <FieldError message={fieldErrors.titleEn} />
               </div>
               <div className="space-y-1.5">
-                <FieldLabel>Descripción en inglés</FieldLabel>
+                <FieldLabel htmlFor="property-description-en">Descripción en inglés</FieldLabel>
                 <textarea
+                  id="property-description-en"
                   placeholder="Describe the property, finishes, location and nearby points of interest..."
                   value={descriptionEn}
                   onChange={(e) => { setDescriptionEn(e.target.value); clearError("descriptionEn") }}

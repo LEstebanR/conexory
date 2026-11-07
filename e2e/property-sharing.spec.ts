@@ -9,11 +9,10 @@ test("registro → crear propiedad → compartir", async ({ page }) => {
   await page.goto("/dashboard/properties/new")
 
   await page.getByRole("button", { name: "Apartamento", exact: true }).click()
-  await page.getByPlaceholder("Ej: Apartamento moderno con vista al parque").fill(title)
-  await page.getByPlaceholder("2.800.000").fill("350000000")
-  // Only <select> on the page — Departamento/Ciudad aren't <label for> pairs.
-  await page.locator("select").selectOption({ label: "Cundinamarca" })
-  await page.getByPlaceholder("Buscar ciudad…").fill("Bogotá D.C.")
+  await page.getByLabel("Título del anuncio").fill(title)
+  await page.getByLabel("Precio").fill("350000000")
+  await page.getByLabel("Departamento").selectOption({ label: "Cundinamarca" })
+  await page.getByLabel("Ciudad").fill("Bogotá D.C.")
   await page.getByRole("button", { name: "Bogotá D.C.", exact: true }).click()
 
   // MapPicker keeps re-centering after the city is set, so force skips
