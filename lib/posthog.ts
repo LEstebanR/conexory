@@ -12,3 +12,10 @@ export function posthogKey(): string | null {
 export function posthogRewrites() {
   return [{ source: `${POSTHOG_PROXY_PATH}/:path*`, destination: `${POSTHOG_INGEST_HOST}/:path*` }]
 }
+
+// skipTrailingSlashRedirect (needed by the proxy) turns off Next's own
+// trailing-slash redirect site-wide; this restores it for every path except
+// the proxy, so /precios/ and /precios don't become two indexable pages.
+export function trailingSlashRedirects() {
+  return [{ source: `/:path((?!${POSTHOG_PROXY_PATH.slice(1)}(?:/|$)).+)/`, destination: "/:path", permanent: true }]
+}

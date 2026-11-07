@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { POSTHOG_INGEST_HOST, posthogKey, posthogRewrites } from "./posthog"
+import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match"
+import { POSTHOG_INGEST_HOST, posthogKey, posthogRewrites, trailingSlashRedirects } from "./posthog"
 
 const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
 
@@ -25,5 +26,31 @@ describe("posthogKey", () => {
 describe("posthogRewrites", () => {
   test("proxies the ingest path to PostHog", () => {
     expect(posthogRewrites()).toEqual([{ source: "/ingest/:path*", destination: `${POSTHOG_INGEST_HOST}/:path*` }])
+  })
+})
+
+describe("trailingSlashRedirects", () => {
+  const [redirect] = trailingSlashRedirects()
+  const match = getPathMatch(redirect.source, { strict: true, removeUnnamedParams: true })
+
+  test("is permanent and drops the trailing slash", () => {
+    expect(redirect.permanent).toBe(true)
+    expect(match("/precios/")).toEqual({ path: "precios" })
+    expect(match("/p/abc123/")).toEqual({ path: "p/abc123" })
+  })
+
+  test("leaves paths without a trailing slash and the root alone", () => {
+    expect(match("/precios")).toBe(false)
+    expect(match("/")).toBe(false)
+  })
+
+  test("never redirects the PostHog proxy", () => {
+    expect(match("/ingest/")).toBe(false)
+    expect(match("/ingest/e/")).toBe(false)
+    expect(match("/ingest/i/v0/e/")).toBe(false)
+  })
+
+  test("still redirects paths that only start like the proxy", () => {
+    expect(match("/ingestion/")).toEqual({ path: "ingestion" })
   })
 })
