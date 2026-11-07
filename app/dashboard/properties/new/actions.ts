@@ -6,6 +6,7 @@ import { invalidatePublicListings } from "@/lib/public-cache"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { propertyLimit, photoLimit, hasProAccess, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
+import { reportError } from "@/lib/report-error"
 
 async function generateUniqueSlug(): Promise<string> {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -95,7 +96,7 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
 
     return { success: true, id: property.id }
   } catch (err) {
-    console.error("createProperty failed:", err)
+    await reportError("createProperty failed", err)
     return {
       success: false,
       error:

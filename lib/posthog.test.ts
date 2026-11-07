@@ -1,0 +1,56 @@
+import { afterEach, describe, expect, test } from "bun:test"
+import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match"
+import { POSTHOG_INGEST_HOST, posthogKey, posthogRewrites, trailingSlashRedirects } from "./posthog"
+
+const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
+
+afterEach(() => {
+  if (originalKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY
+  else process.env.NEXT_PUBLIC_POSTHOG_KEY = originalKey
+})
+
+describe("posthogKey", () => {
+  test("returns the configured key", () => {
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test"
+    expect(posthogKey()).toBe("phc_test")
+  })
+
+  test("treats a missing or empty key as absent", () => {
+    delete process.env.NEXT_PUBLIC_POSTHOG_KEY
+    expect(posthogKey()).toBeNull()
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = ""
+    expect(posthogKey()).toBeNull()
+  })
+})
+
+describe("posthogRewrites", () => {
+  test("proxies the ingest path to PostHog", () => {
+    expect(posthogRewrites()).toEqual([{ source: "/ingest/:path*", destination: `${POSTHOG_INGEST_HOST}/:path*` }])
+  })
+})
+
+describe("trailingSlashRedirects", () => {
+  const [redirect] = trailingSlashRedirects()
+  const match = getPathMatch(redirect.source, { strict: true, removeUnnamedParams: true })
+
+  test("is permanent and drops the trailing slash", () => {
+    expect(redirect.permanent).toBe(true)
+    expect(match("/precios/")).toEqual({ path: "precios" })
+    expect(match("/p/abc123/")).toEqual({ path: "p/abc123" })
+  })
+
+  test("leaves paths without a trailing slash and the root alone", () => {
+    expect(match("/precios")).toBe(false)
+    expect(match("/")).toBe(false)
+  })
+
+  test("never redirects the PostHog proxy", () => {
+    expect(match("/ingest/")).toBe(false)
+    expect(match("/ingest/e/")).toBe(false)
+    expect(match("/ingest/i/v0/e/")).toBe(false)
+  })
+
+  test("still redirects paths that only start like the proxy", () => {
+    expect(match("/ingestion/")).toEqual({ path: "ingestion" })
+  })
+})

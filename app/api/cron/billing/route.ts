@@ -7,6 +7,7 @@ import {
   type OrphanReason,
 } from "@/lib/orphan-subscriptions"
 import { sendRenewalReminder, sendSubscriptionCancelled } from "@/lib/email"
+import { reportError } from "@/lib/report-error"
 
 // Daily billing job (scheduled in vercel.json). Mercado Pago drives the
 // recurring charges itself (unlike Wompi) and reports outcomes via
@@ -180,7 +181,7 @@ async function cancelOrphanSubscriptions(summary: { orphansCanceled: number }) {
   const live = await searchLivePreapprovals()
   if (!live.ok || !live.results) {
     // Never infer "no live subscriptions" from a failed lookup.
-    console.error("Orphan reconciliation skipped: preapproval search failed", {
+    await reportError("Orphan reconciliation skipped: preapproval search failed", undefined, {
       error: live.error,
     })
     return
@@ -200,10 +201,9 @@ async function cancelOrphanSubscriptions(summary: { orphansCanceled: number }) {
       id: preapproval.id,
       externalReference: preapproval.externalReference,
       dateCreated: preapproval.dateCreated,
-    }).catch((err) => {
-      console.error("Orphan reconciliation aborted: classification failed", {
+    }).catch(async (err) => {
+      await reportError("Orphan reconciliation aborted: classification failed", err, {
         preapprovalId: preapproval.id,
-        err,
       })
       return null
     })
@@ -214,7 +214,7 @@ async function cancelOrphanSubscriptions(summary: { orphansCanceled: number }) {
   }
 
   if (orphans.length > MAX_ORPHAN_CANCELS_PER_RUN) {
-    console.error("Orphan reconciliation aborted: too many candidates", {
+    await reportError("Orphan reconciliation aborted: too many candidates", undefined, {
       candidates: orphans.length,
       limit: MAX_ORPHAN_CANCELS_PER_RUN,
       preapprovalIds: orphans.map((o) => o.preapproval.id),
