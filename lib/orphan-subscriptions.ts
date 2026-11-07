@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { cancelPreapproval, referenceToUserId } from "@/lib/mercadopago"
+import { reportError } from "@/lib/report-error"
 
 // A preapproval keeps charging on Mercado Pago's schedule until we cancel it,
 // and nothing in our database is required for that to happen. So whenever the
@@ -129,7 +130,7 @@ export async function cancelOrphanPreapproval(
   if (result.ok) {
     console.warn(`Orphan subscription cancelled (${input.reason})`, context)
   } else {
-    console.error(`Orphan subscription could NOT be cancelled (${input.reason})`, context)
+    await reportError(`Orphan subscription could NOT be cancelled (${input.reason})`, undefined, context)
   }
 
   return { cancelled: result.ok }

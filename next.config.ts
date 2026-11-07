@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
+import { posthogRewrites } from "./lib/posthog";
 
 const nextConfig: NextConfig = {
+  // PostHog's API paths end in a trailing slash; redirecting them would break the proxy.
+  skipTrailingSlashRedirect: true,
+  async rewrites() {
+    return posthogRewrites();
+  },
   images: {
     remotePatterns: [
       {

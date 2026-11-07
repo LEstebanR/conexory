@@ -7,6 +7,7 @@ import {
 } from "@/lib/mercadopago"
 import { classifyPreapproval, cancelOrphanPreapproval } from "@/lib/orphan-subscriptions"
 import { sendPaymentFailed, sendSubscriptionConfirmation } from "@/lib/email"
+import { reportError } from "@/lib/report-error"
 
 export async function POST(req: Request) {
   const url = new URL(req.url)
@@ -48,7 +49,10 @@ export async function POST(req: Request) {
 
 async function handlePaymentNotification(paymentId: string, type: string, body: object) {
   const payment = await getPayment(paymentId)
-  if (!payment.ok) return
+  if (!payment.ok) {
+    await reportError("Mercado Pago webhook: payment lookup failed", undefined, { paymentId, error: payment.error })
+    return
+  }
 
   // The status is part of the idempotency key, not just the id: a single
   // payment/preapproval goes through several distinct statuses over its
@@ -115,7 +119,13 @@ async function stopOrphanCharge({
 
 async function handlePreapprovalNotification(preapprovalId: string, type: string, body: object) {
   const preapproval = await getPreapproval(preapprovalId)
-  if (!preapproval.ok) return
+  if (!preapproval.ok) {
+    await reportError("Mercado Pago webhook: preapproval lookup failed", undefined, {
+      preapprovalId,
+      error: preapproval.error,
+    })
+    return
+  }
 
   const externalId = `${type}-${preapprovalId}-${preapproval.status ?? "unknown"}`
   const isNew = await recordEvent(externalId, type, preapproval.status ?? "unknown", body)
