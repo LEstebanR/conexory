@@ -1,100 +1,27 @@
 "use client"
 
-import { useState, useRef, useEffect, useLayoutEffect } from "react"
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core"
-import {
-  SortableContext,
-  useSortable,
-  arrayMove,
-  rectSortingStrategy,
-} from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
+import { useState, useRef, useEffect, useLayoutEffect, createContext, use } from "react"
+import dynamic from "next/dynamic"
 import imageCompression from "browser-image-compression"
-import { ImagePlus, X, Loader2, AlertCircle, Plus } from "lucide-react"
+import { ImagePlus, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-type ImageItem = {
-  id: string
-  preview: string
-  url: string | null
-  uploading: boolean
-  error: boolean
-}
+import { PhotoGrid, type ImageItem, type PhotoGridProps } from "./photo-grid"
 
 const MAX_SIZE_MB = 20
 
-function SortablePhoto({
-  item,
-  index,
-  onRemove,
-}: {
-  item: ImageItem
-  index: number
-  onRemove: (id: string) => void
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: item.id })
+// next/dynamic's `loading` receives no props, so the fallback reads the photos from context
+// to render the same grid (without drag-and-drop) while the dnd-kit chunk downloads.
+const PhotoGridFallbackContext = createContext<PhotoGridProps | null>(null)
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
-    zIndex: isDragging ? 10 : undefined,
-  }
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="relative aspect-square rounded-xl overflow-hidden bg-canvas-soft touch-none"
-    >
-      {/* Drag target — whole tile (excluding the X button) */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute inset-0 cursor-grab active:cursor-grabbing"
-      />
-
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={item.preview} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
-
-      {item.uploading && (
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
-          <Loader2 className="w-5 h-5 text-white animate-spin" />
-        </div>
-      )}
-      {item.error && (
-        <div className="absolute inset-0 bg-red-500/50 flex flex-col items-center justify-center gap-1 pointer-events-none">
-          <AlertCircle className="w-5 h-5 text-white" />
-          <span className="text-[10px] text-white font-bold">Error</span>
-        </div>
-      )}
-
-      {/* X button — sits above drag listeners */}
-      <button
-        type="button"
-        onClick={() => onRemove(item.id)}
-        aria-label="Eliminar foto"
-        className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-sm"
-      >
-        <X className="w-4 h-4" strokeWidth={2.5} />
-      </button>
-
-      {index === 0 && (
-        <div className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold bg-ink text-white px-1.5 py-0.5 rounded-full pointer-events-none">
-          Portada
-        </div>
-      )}
-    </div>
-  )
+function PhotoGridFallback() {
+  const props = use(PhotoGridFallbackContext)
+  return props ? <PhotoGrid {...props} /> : null
 }
+
+const SortablePhotoGrid = dynamic(() => import("./sortable-photo-grid"), {
+  ssr: false,
+  loading: () => <PhotoGridFallback />,
+})
 
 export default function ImageUpload({
   onUrlsChange,
@@ -130,22 +57,6 @@ export default function ImageUpload({
     onUrlsChangeRef.current(items.filter((i) => i.url).map((i) => i.url!))
     onUploadingChangeRef.current(items.some((i) => i.uploading))
   }, [items])
-
-  // distance:8 prevents accidental drags on click/tap
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
-  )
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (over && active.id !== over.id) {
-      setItems((prev) => {
-        const from = prev.findIndex((i) => i.id === active.id)
-        const to = prev.findIndex((i) => i.id === over.id)
-        return arrayMove(prev, from, to)
-      })
-    }
-  }
 
   async function uploadOne(file: File, itemId: string) {
     try {
@@ -195,7 +106,20 @@ export default function ImageUpload({
     })
   }
 
-  const canAdd = items.length < maxImages
+  const gridProps: PhotoGridProps = {
+    items,
+    onRemove: remove,
+    addButton: items.length < maxImages && (
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong hover:border-ink hover:bg-canvas-soft/30 flex flex-col items-center justify-center gap-1.5 text-mute hover:text-ink transition-colors"
+      >
+        <Plus className="w-6 h-6" strokeWidth={2} />
+        <span className="text-xs font-semibold">Agregar</span>
+      </button>
+    ),
+  }
 
   return (
     <div className="space-y-3">
@@ -246,35 +170,9 @@ export default function ImageUpload({
 
       {items.length > 0 && (
         <>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={items.map((i) => i.id)} strategy={rectSortingStrategy}>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {items.map((item, index) => (
-                  <SortablePhoto
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    onRemove={remove}
-                  />
-                ))}
-
-                {canAdd && (
-                  <button
-                    type="button"
-                    onClick={() => inputRef.current?.click()}
-                    className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong hover:border-ink hover:bg-canvas-soft/30 flex flex-col items-center justify-center gap-1.5 text-mute hover:text-ink transition-colors"
-                  >
-                    <Plus className="w-6 h-6" strokeWidth={2} />
-                    <span className="text-xs font-semibold">Agregar</span>
-                  </button>
-                )}
-              </div>
-            </SortableContext>
-          </DndContext>
+          <PhotoGridFallbackContext value={gridProps}>
+            <SortablePhotoGrid {...gridProps} onReorder={setItems} />
+          </PhotoGridFallbackContext>
 
           <p className="text-xs text-mute">
             Arrastra las fotos para reordenar · La primera es la portada · {items.length}/{maxImages} fotos
