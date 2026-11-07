@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 import { DEPARTAMENTOS, getCitiesForDepartamento } from "@/lib/colombia"
 
@@ -28,12 +28,14 @@ function ChevronDown() {
 }
 
 function CityCombobox({
+  id,
   cities,
   value,
   onChange,
   disabled,
   required,
 }: {
+  id: string
   cities: string[]
   value: string
   onChange: (v: string) => void
@@ -88,6 +90,7 @@ function CityCombobox({
   return (
     <div ref={containerRef} className="relative">
       <input
+        id={id}
         ref={inputRef}
         type="text"
         value={inputValue}
@@ -144,6 +147,8 @@ export default function LocationSelect({
 }: Props) {
   const [selectedState, setSelectedState] = useState(initialState)
   const [selectedCity, setSelectedCity] = useState(initialCity)
+  const stateId = useId()
+  const cityId = useId()
 
   const cities = getCitiesForDepartamento(selectedState)
 
@@ -166,9 +171,10 @@ export default function LocationSelect({
     <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-3", className)}>
       {/* Department (state) — plain select, only 32 options */}
       <div className="space-y-1.5">
-        <label className="block text-sm font-semibold text-ink">Departamento</label>
+        <label htmlFor={stateId} className="block text-sm font-semibold text-ink">Departamento</label>
         <div className="relative">
           <select
+            id={stateId}
             value={selectedState}
             onChange={(e) => handleStateChange(e.target.value)}
             className={selectClass}
@@ -185,8 +191,9 @@ export default function LocationSelect({
 
       {/* City — combobox with filtering */}
       <div className="space-y-1.5">
-        <label className="block text-sm font-semibold text-ink">Ciudad</label>
+        <label htmlFor={cityId} className="block text-sm font-semibold text-ink">Ciudad</label>
         <CityCombobox
+          id={cityId}
           key={selectedState}
           cities={cities}
           value={selectedCity}

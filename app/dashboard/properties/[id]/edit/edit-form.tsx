@@ -56,9 +56,17 @@ function SectionCard({ title, children, id }: { title: string; children: React.R
   )
 }
 
-function FieldLabel({ children, optional }: { children: React.ReactNode; optional?: boolean }) {
+function FieldLabel({
+  htmlFor,
+  children,
+  optional,
+}: {
+  htmlFor: string
+  children: React.ReactNode
+  optional?: boolean
+}) {
   return (
-    <label className="block text-sm font-semibold text-ink">
+    <label htmlFor={htmlFor} className="block text-sm font-semibold text-ink">
       {children}
       {optional && <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>}
     </label>
@@ -237,14 +245,14 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
                 </div>
               )}
               <div className="space-y-1.5">
-                <FieldLabel>Título en inglés</FieldLabel>
-                <Input placeholder="E.g. Modern apartment with park view" value={titleEn} onChange={(e) => { setTitleEn(e.target.value); clearError("titleEn") }} className="h-11" maxLength={120} />
+                <FieldLabel htmlFor="property-title-en">Título en inglés</FieldLabel>
+                <Input id="property-title-en" placeholder="E.g. Modern apartment with park view" value={titleEn} onChange={(e) => { setTitleEn(e.target.value); clearError("titleEn") }} className="h-11" maxLength={120} />
                 <p className="text-xs text-mute text-right">{titleEn.length}/120</p>
                 <FieldError message={fieldErrors.titleEn} />
               </div>
               <div className="space-y-1.5">
-                <FieldLabel>Descripción en inglés</FieldLabel>
-                <textarea placeholder="Describe the property, finishes, location and nearby points of interest..." value={descriptionEn} onChange={(e) => { setDescriptionEn(e.target.value); clearError("descriptionEn") }} rows={5} maxLength={1000} className="w-full rounded-xl border border-hairline-strong px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors" />
+                <FieldLabel htmlFor="property-description-en">Descripción en inglés</FieldLabel>
+                <textarea id="property-description-en" placeholder="Describe the property, finishes, location and nearby points of interest..." value={descriptionEn} onChange={(e) => { setDescriptionEn(e.target.value); clearError("descriptionEn") }} rows={5} maxLength={1000} className="w-full rounded-xl border border-hairline-strong px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors" />
                 <p className="text-xs text-mute text-right">{descriptionEn.length}/1000</p>
                 <FieldError message={fieldErrors.descriptionEn} />
               </div>
@@ -283,8 +291,9 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
             maxImages={photoLimit(isPremium)}
           />
           <div className="space-y-1.5 pt-4 border-t border-hairline">
-            <FieldLabel optional>Video de YouTube</FieldLabel>
+            <FieldLabel htmlFor="property-video-url" optional>Video de YouTube</FieldLabel>
             <Input
+              id="property-video-url"
               placeholder="https://youtube.com/watch?v=..."
               value={videoUrl}
               onChange={(e) => { setVideoUrl(e.target.value); clearError("videoUrl") }}
@@ -300,8 +309,9 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
 
         <SectionCard id="tour-basic" title="Información básica">
           <div className="space-y-1.5">
-            <FieldLabel>Título del anuncio</FieldLabel>
+            <FieldLabel htmlFor="property-title">Título del anuncio</FieldLabel>
             <Input
+              id="property-title"
               placeholder="Ej: Apartamento moderno con vista al parque"
               value={title}
               onChange={(e) => { setTitle(e.target.value); clearError("title") }}
@@ -313,10 +323,11 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           </div>
 
           <div className="space-y-1.5">
-            <FieldLabel>Precio</FieldLabel>
+            <FieldLabel htmlFor="property-price">Precio</FieldLabel>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-mute select-none">$</span>
               <input
+                id="property-price"
                 type="text"
                 inputMode="numeric"
                 placeholder="2.800.000"
@@ -340,39 +351,39 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
           </div>
 
           <div className="space-y-1.5">
-            <FieldLabel optional>Barrio / Zona</FieldLabel>
-            <Input placeholder="Chapinero" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="h-11" />
+            <FieldLabel htmlFor="property-neighborhood" optional>Barrio / Zona</FieldLabel>
+            <Input id="property-neighborhood" placeholder="Chapinero" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="h-11" />
           </div>
         </SectionCard>
 
         <SectionCard id="tour-details" title="Detalles">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <FieldLabel optional>Área (m²)</FieldLabel>
-              <Input placeholder="65" value={area} onChange={(e) => { setArea(e.target.value); clearError("area") }} className="h-11" type="number" inputMode="decimal" min="0" />
+              <FieldLabel htmlFor="property-area" optional>Área (m²)</FieldLabel>
+              <Input id="property-area" placeholder="65" value={area} onChange={(e) => { setArea(e.target.value); clearError("area") }} className="h-11" type="number" inputMode="decimal" min="0" />
               <FieldError message={fieldErrors.area} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel optional>Terreno (m²)</FieldLabel>
-              <Input placeholder="120" value={landArea} onChange={(e) => { setLandArea(e.target.value); clearError("landArea") }} className="h-11" type="number" inputMode="decimal" min="0" />
+              <FieldLabel htmlFor="property-land-area" optional>Terreno (m²)</FieldLabel>
+              <Input id="property-land-area" placeholder="120" value={landArea} onChange={(e) => { setLandArea(e.target.value); clearError("landArea") }} className="h-11" type="number" inputMode="decimal" min="0" />
               <FieldError message={fieldErrors.landArea} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <FieldLabel optional>Habitaciones</FieldLabel>
-              <Input placeholder="2" value={bedrooms} onChange={(e) => { setBedrooms(e.target.value); clearError("bedrooms") }} className="h-11" type="number" inputMode="numeric" min="0" />
+              <FieldLabel htmlFor="property-bedrooms" optional>Habitaciones</FieldLabel>
+              <Input id="property-bedrooms" placeholder="2" value={bedrooms} onChange={(e) => { setBedrooms(e.target.value); clearError("bedrooms") }} className="h-11" type="number" inputMode="numeric" min="0" />
               <FieldError message={fieldErrors.bedrooms} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel optional>Baños</FieldLabel>
-              <Input placeholder="1" value={bathrooms} onChange={(e) => { setBathrooms(e.target.value); clearError("bathrooms") }} className="h-11" type="number" inputMode="numeric" min="0" />
+              <FieldLabel htmlFor="property-bathrooms" optional>Baños</FieldLabel>
+              <Input id="property-bathrooms" placeholder="1" value={bathrooms} onChange={(e) => { setBathrooms(e.target.value); clearError("bathrooms") }} className="h-11" type="number" inputMode="numeric" min="0" />
               <FieldError message={fieldErrors.bathrooms} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel optional>Parqueaderos</FieldLabel>
-              <Input placeholder="1" value={parking} onChange={(e) => { setParking(e.target.value); clearError("parking") }} className="h-11" type="number" inputMode="numeric" min="0" />
+              <FieldLabel htmlFor="property-parking" optional>Parqueaderos</FieldLabel>
+              <Input id="property-parking" placeholder="1" value={parking} onChange={(e) => { setParking(e.target.value); clearError("parking") }} className="h-11" type="number" inputMode="numeric" min="0" />
               <FieldError message={fieldErrors.parking} />
             </div>
           </div>
@@ -401,8 +412,9 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
 
         <SectionCard id="tour-description" title="Descripción">
           <div className="space-y-1.5">
-            <FieldLabel optional>Descripción libre</FieldLabel>
+            <FieldLabel htmlFor="property-description" optional>Descripción libre</FieldLabel>
             <textarea
+              id="property-description"
               placeholder="Describe la propiedad: características, acabados, ubicación..."
               value={description}
               onChange={(e) => { setDescription(e.target.value); clearError("description") }}
