@@ -29,13 +29,24 @@ export function loadPostHog(): Promise<PostHog | null> {
       })
       return posthog
     })
-    .catch(() => null)
+    .catch(() => {
+      // A stale tab after a deploy can fail to fetch the chunk; forget the
+      // failure so the next error retries instead of staying silent.
+      loading = undefined
+      return null
+    })
   return loading
 }
 
+// Never rejects: the unhandledrejection listener calls this, and a rejection
+// here would fire that listener again.
 export async function captureClientError(error: unknown, properties?: Record<string, unknown>): Promise<void> {
-  const posthog = await loadPostHog()
-  posthog?.captureException(error, properties)
+  try {
+    const posthog = await loadPostHog()
+    posthog?.captureException(error, properties)
+  } catch {
+    // Error tracking must never become a source of errors itself.
+  }
 }
 
 // Errors React catches in an error boundary don't reach these listeners; the
@@ -49,6 +60,13 @@ export function captureUncaughtErrors(): void {
   window.addEventListener("unhandledrejection", (event) => {
     void captureClientError(event.reason, { source: "unhandledrejection" })
   })
+}
+
+// Server errors reach the boundary with a digest and a message redacted in
+// production; onRequestError already reported the real one on the server.
+export function captureBoundaryError(error: Error & { digest?: string }, boundary: string): void {
+  if (error.digest) return
+  void captureClientError(error, { boundary })
 }
 
 export function resetPostHogClientForTests() {

@@ -7,7 +7,8 @@ mock.module("posthog-js", () => ({
   default: { init: mockInit, captureException: mockCaptureException },
 }))
 
-const { loadPostHog, captureClientError, captureUncaughtErrors, resetPostHogClientForTests } = await import(
+const { loadPostHog, captureClientError, captureBoundaryError, captureUncaughtErrors, resetPostHogClientForTests } =
+  await import(
   "./posthog-client"
 )
 
@@ -86,6 +87,15 @@ describe("loadPostHog", () => {
     })
     expect(await loadPostHog()).toBeNull()
   })
+
+  test("retries after a failed load instead of staying off", async () => {
+    mockInit.mockImplementationOnce(() => {
+      throw new Error("chunk failed")
+    })
+    expect(await loadPostHog()).toBeNull()
+    expect(await loadPostHog()).not.toBeNull()
+    expect(mockInit).toHaveBeenCalledTimes(2)
+  })
 })
 
 describe("captureClientError", () => {
@@ -101,6 +111,28 @@ describe("captureClientError", () => {
     process.env.NEXT_PUBLIC_POSTHOG_KEY = ""
     await captureClientError(new Error("render failed"))
     expect(mockCaptureException).not.toHaveBeenCalled()
+  })
+
+  test("never rejects, so it can't retrigger the unhandledrejection listener", async () => {
+    mockCaptureException.mockImplementationOnce(() => {
+      throw new Error("bad reason object")
+    })
+    await expect(captureClientError({})).resolves.toBeUndefined()
+  })
+})
+
+describe("captureBoundaryError", () => {
+  test("reports client-side errors with their boundary", async () => {
+    const error = new Error("render failed")
+    captureBoundaryError(error, "dashboard")
+    await flush()
+    expect(mockCaptureException).toHaveBeenCalledWith(error, { boundary: "dashboard" })
+  })
+
+  test("skips server errors, which onRequestError already reported", async () => {
+    captureBoundaryError(Object.assign(new Error("redacted"), { digest: "123" }), "root")
+    await flush()
+    expect(mockInit).not.toHaveBeenCalled()
   })
 })
 

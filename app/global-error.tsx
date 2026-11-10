@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { SUPPORT_EMAIL } from "@/lib/urls"
-import { captureClientError } from "@/lib/posthog-client"
+import { captureBoundaryError } from "@/lib/posthog-client"
 import type { ErrorBoundaryProps } from "@/components/error-fallback"
 import "./globals.css"
 
@@ -11,7 +11,7 @@ import "./globals.css"
 export default function GlobalError({ error, reset }: ErrorBoundaryProps) {
   useEffect(() => {
     console.error(error)
-    void captureClientError(error, { boundary: "global", digest: error.digest })
+    captureBoundaryError(error, "global")
   }, [error])
 
   return (

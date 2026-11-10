@@ -19,3 +19,7 @@ export function posthogRewrites() {
 export function trailingSlashRedirects() {
   return [{ source: `/:path((?!${POSTHOG_PROXY_PATH.slice(1)}(?:/|$)).+)/`, destination: "/:path", permanent: true }]
 }
+
+export function pathWithoutQuery(url: string): string {
+  return url.split(/[?#]/, 1)[0]
+}

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test"
 import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match"
-import { POSTHOG_INGEST_HOST, posthogKey, posthogRewrites, trailingSlashRedirects } from "./posthog"
+import { POSTHOG_INGEST_HOST, pathWithoutQuery, posthogKey, posthogRewrites, trailingSlashRedirects } from "./posthog"
 
 const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
 
@@ -52,5 +52,13 @@ describe("trailingSlashRedirects", () => {
 
   test("still redirects paths that only start like the proxy", () => {
     expect(match("/ingestion/")).toEqual({ path: "ingestion" })
+  })
+})
+
+describe("pathWithoutQuery", () => {
+  test("drops the query string and fragment, which can carry secrets", () => {
+    expect(pathWithoutQuery("/reset-password?token=abc123")).toBe("/reset-password")
+    expect(pathWithoutQuery("/p/slug#fotos")).toBe("/p/slug")
+    expect(pathWithoutQuery("/precios")).toBe("/precios")
   })
 })

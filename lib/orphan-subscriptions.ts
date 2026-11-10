@@ -120,15 +120,15 @@ export async function cancelOrphanPreapproval(
 
   await recordOrphanEvent(input, result.ok)
 
+  // The payer email stays out of the PostHog report; the orphan event row keeps it.
   const context = {
     source: input.source,
     preapprovalId: input.preapprovalId,
     userId: input.userId,
-    payerEmail: input.payerEmail,
     ...input.detail,
   }
   if (result.ok) {
-    console.warn(`Orphan subscription cancelled (${input.reason})`, context)
+    console.warn(`Orphan subscription cancelled (${input.reason})`, { ...context, payerEmail: input.payerEmail })
   } else {
     await reportError(`Orphan subscription could NOT be cancelled (${input.reason})`, undefined, context)
   }

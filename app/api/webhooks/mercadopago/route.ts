@@ -47,10 +47,21 @@ export async function POST(req: Request) {
   return new Response(null, { status: 200 })
 }
 
+// Mercado Pago's "simulate notification" and test payloads carry fake ids that
+// 404 on lookup. Those are noise, not failures worth an alert.
+async function reportLookupFailure(resource: "payment" | "preapproval", context: { error?: string } & Record<string, unknown>) {
+  const message = `Mercado Pago webhook: ${resource} lookup failed`
+  if (context.error === "http_404") {
+    console.warn(message, context)
+    return
+  }
+  await reportError(message, undefined, context)
+}
+
 async function handlePaymentNotification(paymentId: string, type: string, body: object) {
   const payment = await getPayment(paymentId)
   if (!payment.ok) {
-    await reportError("Mercado Pago webhook: payment lookup failed", undefined, { paymentId, error: payment.error })
+    await reportLookupFailure("payment", { paymentId, error: payment.error })
     return
   }
 
@@ -120,10 +131,7 @@ async function stopOrphanCharge({
 async function handlePreapprovalNotification(preapprovalId: string, type: string, body: object) {
   const preapproval = await getPreapproval(preapprovalId)
   if (!preapproval.ok) {
-    await reportError("Mercado Pago webhook: preapproval lookup failed", undefined, {
-      preapprovalId,
-      error: preapproval.error,
-    })
+    await reportLookupFailure("preapproval", { preapprovalId, error: preapproval.error })
     return
   }
 
