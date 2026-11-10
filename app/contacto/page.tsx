@@ -3,6 +3,7 @@ import { pageMetadata } from "@/lib/page-metadata"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Reveal from "@/components/reveal"
+import { SUPPORT_EMAIL } from "@/lib/urls"
 
 export const metadata = pageMetadata({
   title: "Contacto",
@@ -11,8 +12,8 @@ export const metadata = pageMetadata({
 })
 
 const channels = [
-  { icon: Mail, title: "Email general", value: "Conexory@gmail.com", note: "Para cualquier consulta", href: "mailto:Conexory@gmail.com" },
-  { icon: MessageCircle, title: "Soporte técnico", value: "Conexory@gmail.com", note: "Problemas con la plataforma", href: "mailto:Conexory@gmail.com" },
+  { icon: Mail, title: "Email general", value: SUPPORT_EMAIL, note: "Para cualquier consulta", href: `mailto:${SUPPORT_EMAIL}` },
+  { icon: MessageCircle, title: "Soporte técnico", value: SUPPORT_EMAIL, note: "Problemas con la plataforma", href: `mailto:${SUPPORT_EMAIL}` },
   { icon: MapPin, title: "Ubicación", value: "Bogotá D.C.", note: "Colombia", href: null },
 ]
 
@@ -27,7 +28,7 @@ const faqs = [
   },
   {
     q: "¿Cómo elimino mi cuenta?",
-    a: "Escríbenos a Conexory@gmail.com y procesamos la eliminación en menos de 24 horas.",
+    a: `Escríbenos a ${SUPPORT_EMAIL} y procesamos la eliminación en menos de 24 horas.`,
   },
   {
     q: "¿Dónde se almacenan mis datos?",

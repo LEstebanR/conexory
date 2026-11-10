@@ -6,6 +6,7 @@ import LegalLayout, {
   LegalSubtitle,
   LegalHighlight,
 } from "@/components/legal-layout"
+import { SUPPORT_EMAIL } from "@/lib/urls"
 
 export const metadata: Metadata = {
   title: "Política de Privacidad",
@@ -36,7 +37,7 @@ export default function PrivacyPage() {
     <LegalLayout
       title="Política de Privacidad"
       description="Cómo recopilamos, usamos y protegemos tus datos personales, en cumplimiento de la Ley 1581 de 2012 (Habeas Data) y demás normas colombianas aplicables."
-      lastUpdated="31 de mayo de 2026"
+      lastUpdated="10 de noviembre de 2026"
       sections={sections}
     >
       <LegalHighlight>
@@ -69,10 +70,10 @@ export default function PrivacyPage() {
               Correo para datos personales:
             </span>{" "}
             <a
-              href="mailto:Conexory@gmail.com"
+              href={`mailto:${SUPPORT_EMAIL}`}
               className="text-ink hover:underline"
             >
-              Conexory@gmail.com
+              {SUPPORT_EMAIL}
             </a>
           </p>
         </div>
@@ -162,10 +163,10 @@ export default function PrivacyPage() {
         <LegalP>
           Para ejercer cualquiera de estos derechos, escríbenos a{" "}
           <a
-            href="mailto:Conexory@gmail.com"
+            href={`mailto:${SUPPORT_EMAIL}`}
             className="text-ink font-semibold hover:underline"
           >
-            Conexory@gmail.com
+            {SUPPORT_EMAIL}
           </a>
           . Responderemos en un plazo máximo de diez (10) días hábiles, según lo
           establece la Ley 1581 de 2012.
@@ -281,10 +282,10 @@ export default function PrivacyPage() {
           Si eres padre, madre o tutor y crees que tu hijo ha creado una cuenta
           en Conexory, contáctanos en{" "}
           <a
-            href="mailto:Conexory@gmail.com"
+            href={`mailto:${SUPPORT_EMAIL}`}
             className="text-ink font-semibold hover:underline"
           >
-            Conexory@gmail.com
+            {SUPPORT_EMAIL}
           </a>{" "}
           para proceder a la eliminación inmediata de sus datos.
         </LegalP>
@@ -320,10 +321,10 @@ export default function PrivacyPage() {
           <p>
             <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
-              href="mailto:Conexory@gmail.com"
+              href={`mailto:${SUPPORT_EMAIL}`}
               className="text-ink hover:underline"
             >
-              Conexory@gmail.com
+              {SUPPORT_EMAIL}
             </a>
           </p>
           <p>

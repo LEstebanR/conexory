@@ -5,6 +5,7 @@ import LegalLayout, {
   LegalList,
   LegalHighlight,
 } from "@/components/legal-layout"
+import { SUPPORT_EMAIL } from "@/lib/urls"
 
 export const metadata: Metadata = {
   title: "Política de Cookies",
@@ -27,7 +28,7 @@ export default function CookiesPage() {
     <LegalLayout
       title="Política de Cookies"
       description="Información sobre cómo Conexory utiliza cookies y tecnologías similares para operar la plataforma y mejorar tu experiencia."
-      lastUpdated="31 de mayo de 2026"
+      lastUpdated="10 de noviembre de 2026"
       sections={sections}
     >
       <LegalHighlight>
@@ -161,10 +162,10 @@ export default function CookiesPage() {
           <p>
             <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
-              href="mailto:Conexory@gmail.com"
+              href={`mailto:${SUPPORT_EMAIL}`}
               className="text-ink hover:underline"
             >
-              Conexory@gmail.com
+              {SUPPORT_EMAIL}
             </a>
           </p>
           <p>

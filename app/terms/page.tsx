@@ -6,6 +6,7 @@ import LegalLayout, {
   LegalSubtitle,
   LegalHighlight,
 } from "@/components/legal-layout"
+import { SUPPORT_EMAIL } from "@/lib/urls"
 
 export const metadata: Metadata = {
   title: "Términos de Uso",
@@ -36,7 +37,7 @@ export default function TermsPage() {
     <LegalLayout
       title="Términos de Uso"
       description="Estos términos rigen el uso de la plataforma Conexory. Léelos con atención antes de crear tu cuenta."
-      lastUpdated="31 de mayo de 2026"
+      lastUpdated="10 de noviembre de 2026"
       sections={sections}
     >
       <LegalSection id="aceptacion" number={1} title="Aceptación de los términos">
@@ -94,10 +95,10 @@ export default function TermsPage() {
           Eres el único responsable de mantener la confidencialidad de tus
           credenciales de acceso. Debes notificarnos inmediatamente a{" "}
           <a
-            href="mailto:Conexory@gmail.com"
+            href={`mailto:${SUPPORT_EMAIL}`}
             className="text-ink font-semibold hover:underline"
           >
-            Conexory@gmail.com
+            {SUPPORT_EMAIL}
           </a>{" "}
           si detectas acceso no autorizado a tu cuenta.
         </LegalP>
@@ -291,10 +292,10 @@ export default function TermsPage() {
           <p>
             <span className="font-semibold text-ink">Correo:</span>{" "}
             <a
-              href="mailto:Conexory@gmail.com"
+              href={`mailto:${SUPPORT_EMAIL}`}
               className="text-ink hover:underline"
             >
-              Conexory@gmail.com
+              {SUPPORT_EMAIL}
             </a>
           </p>
           <p>

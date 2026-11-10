@@ -9,7 +9,6 @@ const UNTESTED_ALLOWLIST: Record<string, string> = {
   "lib/auth.ts": "better-auth config; every action test replaces it via mock.module, which is process-wide",
   "lib/auth-client.ts": "browser-only better-auth client with no logic of its own",
   "lib/prisma.ts": "PrismaClient singleton; the retry logic lives in prisma-retry.ts",
-  "lib/brand.ts": "static constants",
   "lib/colombia.ts": "static list of departments and cities",
   "lib/faq-data.ts": "static FAQ copy",
   "lib/property-types.ts": "static labels, exercised by city-seo and properties tests",
