@@ -10,6 +10,7 @@ import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-message"
 import { SHARE_INFO_IDS, SHARE_MESSAGE_KINDS } from "@/lib/share-message-options"
 import { propertyLimit, pinnedLimit, hasProAccess, aiMessageLimit } from "@/lib/plans"
+import { reportError } from "@/lib/report-error"
 
 export async function togglePublished(
   propertyId: string,
@@ -173,7 +174,8 @@ export async function generateShareMessage(input: {
     }
 
     return { message }
-  } catch {
+  } catch (err) {
+    await reportError("generateShareMessage failed", err, { propertyId: input.propertyId })
     return { error: "No pudimos generar el mensaje. Inténtalo de nuevo." }
   }
 }

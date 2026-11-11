@@ -3,6 +3,7 @@ import type { Property } from "@prisma/client"
 import { formatCOP } from "@/lib/format"
 import { PROPERTY_TYPE_LABELS, TRANSACTION_TYPE_LABELS } from "@/lib/property-types"
 import { SHARE_INFO_IDS, type ShareInfo, type ShareMessageKind } from "@/lib/share-message-options"
+import { reportError } from "@/lib/report-error"
 
 const GEMINI_TIMEOUT_MS = 8000
 const GEMINI_RETRY_DELAY_MS = 1500
@@ -114,8 +115,17 @@ ${propertyFacts(property, include)}`
     try {
       return await callGemini(ai, prompt, agentName)
     } catch (secondError) {
-      console.error("[share-message] Gemini attempt 2 failed:", secondError)
+      // The free tier runs out of quota under normal use; that's expected, not a bug.
+      if (isQuotaExceeded(secondError)) {
+        console.warn("[share-message] Gemini quota exceeded after retry")
+      } else {
+        await reportError("AI share message failed after retry (Gemini)", secondError)
+      }
       return null
     }
   }
+}
+
+function isQuotaExceeded(error: unknown): boolean {
+  return (error as { status?: unknown } | null)?.status === 429
 }

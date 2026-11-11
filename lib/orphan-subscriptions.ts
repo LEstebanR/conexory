@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { cancelPreapproval, referenceToUserId } from "@/lib/mercadopago"
+import { reportError } from "@/lib/report-error"
 
 // A preapproval keeps charging on Mercado Pago's schedule until we cancel it,
 // and nothing in our database is required for that to happen. So whenever the
@@ -119,17 +120,17 @@ export async function cancelOrphanPreapproval(
 
   await recordOrphanEvent(input, result.ok)
 
+  // The payer email stays out of the PostHog report; the orphan event row keeps it.
   const context = {
     source: input.source,
     preapprovalId: input.preapprovalId,
     userId: input.userId,
-    payerEmail: input.payerEmail,
     ...input.detail,
   }
   if (result.ok) {
-    console.warn(`Orphan subscription cancelled (${input.reason})`, context)
+    console.warn(`Orphan subscription cancelled (${input.reason})`, { ...context, payerEmail: input.payerEmail })
   } else {
-    console.error(`Orphan subscription could NOT be cancelled (${input.reason})`, context)
+    await reportError(`Orphan subscription could NOT be cancelled (${input.reason})`, undefined, context)
   }
 
   return { cancelled: result.ok }
@@ -162,5 +163,5 @@ async function recordOrphanEvent(input: CancelOrphanInput, cancelled: boolean) {
       },
       update: { status: cancelled ? "cancelled" : "cancel_failed", payload },
     })
-    .catch(() => null)
+    .catch((err) => reportError("Orphan subscription audit row could not be saved", err, { externalId }))
 }
