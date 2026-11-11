@@ -7,6 +7,7 @@ import {
 } from "@/lib/mercadopago"
 import { classifyPreapproval, cancelOrphanPreapproval } from "@/lib/orphan-subscriptions"
 import { sendPaymentFailed, sendSubscriptionConfirmation } from "@/lib/email"
+import { reportError } from "@/lib/report-error"
 
 export async function POST(req: Request) {
   const url = new URL(req.url)
@@ -46,9 +47,23 @@ export async function POST(req: Request) {
   return new Response(null, { status: 200 })
 }
 
+// Mercado Pago's "simulate notification" and test payloads carry fake ids that
+// 404 on lookup. Those are noise, not failures worth an alert.
+async function reportLookupFailure(resource: "payment" | "preapproval", context: { error?: string } & Record<string, unknown>) {
+  const message = `Mercado Pago webhook: ${resource} lookup failed`
+  if (context.error === "http_404") {
+    console.warn(message, context)
+    return
+  }
+  await reportError(message, undefined, context)
+}
+
 async function handlePaymentNotification(paymentId: string, type: string, body: object) {
   const payment = await getPayment(paymentId)
-  if (!payment.ok) return
+  if (!payment.ok) {
+    await reportLookupFailure("payment", { paymentId, error: payment.error })
+    return
+  }
 
   // The status is part of the idempotency key, not just the id: a single
   // payment/preapproval goes through several distinct statuses over its
@@ -115,7 +130,10 @@ async function stopOrphanCharge({
 
 async function handlePreapprovalNotification(preapprovalId: string, type: string, body: object) {
   const preapproval = await getPreapproval(preapprovalId)
-  if (!preapproval.ok) return
+  if (!preapproval.ok) {
+    await reportLookupFailure("preapproval", { preapprovalId, error: preapproval.error })
+    return
+  }
 
   const externalId = `${type}-${preapprovalId}-${preapproval.status ?? "unknown"}`
   const isNew = await recordEvent(externalId, type, preapproval.status ?? "unknown", body)

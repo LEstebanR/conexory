@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 import imageCompression from "browser-image-compression"
 import { ImagePlus, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { captureClientError } from "@/lib/posthog-client"
 import { PhotoGrid, type ImageItem, type PhotoGridProps } from "./photo-grid"
 
 const MAX_SIZE_MB = 20
@@ -22,6 +23,12 @@ const SortablePhotoGrid = dynamic(() => import("./sortable-photo-grid"), {
   ssr: false,
   loading: () => <PhotoGridFallback />,
 })
+
+class UploadResponseError extends Error {
+  constructor(status: number) {
+    super(`Upload failed with status ${status}`)
+  }
+}
 
 export default function ImageUpload({
   onUrlsChange,
@@ -68,12 +75,15 @@ export default function ImageUpload({
       const fd = new FormData()
       fd.append("file", compressed, file.name)
       const res = await fetch("/api/upload", { method: "POST", body: fd })
-      if (!res.ok) throw new Error()
+      if (!res.ok) throw new UploadResponseError(res.status)
       const { url } = await res.json()
       setItems((prev) =>
         prev.map((i) => (i.id === itemId ? { ...i, url, uploading: false } : i))
       )
-    } catch {
+    } catch (err) {
+      // Failed responses are reported by the server; only browser-side
+      // failures (compression, network) are new information here.
+      if (!(err instanceof UploadResponseError)) void captureClientError(err, { source: "image-upload" })
       setItems((prev) =>
         prev.map((i) => (i.id === itemId ? { ...i, uploading: false, error: true } : i))
       )

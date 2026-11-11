@@ -8,6 +8,7 @@ import { ResetPasswordEmail } from "@/emails/reset-password"
 import { VerifyEmailEmail } from "@/emails/verify-email"
 import { WelcomeEmail } from "@/emails/welcome"
 import { formatColombiaDate } from "@/lib/dates"
+import { reportError } from "@/lib/report-error"
 
 // Instantiated lazily inside each function so the build doesn't require
 // RESEND_API_KEY at module-load time (Next.js collects route data during build).
@@ -19,9 +20,29 @@ function resend() {
   return new Resend(process.env.RESEND_API_KEY)
 }
 
+type Message = Parameters<Resend["emails"]["send"]>[0]
+
+// Resend reports failures in the returned { error } instead of throwing, so
+// without this check a failed reset or verification email leaves no trace.
+// The recipient stays out of the report.
+async function deliver(template: string, message: Message) {
+  const { error } = await resend().emails.send(message)
+  if (error) {
+    await reportError(`Email failed to send: ${template}`, undefined, {
+      template,
+      errorName: error.name,
+      errorMessage: redactEmails(error.message),
+    })
+  }
+}
+
+function redactEmails(text: string) {
+  return text.replace(/[^\s@<>"']+@[^\s@<>"']+/g, "[email]")
+}
+
 export async function sendWelcome(email: string, name: string) {
   const appUrl = getAppUrl()
-  await resend().emails.send({
+  await deliver("welcome", {
     from: FROM,
     to: email,
     subject: "Bienvenido a Conexory",
@@ -31,7 +52,7 @@ export async function sendWelcome(email: string, name: string) {
 
 export async function sendSubscriptionConfirmation(email: string, name: string) {
   const appUrl = getAppUrl()
-  await resend().emails.send({
+  await deliver("subscription_confirmation", {
     from: FROM,
     to: email,
     subject: "¡Bienvenido a Conexory Pro!",
@@ -41,7 +62,7 @@ export async function sendSubscriptionConfirmation(email: string, name: string) 
 
 export async function sendPaymentFailed(email: string, name: string) {
   const appUrl = getAppUrl()
-  await resend().emails.send({
+  await deliver("payment_failed", {
     from: FROM,
     to: email,
     subject: "No pudimos cobrar tu plan Pro de Conexory",
@@ -60,7 +81,7 @@ export async function sendRenewalReminder(
     day: "numeric",
     month: "long",
   })
-  await resend().emails.send({
+  await deliver("renewal_reminder", {
     from: FROM,
     to: email,
     subject: "Tu plan Pro de Conexory se renueva pronto",
@@ -70,7 +91,7 @@ export async function sendRenewalReminder(
 
 export async function sendSubscriptionCancelled(email: string, name: string) {
   const appUrl = getAppUrl()
-  await resend().emails.send({
+  await deliver("subscription_cancelled", {
     from: FROM,
     to: email,
     subject: "Tu plan Pro de Conexory fue cancelado",
@@ -80,7 +101,7 @@ export async function sendSubscriptionCancelled(email: string, name: string) {
 
 export async function sendResetPasswordEmail(email: string, name: string, url: string) {
   const appUrl = getAppUrl()
-  await resend().emails.send({
+  await deliver("reset_password", {
     from: FROM,
     to: email,
     subject: "Recupera tu contraseña de Conexory",
@@ -90,7 +111,7 @@ export async function sendResetPasswordEmail(email: string, name: string, url: s
 
 export async function sendVerificationEmail(email: string, name: string, url: string) {
   const appUrl = getAppUrl()
-  await resend().emails.send({
+  await deliver("verify_email", {
     from: FROM,
     to: email,
     subject: "Confirma tu correo de Conexory",

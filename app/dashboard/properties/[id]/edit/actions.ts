@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { invalidatePublicListings } from "@/lib/public-cache"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { photoLimit, hasProAccess } from "@/lib/plans"
+import { reportError } from "@/lib/report-error"
 
 type UpdateResult = { success: true } | { success: false; error: string }
 
@@ -68,7 +69,7 @@ export async function updateProperty(
 
     return { success: true }
   } catch (err) {
-    console.error("updateProperty failed:", err)
+    await reportError("updateProperty failed", err)
     return {
       success: false,
       error:

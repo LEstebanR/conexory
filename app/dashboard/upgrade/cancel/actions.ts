@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { cancelPreapproval } from "@/lib/mercadopago"
+import { reportError } from "@/lib/report-error"
 
 // Cancel = stop future auto-charges but honor the period already paid: the user
 // stays Pro until currentPeriodEnd, then the billing cron downgrades them. We
@@ -27,7 +28,14 @@ export async function cancelSubscription() {
   })
   if (subscription?.mpPreapprovalId) {
     const result = await cancelPreapproval(subscription.mpPreapprovalId)
-    if (!result.ok) redirect("/dashboard/upgrade?error=cancel_failed")
+    if (!result.ok) {
+      await reportError("Subscription cancel failed on Mercado Pago", undefined, {
+        userId: session.user.id,
+        preapprovalId: subscription.mpPreapprovalId,
+        error: result.error,
+      })
+      redirect("/dashboard/upgrade?error=cancel_failed")
+    }
   }
 
   await prisma.subscription.updateMany({

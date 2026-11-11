@@ -35,6 +35,7 @@ Public surfaces: `/p/[slug]` (+ `og.jpg`), `/agente/**`, `/propiedades/**`, land
 - JSON-LD via `dangerouslySetInnerHTML={{ __html: JSON.stringify(x) }}`: if `x` contains user-controlled text (titles, descriptions, names), a `</script>` inside it breaks out. It must be escaped (e.g. replace `<` with `<`) — 🔴 on public pages.
 - Markdown rendered with `marked` is only for repo-owned blog content. Rendering user input through `marked`/`dangerouslySetInnerHTML` is XSS (🔴).
 - Public event tracking (`/api/properties/[id]/event`) is unauthenticated: check it can't be abused to inflate other users' metrics beyond what's intended or to write arbitrary data.
+- Third-party SDKs in the browser (analytics, error tracking) capture `window.location.href` and `document.referrer` on every event. Routes that carry secrets in the query string (`/reset-password?token=`, Mercado Pago return params) need sanitizing in the SDK itself (e.g. PostHog `before_send`), not only on the server. When a diff sanitizes URLs server-side, check the client side of the same integration too (🟠).
 
 ## Plans & limits
 
@@ -128,4 +129,5 @@ Files: `lib/mercadopago.ts`, `lib/subscription.ts`, `lib/orphan-subscriptions.ts
 - `vercel.json` crons and `scripts/vercel-ignore-build.sh` changes affect every deploy: review carefully.
 - Transactional email via Resend with `FROM` on the verified `conexory.com` domain; templates in `emails/` (React Email).
 - Inbound mail: `conexory.com` only receives at the addresses forwarded by Forward Email (today just `hola@`, i.e. `SUPPORT_EMAIL`); every other address bounces, `no-reply@` included. A new or changed send in `lib/email.ts` that users may answer (welcome, payment, cancellation) should set `replyTo: SUPPORT_EMAIL`; flag its absence as 🟡. A new contact address published anywhere needs its forwarding rule in DNS first (🟠 if it would receive nothing).
+- The PR body describes the **final** state of the branch: when later commits change behavior (e.g. after a review round), the body's "Main changes", "How to test" and manual steps must be updated too, and the issue's acceptance criteria must match what was actually decided. A stale body or manual step that can't be followed is 🟠.
 - Branch name must match `^(feat|fix|refactor|chore|docs)/(LES-[0-9]+-[a-z0-9-]+|[a-z0-9-]+)$` (CI job). PR body follows `.github/pull_request_template.md` with `Closes #N` or the Linear link.

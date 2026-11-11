@@ -7,6 +7,7 @@ import { Loader2, Lock, X } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { captureClientError } from "@/lib/posthog-client"
 
 declare global {
   interface Window {
@@ -150,6 +151,7 @@ export function CardTokenForm({
             if (cancelled) return
             if (error) {
               console.error("[mercadopago] cardForm mount failed:", error)
+              void captureClientError(error, { source: "mercadopago-card-form" })
               setStatus("error")
               return
             }

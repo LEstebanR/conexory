@@ -34,6 +34,10 @@ mock.module("next/navigation", () => ({
 }))
 
 mock.module("next/server", () => ({
+  // Tests run outside a request scope, where the real after() throws.
+  after: () => {
+    throw new Error("`after` was called outside a request scope")
+  },
   NextResponse: {
     json: (data: unknown, init?: { status?: number }) =>
       new Response(JSON.stringify(data), {

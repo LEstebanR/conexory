@@ -1,4 +1,4 @@
-import { describe, test, expect, mock } from "bun:test"
+import { describe, test, expect, mock, spyOn } from "bun:test"
 
 const userId = "cljabc123"
 
@@ -8,6 +8,7 @@ const mockVerifyMercadoPagoWebhook = mock((...args: [unknown]) => {
 })
 type PaymentDetails = {
   ok: boolean
+  error?: string
   status?: string
   externalReference?: string
   preapprovalId?: string
@@ -170,6 +171,39 @@ describe("POST /api/webhooks/mercadopago", () => {
     )
     expect(res.status).toBe(200)
     expect(mockUserUpdate).not.toHaveBeenCalled()
+  })
+
+  test("only logs a payment lookup that 404s, like Mercado Pago's test notifications", async () => {
+    const warn = spyOn(console, "warn").mockImplementation(() => {})
+    const error = spyOn(console, "error").mockImplementation(() => {})
+    mockGetPayment.mockImplementationOnce(() => Promise.resolve({ ok: false, error: "http_404" }))
+    try {
+      const res = await POST(paymentWebhook())
+      expect(res.status).toBe(200)
+      expect(warn).toHaveBeenCalledWith("Mercado Pago webhook: payment lookup failed", {
+        paymentId: "pay-1",
+        error: "http_404",
+      })
+      expect(error).not.toHaveBeenCalledWith("Mercado Pago webhook: payment lookup failed", expect.anything())
+    } finally {
+      warn.mockRestore()
+      error.mockRestore()
+    }
+  })
+
+  test("reports a payment lookup that fails for any other reason", async () => {
+    const error = spyOn(console, "error").mockImplementation(() => {})
+    mockGetPayment.mockImplementationOnce(() => Promise.resolve({ ok: false, error: "http_500" }))
+    try {
+      const res = await POST(paymentWebhook())
+      expect(res.status).toBe(200)
+      expect(error).toHaveBeenCalledWith("Mercado Pago webhook: payment lookup failed", {
+        paymentId: "pay-1",
+        error: "http_500",
+      })
+    } finally {
+      error.mockRestore()
+    }
   })
 
   test("returns 200 silently on a duplicate event (idempotency)", async () => {

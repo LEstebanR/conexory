@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach } from "bun:test"
+import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
 
 type Session = { user: { id: string; email: string; isPremium: boolean } } | null
 
@@ -154,8 +154,18 @@ describe("changeCardAction", () => {
     })
   })
 
-  test("returns update_failed when Mercado Pago rejects the update", async () => {
-    mockUpdatePreapprovalCard.mockImplementation(() => Promise.resolve({ ok: false }))
-    expect(await changeCardAction("card-token-123")).toEqual({ ok: false, reason: "update_failed" })
+  test("returns update_failed and reports it when Mercado Pago rejects the update", async () => {
+    const consoleError = spyOn(console, "error").mockImplementation(() => {})
+    mockUpdatePreapprovalCard.mockImplementation(() => Promise.resolve({ ok: false, error: "http_400" }))
+    try {
+      expect(await changeCardAction("card-token-123")).toEqual({ ok: false, reason: "update_failed" })
+      expect(consoleError).toHaveBeenCalledWith("Card update failed on Mercado Pago", {
+        userId: expect.any(String),
+        preapprovalId: "preapproval-123",
+        error: "http_400",
+      })
+    } finally {
+      consoleError.mockRestore()
+    }
   })
 })

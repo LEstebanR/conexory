@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach } from "bun:test"
+import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
 
 type Session = { user: { id: string; isPremium: boolean } } | null
 
@@ -82,10 +82,20 @@ describe("cancelSubscription", () => {
   })
 
   test("redirects with an error and does not touch local status when Mercado Pago fails to cancel", async () => {
-    mockCancelPreapproval.mockImplementation(() => Promise.resolve({ ok: false }))
-    await expect(cancelSubscription()).rejects.toThrow(
-      "REDIRECT:/dashboard/upgrade?error=cancel_failed"
-    )
-    expect(mockSubscriptionUpdateMany).not.toHaveBeenCalled()
+    const consoleError = spyOn(console, "error").mockImplementation(() => {})
+    mockCancelPreapproval.mockImplementation(() => Promise.resolve({ ok: false, error: "http_500" }))
+    try {
+      await expect(cancelSubscription()).rejects.toThrow(
+        "REDIRECT:/dashboard/upgrade?error=cancel_failed"
+      )
+      expect(mockSubscriptionUpdateMany).not.toHaveBeenCalled()
+      expect(consoleError).toHaveBeenCalledWith("Subscription cancel failed on Mercado Pago", {
+        userId: "u1",
+        preapprovalId: "preapproval-1",
+        error: "http_500",
+      })
+    } finally {
+      consoleError.mockRestore()
+    }
   })
 })

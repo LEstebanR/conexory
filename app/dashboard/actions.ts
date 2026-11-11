@@ -4,6 +4,7 @@ import { z } from "zod"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
+import { reportError } from "@/lib/report-error"
 
 export async function getIsPremium(): Promise<boolean> {
   const session = await getSession()
@@ -59,7 +60,8 @@ export async function submitFeedback(
         message: result.data.message,
       },
     })
-  } catch {
+  } catch (err) {
+    await reportError("Feedback could not be saved", err, { userId: session.user.id })
     return { error: "No pudimos guardar tu feedback. Intenta de nuevo." }
   }
 

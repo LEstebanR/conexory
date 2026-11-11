@@ -1,7 +1,9 @@
 "use server"
 
 import { headers } from "next/headers"
+import { APIError } from "better-auth/api"
 import { auth } from "@/lib/auth"
+import { reportError } from "@/lib/report-error"
 import { forgotPasswordSchema, type ForgotPasswordErrors } from "@/lib/schemas/auth.schema"
 
 export type ForgotPasswordState = { error?: string; errors?: ForgotPasswordErrors; success?: boolean }
@@ -23,9 +25,12 @@ export async function forgotPasswordAction(
       },
       headers: await headers(),
     })
-  } catch {
+  } catch (err) {
     // better-auth always returns 200 (even for unknown emails) to avoid enumeration.
     // Only hard errors reach here — surface a generic message.
+    if (!(err instanceof APIError && err.statusCode < 500)) {
+      await reportError("Password reset request failed", err)
+    }
     return { error: "No se pudo enviar el correo. Inténtalo de nuevo." }
   }
 
