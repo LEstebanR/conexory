@@ -1,5 +1,6 @@
 import { mockRevalidateTag } from "@/test-setup"
-import { describe, test, expect, mock, spyOn } from "bun:test"
+import { afterAll, describe, test, expect, mock, spyOn } from "bun:test"
+import * as analytics from "@/lib/analytics"
 
 const mockGetSession = mock(() =>
   Promise.resolve<{ user: { id: string; isPremium: boolean; role: string } } | null>({
@@ -35,10 +36,15 @@ mock.module("@/lib/prisma", () => ({
 
 const mockConsoleError = spyOn(console, "error").mockImplementation(() => {})
 
-const mockSetOnboardingFlag = mock(() => Promise.resolve())
+const mockSetOnboardingFlag = mock(() => Promise.resolve(true))
 mock.module("@/lib/onboarding-server", () => ({
   setOnboardingFlag: mockSetOnboardingFlag,
 }))
+
+// spyOn instead of mock.module: a module mock is process-wide and would hand
+// this fake to lib/analytics.test.ts if it runs later.
+const mockTrackEvent = spyOn(analytics, "trackEvent").mockImplementation(() => Promise.resolve())
+afterAll(() => mockTrackEvent.mockRestore())
 
 const { createProperty, getEnglishProfileStatus } = await import("./actions")
 
@@ -114,6 +120,26 @@ describe("createProperty", () => {
     mockSetOnboardingFlag.mockClear()
     await createProperty(validInput)
     expect(mockSetOnboardingFlag).toHaveBeenCalledWith("u1", "firstPropertyCreated")
+  })
+
+  test("tracks first_property_created only when the flag was just set", async () => {
+    mockTrackEvent.mockClear()
+    mockSetOnboardingFlag.mockImplementationOnce(() => Promise.resolve(true))
+    await createProperty(validInput)
+    expect(mockTrackEvent).toHaveBeenCalledWith("u1", "first_property_created")
+
+    mockTrackEvent.mockClear()
+    mockSetOnboardingFlag.mockImplementationOnce(() => Promise.resolve(false))
+    await createProperty(validInput)
+    expect(mockTrackEvent).not.toHaveBeenCalled()
+  })
+
+  test("does not track nor fail the create when the flag write fails", async () => {
+    mockTrackEvent.mockClear()
+    mockSetOnboardingFlag.mockImplementationOnce(() => Promise.reject(new Error("db blip")))
+    const result = await createProperty(validInput)
+    expect(result.success).toBe(true)
+    expect(mockTrackEvent).not.toHaveBeenCalled()
   })
 
   test("logs the exception and returns error on unexpected failure", async () => {

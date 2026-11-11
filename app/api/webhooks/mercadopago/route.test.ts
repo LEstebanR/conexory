@@ -1,4 +1,5 @@
-import { describe, test, expect, mock, spyOn } from "bun:test"
+import { afterAll, describe, test, expect, mock, spyOn } from "bun:test"
+import * as analytics from "@/lib/analytics"
 
 const userId = "cljabc123"
 
@@ -77,6 +78,7 @@ type UserRow = {
   id: string
   email: string
   name: string
+  isPremium?: boolean
   subscription: { status: string; mpPreapprovalId: string | null } | null
 }
 const mockUserFindUnique = mock(() =>
@@ -87,6 +89,11 @@ const mockUserFindUnique = mock(() =>
     subscription: { status: "active", mpPreapprovalId: "pa-1" },
   })
 )
+
+// spyOn instead of mock.module: a module mock is process-wide and would hand
+// this fake to lib/analytics.test.ts if it runs later.
+const mockTrackEvent = spyOn(analytics, "trackEvent").mockImplementation(() => Promise.resolve())
+afterAll(() => mockTrackEvent.mockRestore())
 
 mock.module("@/lib/prisma", () => ({
   prisma: {
@@ -241,6 +248,33 @@ describe("POST /api/webhooks/mercadopago", () => {
     const [call] = mockSubscriptionUpsert.mock.calls
     expect((call[0] as { create: { status: string } }).create.status).toBe("active")
     expect(mockSendSubscriptionConfirmation).toHaveBeenCalledTimes(1)
+  })
+
+  // The webhook reads the user twice: once to classify the subscription, once before activating it.
+  function givenUserIsPremium(isPremium: boolean) {
+    const row = { id: userId, email: "u@example.com", name: "User", isPremium, subscription: { status: "active", mpPreapprovalId: "pa-1" } }
+    mockUserFindUnique.mockImplementationOnce(() => Promise.resolve(row))
+    mockUserFindUnique.mockImplementationOnce(() => Promise.resolve(row))
+  }
+
+  test("approved payment for a Free user counts as an upgrade", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
+    givenUserIsPremium(false)
+    mockTrackEvent.mockClear()
+    await POST(paymentWebhook())
+    expect(mockTrackEvent).toHaveBeenCalledWith(userId, "upgrade_completed", { source: "webhook" })
+  })
+
+  test("approved payment for a user already Pro (renewal or optimistic activation) isn't an upgrade", async () => {
+    mockGetPayment.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, status: "approved", externalReference: reference, preapprovalId: "pa-1" }),
+    )
+    givenUserIsPremium(true)
+    mockTrackEvent.mockClear()
+    await POST(paymentWebhook())
+    expect(mockTrackEvent).not.toHaveBeenCalled()
   })
 
   test("cancels the preapproval when an approved payment belongs to a deleted user", async () => {
