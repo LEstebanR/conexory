@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach } from "bun:test"
+import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
 import type { Property } from "@prisma/client"
 import { SHARE_INFO_IDS } from "./share-message-options"
 
@@ -109,10 +109,40 @@ describe("generateShareMessage", () => {
     expect(result).toBeNull()
   })
 
-  test("returns null instead of throwing when the API call fails", async () => {
-    mockGenerateContent.mockImplementation(() => Promise.reject(new Error("429 quota exceeded")))
-    const result = await generateShareMessage(property, "intro", SHARE_INFO_IDS, "Luis")
-    expect(result).toBeNull()
+  test("returns null instead of throwing when the API call fails, and reports it", async () => {
+    const consoleError = spyOn(console, "error").mockImplementation(() => {})
+    mockGenerateContent.mockImplementation(() => Promise.reject(new Error("model unavailable")))
+    try {
+      const result = await generateShareMessage(property, "intro", SHARE_INFO_IDS, "Luis")
+      expect(result).toBeNull()
+      expect(consoleError).toHaveBeenCalledWith(
+        "AI share message failed after retry (Gemini)",
+        expect.any(Error),
+        {},
+      )
+    } finally {
+      consoleError.mockRestore()
+    }
+  })
+
+  test("only warns when the free-tier quota runs out", async () => {
+    const consoleError = spyOn(console, "error").mockImplementation(() => {})
+    const consoleWarn = spyOn(console, "warn").mockImplementation(() => {})
+    mockGenerateContent.mockImplementation(() =>
+      Promise.reject(Object.assign(new Error("quota exceeded"), { status: 429 })),
+    )
+    try {
+      expect(await generateShareMessage(property, "intro", SHARE_INFO_IDS, "Luis")).toBeNull()
+      expect(consoleWarn).toHaveBeenCalledWith("[share-message] Gemini quota exceeded after retry")
+      expect(consoleError).not.toHaveBeenCalledWith(
+        "AI share message failed after retry (Gemini)",
+        expect.anything(),
+        expect.anything(),
+      )
+    } finally {
+      consoleError.mockRestore()
+      consoleWarn.mockRestore()
+    }
   })
 
   test("retries once after a transient failure and returns the second attempt's result", async () => {

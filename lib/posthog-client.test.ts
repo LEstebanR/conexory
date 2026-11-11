@@ -8,8 +8,14 @@ mock.module("posthog-js", () => ({
   default: { init: mockInit, captureException: mockCaptureException, register: mockRegister },
 }))
 
-const { loadPostHog, captureClientError, captureBoundaryError, captureUncaughtErrors, resetPostHogClientForTests } =
-  await import(
+const {
+  loadPostHog,
+  captureClientError,
+  captureBoundaryError,
+  captureUncaughtErrors,
+  stripUrlQueries,
+  resetPostHogClientForTests,
+} = await import(
   "./posthog-client"
 )
 
@@ -68,6 +74,7 @@ describe("loadPostHog", () => {
       autocapture: false,
       capture_pageview: false,
       disable_session_recording: true,
+      before_send: stripUrlQueries,
     })
   })
 
@@ -174,5 +181,31 @@ describe("captureUncaughtErrors", () => {
     process.env.NEXT_PUBLIC_POSTHOG_KEY = ""
     captureUncaughtErrors()
     expect(listeners).toEqual({})
+  })
+})
+
+describe("stripUrlQueries", () => {
+  test("drops query strings that can carry secrets from page URLs and referrers", () => {
+    const event = {
+      uuid: "1",
+      event: "$exception",
+      properties: {
+        $current_url: "https://conexory.com/reset-password?token=abc123",
+        $referrer: "https://www.mercadopago.com.co/checkout?preapproval_id=pa-1",
+        $exception_list: [],
+      },
+      $set_once: { $initial_current_url: "https://conexory.com/reset-password?token=abc123#form" },
+    }
+
+    const result = stripUrlQueries(event as never)
+
+    expect(result?.properties.$current_url).toBe("https://conexory.com/reset-password")
+    expect(result?.properties.$referrer).toBe("https://www.mercadopago.com.co/checkout")
+    expect(result?.properties.$exception_list).toEqual([])
+    expect(result?.$set_once?.$initial_current_url).toBe("https://conexory.com/reset-password")
+  })
+
+  test("passes a dropped event through", () => {
+    expect(stripUrlQueries(null)).toBeNull()
   })
 })

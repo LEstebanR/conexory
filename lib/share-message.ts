@@ -115,8 +115,17 @@ ${propertyFacts(property, include)}`
     try {
       return await callGemini(ai, prompt, agentName)
     } catch (secondError) {
-      await reportError("AI share message failed after retry (Gemini)", secondError)
+      // The free tier runs out of quota under normal use; that's expected, not a bug.
+      if (isQuotaExceeded(secondError)) {
+        console.warn("[share-message] Gemini quota exceeded after retry")
+      } else {
+        await reportError("AI share message failed after retry (Gemini)", secondError)
+      }
       return null
     }
   }
+}
+
+function isQuotaExceeded(error: unknown): boolean {
+  return (error as { status?: unknown } | null)?.status === 429
 }

@@ -1,5 +1,5 @@
-import type { PostHog } from "posthog-js"
-import { POSTHOG_PROXY_PATH, POSTHOG_UI_HOST, posthogContext, posthogKey } from "./posthog"
+import type { CaptureResult, PostHog } from "posthog-js"
+import { POSTHOG_PROXY_PATH, POSTHOG_UI_HOST, pathWithoutQuery, posthogContext, posthogKey } from "./posthog"
 
 let loading: Promise<PostHog | null> | undefined
 
@@ -26,6 +26,7 @@ export function loadPostHog(): Promise<PostHog | null> {
         persistence: "memory",
         person_profiles: "identified_only",
         request_batching: false,
+        before_send: stripUrlQueries,
       })
       posthog.register(posthogContext())
       return posthog
@@ -37,6 +38,21 @@ export function loadPostHog(): Promise<PostHog | null> {
       return null
     })
   return loading
+}
+
+// The SDK records the full page URL and referrer, and some carry secrets in the
+// query string (the password-reset token, Mercado Pago's return params).
+const URL_PROPERTIES = ["$current_url", "$referrer", "$initial_current_url", "$initial_referrer"]
+
+export function stripUrlQueries(event: CaptureResult | null): CaptureResult | null {
+  if (!event) return event
+  for (const bag of [event.properties, event.$set, event.$set_once]) {
+    if (!bag) continue
+    for (const key of URL_PROPERTIES) {
+      if (typeof bag[key] === "string") bag[key] = pathWithoutQuery(bag[key])
+    }
+  }
+  return event
 }
 
 // Never rejects: the unhandledrejection listener calls this, and a rejection

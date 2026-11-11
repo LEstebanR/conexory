@@ -6,8 +6,11 @@ const mockCaptureExceptionImmediate = mock((...args: [unknown, unknown, unknown]
 })
 const constructorCalls: unknown[][] = []
 
+let failConstruction = () => {}
+
 class FakePostHog {
   constructor(...args: unknown[]) {
+    failConstruction()
     constructorCalls.push(args)
   }
   captureExceptionImmediate = mockCaptureExceptionImmediate
@@ -94,6 +97,25 @@ describe("captureServerError", () => {
 
     expect(constructorCalls).toEqual([["phc_test", { host: "https://us.i.posthog.com", flushAt: 1, flushInterval: 0 }]])
     expect(mockCaptureExceptionImmediate).toHaveBeenCalledTimes(2)
+  })
+
+  test("retries creating the client after a failed load instead of staying off", async () => {
+    let failNext = true
+    failConstruction = () => {
+      if (failNext) {
+        failNext = false
+        throw new Error("chunk failed")
+      }
+    }
+    try {
+      await captureServerError(new Error("first"))
+      expect(mockCaptureExceptionImmediate).not.toHaveBeenCalled()
+
+      await captureServerError(new Error("second"))
+      expect(mockCaptureExceptionImmediate).toHaveBeenCalledTimes(1)
+    } finally {
+      failConstruction = () => {}
+    }
   })
 
   test("never throws when sending fails", async () => {
