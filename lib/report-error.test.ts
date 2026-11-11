@@ -18,7 +18,8 @@ class FakePostHog {
 
 mock.module("posthog-node", () => ({ PostHog: FakePostHog }))
 
-const { reportError, captureServerError, resetReportErrorClientForTests } = await import("./report-error")
+const { reportError, captureServerError } = await import("./report-error")
+const { resetPostHogServerForTests } = await import("./posthog-server")
 
 const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
 const VERCEL_VARS = ["VERCEL_ENV", "VERCEL_GIT_COMMIT_SHA", "NEXT_PUBLIC_VERCEL_ENV", "NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA"]
@@ -31,7 +32,7 @@ beforeEach(() => {
   for (const name of VERCEL_VARS) delete process.env[name]
   process.env.VERCEL_ENV = "preview"
   process.env.VERCEL_GIT_COMMIT_SHA = "abc1234def5678"
-  resetReportErrorClientForTests()
+  resetPostHogServerForTests()
   constructorCalls.length = 0
   mockCaptureExceptionImmediate.mockClear()
   mockCaptureExceptionImmediate.mockImplementation(() => Promise.resolve())
@@ -45,7 +46,7 @@ afterAll(() => {
     if (originalVercel[name] === undefined) delete process.env[name]
     else process.env[name] = originalVercel[name]
   }
-  resetReportErrorClientForTests()
+  resetPostHogServerForTests()
   mockConsoleError.mockRestore()
 })
 
