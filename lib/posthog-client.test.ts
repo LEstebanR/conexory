@@ -2,9 +2,10 @@ import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test"
 
 const mockInit = mock((...args: [string, Record<string, unknown>]) => void args)
 const mockCaptureException = mock((...args: [unknown, unknown]) => void args)
+const mockRegister = mock((...args: [Record<string, unknown>]) => void args)
 
 mock.module("posthog-js", () => ({
-  default: { init: mockInit, captureException: mockCaptureException },
+  default: { init: mockInit, captureException: mockCaptureException, register: mockRegister },
 }))
 
 const { loadPostHog, captureClientError, captureBoundaryError, captureUncaughtErrors, resetPostHogClientForTests } =
@@ -41,6 +42,7 @@ beforeEach(() => {
   mockInit.mockClear()
   mockInit.mockImplementation(() => {})
   mockCaptureException.mockClear()
+  mockRegister.mockClear()
 })
 
 afterAll(() => {
@@ -67,6 +69,12 @@ describe("loadPostHog", () => {
       capture_pageview: false,
       disable_session_recording: true,
     })
+  })
+
+  test("tags every event with the environment and release", async () => {
+    await loadPostHog()
+    expect(mockRegister).toHaveBeenCalledTimes(1)
+    expect(Object.keys(mockRegister.mock.calls[0][0]).sort()).toEqual(["environment", "release"])
   })
 
   test("is a no-op without a key", async () => {

@@ -5,6 +5,7 @@ import { headers } from "next/headers"
 import { unstable_rethrow } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { sendResetPasswordEmail, sendVerificationEmail, sendWelcome } from "@/lib/email"
+import { reportError } from "@/lib/report-error"
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -125,7 +126,7 @@ export async function getSession() {
     unstable_rethrow(error)
     // Degrading to "no session" logs the agent out silently, so keep a trail:
     // a spike here is people being kicked to /login, not people not logged in.
-    console.warn("getSession failed, treating as signed out:", error)
+    await reportError("getSession failed, treating the agent as signed out", error)
     return null
   }
 }

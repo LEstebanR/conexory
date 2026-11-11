@@ -163,5 +163,5 @@ async function recordOrphanEvent(input: CancelOrphanInput, cancelled: boolean) {
       },
       update: { status: cancelled ? "cancelled" : "cancel_failed", payload },
     })
-    .catch(() => null)
+    .catch((err) => reportError("Orphan subscription audit row could not be saved", err, { externalId }))
 }

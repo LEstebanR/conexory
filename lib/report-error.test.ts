@@ -18,10 +18,16 @@ mock.module("posthog-node", () => ({ PostHog: FakePostHog }))
 const { reportError, captureServerError, resetReportErrorClientForTests } = await import("./report-error")
 
 const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
+const VERCEL_VARS = ["VERCEL_ENV", "VERCEL_GIT_COMMIT_SHA", "NEXT_PUBLIC_VERCEL_ENV", "NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA"]
+const originalVercel = Object.fromEntries(VERCEL_VARS.map((name) => [name, process.env[name]]))
+const context = { environment: "preview", release: "abc1234" }
 const mockConsoleError = spyOn(console, "error").mockImplementation(() => {})
 
 beforeEach(() => {
   process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test"
+  for (const name of VERCEL_VARS) delete process.env[name]
+  process.env.VERCEL_ENV = "preview"
+  process.env.VERCEL_GIT_COMMIT_SHA = "abc1234def5678"
   resetReportErrorClientForTests()
   constructorCalls.length = 0
   mockCaptureExceptionImmediate.mockClear()
@@ -32,6 +38,10 @@ beforeEach(() => {
 afterAll(() => {
   if (originalKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY
   else process.env.NEXT_PUBLIC_POSTHOG_KEY = originalKey
+  for (const name of VERCEL_VARS) {
+    if (originalVercel[name] === undefined) delete process.env[name]
+    else process.env[name] = originalVercel[name]
+  }
   resetReportErrorClientForTests()
   mockConsoleError.mockRestore()
 })
@@ -43,6 +53,7 @@ describe("reportError", () => {
 
     expect(mockConsoleError).toHaveBeenCalledWith("createProperty failed", error, { userId: "u1" })
     expect(mockCaptureExceptionImmediate).toHaveBeenCalledWith(error, undefined, {
+      ...context,
       message: "createProperty failed",
       userId: "u1",
     })
@@ -55,7 +66,7 @@ describe("reportError", () => {
     const [sent, , properties] = mockCaptureExceptionImmediate.mock.calls[0]
     expect(sent).toBeInstanceOf(Error)
     expect((sent as Error).message).toBe("Orphan reconciliation skipped")
-    expect(properties).toEqual({ message: "Orphan reconciliation skipped", error: "http_500" })
+    expect(properties).toEqual({ ...context, message: "Orphan reconciliation skipped", error: "http_500" })
   })
 
   test("keeps a non-Error value as a detail property", async () => {
@@ -63,7 +74,7 @@ describe("reportError", () => {
 
     const [sent, , properties] = mockCaptureExceptionImmediate.mock.calls[0]
     expect((sent as Error).message).toBe("weird failure")
-    expect(properties).toEqual({ message: "weird failure", detail: "plain string" })
+    expect(properties).toEqual({ ...context, message: "weird failure", detail: "plain string" })
   })
 
   test("only logs when there is no PostHog key", async () => {

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test"
 import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match"
-import { POSTHOG_INGEST_HOST, pathWithoutQuery, posthogKey, posthogRewrites, trailingSlashRedirects } from "./posthog"
+import { POSTHOG_INGEST_HOST, pathWithoutQuery, posthogContext, posthogKey, posthogRewrites, trailingSlashRedirects } from "./posthog"
 
 const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
 
@@ -60,5 +60,37 @@ describe("pathWithoutQuery", () => {
     expect(pathWithoutQuery("/reset-password?token=abc123")).toBe("/reset-password")
     expect(pathWithoutQuery("/p/slug#fotos")).toBe("/p/slug")
     expect(pathWithoutQuery("/precios")).toBe("/precios")
+  })
+})
+
+describe("posthogContext", () => {
+  const names = ["VERCEL_ENV", "VERCEL_GIT_COMMIT_SHA", "NEXT_PUBLIC_VERCEL_ENV", "NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA"]
+  const original = Object.fromEntries(names.map((name) => [name, process.env[name]]))
+
+  afterEach(() => {
+    for (const name of names) {
+      if (original[name] === undefined) delete process.env[name]
+      else process.env[name] = original[name]
+    }
+  })
+
+  test("uses Vercel's environment and the short commit SHA", () => {
+    for (const name of names) delete process.env[name]
+    process.env.VERCEL_ENV = "production"
+    process.env.VERCEL_GIT_COMMIT_SHA = "0869586abcdef"
+    expect(posthogContext()).toEqual({ environment: "production", release: "0869586" })
+  })
+
+  test("prefers the values inlined into the browser bundle", () => {
+    for (const name of names) delete process.env[name]
+    process.env.NEXT_PUBLIC_VERCEL_ENV = "preview"
+    process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA = "1234567890"
+    expect(posthogContext()).toEqual({ environment: "preview", release: "1234567" })
+  })
+
+  test("falls back to development with no release outside Vercel, treating empty values as absent", () => {
+    for (const name of names) delete process.env[name]
+    process.env.NEXT_PUBLIC_VERCEL_ENV = ""
+    expect(posthogContext()).toEqual({ environment: "development", release: null })
   })
 })

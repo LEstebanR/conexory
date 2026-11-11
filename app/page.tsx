@@ -11,6 +11,7 @@ import FAQ from "@/components/faq"
 import PricingTeaser from "@/components/pricing-teaser"
 import SignupCTA from "@/components/signup-cta"
 import Footer from "@/components/footer"
+import { reportError } from "@/lib/report-error"
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -24,8 +25,8 @@ export const revalidate = 86400
 export default async function Home() {
   const appUrl = getAppUrl()
 
-  const featuredProperties = await getFeaturedProperties().catch((err) => {
-    console.error("getFeaturedProperties failed:", err)
+  const featuredProperties = await getFeaturedProperties().catch(async (err) => {
+    await reportError("Landing featured properties failed to load", err)
     return []
   })
 

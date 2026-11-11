@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma"
 import { startSubscription } from "@/lib/subscription"
 import { updatePreapprovalCard, getCardToken } from "@/lib/mercadopago"
 import { getAppUrl } from "@/lib/urls"
+import { reportError } from "@/lib/report-error"
 
 const cardTokenSchema = z.object({ cardTokenId: z.string().min(1) })
 
@@ -73,7 +74,14 @@ export async function changeCardAction(cardTokenId: string): Promise<ChangeCardR
     updatePreapprovalCard(subscription.mpPreapprovalId, parsed.data.cardTokenId),
     getCardToken(parsed.data.cardTokenId),
   ])
-  if (!result.ok) return { ok: false, reason: "update_failed" }
+  if (!result.ok) {
+    await reportError("Card update failed on Mercado Pago", undefined, {
+      userId: session.user.id,
+      preapprovalId: subscription.mpPreapprovalId,
+      error: result.error,
+    })
+    return { ok: false, reason: "update_failed" }
+  }
 
   await prisma.subscription.update({
     where: { userId: session.user.id },

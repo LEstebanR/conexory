@@ -23,3 +23,12 @@ export function trailingSlashRedirects() {
 export function pathWithoutQuery(url: string): string {
   return url.split(/[?#]/, 1)[0]
 }
+
+// Preview and production share one PostHog project, so every event says where
+// it came from. NEXT_PUBLIC_ copies are inlined into the browser bundle; the
+// plain ones are what the server sees.
+export function posthogContext(): { environment: string; release: string | null } {
+  const environment = process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL_ENV || "development"
+  const sha = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA
+  return { environment, release: sha ? sha.slice(0, 7) : null }
+}

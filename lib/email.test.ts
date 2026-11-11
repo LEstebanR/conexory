@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach } from "bun:test"
+import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
 import { renderToStaticMarkup } from "react-dom/server"
 import type { ReactElement } from "react"
 
@@ -103,5 +103,37 @@ describe("sendVerificationEmail", () => {
   test("sends the verification subject with the verify url", async () => {
     await sendVerificationEmail("agent@example.com", "Luis", "https://conexory.com/verify?token=abc")
     expect(lastCall().subject).toBe("Confirma tu correo de Conexory")
+  })
+})
+
+describe("failed sends", () => {
+  test("reports Resend's returned error without the recipient's address", async () => {
+    const consoleError = spyOn(console, "error").mockImplementation(() => {})
+    mockSend.mockImplementationOnce(() =>
+      Promise.resolve({
+        data: null,
+        error: { name: "validation_error", message: "Invalid `to` field: agent@example.com" },
+      } as never),
+    )
+    try {
+      await sendResetPasswordEmail("agent@example.com", "Luis", "https://conexory.com/reset?token=x")
+      expect(consoleError).toHaveBeenCalledWith("Email failed to send: reset_password", {
+        template: "reset_password",
+        errorName: "validation_error",
+        errorMessage: "Invalid `to` field: [email]",
+      })
+    } finally {
+      consoleError.mockRestore()
+    }
+  })
+
+  test("stays quiet when the send succeeds", async () => {
+    const consoleError = spyOn(console, "error").mockImplementation(() => {})
+    try {
+      await sendWelcome("agent@example.com", "Luis")
+      expect(consoleError).not.toHaveBeenCalledWith(expect.stringContaining("Email failed"), expect.anything())
+    } finally {
+      consoleError.mockRestore()
+    }
   })
 })

@@ -1,5 +1,5 @@
 import { mockRevalidateTag } from "@/test-setup"
-import { describe, test, expect, mock } from "bun:test"
+import { describe, test, expect, mock, spyOn } from "bun:test"
 
 const mockUserUpdate = mock(
   (...args: [{ where: { id: string }; data: { isPremium: boolean } }]) => {
@@ -134,10 +134,16 @@ describe("startSubscription", () => {
     cardTokenId: "card-token-123",
   }
 
-  test("returns preapproval_failed when Mercado Pago rejects the request", async () => {
-    mockCreatePreapproval.mockImplementation(() => Promise.resolve({ ok: false }))
+  test("returns preapproval_failed and reports it when Mercado Pago rejects the request", async () => {
+    const consoleError = spyOn(console, "error").mockImplementation(() => {})
+    mockCreatePreapproval.mockImplementation(() => Promise.resolve({ ok: false, error: "http_400" }))
     const result = await startSubscription(input)
     expect(result).toEqual({ ok: false, reason: "preapproval_failed" })
+    expect(consoleError).toHaveBeenCalledWith("Subscription checkout failed: preapproval not created", {
+      userId: "u1",
+      error: "http_400",
+    })
+    consoleError.mockRestore()
     mockCreatePreapproval.mockImplementation(() =>
       Promise.resolve({
         ok: true,

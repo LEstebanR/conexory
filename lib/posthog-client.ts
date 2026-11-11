@@ -1,5 +1,5 @@
 import type { PostHog } from "posthog-js"
-import { POSTHOG_PROXY_PATH, POSTHOG_UI_HOST, posthogKey } from "./posthog"
+import { POSTHOG_PROXY_PATH, POSTHOG_UI_HOST, posthogContext, posthogKey } from "./posthog"
 
 let loading: Promise<PostHog | null> | undefined
 
@@ -27,6 +27,7 @@ export function loadPostHog(): Promise<PostHog | null> {
         person_profiles: "identified_only",
         request_batching: false,
       })
+      posthog.register(posthogContext())
       return posthog
     })
     .catch(() => {

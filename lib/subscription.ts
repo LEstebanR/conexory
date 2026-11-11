@@ -3,6 +3,7 @@ import { invalidatePublicListings } from "@/lib/public-cache"
 import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
 import { createPreapproval, getCardToken } from "@/lib/mercadopago"
 import { cancelOrphanPreapproval } from "@/lib/orphan-subscriptions"
+import { reportError } from "@/lib/report-error"
 
 // Drop a user to Free: clear the premium flag and deactivate properties beyond
 // the Free limit (keeping the most recent ones). Used both when a canceled plan
@@ -75,6 +76,10 @@ export async function startSubscription({
     getCardToken(cardTokenId),
   ])
   if (!result.ok || !result.preapprovalId) {
+    await reportError("Subscription checkout failed: preapproval not created", undefined, {
+      userId,
+      error: result.error ?? "missing_preapproval_id",
+    })
     return { ok: false, reason: "preapproval_failed" }
   }
 

@@ -1,6 +1,6 @@
 import { after } from "next/server"
 import type { PostHog } from "posthog-node"
-import { POSTHOG_INGEST_HOST, posthogKey } from "./posthog"
+import { POSTHOG_INGEST_HOST, posthogContext, posthogKey } from "./posthog"
 
 type Properties = Record<string, unknown>
 
@@ -26,7 +26,7 @@ function getClient(): Promise<PostHog | null> {
 export async function captureServerError(error: unknown, properties: Properties = {}): Promise<void> {
   try {
     const posthog = await getClient()
-    await posthog?.captureExceptionImmediate(error, undefined, properties)
+    await posthog?.captureExceptionImmediate(error, undefined, { ...posthogContext(), ...properties })
   } catch (sendError) {
     console.error("[posthog] could not report error:", sendError)
   }
