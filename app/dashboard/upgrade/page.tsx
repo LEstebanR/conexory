@@ -9,6 +9,7 @@ import { SubscribeCardForm } from "./subscribe-card-form"
 import { ChangeCardForm } from "./change-card-form"
 import { UpgradeErrorToast } from "./upgrade-error-toast"
 import { hasProAccess, PRO_VALUE_POINTS } from "@/lib/plans"
+import { SUPPORT_EMAIL } from "@/lib/urls"
 import type { Metadata } from "next"
 import { formatColombiaDate } from "@/lib/dates"
 
@@ -34,10 +35,7 @@ const PRO_FEATURES = [
   "Vista pública para tus clientes",
 ]
 
-// Provisional support inbox for plan-related questions — not yet the
-// verified conexory.com domain, so it's a plain mailto rather than
-// something sent via Resend (see lib/email.ts TEAM_INBOX).
-const PLAN_SUPPORT_MAILTO = `mailto:conexory@gmail.com?cc=leramirezca@gmail.com&subject=${encodeURIComponent("Ayuda con mi plan Conexory")}`
+const PLAN_SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Ayuda con mi plan Conexory")}`
 
 function formatDate(date: Date) {
   return formatColombiaDate(date, { day: "numeric", month: "long", year: "numeric" })
@@ -224,7 +222,7 @@ export default async function UpgradePage() {
           <ShieldCheck className="w-3.5 h-3.5" strokeWidth={1.75} />
           Pago seguro con Mercado Pago ·{" "}
           <a href={PLAN_SUPPORT_MAILTO} className="hover:text-ink transition-colors">
-            Conexory@gmail.com
+            {SUPPORT_EMAIL}
           </a>
         </div>
       </div>

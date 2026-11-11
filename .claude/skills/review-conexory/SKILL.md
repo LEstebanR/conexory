@@ -138,6 +138,10 @@ Before a finding goes in the report:
 **Veredicto:** ✅ Aprobar · 🟡 Aprobar con cambios menores · 🔴 Requiere cambios
 <1-2 líneas: por qué>
 
+**Qué hay que hacer** (una línea por hallazgo, en orden de prioridad):
+1. 🔴 <acción concreta en imperativo: "Filtrar por `userId` en `deleteProperty`"> · `path/file.ts:42`
+2. ...
+
 **Alcance:** <N archivos, +A/−B> · Áreas: <pagos, vista pública, ...> · Issue: <#N / LES-n / sin issue>
 **Cumple el issue:** <sí / parcial: qué falta / no>
 
@@ -152,11 +156,16 @@ Before a finding goes in the report:
 
 ### Hallazgos
 #### 🔴 Bloqueantes
-**1. <título corto>** · `path/file.ts:42` · <dimensión> · confirmado
-- **Problema:** ...
-- **Escenario:** <entrada/estado → resultado incorrecto>
-- **Regla:** <invariante del proyecto, si aplica>
-- **Fix:** <corrección concreta, con snippet si es corto>
+**1. <título que nombre el problema, no el área: "Cualquier usuario puede borrar propiedades ajenas">** · `path/file.ts:42` · confirmado
+- **Qué pasa:** <en lenguaje simple, qué vive el agente, el cliente o el negocio; sin jerga sin explicar>
+- **Por qué importa:** <consecuencia concreta: dinero, datos, confianza, SEO, CI; y la regla del proyecto si aplica>
+- **Cómo se reproduce:** <pasos o estado → resultado incorrecto>
+- **Solución propuesta:** <qué cambiar y dónde, en una frase>
+  ```diff
+  - código actual
+  + código propuesto
+  ```
+  <si hay varias soluciones válidas: A y B con su tradeoff, y cuál recomiendas>
 
 #### 🟠 Importantes
 ...
@@ -166,7 +175,9 @@ Before a finding goes in the report:
 ...
 
 ### Preexistente (fuera del alcance del PR)
-- ...
+**N. <título que nombre el problema>** · `path/file.ts:10` · confirmado/probable
+- **Qué pasa:** ...
+- **Solución propuesta:** <cambio concreto, con diff si es corto> · <¿issue aparte o se puede incluir aquí?>
 
 ### Para probar manualmente
 - <flujos concretos a validar en el navegador/preview, incluyendo móvil y casos borde>
@@ -175,7 +186,14 @@ Before a finding goes in the report:
 - <2-4 bullets específicos, no relleno>
 ```
 
-Omit empty sections. Number findings continuously across severities so the user can say "arregla 1, 3 y 5". If there are no findings, say so plainly and still list what was checked.
+Omit empty sections. Number findings continuously across severities (preexisting ones included) so the user can say "arregla 1, 3 y 5". If there are no findings, say so plainly and still list what was checked.
+
+Writing rules for findings (the reader must understand the problem and act on it without re-reading the code):
+- **Every finding carries a solution.** A finding without a concrete, applicable fix doesn't go in the report. If the right fix is genuinely unclear, say exactly what to check to decide, and propose the most likely fix anyway.
+- **Show the code.** The fix is a `diff` block against the real lines when it fits in ~15 lines; for larger fixes, name the files and the steps. Never just "add validation" or "consider refactoring".
+- **Plain language first.** "Qué pasa" describes the effect on a person (agent, client, Luis) or on the system, not the mechanism. Explain any technical term the first time (e.g. "IDOR: un usuario puede actuar sobre datos de otro cambiando el id").
+- **One problem per finding**, titled with the problem itself, not with the dimension ("Seguridad") or the file.
+- Don't hedge the severity in prose; the emoji and the confidence label carry it.
 
 End by offering, in one line: fix the selected findings, and (for a PR target) post them with `--comment`.
 
@@ -198,7 +216,7 @@ Run this every time, after the report (and after Phase 6 if it ran), even when t
    - Bugs or issues the user (or CI) found that the review missed, and which checklist item should have caught them.
    - Checklist items that were noise for this kind of change, or rules that turned out stale vs. `AGENTS.md` / the code.
    - Friction in the process: a phase that was slow, redundant, or a command that failed.
-2. **Ask the user.** Show a short "Retrospectiva" block with your 0-3 concrete improvement proposals (each: what to change, in which file, and why), then ask with `AskUserQuestion`: **"¿Qué se puede mejorar de esta review?"**, with options such as applying each proposal, "Nada, estuvo bien", and room for the user's own feedback (the automatic "Other" option). If you have no proposals, still ask the question with just the "Nada, estuvo bien" option plus free text.
+2. **Ask the user.** Show a short "Retrospectiva" block with your 0-3 concrete improvement proposals (each: the problem it fixes in plain language, the file, and the exact text you'd add or change), then ask with `AskUserQuestion`: **"¿Qué se puede mejorar de esta review?"**, with options such as applying each proposal, "Nada, estuvo bien", and room for the user's own feedback (the automatic "Other" option). If you have no proposals, still ask the question with just the "Nada, estuvo bien" option plus free text.
 3. **Apply only what the user approves**, as edits to `.claude/skills/review-conexory/` (`SKILL.md` for process, `references/*.md` for rules). Generalize: write the rule that would have caught the case, not a note about this PR. When `AGENTS.md` and a reference file disagree, `AGENTS.md` wins and the reference gets updated.
 4. If the feedback is about the project rather than the skill (a new convention, a product decision), suggest where it belongs (`AGENTS.md` or memory) instead of putting it in the checklists.
 5. Don't commit the skill edits; say they're pending so they ride along with the next PR or get their own `chore` PR.

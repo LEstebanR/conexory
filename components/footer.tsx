@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Mail } from "lucide-react"
+import { SUPPORT_EMAIL } from "@/lib/urls"
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -75,7 +76,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-2">
               <a
-                href="mailto:Conexory@gmail.com"
+                href={`mailto:${SUPPORT_EMAIL}`}
                 aria-label="Email"
                 className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-mute hover:text-white hover:bg-white/10 transition-colors"
               >

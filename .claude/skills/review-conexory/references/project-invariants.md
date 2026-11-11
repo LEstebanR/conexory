@@ -103,6 +103,7 @@ Files: `lib/mercadopago.ts`, `lib/subscription.ts`, `lib/orphan-subscriptions.ts
 - No em dash (—) as an aside in Spanish copy; use commas, parentheses or a period.
 - Prices in COP formatted with the helpers in `lib/format.ts`; dates with `lib/dates.ts` / `lib/colombia-month.ts` (Colombia timezone). Hand-rolled `toLocaleString` / `new Date().getMonth()` on server code can be off by a day/month in UTC.
 - Phone numbers through `lib/phone.ts`.
+- Every contact/support email shown in the UI or in `mailto:` links uses `SUPPORT_EMAIL` (`lib/urls.ts`). A hardcoded address is 🟠; a personal or `@gmail.com` address (in `to`, `cc` or visible text) is 🟠 even if it "works", because it exposes a private inbox and drifts from the real support channel.
 - Code comments in **English** and minimal: default is zero; only a non-obvious *why* that names can't carry. Comments explaining *what* are 💬/🟡.
 
 ## SEO, OG & public view
@@ -127,5 +128,6 @@ Files: `lib/mercadopago.ts`, `lib/subscription.ts`, `lib/orphan-subscriptions.ts
 - New dependency ⇒ **exact version** (no `^`/`~`) in `package.json`, `bun.lock` updated, and justified (bundle cost on client components). Heavy client libs (`@dnd-kit/*`, `leaflet`, `canvas-confetti`, `driver.js`) are lazy-loaded; keep it that way.
 - `vercel.json` crons and `scripts/vercel-ignore-build.sh` changes affect every deploy: review carefully.
 - Transactional email via Resend with `FROM` on the verified `conexory.com` domain; templates in `emails/` (React Email).
+- Inbound mail: `conexory.com` only receives at the addresses forwarded by Forward Email (today just `hola@`, i.e. `SUPPORT_EMAIL`); every other address bounces, `no-reply@` included. A new or changed send in `lib/email.ts` that users may answer (welcome, payment, cancellation) should set `replyTo: SUPPORT_EMAIL`; flag its absence as 🟡. A new contact address published anywhere needs its forwarding rule in DNS first (🟠 if it would receive nothing).
 - The PR body describes the **final** state of the branch: when later commits change behavior (e.g. after a review round), the body's "Main changes", "How to test" and manual steps must be updated too, and the issue's acceptance criteria must match what was actually decided. A stale body or manual step that can't be followed is 🟠.
 - Branch name must match `^(feat|fix|refactor|chore|docs)/(LES-[0-9]+-[a-z0-9-]+|[a-z0-9-]+)$` (CI job). PR body follows `.github/pull_request_template.md` with `Closes #N` or the Linear link.
