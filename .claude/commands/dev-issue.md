@@ -114,6 +114,8 @@ Show the user the proposed description (title + body) **before** creating the PR
 
 Show the PR URL to the user.
 
+Then wait for CI with `gh pr checks <PR> --watch` (in the background) and don't move to Step 10 until it's green: local checks can pass while CI fails. If a test fails only in CI and the Bun version matches `.bun-version`, suspect test-file order: `mock.module()` is process-wide and CI's file order differs from macOS. Take the order from the job log (`gh api repos/LEstebanR/conexory/actions/jobs/<id>/logs | grep '##\[group\].*\.test\.tsx\?:'`) and reproduce with `bun test <files in that order>` before changing anything.
+
 ### Step 9 — Post-PR code review
 
 `/code-review` (the real multi-agent one: 5 parallel Sonnet agents + scoring, comments directly on the GitHub PR) is expensive in time and tokens — a full run can take several minutes and consume hundreds of thousands of tokens. Scale this step with the same criterion as Step 2:
