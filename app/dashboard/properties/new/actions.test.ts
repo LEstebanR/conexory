@@ -1,5 +1,6 @@
 import { mockRevalidateTag } from "@/test-setup"
-import { describe, test, expect, mock, spyOn } from "bun:test"
+import { afterAll, describe, test, expect, mock, spyOn } from "bun:test"
+import * as analytics from "@/lib/analytics"
 
 const mockGetSession = mock(() =>
   Promise.resolve<{ user: { id: string; isPremium: boolean; role: string } } | null>({
@@ -40,11 +41,10 @@ mock.module("@/lib/onboarding-server", () => ({
   setOnboardingFlag: mockSetOnboardingFlag,
 }))
 
-const mockTrackEvent = mock((...args: unknown[]) => {
-  void args
-  return Promise.resolve()
-})
-mock.module("@/lib/analytics", () => ({ trackEvent: mockTrackEvent }))
+// spyOn instead of mock.module: a module mock is process-wide and would hand
+// this fake to lib/analytics.test.ts if it runs later.
+const mockTrackEvent = spyOn(analytics, "trackEvent").mockImplementation(() => Promise.resolve())
+afterAll(() => mockTrackEvent.mockRestore())
 
 const { createProperty, getEnglishProfileStatus } = await import("./actions")
 

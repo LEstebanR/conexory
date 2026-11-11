@@ -1,4 +1,5 @@
-import { describe, test, expect, mock } from "bun:test"
+import { spyOn, afterAll, describe, test, expect, mock } from "bun:test"
+import * as analytics from "@/lib/analytics"
 import { APIError } from "better-auth/api"
 
 const mockSignUpEmail = mock((...args: [unknown]) => {
@@ -30,11 +31,10 @@ mock.module("@/lib/agent-slug", () => ({
   generateAgentSlug: mockGenerateAgentSlug,
 }))
 
-const mockTrackAnonymousEvent = mock((...args: unknown[]) => {
-  void args
-  return Promise.resolve()
-})
-mock.module("@/lib/analytics", () => ({ trackAnonymousEvent: mockTrackAnonymousEvent }))
+// spyOn instead of mock.module: a module mock is process-wide and would hand
+// this fake to lib/analytics.test.ts if it runs later.
+const mockTrackAnonymousEvent = spyOn(analytics, "trackAnonymousEvent").mockImplementation(() => Promise.resolve())
+afterAll(() => mockTrackAnonymousEvent.mockRestore())
 
 // next/headers and next/navigation are mocked globally in test-setup.ts.
 
