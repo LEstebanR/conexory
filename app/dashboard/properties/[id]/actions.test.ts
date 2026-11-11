@@ -76,11 +76,17 @@ mock.module("@vercel/blob", () => ({ ...realBlob, del: mockDel }))
 
 const mockSetOnboardingFlag = mock((...args: [unknown, unknown]) => {
   void args
-  return Promise.resolve()
+  return Promise.resolve(true)
 })
 mock.module("@/lib/onboarding-server", () => ({
   setOnboardingFlag: mockSetOnboardingFlag,
 }))
+
+const mockTrackEvent = mock((...args: unknown[]) => {
+  void args
+  return Promise.resolve()
+})
+mock.module("@/lib/analytics", () => ({ trackEvent: mockTrackEvent }))
 
 const mockGenerateShareMessageWithAI = mock((...args: [unknown, unknown, unknown, unknown]) => {
   void args
@@ -231,6 +237,18 @@ describe("incrementShares", () => {
     mockPropertyUpdateMany.mockImplementation(() => Promise.resolve({ count: 0 }))
     await incrementShares("p1")
     expect(mockSetOnboardingFlag).not.toHaveBeenCalled()
+  })
+
+  test("tracks first_property_shared only on the share that set the flag", async () => {
+    mockTrackEvent.mockClear()
+    mockSetOnboardingFlag.mockImplementationOnce(() => Promise.resolve(true))
+    await incrementShares("p1")
+    expect(mockTrackEvent).toHaveBeenCalledWith("u1", "first_property_shared")
+
+    mockTrackEvent.mockClear()
+    mockSetOnboardingFlag.mockImplementationOnce(() => Promise.resolve(false))
+    await incrementShares("p1")
+    expect(mockTrackEvent).not.toHaveBeenCalled()
   })
 })
 

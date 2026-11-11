@@ -30,6 +30,12 @@ mock.module("@/lib/agent-slug", () => ({
   generateAgentSlug: mockGenerateAgentSlug,
 }))
 
+const mockTrackAnonymousEvent = mock((...args: unknown[]) => {
+  void args
+  return Promise.resolve()
+})
+mock.module("@/lib/analytics", () => ({ trackAnonymousEvent: mockTrackAnonymousEvent }))
+
 // next/headers and next/navigation are mocked globally in test-setup.ts.
 
 const { registerAction } = await import("./actions")
@@ -118,5 +124,14 @@ describe("registerAction", () => {
   test("re-throws errors that aren't an APIError", async () => {
     mockSignUpEmail.mockImplementationOnce(() => Promise.reject(new Error("network down")))
     await expect(registerAction({}, formData(validFields))).rejects.toThrow("network down")
+  })
+})
+
+describe("registerAction analytics", () => {
+  test("tracks signup_started on every submission, even an invalid one", async () => {
+    mockTrackAnonymousEvent.mockClear()
+    const result = await registerAction({}, formData({ ...validFields, email: "not-an-email" }))
+    expect(result.errors?.email).toBeDefined()
+    expect(mockTrackAnonymousEvent).toHaveBeenCalledWith("signup_started")
   })
 })

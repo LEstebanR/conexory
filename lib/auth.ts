@@ -6,6 +6,7 @@ import { unstable_rethrow } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { sendResetPasswordEmail, sendVerificationEmail, sendWelcome } from "@/lib/email"
 import { reportError } from "@/lib/report-error"
+import { trackSignupCompleted } from "@/lib/analytics"
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -101,6 +102,7 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
+          await trackSignupCompleted(user)
           if (user.emailVerified) {
             await sendWelcome(user.email, user.name).catch(() => null)
           }

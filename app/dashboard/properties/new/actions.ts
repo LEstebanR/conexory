@@ -6,6 +6,7 @@ import { invalidatePublicListings } from "@/lib/public-cache"
 import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 import { propertyLimit, photoLimit, hasProAccess, PRO_PROPERTY_LIMIT } from "@/lib/plans"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
+import { trackEvent } from "@/lib/analytics"
 import { reportError } from "@/lib/report-error"
 
 async function generateUniqueSlug(): Promise<string> {
@@ -92,7 +93,8 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
     invalidatePublicListings()
 
     // Best-effort: a flag-write failure must not fail the (already committed) create.
-    await setOnboardingFlag(session.user.id, "firstPropertyCreated").catch(() => {})
+    const isFirstProperty = await setOnboardingFlag(session.user.id, "firstPropertyCreated").catch(() => false)
+    if (isFirstProperty) await trackEvent(session.user.id, "first_property_created")
 
     return { success: true, id: property.id }
   } catch (err) {

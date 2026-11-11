@@ -35,10 +35,16 @@ mock.module("@/lib/prisma", () => ({
 
 const mockConsoleError = spyOn(console, "error").mockImplementation(() => {})
 
-const mockSetOnboardingFlag = mock(() => Promise.resolve())
+const mockSetOnboardingFlag = mock(() => Promise.resolve(true))
 mock.module("@/lib/onboarding-server", () => ({
   setOnboardingFlag: mockSetOnboardingFlag,
 }))
+
+const mockTrackEvent = mock((...args: unknown[]) => {
+  void args
+  return Promise.resolve()
+})
+mock.module("@/lib/analytics", () => ({ trackEvent: mockTrackEvent }))
 
 const { createProperty, getEnglishProfileStatus } = await import("./actions")
 
@@ -114,6 +120,26 @@ describe("createProperty", () => {
     mockSetOnboardingFlag.mockClear()
     await createProperty(validInput)
     expect(mockSetOnboardingFlag).toHaveBeenCalledWith("u1", "firstPropertyCreated")
+  })
+
+  test("tracks first_property_created only when the flag was just set", async () => {
+    mockTrackEvent.mockClear()
+    mockSetOnboardingFlag.mockImplementationOnce(() => Promise.resolve(true))
+    await createProperty(validInput)
+    expect(mockTrackEvent).toHaveBeenCalledWith("u1", "first_property_created")
+
+    mockTrackEvent.mockClear()
+    mockSetOnboardingFlag.mockImplementationOnce(() => Promise.resolve(false))
+    await createProperty(validInput)
+    expect(mockTrackEvent).not.toHaveBeenCalled()
+  })
+
+  test("does not track nor fail the create when the flag write fails", async () => {
+    mockTrackEvent.mockClear()
+    mockSetOnboardingFlag.mockImplementationOnce(() => Promise.reject(new Error("db blip")))
+    const result = await createProperty(validInput)
+    expect(result.success).toBe(true)
+    expect(mockTrackEvent).not.toHaveBeenCalled()
   })
 
   test("logs the exception and returns error on unexpected failure", async () => {

@@ -7,6 +7,12 @@ const mockUserUpdate = mock(
     return Promise.resolve({})
   }
 )
+const mockUserUpdateMany = mock(
+  (...args: [{ where: { id: string; isPremium: boolean }; data: { isPremium: boolean } }]) => {
+    void args
+    return Promise.resolve({ count: 1 })
+  }
+)
 const mockPropertyFindMany = mock(() => Promise.resolve<{ id: string }[]>([]))
 const mockPropertyUpdateMany = mock(
   (...args: [{ where: { id: { in: string[] } }; data: { published: boolean } }]) => {
@@ -38,9 +44,15 @@ const mockPaymentEventUpsert = mock((...args: [unknown]) => {
   return Promise.resolve({})
 })
 
+const mockTrackEvent = mock((...args: unknown[]) => {
+  void args
+  return Promise.resolve()
+})
+mock.module("@/lib/analytics", () => ({ trackEvent: mockTrackEvent }))
+
 mock.module("@/lib/prisma", () => ({
   prisma: {
-    user: { update: mockUserUpdate },
+    user: { update: mockUserUpdate, updateMany: mockUserUpdateMany },
     property: { findMany: mockPropertyFindMany, updateMany: mockPropertyUpdateMany },
     subscription: { upsert: mockSubscriptionUpsert, findUnique: mockSubscriptionFindUnique },
     paymentEvent: { upsert: mockPaymentEventUpsert },
@@ -156,7 +168,8 @@ describe("startSubscription", () => {
 
   test("persists the preapproval as incomplete when Mercado Pago hasn't authorized it yet", async () => {
     mockSubscriptionUpsert.mockClear()
-    mockUserUpdate.mockClear()
+    mockUserUpdateMany.mockClear()
+    mockTrackEvent.mockClear()
     await startSubscription(input)
     expect(mockSubscriptionUpsert).toHaveBeenCalledTimes(1)
     const [call] = mockSubscriptionUpsert.mock.calls
@@ -167,7 +180,8 @@ describe("startSubscription", () => {
       mpPreapprovalId: "preapproval-123",
     })
     expect(call[0].create).not.toHaveProperty("currentPeriodEnd", expect.any(Date))
-    expect(mockUserUpdate).not.toHaveBeenCalled()
+    expect(mockUserUpdateMany).not.toHaveBeenCalled()
+    expect(mockTrackEvent).not.toHaveBeenCalled()
   })
 
   test("returns ok on success", async () => {
@@ -227,13 +241,15 @@ describe("startSubscription", () => {
       Promise.resolve({ ok: true, preapprovalId: "preapproval-123", status: "authorized", cardBrand: "visa" })
     )
     mockSubscriptionUpsert.mockClear()
-    mockUserUpdate.mockClear()
+    mockUserUpdateMany.mockClear()
+    mockTrackEvent.mockClear()
     const result = await startSubscription(input)
     expect(result).toEqual({ ok: true })
-    expect(mockUserUpdate).toHaveBeenCalledWith({
-      where: { id: "u1" },
+    expect(mockUserUpdateMany).toHaveBeenCalledWith({
+      where: { id: "u1", isPremium: false },
       data: { isPremium: true },
     })
+    expect(mockTrackEvent).toHaveBeenCalledWith("u1", "upgrade_completed", { source: "card" })
     const [call] = mockSubscriptionUpsert.mock.calls
     expect(call[0].create).toMatchObject({
       userId: "u1",
@@ -243,5 +259,15 @@ describe("startSubscription", () => {
       cardLastFour: "1234",
     })
     expect((call[0].create as { currentPeriodEnd: Date }).currentPeriodEnd).toBeInstanceOf(Date)
+  })
+
+  test("doesn't count an upgrade when the user was already Pro", async () => {
+    mockCreatePreapproval.mockImplementationOnce(() =>
+      Promise.resolve({ ok: true, preapprovalId: "preapproval-123", status: "authorized", cardBrand: "visa" })
+    )
+    mockUserUpdateMany.mockImplementationOnce(() => Promise.resolve({ count: 0 }))
+    mockTrackEvent.mockClear()
+    await startSubscription(input)
+    expect(mockTrackEvent).not.toHaveBeenCalled()
   })
 })

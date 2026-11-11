@@ -8,6 +8,7 @@ import {
 import { classifyPreapproval, cancelOrphanPreapproval } from "@/lib/orphan-subscriptions"
 import { sendPaymentFailed, sendSubscriptionConfirmation } from "@/lib/email"
 import { reportError } from "@/lib/report-error"
+import { trackEvent } from "@/lib/analytics"
 
 export async function POST(req: Request) {
   const url = new URL(req.url)
@@ -193,7 +194,7 @@ async function handleApproved(
   // resolve to a userId that doesn't exist. Without this check, user.update
   // and subscription.upsert's create branch below throw (P2025/P2003), which
   // surfaces as an uncaught 500 to Mercado Pago and gets retried forever.
-  const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } })
+  const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, isPremium: true } })
   if (!userExists) return
 
   const existing = await prisma.subscription.findUnique({
@@ -268,6 +269,12 @@ async function handleApproved(
       },
     }),
   ])
+
+  // Renewals and the first charge of an optimistically activated subscription
+  // find the user already Pro, so they aren't counted as new upgrades.
+  if (!userExists.isPremium) {
+    await trackEvent(userId, "upgrade_completed", { source: "webhook" })
+  }
 
   if (!isRenewal) {
     await sendSubscriptionConfirmation(user.email, user.name).catch(() => null)
