@@ -1,6 +1,7 @@
 import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
 import { renderToStaticMarkup } from "react-dom/server"
 import type { ReactElement } from "react"
+import { SUPPORT_EMAIL } from "./urls"
 
 const mockSend = mock((...args: [unknown]) => {
   void args
@@ -30,6 +31,25 @@ beforeEach(() => {
 function lastCall(): { from: string; to: string; subject: string; react?: unknown; html?: string; replyTo?: string } {
   return mockSend.mock.calls[0][0] as ReturnType<typeof lastCall>
 }
+
+describe("sender and reply address", () => {
+  const sends: [string, () => Promise<void>][] = [
+    ["sendWelcome", () => sendWelcome("agent@example.com", "Luis")],
+    ["sendSubscriptionConfirmation", () => sendSubscriptionConfirmation("agent@example.com", "Luis")],
+    ["sendPaymentFailed", () => sendPaymentFailed("agent@example.com", "Luis")],
+    ["sendRenewalReminder", () => sendRenewalReminder("agent@example.com", "Luis", new Date("2026-08-15"), true)],
+    ["sendSubscriptionCancelled", () => sendSubscriptionCancelled("agent@example.com", "Luis")],
+    ["sendResetPasswordEmail", () => sendResetPasswordEmail("agent@example.com", "Luis", "https://conexory.com/r?t=a")],
+    ["sendVerificationEmail", () => sendVerificationEmail("agent@example.com", "Luis", "https://conexory.com/v?t=a")],
+  ]
+
+  test.each(sends)("%s sends from no-reply and routes replies to support", async (_name, send) => {
+    await send()
+    const call = lastCall()
+    expect(call.from).toBe("Conexory <no-reply@conexory.com>")
+    expect(call.replyTo).toBe(SUPPORT_EMAIL)
+  })
+})
 
 describe("sendWelcome", () => {
   test("sends from the verified domain with the right subject and recipient", async () => {
