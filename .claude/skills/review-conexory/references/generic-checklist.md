@@ -35,6 +35,7 @@ Go through every section; skip items that clearly don't apply to the diff. Each 
 - **DB:** N+1 queries; missing `select`; unbounded `findMany` (no `take`) on growing tables; missing indexes for new filters; sequential awaits that could be `Promise.all`.
 - **Public pages:** uncached queries (see Caching in project invariants); work in `proxy.ts`; heavy `generateMetadata` duplicating the page's query without `cache()`.
 - **Rendering:** a Server Component turned into a Client Component without need; `"use client"` placed too high in the tree pulling big subtrees into the bundle; large libs imported statically in client code (lazy-load with `next/dynamic`).
+- **Client imports drag dependencies:** a new import from a `"use client"` file (including `error.tsx`, which loads with its route) into a `lib/` module pulls that module's whole import graph into the browser bundle. Check the module doesn't import Zod, Prisma, server-only code or other heavy libs; if it does, split the client-safe part into its own module (🟠 on public pages).
 - **Images:** `next/image` with proper `sizes`; LCP image `priority` on `/p/[slug]`; no unnecessarily large originals.
 - **Client effects:** fetch-in-`useEffect` waterfalls that could be server data; re-renders from unstable props/inline objects in hot lists.
 - **External calls:** timeouts on Mercado Pago/Gemini/Resend; no external call on the critical render path of public pages.
