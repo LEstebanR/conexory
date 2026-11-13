@@ -10,7 +10,7 @@ class FakePostHog {
 
 mock.module("posthog-node", () => ({ PostHog: FakePostHog }))
 
-const { getPostHogServer, sendWithoutBlocking, resetPostHogServerForTests } = await import("./posthog-server")
+const { getPostHogServer, resetPostHogServerForTests } = await import("./posthog-server")
 
 const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
 
@@ -41,15 +41,5 @@ describe("getPostHogServer", () => {
     expect(first).toBeInstanceOf(FakePostHog)
     expect(second).toBe(first)
     expect(constructorCalls).toEqual([["phc_test", { host: "https://us.i.posthog.com", flushAt: 1, flushInterval: 0 }]])
-  })
-})
-
-describe("sendWithoutBlocking", () => {
-  test("sends inline when called outside a request", async () => {
-    const send = mock(() => Promise.resolve())
-
-    await sendWithoutBlocking(send)
-
-    expect(send).toHaveBeenCalledTimes(1)
   })
 })

@@ -1,6 +1,7 @@
 import { describe, test, expect, mock, beforeEach, afterAll, spyOn } from "bun:test"
 import { Prisma } from "@prisma/client"
 import * as email from "@/lib/email"
+import * as errors from "@/lib/report-error"
 
 process.env.CRON_SECRET = "test-cron-secret"
 
@@ -114,6 +115,27 @@ describe("reengagement", () => {
     expect(body.reengaged).toBe(1)
     expect(mockSendReengagement).toHaveBeenCalledTimes(1)
     expect(mockSendReengagement).toHaveBeenCalledWith(beto)
+  })
+})
+
+describe("send failures", () => {
+  test("a failing send is reported and the next recipient still gets theirs", async () => {
+    const mockReportError = spyOn(errors, "reportError").mockImplementation(() => Promise.resolve())
+    try {
+      mockUserFindMany.mockImplementation(() => Promise.resolve([ana, beto]))
+      mockSendReengagement.mockImplementationOnce(() => Promise.reject(new Error("render failed")))
+      const res = await GET(authedRequest())
+      expect(res.status).toBe(200)
+      expect((await res.json()).reengaged).toBe(1)
+      expect(mockSendReengagement).toHaveBeenCalledWith(beto)
+      expect(mockReportError).toHaveBeenCalledWith(
+        "Lifecycle email failed: reengagement",
+        expect.any(Error),
+        { userId: "u1" },
+      )
+    } finally {
+      mockReportError.mockRestore()
+    }
   })
 })
 

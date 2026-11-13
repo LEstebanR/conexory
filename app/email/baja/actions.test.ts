@@ -32,8 +32,8 @@ describe("unsubscribe action", () => {
   })
 
   test("sends an invalid or missing token back to the page without opting anyone out", async () => {
-    await expect(unsubscribe(form("u1.forged"))).rejects.toThrow("REDIRECT:/email/baja")
-    await expect(unsubscribe(form())).rejects.toThrow("REDIRECT:/email/baja")
+    await expect(unsubscribe(form("u1.forged"))).rejects.toThrow(/^REDIRECT:\/email\/baja$/)
+    await expect(unsubscribe(form())).rejects.toThrow(/^REDIRECT:\/email\/baja$/)
     expect(mockUserUpdateMany).not.toHaveBeenCalled()
   })
 })

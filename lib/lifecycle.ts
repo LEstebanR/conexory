@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
 import { sendPropertyLimitReached } from "@/lib/email"
-import { sendWithoutBlocking } from "@/lib/posthog-server"
+import { sendWithoutBlocking } from "@/lib/after"
 import { reportError } from "@/lib/report-error"
 
 export type LifecycleEmailKind = "property_limit_reached" | "reengagement" | "winback"

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { claimLifecycleEmail, type LifecycleEmailKind } from "@/lib/lifecycle"
 import { sendReengagement, sendWinback } from "@/lib/email"
+import { reportError } from "@/lib/report-error"
 
 // Daily proactive emails (scheduled in vercel.json). The limit-reached email
 // is sent from the property actions instead, at the moment it happens.
@@ -86,8 +87,12 @@ async function sendOnce(
   let sent = 0
   for (const user of recipients) {
     if (!(await claimLifecycleEmail(user.id, kind))) continue
-    await send(user)
-    sent++
+    // One failing send must not leave the rest of today's recipients without theirs.
+    const ok = await send(user).then(
+      () => true,
+      (err) => reportError(`Lifecycle email failed: ${kind}`, err, { userId: user.id }).then(() => false),
+    )
+    if (ok) sent++
   }
   return sent
 }
