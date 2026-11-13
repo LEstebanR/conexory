@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma"
 import { invalidatePublicListings } from "@/lib/public-cache"
 import { del } from "@vercel/blob"
 import { setOnboardingFlag } from "@/lib/onboarding-server"
+import { trackEvent } from "@/lib/analytics"
 import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-message"
 import { SHARE_INFO_IDS, SHARE_MESSAGE_KINDS } from "@/lib/share-message-options"
 import { propertyLimit, pinnedLimit, hasProAccess, aiMessageLimit } from "@/lib/plans"
@@ -103,7 +104,8 @@ export async function incrementShares(propertyId: string) {
     data: { shares: { increment: 1 } },
   })
   if (count > 0) {
-    await setOnboardingFlag(session.user.id, "firstPropertyShared").catch(() => {})
+    const isFirstShare = await setOnboardingFlag(session.user.id, "firstPropertyShared").catch(() => false)
+    if (isFirstShare) await trackEvent(session.user.id, "first_property_shared")
   }
 }
 

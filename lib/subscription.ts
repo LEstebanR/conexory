@@ -4,6 +4,7 @@ import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
 import { createPreapproval, getCardToken } from "@/lib/mercadopago"
 import { cancelOrphanPreapproval } from "@/lib/orphan-subscriptions"
 import { reportError } from "@/lib/report-error"
+import { trackEvent } from "@/lib/analytics"
 
 // Drop a user to Free: clear the premium flag and deactivate properties beyond
 // the Free limit (keeping the most recent ones). Used both when a canceled plan
@@ -89,7 +90,7 @@ export async function startSubscription({
   const cardBrand = result.cardBrand
   const cardLastFour = cardToken.ok ? cardToken.cardLastFour : undefined
 
-  await Promise.all([
+  const [, activated] = await Promise.all([
     prisma.subscription.upsert({
       where: { userId },
       create: {
@@ -109,8 +110,14 @@ export async function startSubscription({
         cardLastFour,
       },
     }),
-    authorized ? prisma.user.update({ where: { id: userId }, data: { isPremium: true } }) : Promise.resolve(),
+    authorized
+      ? prisma.user.updateMany({ where: { id: userId, isPremium: false }, data: { isPremium: true } })
+      : Promise.resolve({ count: 0 }),
   ])
+
+  if (activated.count > 0) {
+    await trackEvent(userId, "upgrade_completed", { source: "card" })
+  }
 
   // Only after the new subscription is safely persisted: if cancelling the old
   // one fails, the buyer still ends up subscribed and the daily reconciliation

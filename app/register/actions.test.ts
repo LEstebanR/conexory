@@ -1,4 +1,5 @@
-import { describe, test, expect, mock } from "bun:test"
+import { spyOn, afterAll, describe, test, expect, mock } from "bun:test"
+import * as analytics from "@/lib/analytics"
 import { APIError } from "better-auth/api"
 
 const mockSignUpEmail = mock((...args: [unknown]) => {
@@ -29,6 +30,11 @@ const mockGenerateAgentSlug = mock((...args: [string, unknown]) => {
 mock.module("@/lib/agent-slug", () => ({
   generateAgentSlug: mockGenerateAgentSlug,
 }))
+
+// spyOn instead of mock.module: a module mock is process-wide and would hand
+// this fake to lib/analytics.test.ts if it runs later.
+const mockTrackAnonymousEvent = spyOn(analytics, "trackAnonymousEvent").mockImplementation(() => Promise.resolve())
+afterAll(() => mockTrackAnonymousEvent.mockRestore())
 
 // next/headers and next/navigation are mocked globally in test-setup.ts.
 
@@ -118,5 +124,14 @@ describe("registerAction", () => {
   test("re-throws errors that aren't an APIError", async () => {
     mockSignUpEmail.mockImplementationOnce(() => Promise.reject(new Error("network down")))
     await expect(registerAction({}, formData(validFields))).rejects.toThrow("network down")
+  })
+})
+
+describe("registerAction analytics", () => {
+  test("tracks signup_started on every submission, even an invalid one", async () => {
+    mockTrackAnonymousEvent.mockClear()
+    const result = await registerAction({}, formData({ ...validFields, email: "not-an-email" }))
+    expect(result.errors?.email).toBeDefined()
+    expect(mockTrackAnonymousEvent).toHaveBeenCalledWith("signup_started")
   })
 })

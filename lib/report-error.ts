@@ -1,46 +1,39 @@
-import { after } from "next/server"
-import type { PostHog } from "posthog-node"
-import { POSTHOG_INGEST_HOST, posthogContext, posthogKey } from "./posthog"
+import { randomUUID } from "node:crypto"
+import { posthogContext } from "./posthog"
+import { getPostHogServer, sendWithoutBlocking } from "./posthog-server"
 
 type Properties = Record<string, unknown>
 
-let client: Promise<PostHog | null> | undefined
-
-// Loaded lazily so a missing key never pulls posthog-node into the request.
-// flushAt/flushInterval keep the client from batching: serverless functions
-// can be frozen right after responding, losing anything still queued.
-function getClient(): Promise<PostHog | null> {
-  const key = posthogKey()
-  if (!key) return Promise.resolve(null)
-  client ??= import("posthog-node")
-    .then(({ PostHog }) => new PostHog(key, { host: POSTHOG_INGEST_HOST, flushAt: 1, flushInterval: 0 }))
-    .catch(() => {
-      // Forget the failure so the next error retries instead of staying silent
-      // for the rest of this warm function's life.
-      client = undefined
-      return null
-    })
-  return client
-}
-
 export async function captureServerError(error: unknown, properties: Properties = {}): Promise<void> {
   try {
-    const posthog = await getClient()
+    const posthog = await getPostHogServer()
     await posthog?.captureExceptionImmediate(error, undefined, { ...posthogContext(), ...properties })
   } catch (sendError) {
     console.error("[posthog] could not report error:", sendError)
   }
 }
 
-// Inside a request, the send runs after the response so a slow PostHog never
-// delays it. Outside one (scripts, tests), after() throws and we send inline.
-function sendWithoutBlocking(send: () => Promise<void>): Promise<void> {
+// A browser still running a previous deploy posts an action id the new build
+// no longer has. Not a bug in our code, so it's counted, not raised as an issue.
+export function isServerActionVersionSkew(error: unknown): boolean {
+  return error instanceof Error && error.message.startsWith("Failed to find Server Action")
+}
+
+async function captureVersionSkew(properties: Properties): Promise<void> {
   try {
-    after(send)
-    return Promise.resolve()
-  } catch {
-    return send()
+    const posthog = await getPostHogServer()
+    await posthog?.captureImmediate({
+      distinctId: randomUUID(),
+      event: "server_action_version_skew",
+      properties: { ...posthogContext(), ...properties, $process_person_profile: false },
+    })
+  } catch (sendError) {
+    console.error("[posthog] could not report version skew:", sendError)
   }
+}
+
+export function captureRequestError(error: unknown, properties: Properties = {}): Promise<void> {
+  return isServerActionVersionSkew(error) ? captureVersionSkew(properties) : captureServerError(error, properties)
 }
 
 export async function reportError(message: string, error?: unknown, context: Properties = {}): Promise<void> {
@@ -52,8 +45,4 @@ export async function reportError(message: string, error?: unknown, context: Pro
       ...(error === undefined || error instanceof Error ? {} : { detail: error }),
     }),
   )
-}
-
-export function resetReportErrorClientForTests() {
-  client = undefined
 }

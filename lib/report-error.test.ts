@@ -4,6 +4,10 @@ const mockCaptureExceptionImmediate = mock((...args: [unknown, unknown, unknown]
   void args
   return Promise.resolve()
 })
+const mockCaptureImmediate = mock((...args: [unknown]) => {
+  void args
+  return Promise.resolve()
+})
 const constructorCalls: unknown[][] = []
 
 let failConstruction = () => {}
@@ -14,11 +18,13 @@ class FakePostHog {
     constructorCalls.push(args)
   }
   captureExceptionImmediate = mockCaptureExceptionImmediate
+  captureImmediate = mockCaptureImmediate
 }
 
 mock.module("posthog-node", () => ({ PostHog: FakePostHog }))
 
-const { reportError, captureServerError, resetReportErrorClientForTests } = await import("./report-error")
+const { reportError, captureServerError, captureRequestError, isServerActionVersionSkew } = await import("./report-error")
+const { resetPostHogServerForTests } = await import("./posthog-server")
 
 const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
 const VERCEL_VARS = ["VERCEL_ENV", "VERCEL_GIT_COMMIT_SHA", "NEXT_PUBLIC_VERCEL_ENV", "NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA"]
@@ -31,10 +37,12 @@ beforeEach(() => {
   for (const name of VERCEL_VARS) delete process.env[name]
   process.env.VERCEL_ENV = "preview"
   process.env.VERCEL_GIT_COMMIT_SHA = "abc1234def5678"
-  resetReportErrorClientForTests()
+  resetPostHogServerForTests()
   constructorCalls.length = 0
   mockCaptureExceptionImmediate.mockClear()
   mockCaptureExceptionImmediate.mockImplementation(() => Promise.resolve())
+  mockCaptureImmediate.mockClear()
+  mockCaptureImmediate.mockImplementation(() => Promise.resolve())
   mockConsoleError.mockClear()
 })
 
@@ -45,7 +53,7 @@ afterAll(() => {
     if (originalVercel[name] === undefined) delete process.env[name]
     else process.env[name] = originalVercel[name]
   }
-  resetReportErrorClientForTests()
+  resetPostHogServerForTests()
   mockConsoleError.mockRestore()
 })
 
@@ -123,5 +131,49 @@ describe("captureServerError", () => {
 
     await expect(captureServerError(new Error("boom"))).resolves.toBeUndefined()
     expect(mockConsoleError).toHaveBeenCalledWith("[posthog] could not report error:", expect.any(Error))
+  })
+})
+
+const SKEW_MESSAGE =
+  "Failed to find Server Action. This request might be from an older or newer deployment.\nRead more: https://nextjs.org/docs/messages/failed-to-find-server-action"
+
+describe("isServerActionVersionSkew", () => {
+  test("recognizes Next.js' missing action error", () => {
+    expect(isServerActionVersionSkew(new Error(SKEW_MESSAGE))).toBe(true)
+  })
+
+  test("ignores other errors and non-Error values", () => {
+    expect(isServerActionVersionSkew(new Error("boom"))).toBe(false)
+    expect(isServerActionVersionSkew(SKEW_MESSAGE)).toBe(false)
+  })
+})
+
+describe("captureRequestError", () => {
+  const request = { path: "/register", method: "POST", routePath: "/register/page", routeType: "render" }
+
+  test("counts version skew as an anonymous event instead of an exception", async () => {
+    await captureRequestError(new Error(SKEW_MESSAGE), request)
+
+    expect(mockCaptureExceptionImmediate).not.toHaveBeenCalled()
+    expect(mockCaptureImmediate).toHaveBeenCalledWith({
+      distinctId: expect.any(String),
+      event: "server_action_version_skew",
+      properties: { ...context, ...request, $process_person_profile: false },
+    })
+  })
+
+  test("reports any other error as an exception", async () => {
+    const error = new Error("boom")
+    await captureRequestError(error, request)
+
+    expect(mockCaptureImmediate).not.toHaveBeenCalled()
+    expect(mockCaptureExceptionImmediate).toHaveBeenCalledWith(error, undefined, { ...context, ...request })
+  })
+
+  test("never throws when sending the skew event fails", async () => {
+    mockCaptureImmediate.mockImplementation(() => Promise.reject(new Error("network down")))
+
+    await expect(captureRequestError(new Error(SKEW_MESSAGE))).resolves.toBeUndefined()
+    expect(mockConsoleError).toHaveBeenCalledWith("[posthog] could not report version skew:", expect.any(Error))
   })
 })

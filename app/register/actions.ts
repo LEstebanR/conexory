@@ -6,6 +6,7 @@ import { APIError } from "better-auth/api"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateAgentSlug } from "@/lib/agent-slug"
+import { trackAnonymousEvent } from "@/lib/analytics"
 import { registerSchema, type RegisterErrors } from "@/lib/schemas/auth.schema"
 
 const AUTH_ERRORS: Record<string, string> = {
@@ -22,6 +23,8 @@ export async function registerAction(
   _prev: RegisterState,
   formData: FormData
 ): Promise<RegisterState> {
+  await trackAnonymousEvent("signup_started")
+
   const parsed = registerSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),

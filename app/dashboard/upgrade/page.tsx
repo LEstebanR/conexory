@@ -10,6 +10,7 @@ import { ChangeCardForm } from "./change-card-form"
 import { UpgradeErrorToast } from "./upgrade-error-toast"
 import { hasProAccess, PRO_VALUE_POINTS } from "@/lib/plans"
 import { SUPPORT_EMAIL } from "@/lib/urls"
+import { trackEvent } from "@/lib/analytics"
 import type { Metadata } from "next"
 import { formatColombiaDate } from "@/lib/dates"
 
@@ -44,6 +45,9 @@ function formatDate(date: Date) {
 export default async function UpgradePage() {
   const session = await getSession()
   if (!session) redirect("/login")
+
+  // Pro users land here to manage their plan; only the offer counts as a funnel step.
+  if (!hasProAccess(session.user)) await trackEvent(session.user.id, "upgrade_page_viewed")
 
   if (hasProAccess(session.user)) {
     const subscription = await prisma.subscription.findUnique({
