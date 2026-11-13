@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { AlertTriangle, RefreshCw } from "lucide-react"
+import { attributedHref } from "@/lib/attribution"
 
 export default function PropertyError({
   error,
@@ -47,7 +48,7 @@ export default function PropertyError({
       <footer className="border-t border-hairline bg-white py-5 px-4 text-center">
         <p className="text-xs text-mute">
           Publicado con{" "}
-          <Link href="/" className="text-ink font-semibold hover:underline">
+          <Link href={attributedHref("/", "property_page")} className="text-ink font-semibold hover:underline">
             Conexory
           </Link>
         </p>

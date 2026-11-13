@@ -6,6 +6,7 @@ import { unstable_rethrow } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { sendResetPasswordEmail, sendVerificationEmail, sendWelcome } from "@/lib/email"
 import { reportError } from "@/lib/report-error"
+import { signupSourceFromCookies } from "@/lib/attribution"
 import { trackSignupCompleted } from "@/lib/analytics"
 
 export const auth = betterAuth({
@@ -90,6 +91,12 @@ export const auth = betterAuth({
         defaultValue: "user",
         input: false,
       },
+      signupSource: {
+        type: "string",
+        required: false,
+        input: false,
+        returned: false,
+      },
     },
   },
 
@@ -101,6 +108,12 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
+        // Both email and Google sign-ups reach this hook with the request's
+        // cookies, so attribution is read here once instead of per flow.
+        before: async (user, ctx) => {
+          const signupSource = signupSourceFromCookies(ctx)
+          return signupSource ? { data: { ...user, signupSource } } : undefined
+        },
         after: async (user) => {
           await trackSignupCompleted(user)
           if (user.emailVerified) {

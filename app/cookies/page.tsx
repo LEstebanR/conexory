@@ -90,6 +90,7 @@ export default function CookiesPage() {
                 "Páginas visitadas y tiempo de permanencia.",
                 "Tipo de dispositivo y navegador.",
                 "Errores técnicos que nos ayudan a detectar problemas.",
+                "Origen de tu registro: si llegaste desde una ficha o un perfil publicado con Conexory. Se guarda hasta 30 días.",
               ]}
             />
             <p className="text-xs text-mute mt-3">
