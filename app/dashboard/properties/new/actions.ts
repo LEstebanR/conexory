@@ -8,6 +8,7 @@ import { propertyLimit, photoLimit, hasProAccess, PRO_PROPERTY_LIMIT } from "@/l
 import { setOnboardingFlag } from "@/lib/onboarding-server"
 import { trackEvent } from "@/lib/analytics"
 import { reportError } from "@/lib/report-error"
+import { notifyIfReachedFreeLimit } from "@/lib/lifecycle"
 
 async function generateUniqueSlug(): Promise<string> {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -95,6 +96,7 @@ export async function createProperty(data: PropertyInput): Promise<CreateResult>
     // Best-effort: a flag-write failure must not fail the (already committed) create.
     const isFirstProperty = await setOnboardingFlag(session.user.id, "firstPropertyCreated").catch(() => false)
     if (isFirstProperty) await trackEvent(session.user.id, "first_property_created")
+    await notifyIfReachedFreeLimit(session.user.id, activeCount + 1, proAccess)
 
     return { success: true, id: property.id }
   } catch (err) {

@@ -22,7 +22,11 @@ const {
   sendSubscriptionCancelled,
   sendResetPasswordEmail,
   sendVerificationEmail,
+  sendPropertyLimitReached,
+  sendReengagement,
+  sendWinback,
 } = await import("./email")
+const { unsubscribeToken } = await import("./unsubscribe")
 
 beforeEach(() => {
   mockSend.mockClear()
@@ -155,5 +159,44 @@ describe("failed sends", () => {
     } finally {
       consoleError.mockRestore()
     }
+  })
+})
+
+describe("lifecycle emails", () => {
+  const user = { id: "u1", email: "agent@example.com", name: "Luis Ramirez" }
+  type LifecycleCall = ReturnType<typeof lastCall> & { headers?: Record<string, string> }
+
+  const cases = [
+    { send: sendPropertyLimitReached, subject: "Llegaste a tus 3 propiedades gratis en Conexory", cta: "/dashboard/upgrade" },
+    { send: sendReengagement, subject: "Tu primera propiedad en Conexory está a un minuto", cta: "/dashboard/properties/new" },
+    { send: sendWinback, subject: "Tu plan Pro de Conexory te está esperando", cta: "/dashboard/upgrade" },
+  ]
+
+  for (const { send, subject, cta } of cases) {
+    test(`${subject}: subject, CTA and unsubscribe link`, async () => {
+      await send(user)
+      const call = lastCall() as LifecycleCall
+      expect(call.from).toBe("Conexory <no-reply@conexory.com>")
+      expect(call.to).toBe("agent@example.com")
+      expect(call.subject).toBe(subject)
+      const html = renderToStaticMarkup(call.react as ReactElement)
+      expect(html).toContain("Hola, Luis")
+      expect(html).toContain(cta)
+      expect(html).toContain(`/email/baja?token=${encodeURIComponent(unsubscribeToken("u1"))}`)
+      expect(html).toContain("Dejar de recibir estos correos")
+    })
+
+    test(`${subject}: one-click unsubscribe headers`, async () => {
+      await send(user)
+      const { headers } = lastCall() as LifecycleCall
+      expect(headers?.["List-Unsubscribe"]).toMatch(/^<.+\/api\/email\/unsubscribe\?token=.+>$/)
+      expect(headers?.["List-Unsubscribe-Post"]).toBe("List-Unsubscribe=One-Click")
+    })
+  }
+
+  test("transactional emails carry no unsubscribe link", async () => {
+    await sendWelcome("agent@example.com", "Luis")
+    const html = renderToStaticMarkup(lastCall().react as ReactElement)
+    expect(html).not.toContain("Dejar de recibir estos correos")
   })
 })

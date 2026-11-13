@@ -63,10 +63,12 @@ export function EmailButton({ href, children }: { href: string; children: React.
 export function EmailLayout({
   preview,
   appUrl,
+  unsubscribeUrl,
   children,
 }: {
   preview: string
   appUrl: string
+  unsubscribeUrl?: string
   children: React.ReactNode
 }) {
   return (
@@ -115,6 +117,14 @@ export function EmailLayout({
             <Link href={`${appUrl}/contacto`} style={{ color: "#afafaf" }}>
               Contacto
             </Link>
+            {unsubscribeUrl && (
+              <>
+                <br />
+                <Link href={unsubscribeUrl} style={{ color: "#afafaf" }}>
+                  Dejar de recibir estos correos
+                </Link>
+              </>
+            )}
           </Text>
         </Container>
       </Body>

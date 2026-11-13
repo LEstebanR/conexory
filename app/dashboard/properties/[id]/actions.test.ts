@@ -1,6 +1,7 @@
 import { mockRevalidateTag } from "@/test-setup"
 import { spyOn, afterAll, describe, test, expect, mock, beforeEach } from "bun:test"
 import * as analytics from "@/lib/analytics"
+import * as lifecycle from "@/lib/lifecycle"
 
 type Session = { user: { id: string; isPremium: boolean; role: string; name: string } } | null
 
@@ -87,6 +88,8 @@ mock.module("@/lib/onboarding-server", () => ({
 // this fake to lib/analytics.test.ts if it runs later.
 const mockTrackEvent = spyOn(analytics, "trackEvent").mockImplementation(() => Promise.resolve())
 afterAll(() => mockTrackEvent.mockRestore())
+const mockNotifyLimit = spyOn(lifecycle, "notifyIfReachedFreeLimit").mockImplementation(() => Promise.resolve())
+afterAll(() => mockNotifyLimit.mockRestore())
 
 const mockGenerateShareMessageWithAI = mock((...args: [unknown, unknown, unknown, unknown]) => {
   void args
@@ -153,6 +156,22 @@ describe("togglePublished", () => {
     expect(result.success).toBe(false)
     if (!result.success) expect(result.error).toMatch(/límite/i)
     expect(mockPropertyUpdate).not.toHaveBeenCalled()
+  })
+
+  test("hands the post-publish active count to the limit notification", async () => {
+    mockNotifyLimit.mockClear()
+    mockGetSession.mockImplementation(() =>
+      Promise.resolve({ user: { id: "u1", isPremium: false, role: "user", name: "Luis" } })
+    )
+    mockPropertyCount.mockImplementation(() => Promise.resolve(2))
+    await togglePublished("p1", true)
+    expect(mockNotifyLimit).toHaveBeenCalledWith("u1", 3, false)
+  })
+
+  test("does not notify when unpublishing", async () => {
+    mockNotifyLimit.mockClear()
+    await togglePublished("p1", false)
+    expect(mockNotifyLimit).not.toHaveBeenCalled()
   })
 
   test("publishes when under the limit", async () => {

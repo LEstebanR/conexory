@@ -37,6 +37,7 @@ model User {
   brandColor      String    @default("#0a0a0a")
   secondaryColor  String    @default("#0a0a0a")
   referredById    String?
+  lifecycleEmailsOptOut Boolean @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -48,6 +49,7 @@ model User {
   referredBy            User?          @relation("UserReferrals", fields: [referredById], references: [id])
   referrals             User[]         @relation("UserReferrals")
   feedback              Feedback[]
+  lifecycleEmails       LifecycleEmail[]
 
   @@index([referredById])
   @@map("users")
@@ -65,6 +67,7 @@ model Subscription {
   cardBrand        String?
   cardLastFour     String?
   renewalReminderSentAt DateTime?
+  endedAt          DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -204,4 +207,15 @@ model Feedback {
 
   @@index([userId])
   @@map("feedback")
+}
+
+model LifecycleEmail {
+  id     String   @id @default(cuid())
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind   String   // property_limit_reached | reengagement | winback
+  sentAt DateTime @default(now())
+
+  @@unique([userId, kind])
+  @@map("lifecycle_emails")
 }
