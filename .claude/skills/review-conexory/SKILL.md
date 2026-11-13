@@ -67,7 +67,8 @@ Flags:
 | `content/blog/**`, metadata, sitemap, robots | SEO/content |
 
 4. **Size the review.** Small (≤ ~150 changed lines, one area) → normal pass. Large or multi-area → be systematic: go area by area and say which areas you covered. Very large (≥ ~800 lines) → suggest `--deep` if it wasn't passed, but continue.
-5. **Read beyond the hunks.** For every changed file read the whole modified function/component, not just the hunk. For every changed exported symbol, `grep` its callers and check they still hold. Read the sibling tests of changed modules.
+5. **Look for parallel work.** List open PRs and local branches touching the same files (`gh pr list --state open --json number,headRefName,files`, `git branch` + `git diff main...<branch> --stat`). For each overlap, check whether the two changes still compile and behave together once both merge (a changed type, signature or contract), and report a conflict as a finding.
+6. **Read beyond the hunks.** For every changed file read the whole modified function/component, not just the hunk. For every changed exported symbol, `grep` its callers and check they still hold. Read the sibling tests of changed modules.
 
 ## Phase 2 — Automated checks (skip with `--quick`)
 
@@ -132,68 +133,38 @@ Before a finding goes in the report:
 
 ## Phase 5 — Report
 
+The report must be **short and scannable**: it should fit on one screen (aim for ≤ 25 lines; a review with many findings can go longer, but never through padding). Everything gathered in Phases 1–4 (reproduction steps, scope, what's fine) stays internal and comes out only if the user asks for it.
+
 ```markdown
-## Code review — <PR #/branch> · <título o intención en una línea>
+**Review <PR #/rama>:** ✅ Aprobar · 🟡 Aprobar con cambios menores · 🔴 Requiere cambios. <por qué, en una línea>
+Checks: typecheck ✅ · lint ✅ · tests + coverage ✅ <n/n> · migración ✅/n.a. · CI ✅/n.a.
 
-**Veredicto:** ✅ Aprobar · 🟡 Aprobar con cambios menores · 🔴 Requiere cambios
-<1-2 líneas: por qué>
+1. 🔴 **<el problema, en una frase>** · `path/file.ts:42`
+   <1-2 líneas en lenguaje simple: qué le pasa al agente, al cliente o al sistema, y por qué importa>
+   Arreglo: <el cambio concreto en una frase>
+   ```diff
+   - código actual
+   + código propuesto
+   ```
+2. 🟡 **<problema>** · `path/file.ts:10` (probable: <qué falta verificar>)
+   <1 línea>
+   Arreglo: <una frase>
 
-**Qué hay que hacer** (una línea por hallazgo, en orden de prioridad):
-1. 🔴 <acción concreta en imperativo: "Filtrar por `userId` en `deleteProperty`"> · `path/file.ts:42`
-2. ...
-
-**Alcance:** <N archivos, +A/−B> · Áreas: <pagos, vista pública, ...> · Issue: <#N / LES-n / sin issue>
-**Cumple el issue:** <sí / parcial: qué falta / no>
-
-### Checks automáticos
-| Check | Resultado |
-|---|---|
-| typecheck | ✅ / ❌ <error> |
-| lint | ... |
-| tests + coverage (80%) + coverage guard | ... |
-| prisma validate / migración | ... / n.a. |
-| CI del PR | ... / n.a. |
-
-### Hallazgos
-#### 🔴 Bloqueantes
-**1. <título que nombre el problema, no el área: "Cualquier usuario puede borrar propiedades ajenas">** · `path/file.ts:42` · confirmado
-- **Qué pasa:** <en lenguaje simple, qué vive el agente, el cliente o el negocio; sin jerga sin explicar>
-- **Por qué importa:** <consecuencia concreta: dinero, datos, confianza, SEO, CI; y la regla del proyecto si aplica>
-- **Cómo se reproduce:** <pasos o estado → resultado incorrecto>
-- **Solución propuesta:** <qué cambiar y dónde, en una frase>
-  ```diff
-  - código actual
-  + código propuesto
-  ```
-  <si hay varias soluciones válidas: A y B con su tradeoff, y cuál recomiendas>
-
-#### 🟠 Importantes
-...
-#### 🟡 Sugerencias
-...
-#### 💬 Nits
-...
-
-### Preexistente (fuera del alcance del PR)
-**N. <título que nombre el problema>** · `path/file.ts:10` · confirmado/probable
-- **Qué pasa:** ...
-- **Solución propuesta:** <cambio concreto, con diff si es corto> · <¿issue aparte o se puede incluir aquí?>
-
-### Para probar manualmente
-- <flujos concretos a validar en el navegador/preview, incluyendo móvil y casos borde>
-
-### Lo que está bien
-- <2-4 bullets específicos, no relleno>
+Preexistente: <N>. <problema en una línea> · `path` · <issue aparte / se incluye aquí>
+Probar a mano: <flujo 1> · <flujo 2> · <flujo 3>
 ```
 
-Omit empty sections. Number findings continuously across severities (preexisting ones included) so the user can say "arregla 1, 3 y 5". If there are no findings, say so plainly and still list what was checked.
-
-Writing rules for findings (the reader must understand the problem and act on it without re-reading the code):
-- **Every finding carries a solution.** A finding without a concrete, applicable fix doesn't go in the report. If the right fix is genuinely unclear, say exactly what to check to decide, and propose the most likely fix anyway.
-- **Show the code.** The fix is a `diff` block against the real lines when it fits in ~15 lines; for larger fixes, name the files and the steps. Never just "add validation" or "consider refactoring".
-- **Plain language first.** "Qué pasa" describes the effect on a person (agent, client, Luis) or on the system, not the mechanism. Explain any technical term the first time (e.g. "IDOR: un usuario puede actuar sobre datos de otro cambiando el id").
-- **One problem per finding**, titled with the problem itself, not with the dimension ("Seguridad") or the file.
-- Don't hedge the severity in prose; the emoji and the confidence label carry it.
+Rules:
+- **Checks in one line.** Only a failing check gets detail: the exact error, right below that line.
+- **Each finding is 2–3 lines**: title with the problem itself (not the area or file), the effect in plain language, and the fix. If a technical term is unavoidable, explain it in a few words.
+- **Every finding carries a concrete fix.** A `diff` only for 🔴/🟠 and only if it fits in ~6 lines; otherwise name the file and the change in the sentence.
+- Mark confidence only when it's *probable*, saying which link is unverified. Severity lives in the emoji: don't repeat it in prose.
+- 💬 nits: at most 2, one line each, or drop them.
+- Number findings continuously (preexisting included) so the user can say "arregla 1 y 3". Omit empty lines and sections.
+- No "lo que está bien", no scope/"cumple el issue" lines, unless the issue is only partly covered (then one line saying what's missing).
+- If the user asks for detail on a finding ("detalle del 2"), give the full scenario, reproduction and options then.
+- No findings: the verdict line, the checks line, and one line on what was reviewed.
+- The Retrospectiva (Phase 7) follows the same rule: one line per proposal.
 
 End by offering, in one line: fix the selected findings, and (for a PR target) post them with `--comment`.
 
