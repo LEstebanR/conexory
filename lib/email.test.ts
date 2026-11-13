@@ -177,6 +177,7 @@ describe("lifecycle emails", () => {
       await send(user)
       const call = lastCall() as LifecycleCall
       expect(call.from).toBe("Conexory <no-reply@conexory.com>")
+      expect(call.replyTo).toBe(SUPPORT_EMAIL)
       expect(call.to).toBe("agent@example.com")
       expect(call.subject).toBe(subject)
       const html = renderToStaticMarkup(call.react as ReactElement)

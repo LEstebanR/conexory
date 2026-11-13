@@ -26,7 +26,7 @@ function resend() {
   return new Resend(process.env.RESEND_API_KEY)
 }
 
-type Message = { to: string; subject: string; react: ReactElement }
+type Message = { to: string; subject: string; react: ReactElement; headers?: Record<string, string> }
 
 // Resend reports failures in the returned { error } instead of throwing, so
 // without this check a failed reset or verification email leaves no trace.
@@ -130,7 +130,6 @@ function lifecycleMessage(
   render: (props: { name: string; appUrl: string; unsubscribeUrl: string }) => Message["react"],
 ): Message {
   return {
-    from: FROM,
     to: user.email,
     subject,
     react: render({ name: user.name, appUrl: getAppUrl(), unsubscribeUrl: unsubscribePageUrl(user.id) }),
