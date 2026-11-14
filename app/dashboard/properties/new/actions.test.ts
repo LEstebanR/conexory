@@ -1,6 +1,7 @@
 import { mockRevalidateTag } from "@/test-setup"
 import { afterAll, describe, test, expect, mock, spyOn } from "bun:test"
 import * as analytics from "@/lib/analytics"
+import * as lifecycle from "@/lib/lifecycle"
 
 const mockGetSession = mock(() =>
   Promise.resolve<{ user: { id: string; isPremium: boolean; role: string } } | null>({
@@ -45,6 +46,8 @@ mock.module("@/lib/onboarding-server", () => ({
 // this fake to lib/analytics.test.ts if it runs later.
 const mockTrackEvent = spyOn(analytics, "trackEvent").mockImplementation(() => Promise.resolve())
 afterAll(() => mockTrackEvent.mockRestore())
+const mockNotifyLimit = spyOn(lifecycle, "notifyIfReachedFreeLimit").mockImplementation(() => Promise.resolve())
+afterAll(() => mockNotifyLimit.mockRestore())
 
 const { createProperty, getEnglishProfileStatus } = await import("./actions")
 
@@ -140,6 +143,22 @@ describe("createProperty", () => {
     const result = await createProperty(validInput)
     expect(result.success).toBe(true)
     expect(mockTrackEvent).not.toHaveBeenCalled()
+  })
+
+  test("hands the post-create active count to the limit notification", async () => {
+    mockNotifyLimit.mockClear()
+    mockPropertyCount.mockImplementation(() => Promise.resolve(2))
+    await createProperty(validInput)
+    expect(mockNotifyLimit).toHaveBeenCalledWith("u1", 3, false)
+    mockPropertyCount.mockImplementation(() => Promise.resolve(0))
+  })
+
+  test("does not notify when the create is rejected at the limit", async () => {
+    mockNotifyLimit.mockClear()
+    mockPropertyCount.mockImplementation(() => Promise.resolve(3))
+    await createProperty(validInput)
+    expect(mockNotifyLimit).not.toHaveBeenCalled()
+    mockPropertyCount.mockImplementation(() => Promise.resolve(0))
   })
 
   test("logs the exception and returns error on unexpected failure", async () => {

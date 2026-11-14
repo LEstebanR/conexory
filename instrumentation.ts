@@ -6,8 +6,8 @@ import { pathWithoutQuery } from "./lib/posthog"
 // secrets such as the password-reset token.
 export const onRequestError: Instrumentation.onRequestError = async (error, request, context) => {
   if (process.env.NEXT_RUNTIME !== "nodejs") return
-  const { captureServerError } = await import("./lib/report-error")
-  await captureServerError(error, {
+  const { captureRequestError } = await import("./lib/report-error")
+  await captureRequestError(error, {
     digest: (error as { digest?: string }).digest,
     path: pathWithoutQuery(request.path),
     method: request.method,

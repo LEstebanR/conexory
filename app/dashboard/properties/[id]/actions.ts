@@ -12,6 +12,7 @@ import { generateShareMessage as generateShareMessageWithAI } from "@/lib/share-
 import { SHARE_INFO_IDS, SHARE_MESSAGE_KINDS } from "@/lib/share-message-options"
 import { propertyLimit, pinnedLimit, hasProAccess, aiMessageLimit } from "@/lib/plans"
 import { reportError } from "@/lib/report-error"
+import { notifyIfReachedFreeLimit } from "@/lib/lifecycle"
 
 export async function togglePublished(
   propertyId: string,
@@ -20,12 +21,14 @@ export async function togglePublished(
   const session = await getSession()
   if (!session) return { success: false, error: "Sesión expirada. Vuelve a iniciar sesión." }
 
+  const proAccess = hasProAccess(session.user)
+  let activeCountAfter = 0
   if (published) {
-    const proAccess = hasProAccess(session.user)
     const limit = propertyLimit(proAccess)
     const activeCount = await prisma.property.count({
       where: { userId: session.user.id, published: true, id: { not: propertyId } },
     })
+    activeCountAfter = activeCount + 1
     if (activeCount >= limit) {
       return {
         success: false,
@@ -42,6 +45,8 @@ export async function togglePublished(
   })
 
   invalidatePublicListings()
+
+  if (published) await notifyIfReachedFreeLimit(session.user.id, activeCountAfter, proAccess)
 
   return { success: true }
 }

@@ -3,6 +3,7 @@
 // same known values regardless of which test file imports it first.
 process.env.MERCADOPAGO_ACCESS_TOKEN = "test_access_token_stub"
 process.env.MERCADOPAGO_WEBHOOK_SECRET = "test_webhook_secret"
+process.env.BETTER_AUTH_SECRET = "test_better_auth_secret"
 
 import { mock } from "bun:test"
 import { AsyncLocalStorage } from "node:async_hooks"

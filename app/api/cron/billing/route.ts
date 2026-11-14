@@ -69,7 +69,7 @@ async function expireCanceled(
     await downgradeToFree(sub.userId)
     await prisma.subscription.update({
       where: { id: sub.id },
-      data: { status: "cancelled" },
+      data: { status: "cancelled", endedAt: now },
     })
     summary.canceled++
   }
@@ -128,7 +128,7 @@ async function downgradeExpired(
     await downgradeToFree(sub.userId)
     await prisma.subscription.update({
       where: { id: sub.id },
-      data: { status: "expired" },
+      data: { status: "expired", endedAt: now },
     })
     await sendSubscriptionCancelled(sub.user.email, sub.user.name).catch(() => null)
     summary.downgraded++
