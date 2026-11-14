@@ -1,7 +1,7 @@
 ---
 name: review-conexory
-description: Full code review of a Conexory change (local diff, branch or PR) — scope vs. issue, automated checks (types, lint, tests, coverage guard), security/authz, project invariants, data & migrations, payments, caching/perf, UI/design system, SEO, tests and code quality — with every finding verified before it's reported. Use when asked to review code, a branch, a diff or a PR in this repo, or as the pre-PR review step of /dev-issue.
-argument-hint: "[PR# | branch | path] [--quick | --deep] [--comment]"
+description: Full code review of a Conexory change (local diff, branch or PR) — scope vs. issue, automated checks (types, lint, tests, coverage guard), security/authz, project invariants, data & migrations, payments, caching/perf, UI/design system, SEO, tests and code quality — with every finding verified before it's reported. Use when asked to review code, a branch, a diff or a PR in this repo, or as the pre-PR and post-PR review steps of /dev-issue. This is the only review skill for this repo: use it instead of /code-review.
+argument-hint: "[PR# | branch | path] [--quick | --deep] [--since <ref>] [--comment]"
 ---
 
 # Code review — Conexory
@@ -28,6 +28,7 @@ Parse `$ARGUMENTS`:
 Flags:
 - `--quick` → skip Phase 2 (automated checks). Use for small iterations.
 - `--deep` → Phase 3 is split across parallel subagents (see "Deep mode"). Only when the user passes it: it's expensive.
+- `--since <ref>` → re-review: run Phase 3 only on `git diff <ref>...HEAD` (the commits added after an earlier review), but keep the whole-branch checks (Phase 2, parallel work, PR body vs. final diff, CI). Use it for the post-PR step of `/dev-issue`.
 - `--comment` → after the report, offer to post the findings on the PR (Phase 6). Requires a PR target.
 
 ## Guard
@@ -69,6 +70,8 @@ Flags:
 4. **Size the review.** Small (≤ ~150 changed lines, one area) → normal pass. Large or multi-area → be systematic: go area by area and say which areas you covered. Very large (≥ ~800 lines) → suggest `--deep` if it wasn't passed, but continue.
 5. **Look for parallel work.** List open PRs and local branches touching the same files (`gh pr list --state open --json number,headRefName,files`, `git branch` + `git diff main...<branch> --stat`). For each overlap, check whether the two changes still compile and behave together once both merge (a changed type, signature or contract), and report a conflict as a finding.
 6. **Read beyond the hunks.** For every changed file read the whole modified function/component, not just the hunk. For every changed exported symbol, `grep` its callers and check they still hold. Read the sibling tests of changed modules.
+7. **History.** For the riskiest changed files, skim `git log -5 --format='%h %s' -- <file>` and, when a past commit or PR explains a non-obvious choice the diff now undoes, check the reason still holds. Also read earlier review comments on PRs that touched the same files (`gh pr list --state merged --search <file>` → `gh api repos/LEstebanR/conexory/pulls/<n>/comments`): a problem flagged there and repeated here is a finding.
+8. **AGENTS.md compliance.** Read `AGENTS.md` and check the diff against any instruction there that the reference files don't mirror yet; if you find one, propose adding it in the Retrospective.
 
 ## Phase 2 — Automated checks (skip with `--quick`)
 
@@ -114,6 +117,7 @@ Launch these in parallel with the Agent tool (general-purpose), each given: the 
 - B: security & authorization + public surface + SEO
 - C: project invariants + UI/design system/a11y + code quality
 - D: tests + caching/performance + ops
+- E: history & earlier review comments (Phase 1 step 7) + `AGENTS.md` compliance (step 8)
 
 Meanwhile do your own pass on the highest-risk area. Then merge, dedupe, and run Phase 4 on **every** subagent finding yourself: subagents over-report.
 
