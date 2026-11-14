@@ -222,7 +222,7 @@ describe("expireCanceled", () => {
     expect(mockDowngradeToFree).toHaveBeenCalledWith("u1")
     expect(mockSubUpdate).toHaveBeenCalledWith({
       where: { id: "sub-1" },
-      data: { status: "cancelled" },
+      data: { status: "cancelled", endedAt: expect.any(Date) },
     })
   })
 })
@@ -240,7 +240,7 @@ describe("downgradeExpired", () => {
     const body = await res.json()
     expect(body.downgraded).toBe(1)
     expect(mockDowngradeToFree).toHaveBeenCalledWith("u1")
-    expect(mockSubUpdate).toHaveBeenCalledWith({ where: { id: "sub-1" }, data: { status: "expired" } })
+    expect(mockSubUpdate).toHaveBeenCalledWith({ where: { id: "sub-1" }, data: { status: "expired", endedAt: expect.any(Date) } })
     expect(mockSendSubscriptionCancelled).toHaveBeenCalledWith("a@b.com", "Ana")
   })
 

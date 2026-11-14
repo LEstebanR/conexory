@@ -38,7 +38,7 @@ Decide the entry point:
 - Nothing exists → Step 1.
 - Branch with commits, no PR, no clear approved plan → resume from Step 3 using the branch's state as context (don't repeat already-answered questions if they can be inferred from the commits).
 - Branch with commits that already implement a clear plan, no PR → Step 6 (pre-PR code review).
-- PR already open without the real `/code-review` run yet → Step 9.
+- PR already open without its post-PR review (Step 9) yet → Step 9.
 - PR already open and reviewed, or already approved/merged and only the record is missing → Step 10.
 
 Announce in one line the chosen entry point and why, before continuing.
@@ -94,9 +94,7 @@ If a real deviation from the approved plan comes up (something not accounted for
 
 ### Step 6 — Pre-PR code review
 
-`/code-review` is meant to review a PR already opened on GitHub (it uses `gh`, comments there) — it doesn't exist yet at this point in the flow, it's only created in Step 8. Don't invoke it here.
-
-Run `/review-conexory` (this project's own invariants) over the local diff, and also do your own pass of generic correctness over the same diff (equivalent in spirit to what `/code-review` would do, but manual: obvious bugs, edge cases, nothing Conexory-specific).
+Run `/review-conexory` over the local diff. It's the only review skill for this repo: it covers generic correctness as well as the project's invariants, so don't add `/code-review` or a separate manual pass on top. Add `--deep` when Step 2 marked the change as multi-file or with real design decisions.
 
 Resolve blocking findings before continuing (with the same criterion of announcing before applying non-trivial changes). Minor suggestions, decide with the user: now or leave for later.
 
@@ -116,16 +114,12 @@ Show the PR URL to the user.
 
 Then wait for CI with `gh pr checks <PR> --watch` (in the background) and don't move to Step 10 until it's green: local checks can pass while CI fails. If a test fails only in CI and the Bun version matches `.bun-version`, suspect test-file order: `mock.module()` is process-wide and CI's file order differs from macOS. Take the order from the job log (`gh api repos/LEstebanR/conexory/actions/jobs/<id>/logs | grep '##\[group\].*\.test\.tsx\?:'`) and reproduce with `bun test <files in that order>` before changing anything.
 
-### Step 9 — Post-PR code review
+### Step 9 — Post-PR review
 
-`/code-review` (the real multi-agent one: 5 parallel Sonnet agents + scoring, comments directly on the GitHub PR) is expensive in time and tokens — a full run can take several minutes and consume hundreds of thousands of tokens. Scale this step with the same criterion as Step 2:
+Don't use `/code-review`: `/review-conexory` is the review skill for this repo, and it was already run in Step 6.
 
-- **If Step 2 classified the change as small and mechanical:** skip this step — the manual review from Step 6 is already enough. Say so in one line and move to Step 10.
-- **If Step 2 marked it as multi-file or with real design decisions:** run `/code-review` (the `code-review:code-review` skill) on the now-open PR — only here does it have a PR to operate on.
-
-It only comments on the PR for findings scoring ≥80. Findings below that can still be real (e.g. a cleanup edge case): report them to the user with your own assessment and let them decide whether to fix them, instead of silently dropping them.
-
-If at any point the user asks to cut the run short (cost, time, or because it isn't warranted), use `TaskStop` on the in-flight agents instead of letting them finish, and don't comment on the PR with partial results.
+- **If Step 2 classified the change as small and mechanical:** skip this step. Say so in one line and move to Step 10.
+- **Otherwise:** run `/review-conexory <PR#> --since <sha reviewed in Step 6>`. It covers what only exists once the PR is open (CI status, PR body vs. final diff, parallel PRs) plus the commits added after Step 6. If nothing changed since Step 6 and CI is green, the report is just the verdict line. Add `--comment` only if the user wants the findings on GitHub.
 
 Resolve the blocking findings it reports, with the same criterion of announcing before applying non-trivial changes; if a fix needs to be pushed, it's a new commit on the same branch, not an amend.
 

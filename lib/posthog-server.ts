@@ -1,4 +1,3 @@
-import { after } from "next/server"
 import type { PostHog } from "posthog-node"
 import { POSTHOG_INGEST_HOST, posthogKey } from "./posthog"
 
@@ -19,17 +18,6 @@ export function getPostHogServer(): Promise<PostHog | null> {
       return null
     })
   return client
-}
-
-// Inside a request, the send runs after the response so a slow PostHog never
-// delays it. Outside one (scripts, tests), after() throws and we send inline.
-export function sendWithoutBlocking(send: () => Promise<void>): Promise<void> {
-  try {
-    after(send)
-    return Promise.resolve()
-  } catch {
-    return send()
-  }
 }
 
 export function resetPostHogServerForTests() {

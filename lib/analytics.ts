@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { posthogContext } from "./posthog"
-import { getPostHogServer, sendWithoutBlocking } from "./posthog-server"
+import { getPostHogServer } from "./posthog-server"
+import { sendWithoutBlocking } from "./after"
 
 type FunnelEventProperties = {
   signup_started: Record<string, never>
