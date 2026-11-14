@@ -13,6 +13,7 @@ export const SIGNUP_SOURCE_COOKIE_OPTIONS = {
   httpOnly: true,
   sameSite: "lax",
   path: "/",
+  secure: process.env.NODE_ENV === "production",
 } as const
 
 // Plain allowlist check instead of Zod: the footer helper is imported from a
@@ -25,17 +26,27 @@ export function attributedHref(path: string, source: SignupSource): string {
   return `${path}?utm_source=${source}&utm_medium=footer`
 }
 
-export function signupSourceFromCookies(
-  ctx: { getCookie: (name: string) => string | null } | null | undefined
-): SignupSource | null {
+type CookieContext = {
+  getCookie: (name: string) => string | null
+  setCookie: (name: string, value: string, options: { maxAge: number; path: string }) => unknown
+}
+
+export function signupSourceFromCookies(ctx: Pick<CookieContext, "getCookie"> | null | undefined): SignupSource | null {
   return parseSignupSource(ctx?.getCookie(SIGNUP_SOURCE_COOKIE))
 }
 
-// First touch wins: a later visit from another footer doesn't overwrite it.
+// Once stored on a user the cookie has done its job; keeping it would hand the
+// same source to any other account created later in that browser.
+export function forgetSignupSource(ctx: CookieContext | null | undefined): void {
+  if (signupSourceFromCookies(ctx)) ctx?.setCookie(SIGNUP_SOURCE_COOKIE, "", { maxAge: 0, path: "/" })
+}
+
+// First touch wins: a later visit from another footer doesn't overwrite a
+// valid source, but an invalid or stale value doesn't block a real one.
 export function signupSourceToRemember(
   searchParams: URLSearchParams,
-  alreadyRemembered: boolean
+  currentCookie: string | undefined
 ): SignupSource | null {
-  if (alreadyRemembered) return null
+  if (parseSignupSource(currentCookie)) return null
   return parseSignupSource(searchParams.get("utm_source"))
 }

@@ -1,5 +1,11 @@
-import { describe, expect, test } from "bun:test"
-import { attributedHref, parseSignupSource, signupSourceFromCookies, signupSourceToRemember } from "./attribution"
+import { describe, expect, mock, test } from "bun:test"
+import {
+  attributedHref,
+  forgetSignupSource,
+  parseSignupSource,
+  signupSourceFromCookies,
+  signupSourceToRemember,
+} from "./attribution"
 
 describe("parseSignupSource", () => {
   test("accepts known sources", () => {
@@ -35,17 +41,36 @@ describe("signupSourceFromCookies", () => {
   })
 })
 
-describe("signupSourceToRemember", () => {
-  test("remembers a valid source on first touch", () => {
-    expect(signupSourceToRemember(new URLSearchParams("utm_source=agent_profile"), false)).toBe("agent_profile")
+describe("forgetSignupSource", () => {
+  test("clears a cookie that holds a source", () => {
+    const setCookie = mock(() => {})
+    forgetSignupSource({ getCookie: () => "agent_profile", setCookie })
+    expect(setCookie).toHaveBeenCalledWith("signup_source", "", { maxAge: 0, path: "/" })
   })
 
-  test("keeps the first source already remembered", () => {
-    expect(signupSourceToRemember(new URLSearchParams("utm_source=agent_profile"), true)).toBeNull()
+  test("leaves the response alone when there is nothing to clear", () => {
+    const setCookie = mock(() => {})
+    forgetSignupSource({ getCookie: () => null, setCookie })
+    forgetSignupSource(null)
+    expect(setCookie).not.toHaveBeenCalled()
+  })
+})
+
+describe("signupSourceToRemember", () => {
+  test("remembers a valid source on first touch", () => {
+    expect(signupSourceToRemember(new URLSearchParams("utm_source=agent_profile"), undefined)).toBe("agent_profile")
+  })
+
+  test("keeps a valid source already remembered", () => {
+    expect(signupSourceToRemember(new URLSearchParams("utm_source=agent_profile"), "property_page")).toBeNull()
+  })
+
+  test("replaces an invalid remembered value", () => {
+    expect(signupSourceToRemember(new URLSearchParams("utm_source=agent_profile"), "admin")).toBe("agent_profile")
   })
 
   test("ignores invalid or missing sources", () => {
-    expect(signupSourceToRemember(new URLSearchParams("utm_source=spam"), false)).toBeNull()
-    expect(signupSourceToRemember(new URLSearchParams(""), false)).toBeNull()
+    expect(signupSourceToRemember(new URLSearchParams("utm_source=spam"), undefined)).toBeNull()
+    expect(signupSourceToRemember(new URLSearchParams(""), undefined)).toBeNull()
   })
 })

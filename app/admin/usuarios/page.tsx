@@ -185,11 +185,11 @@ export default async function AdminUsersPage({
 }
 
 function SignupSourceBadge({ value }: { value: string | null }) {
+  if (!value) return <span className="text-mute">—</span>
   const source = parseSignupSource(value)
-  if (!source) return <span className="text-mute">—</span>
   return (
     <span className="text-xs font-bold uppercase tracking-wider bg-canvas-soft text-body px-2 py-0.5 rounded-full">
-      {SIGNUP_SOURCE_LABELS[source]}
+      {source ? SIGNUP_SOURCE_LABELS[source] : value}
     </span>
   )
 }

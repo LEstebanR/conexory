@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto"
 import { posthogContext } from "./posthog"
+import type { SignupSource } from "./attribution"
 import { getPostHogServer, sendWithoutBlocking } from "./posthog-server"
 
 type FunnelEventProperties = {
   signup_started: Record<string, never>
-  signup_completed: { method: "email" | "google" }
+  signup_completed: { method: "email" | "google"; signup_source: SignupSource | null }
   first_property_created: Record<string, never>
   first_property_shared: Record<string, never>
   upgrade_page_viewed: Record<string, never>
@@ -39,6 +40,12 @@ export function trackAnonymousEvent<E extends FunnelEvent>(event: E, ...[propert
 }
 
 // Google sign-ups arrive already verified; email/password ones start unverified.
-export function trackSignupCompleted(user: { id: string; emailVerified: boolean }): Promise<void> {
-  return trackEvent(user.id, "signup_completed", { method: user.emailVerified ? "google" : "email" })
+export function trackSignupCompleted(
+  user: { id: string; emailVerified: boolean },
+  signupSource: SignupSource | null = null
+): Promise<void> {
+  return trackEvent(user.id, "signup_completed", {
+    method: user.emailVerified ? "google" : "email",
+    signup_source: signupSource,
+  })
 }
