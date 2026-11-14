@@ -13,7 +13,9 @@ const WINBACK_AFTER_DAYS = 14
 // first deploy doesn't email the whole historical backlog, while a few missed
 // runs still catch up.
 const ELIGIBILITY_WINDOW_DAYS = 7
-const MAX_SENDS_PER_KIND = 100
+// Resend's free plan allows 100 emails a day in total; 2 × 30 leaves room
+// for transactional mail (password resets, payments) on the same day.
+const MAX_SENDS_PER_KIND = 30
 
 type Recipient = { id: string; email: string; name: string }
 

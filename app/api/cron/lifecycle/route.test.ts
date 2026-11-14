@@ -94,7 +94,7 @@ describe("reengagement", () => {
     const createdAt = where.createdAt as { gte: Date; lte: Date }
     expect(daysAgo(createdAt.lte)).toBe(3)
     expect(daysAgo(createdAt.gte)).toBe(10)
-    expect(take).toBe(100)
+    expect(take).toBe(30)
   })
 
   test("claims and emails each candidate", async () => {
@@ -154,7 +154,7 @@ describe("winback", () => {
     const endedAt = where.endedAt as { gte: Date; lte: Date }
     expect(daysAgo(endedAt.lte)).toBe(14)
     expect(daysAgo(endedAt.gte)).toBe(21)
-    expect(take).toBe(100)
+    expect(take).toBe(30)
   })
 
   test("claims and emails each former Pro user", async () => {
