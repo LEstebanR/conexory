@@ -6,6 +6,7 @@ import { MapPin, BedDouble, Bath, Ruler, Car, LandPlot, ShieldCheck, MessageCirc
 import { listingOffer } from "@/lib/listing-seo"
 import { getPublicProperty } from "@/lib/public-pages"
 import { getAppUrl } from "@/lib/urls"
+import { attributedHref } from "@/lib/attribution"
 import { youtubeId } from "@/lib/youtube"
 import {
   PROPERTY_TYPE_LABELS as TYPE_LABELS,
@@ -167,7 +168,7 @@ function PageFooter({ english }: { english: boolean }) {
   return (
     <footer className="border-t border-hairline">
       <Link
-        href="/"
+        href={attributedHref("/", "property_page")}
         className="flex items-center justify-center gap-2 py-5 px-4 text-xs text-body hover:text-ink transition-colors"
       >
         <Image src="/mark-black.png" alt="" width={14} height={14} className="h-3.5 w-3.5" />

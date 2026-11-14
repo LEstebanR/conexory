@@ -1,6 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { getSessionCookie } from "better-auth/cookies"
 import { publicListingSlug } from "@/lib/listing-seo"
+import {
+  SIGNUP_SOURCE_COOKIE,
+  SIGNUP_SOURCE_COOKIE_OPTIONS,
+  signupSourceToRemember,
+} from "@/lib/attribution"
 
 async function isPublishedListing(slug: string): Promise<boolean | null> {
   try {
@@ -44,8 +49,19 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
-  if (!getSessionCookie(request)) return NextResponse.next()
+  const response = landingResponse(request)
+  const source = signupSourceToRemember(
+    request.nextUrl.searchParams,
+    request.cookies.get(SIGNUP_SOURCE_COOKIE)?.value
+  )
+  if (source) response.cookies.set(SIGNUP_SOURCE_COOKIE, source, SIGNUP_SOURCE_COOKIE_OPTIONS)
+  return response
+}
 
+// A stale session cookie also lands here on its way to /login, so the
+// attribution is stored on both branches.
+function landingResponse(request: NextRequest): NextResponse {
+  if (!getSessionCookie(request)) return NextResponse.next()
   const response = NextResponse.redirect(new URL("/dashboard", request.url))
   response.cookies.set(LANDING_BOUNCE_COOKIE, "1", { maxAge: 10, httpOnly: true, path: "/" })
   return response

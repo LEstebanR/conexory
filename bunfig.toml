@@ -10,4 +10,7 @@ coverageThreshold = 0.80
 # bun:test's mock.module() replaces modules process-wide, not per file (see
 # LES-263, the same issue that applied to lib/wompi.ts before this migration).
 # Excluded here rather than left permanently failing the threshold.
-coveragePathIgnorePatterns = ["**/lib/mercadopago.ts"]
+# lib/prisma.ts only wires the PrismaClient singleton (see UNTESTED_ALLOWLIST in
+# lib/test-coverage-guard.test.ts); it shows up here whenever a test loads a
+# module that imports it without mocking it, e.g. proxy.test.ts via spyOn.
+coveragePathIgnorePatterns = ["**/lib/mercadopago.ts", "**/lib/prisma.ts"]

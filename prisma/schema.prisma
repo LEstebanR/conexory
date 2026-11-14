@@ -37,6 +37,7 @@ model User {
   brandColor      String    @default("#0a0a0a")
   secondaryColor  String    @default("#0a0a0a")
   referredById    String?
+  signupSource    String?
   lifecycleEmailsOptOut Boolean @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

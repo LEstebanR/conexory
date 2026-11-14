@@ -3,6 +3,7 @@ import Link from "next/link"
 import { ExternalLink } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { hasProAccess } from "@/lib/plans"
+import { parseSignupSource, SIGNUP_SOURCE_LABELS } from "@/lib/attribution"
 import AdminNav from "../admin-nav"
 import PremiumToggle from "./premium-toggle"
 
@@ -42,6 +43,7 @@ export default async function AdminUsersPage({
         role: true,
         agentSlug: true,
         profilePublished: true,
+        signupSource: true,
         subscription: { select: { currentPeriodEnd: true, status: true } },
         _count: { select: { properties: { where: { published: true } } } },
       },
@@ -87,6 +89,7 @@ export default async function AdminUsersPage({
               <th className="px-5 py-3">Nombre</th>
               <th className="px-5 py-3">Email</th>
               <th className="px-5 py-3">Plan</th>
+              <th className="px-5 py-3">Origen</th>
               <th className="px-5 py-3">Propiedades activas</th>
               <th className="px-5 py-3"></th>
             </tr>
@@ -94,7 +97,7 @@ export default async function AdminUsersPage({
           <tbody className="divide-y divide-hairline">
             {users.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-mute">
+                <td colSpan={6} className="px-5 py-8 text-center text-mute">
                   Sin resultados.
                 </td>
               </tr>
@@ -126,6 +129,9 @@ export default async function AdminUsersPage({
                     >
                       {hasProAccess(u) ? "Pro" : "Free"}
                     </span>
+                  </td>
+                  <td className="px-5 py-3 whitespace-nowrap">
+                    <SignupSourceBadge value={u.signupSource} />
                   </td>
                   <td className="px-5 py-3 tabular-nums text-body">{u._count.properties}</td>
                   <td className="px-5 py-3 whitespace-nowrap">
@@ -175,5 +181,15 @@ export default async function AdminUsersPage({
         </div>
       )}
     </div>
+  )
+}
+
+function SignupSourceBadge({ value }: { value: string | null }) {
+  if (!value) return <span className="text-mute">—</span>
+  const source = parseSignupSource(value)
+  return (
+    <span className="text-xs font-bold uppercase tracking-wider bg-canvas-soft text-body px-2 py-0.5 rounded-full">
+      {source ? SIGNUP_SOURCE_LABELS[source] : value}
+    </span>
   )
 }

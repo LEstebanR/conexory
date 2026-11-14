@@ -104,7 +104,7 @@ describe("trackSignupCompleted", () => {
     expect(mockCaptureImmediate).toHaveBeenCalledWith({
       distinctId: "u1",
       event: "signup_completed",
-      properties: { ...context, method: "google" },
+      properties: { ...context, method: "google", signup_source: null },
     })
   })
 
@@ -114,7 +114,17 @@ describe("trackSignupCompleted", () => {
     expect(mockCaptureImmediate).toHaveBeenCalledWith({
       distinctId: "u2",
       event: "signup_completed",
-      properties: { ...context, method: "email" },
+      properties: { ...context, method: "email", signup_source: null },
+    })
+  })
+
+  test("carries the sign-up source when there is one", async () => {
+    await trackSignupCompleted({ id: "u3", emailVerified: false }, "property_page")
+
+    expect(mockCaptureImmediate).toHaveBeenCalledWith({
+      distinctId: "u3",
+      event: "signup_completed",
+      properties: { ...context, method: "email", signup_source: "property_page" },
     })
   })
 })

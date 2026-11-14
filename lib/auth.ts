@@ -6,6 +6,7 @@ import { unstable_rethrow } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { sendResetPasswordEmail, sendVerificationEmail, sendWelcome } from "@/lib/email"
 import { reportError } from "@/lib/report-error"
+import { forgetSignupSource, signupSourceFromCookies } from "@/lib/attribution"
 import { trackSignupCompleted } from "@/lib/analytics"
 
 export const auth = betterAuth({
@@ -90,19 +91,32 @@ export const auth = betterAuth({
         defaultValue: "user",
         input: false,
       },
+      signupSource: {
+        type: "string",
+        required: false,
+        input: false,
+        returned: false,
+      },
     },
   },
 
-  // Google OAuth sign-ups land here already verified, so send the welcome
-  // email right away. Email/password sign-ups start unverified — theirs is
-  // sent from emailVerification.afterEmailVerification instead, so it
-  // doesn't arrive bundled with the verification email. Best-effort: never
-  // block account creation on Resend.
   databaseHooks: {
     user: {
       create: {
-        after: async (user) => {
-          await trackSignupCompleted(user)
+        // Both email and Google sign-ups reach this hook with the request's
+        // cookies, so attribution is read here once instead of per flow.
+        before: async (user, ctx) => {
+          const signupSource = signupSourceFromCookies(ctx)
+          return signupSource ? { data: { ...user, signupSource } } : undefined
+        },
+        // Google OAuth sign-ups land here already verified, so send the welcome
+        // email right away. Email/password sign-ups start unverified — theirs is
+        // sent from emailVerification.afterEmailVerification instead, so it
+        // doesn't arrive bundled with the verification email. Best-effort: never
+        // block account creation on Resend.
+        after: async (user, ctx) => {
+          await trackSignupCompleted(user, signupSourceFromCookies(ctx))
+          forgetSignupSource(ctx)
           if (user.emailVerified) {
             await sendWelcome(user.email, user.name).catch(() => null)
           }

@@ -6,6 +6,7 @@ import Link from "next/link"
 import { MapPin, Phone, MessageCircle, Mail, ArrowUpRight } from "lucide-react"
 import { getPublicAgent } from "@/lib/public-pages"
 import { getAppUrl } from "@/lib/urls"
+import { attributedHref } from "@/lib/attribution"
 import { toWhatsAppNumber } from "@/lib/phone"
 import {
   getProperties, getPropertyFacets, getPropertiesForMap,
@@ -310,7 +311,7 @@ export default async function AgentProfilePage({
       {/* ── Footer ───────────────────────────────────────────────────────── */}
       <footer className="border-t border-hairline">
         <Link
-          href="/"
+          href={attributedHref("/", "agent_profile")}
           className="group flex items-center justify-center gap-2.5 py-6 px-4 hover:bg-canvas-softer transition-colors"
         >
           <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center shadow-sm transition-transform group-hover:scale-105">

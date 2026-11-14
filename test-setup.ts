@@ -7,6 +7,8 @@ process.env.BETTER_AUTH_SECRET = "test_better_auth_secret"
 
 import { mock } from "bun:test"
 import { AsyncLocalStorage } from "node:async_hooks"
+import { NextRequest } from "next/dist/server/web/spec-extension/request"
+import { NextResponse as RealNextResponse } from "next/dist/server/web/spec-extension/response"
 
 Object.assign(globalThis, { AsyncLocalStorage })
 
@@ -39,7 +41,13 @@ mock.module("next/server", () => ({
   after: () => {
     throw new Error("`after` was called outside a request scope")
   },
+  // The real classes, imported from their own files because next/server's
+  // CommonJS re-export hides named exports from Bun; proxy.test.ts needs them.
+  NextRequest,
   NextResponse: {
+    next: RealNextResponse.next.bind(RealNextResponse),
+    redirect: RealNextResponse.redirect.bind(RealNextResponse),
+    rewrite: RealNextResponse.rewrite.bind(RealNextResponse),
     json: (data: unknown, init?: { status?: number }) =>
       new Response(JSON.stringify(data), {
         status: init?.status ?? 200,
