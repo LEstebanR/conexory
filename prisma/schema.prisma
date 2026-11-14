@@ -21,7 +21,7 @@ model User {
   premiumUntil     DateTime?
   aiMessagesUsedToday Int       @default(0)
   aiMessagesResetAt   DateTime?
-  onboarding       Json      @default("{\"welcomeModalSeen\": false, \"dashboardTourCompleted\": false, \"propertyTourCompleted\": false, \"settingsTourCompleted\": false, \"firstPropertyCreated\": false, \"firstPropertyShared\": false}")
+  onboarding       Json      @default("{\"welcomeModalSeen\": false, \"dashboardTourCompleted\": false, \"firstPropertyCreated\": false, \"firstPropertyShared\": false}")
   agentSlug        String?   @unique
   profilePublished Boolean   @default(false)
   location         String?
