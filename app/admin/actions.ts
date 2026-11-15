@@ -83,6 +83,33 @@ export async function updatePremiumUntil(
   return { success: true }
 }
 
+const SetFeedbackResolvedSchema = z.object({
+  feedbackId: z.string().min(1),
+  resolved: z.boolean(),
+})
+
+export async function setFeedbackResolved(
+  feedbackId: string,
+  resolved: boolean
+): Promise<{ success: true } | { success: false; error: string }> {
+  const session = await getSession()
+  if (!session || session.user.role !== "admin") {
+    return { success: false, error: "No autorizado" }
+  }
+
+  const parsed = SetFeedbackResolvedSchema.safeParse({ feedbackId, resolved })
+  if (!parsed.success) return { success: false, error: "Solicitud inválida" }
+
+  const { count } = await prisma.feedback.updateMany({
+    where: { id: parsed.data.feedbackId },
+    data: { resolvedAt: parsed.data.resolved ? new Date() : null },
+  })
+  if (count === 0) return { success: false, error: "Este feedback ya no existe" }
+
+  revalidatePath("/admin/feedback")
+  return { success: true }
+}
+
 // Support override for a real Mercado Pago subscriber — separate from
 // updatePremiumUntil, which only applies to Pro granted manually without
 // billing. A later webhook (e.g. the next renewal charge) can still move
