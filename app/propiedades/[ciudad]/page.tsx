@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import AgentProperties from "@/app/agente/[slug]/agent-properties"
 import { getAppUrl } from "@/lib/urls"
+import { serializeJsonLd } from "@/lib/json-ld"
 import { pageMetadata } from "@/lib/page-metadata"
 import { buildCityTitle, buildCityDescription } from "@/lib/city-seo"
 import {
@@ -83,7 +84,7 @@ export default async function CityPropertiesPage({
     <div className="min-h-screen bg-canvas flex flex-col">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbSchema) }}
       />
       <Navbar />
 

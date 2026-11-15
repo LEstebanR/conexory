@@ -24,6 +24,7 @@ import SocialLinkButton from "./social-link-button"
 import ContactBar from "./contact-bar"
 import TrackVisit from "./track-visit"
 import { socialProfileUrl } from "@/lib/social"
+import { serializeJsonLd } from "@/lib/json-ld"
 
 
 // ── Social icon SVGs (same as agent page) ─────────────────────────────────
@@ -378,7 +379,7 @@ export default async function PublicPropertyPage({
     <div className={`min-h-screen bg-canvas flex flex-col${showContactCard ? " pb-[76px] xl:pb-0" : ""}`}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       <div className="flex-1 w-full xl:max-w-6xl xl:mx-auto xl:px-6 xl:grid xl:grid-cols-[minmax(0,42rem)_18rem] xl:justify-center xl:gap-12">
