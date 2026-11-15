@@ -35,7 +35,7 @@ export default async function DashboardPropertiesPage({
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter">
+        <h1 className="text-3xl sm:text-4xl font-bold text-ink">
           Propiedades disponibles
         </h1>
         <p className="text-sm text-body mt-1">
@@ -50,7 +50,7 @@ export default async function DashboardPropertiesPage({
           </span>
           <div>
             <p className="text-sm font-semibold text-ink">Todavía no hay propiedades publicadas</p>
-            <p className="text-xs text-mute mt-0.5">Vuelve pronto — nuestros agentes están cargando sus fichas.</p>
+            <p className="text-xs text-body mt-0.5">Vuelve pronto — nuestros agentes están cargando sus fichas.</p>
           </div>
         </div>
       ) : (

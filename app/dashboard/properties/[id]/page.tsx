@@ -95,12 +95,12 @@ export default async function PropertyDetailPage({
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/dashboard"
-            className="p-2 -ml-2 rounded-xl text-mute hover:bg-canvas-soft hover:text-ink transition-colors flex-shrink-0"
+            className="p-2 -ml-2 rounded-full text-body hover:bg-canvas-soft hover:text-ink transition-colors flex-shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-black text-ink tracking-tight">
+            <h1 className="text-xl font-bold text-ink">
               {property.published ? "Propiedad publicada" : "Propiedad desactivada"}
             </h1>
             <p className="text-sm text-body truncate">{property.title}</p>
@@ -151,27 +151,27 @@ export default async function PropertyDetailPage({
       <div className="space-y-4">
         {/* Analytics */}
         <div className="bg-white rounded-2xl border border-hairline p-6">
-          <p className="text-xs font-bold text-mute uppercase tracking-wide mb-5">Estadísticas</p>
+          <p className="text-xs font-bold text-body uppercase tracking-wide mb-5">Estadísticas</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {/* Total visits */}
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-mute">
+              <div className="flex items-center gap-1.5 text-body">
                 <Eye className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span className="text-xs font-medium">Visitas totales</span>
               </div>
-              <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{totalVisits}</p>
+              <p className="text-3xl font-bold text-ink tabular-nums">{totalVisits}</p>
             </div>
 
             {/* Visits this week */}
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-mute">
+              <div className="flex items-center gap-1.5 text-body">
                 <Eye className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span className="text-xs font-medium">Esta semana</span>
               </div>
               <div className="flex items-end gap-1.5">
-                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{visitsThisWeek}</p>
+                <p className="text-3xl font-bold text-ink tabular-nums">{visitsThisWeek}</p>
                 {weekDelta !== 0 && (
-                  <span className={`flex items-center gap-0.5 text-xs font-bold mb-1 ${weekDelta > 0 ? "text-ink" : "text-mute"}`}>
+                  <span className={`flex items-center gap-0.5 text-xs font-bold mb-1 ${weekDelta > 0 ? "text-ink" : "text-body"}`}>
                     {weekDelta > 0
                       ? <TrendingUp className="w-3.5 h-3.5" strokeWidth={2} />
                       : <TrendingDown className="w-3.5 h-3.5" strokeWidth={2} />
@@ -184,46 +184,46 @@ export default async function PropertyDetailPage({
 
             {/* WhatsApp clicks — Pro only */}
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-mute">
+              <div className="flex items-center gap-1.5 text-body">
                 <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span className="text-xs font-medium">Clics WhatsApp</span>
               </div>
               {isPremium ? (
-                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{totalWhatsapp}</p>
+                <p className="text-3xl font-bold text-ink tabular-nums">{totalWhatsapp}</p>
               ) : (
-                <p className="text-xl font-black text-mute tracking-tight">Pro</p>
+                <p className="text-xl font-bold text-body">Pro</p>
               )}
             </div>
 
             {/* Social clicks — Pro only */}
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-mute">
+              <div className="flex items-center gap-1.5 text-body">
                 <Users className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span className="text-xs font-medium">Redes</span>
               </div>
               {isPremium ? (
-                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{totalSocial}</p>
+                <p className="text-3xl font-bold text-ink tabular-nums">{totalSocial}</p>
               ) : (
-                <p className="text-xl font-black text-mute tracking-tight">Pro</p>
+                <p className="text-xl font-bold text-body">Pro</p>
               )}
             </div>
 
             {/* Contact clicks — Pro only */}
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-mute">
+              <div className="flex items-center gap-1.5 text-body">
                 <Contact className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span className="text-xs font-medium">Contacto</span>
               </div>
               {isPremium ? (
-                <p className="text-3xl font-black text-ink tracking-tighter tabular-nums">{totalContact}</p>
+                <p className="text-3xl font-bold text-ink tabular-nums">{totalContact}</p>
               ) : (
-                <p className="text-xl font-black text-mute tracking-tight">Pro</p>
+                <p className="text-xl font-bold text-body">Pro</p>
               )}
             </div>
           </div>
 
           {!isPremium && (
-            <p className="text-xs text-mute mt-4 pt-4 border-t border-hairline">
+            <p className="text-xs text-body mt-4 pt-4 border-t border-hairline">
               <Link href="/dashboard/upgrade" className="font-semibold text-ink hover:opacity-70 transition-opacity">Activa Pro</Link>
               {" "}para ver clics en WhatsApp, redes y contacto.
             </p>
@@ -270,7 +270,7 @@ export default async function PropertyDetailPage({
               <span className="inline-flex items-center bg-canvas-soft text-ink text-xs font-bold px-2.5 py-1 rounded-full mb-3 whitespace-nowrap">
                 {typeLabel}{transactionLabel ? ` · ${transactionLabel}` : ""}
               </span>
-              <h2 className="text-xl font-black text-ink tracking-tight leading-tight mb-1">
+              <h2 className="text-xl font-bold text-ink leading-tight mb-1">
                 {property.title}
               </h2>
               {location && (
@@ -280,7 +280,7 @@ export default async function PropertyDetailPage({
                 </div>
               )}
             </div>
-            <p className="text-xl sm:text-2xl font-black text-ink tracking-tighter flex-shrink-0">{price}</p>
+            <p className="text-xl sm:text-2xl font-bold text-ink flex-shrink-0">{price}</p>
           </div>
 
           {hasDetails && (
@@ -327,7 +327,7 @@ export default async function PropertyDetailPage({
 
         {property.description && (
           <div className="bg-white rounded-2xl border border-hairline p-6">
-            <p className="text-xs font-bold text-mute uppercase tracking-wide mb-3">Descripción</p>
+            <p className="text-xs font-bold text-body uppercase tracking-wide mb-3">Descripción</p>
             <p className="text-sm text-body leading-relaxed whitespace-pre-wrap">
               {property.description}
             </p>

@@ -5,7 +5,7 @@ export default function SignupCTA() {
   return (
     <section id="empezar" className="bg-ink">
       <div className="max-w-4xl mx-auto px-5 sm:px-6 lg:px-8 py-28 text-center">
-        <h2 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-none mb-6">
+        <h2 className="font-display text-4xl sm:text-6xl font-bold text-white leading-none mb-6">
           Tu próxima captación,
           <br />
           <span className="text-mute">lista para WhatsApp hoy.</span>

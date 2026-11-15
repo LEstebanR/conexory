@@ -70,8 +70,8 @@ export default async function SettingsPage() {
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <p className="text-sm font-medium text-mute mb-1">Cuenta</p>
-        <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter">
+        <p className="text-sm font-medium text-body mb-1">Cuenta</p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-ink">
           Configuración
         </h1>
       </div>
@@ -107,7 +107,7 @@ export default async function SettingsPage() {
               <Globe className="w-4 h-4 text-ink" strokeWidth={1.75} />
               <h2 className="text-base font-bold text-ink">Perfil público</h2>
             </div>
-            <p className="text-xs text-mute leading-relaxed mb-4">
+            <p className="text-xs text-body leading-relaxed mb-4">
               {user.profilePublished
                 ? "Tu perfil es visible para cualquier persona con el link. Ocultarlo solo lo hace privado — no borra tus datos."
                 : "Tu perfil está oculto. Actívalo para compartir tus propiedades con un link."}
@@ -120,7 +120,7 @@ export default async function SettingsPage() {
                   href={profileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-shrink-0 text-mute hover:text-ink transition-colors"
+                  className="flex-shrink-0 text-body hover:text-ink transition-colors"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
@@ -144,18 +144,18 @@ export default async function SettingsPage() {
             <h2 className="text-base font-bold text-ink mb-1">Plan actual</h2>
             <div className="flex items-center gap-2 mt-3 mb-5">
               {proAccess ? (
-                <span className="text-xs font-black uppercase tracking-wider bg-ink text-white px-2.5 py-1 rounded-full">
+                <span className="text-xs font-bold uppercase tracking-wider bg-ink text-white px-2.5 py-1 rounded-full">
                   Pro
                 </span>
               ) : (
-                <span className="text-xs font-bold text-mute uppercase tracking-wider bg-canvas-soft px-2.5 py-1 rounded-full">
+                <span className="text-xs font-bold text-body uppercase tracking-wider bg-canvas-soft px-2.5 py-1 rounded-full">
                   Gratuito
                 </span>
               )}
             </div>
             {proAccess ? (
               <>
-                <p className="text-xs text-mute leading-relaxed mb-5">
+                <p className="text-xs text-body leading-relaxed mb-5">
                   50 propiedades activas · 20 fotos por propiedad
                 </p>
                 {isPastDue && subscription?.currentPeriodEnd && (
@@ -167,7 +167,7 @@ export default async function SettingsPage() {
                   </div>
                 )}
                 {isCanceling && subscription?.currentPeriodEnd && (
-                  <p className="text-xs text-mute leading-relaxed mb-5">
+                  <p className="text-xs text-body leading-relaxed mb-5">
                     Activo hasta el {formatDate(subscription.currentPeriodEnd)} · no se renueva
                   </p>
                 )}
@@ -177,7 +177,7 @@ export default async function SettingsPage() {
               </>
             ) : (
               <>
-                <p className="text-xs text-mute leading-relaxed mb-5">
+                <p className="text-xs text-body leading-relaxed mb-5">
                   3 propiedades activas · 10 fotos por propiedad
                 </p>
                 <Button size="sm" className="w-full" asChild>

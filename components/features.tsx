@@ -13,7 +13,7 @@ function FormMock() {
         <div className="relative aspect-square rounded-xl overflow-hidden">
           <Image src={LISTING_PHOTO} alt="Foto de propiedad" fill sizes="120px" className="object-cover object-right" />
         </div>
-        <div className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong flex items-center justify-center text-2xl font-light text-mute">
+        <div className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong flex items-center justify-center text-2xl font-light text-body">
           +
         </div>
       </div>
@@ -57,9 +57,9 @@ function ShareMock() {
           <Image src={LISTING_PHOTO} alt="Preview de la propiedad" fill sizes="160px" className="object-cover" />
         </div>
         <div className="flex-1 bg-black px-3 py-2.5 flex flex-col justify-between">
-          <span className="text-[9px] font-black text-white tracking-tight">Conexory</span>
+          <span className="text-[9px] font-bold text-white">Conexory</span>
           <div>
-            <p className="text-sm font-black text-white leading-none tracking-tight">$580.000.000</p>
+            <p className="text-sm font-bold text-white leading-none">$580.000.000</p>
             <p className="text-[10px] text-white/60 mt-0.5">Casa · zona residencial</p>
           </div>
           <div className="flex gap-1 flex-wrap">
@@ -164,10 +164,10 @@ export default function Features() {
       <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
         {/* Header */}
         <Reveal className="max-w-2xl mb-20">
-          <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink tracking-tight leading-none">
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-ink leading-none">
             De las fotos en tu celular
             <br />
-            <span className="text-mute">al chat de tu cliente.</span>
+            <span className="text-body">al chat de tu cliente.</span>
           </h2>
         </Reveal>
 
@@ -179,7 +179,7 @@ export default function Features() {
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                   {/* Copy */}
                   <div className={reversed ? "lg:order-2" : ""}>
-                    <h3 className="font-display text-3xl sm:text-4xl font-extrabold text-ink tracking-tight leading-tight mb-4">
+                    <h3 className="font-display text-3xl sm:text-4xl font-bold text-ink leading-tight mb-4">
                       {block.title}
                     </h3>
                     <p className="text-body leading-relaxed mb-6 max-w-md">

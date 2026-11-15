@@ -202,8 +202,8 @@ export default async function DashboardPage({
       {/* Header */}
       <div className="flex items-end justify-between gap-4 mb-8">
         <div>
-          <p className="text-sm font-medium text-mute mb-1">{greeting(session.user.name)}</p>
-          <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter">
+          <p className="text-sm font-medium text-body mb-1">{greeting(session.user.name)}</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-ink">
             Tus propiedades
           </h1>
         </div>
@@ -244,10 +244,10 @@ export default async function DashboardPage({
               <span className="inline-flex w-8 h-8 rounded-lg bg-white/10 items-center justify-center mb-4">
                 <stat.icon className="w-4 h-4 text-white" strokeWidth={2} />
               </span>
-              <p className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none tabular-nums">
+              <p className="text-3xl sm:text-5xl font-bold text-white leading-none tabular-nums">
                 {stat.value}
               </p>
-              <p className="text-xs sm:text-sm text-mute font-medium mt-2">{stat.label}</p>
+              <p className="text-xs sm:text-sm text-body font-medium mt-2">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -306,7 +306,7 @@ export default async function DashboardPage({
               <Plus className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
           </div>
-          <h3 className="text-xl font-black text-ink tracking-tight text-balance max-w-sm mb-2">
+          <h3 className="text-xl font-bold text-ink text-balance max-w-sm mb-2">
             {onboardingComplete
               ? "Todavía no tienes propiedades"
               : "Crea tu primera propiedad y compártela por WhatsApp"}

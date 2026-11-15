@@ -18,7 +18,7 @@ export default function GlobalError({ error, reset }: ErrorBoundaryProps) {
     <html lang="es">
       <body className="min-h-screen bg-canvas flex flex-col items-center justify-center px-5 py-12 text-center antialiased">
         <title>Algo salió mal — Conexory</title>
-        <h1 className="text-2xl font-black text-ink tracking-tight mb-2">Algo salió mal</h1>
+        <h1 className="text-2xl font-bold text-ink mb-2">Algo salió mal</h1>
         <p className="text-body text-sm max-w-xs leading-relaxed mb-8">
           Ocurrió un error inesperado. Puedes intentar de nuevo o volver al inicio.
         </p>
@@ -29,8 +29,8 @@ export default function GlobalError({ error, reset }: ErrorBoundaryProps) {
         >
           Intentar de nuevo
         </button>
-        {error.digest && <p className="text-[11px] text-mute mt-6 font-mono">Código: {error.digest}</p>}
-        <p className="text-xs text-mute mt-6">
+        {error.digest && <p className="text-[11px] text-body mt-6 font-mono">Código: {error.digest}</p>}
+        <p className="text-xs text-body mt-6">
           Si el problema persiste, escríbenos a{" "}
           <a href={`mailto:${SUPPORT_EMAIL}`} className="text-ink font-semibold hover:opacity-70 transition-opacity">
             {SUPPORT_EMAIL}

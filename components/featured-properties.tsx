@@ -44,7 +44,7 @@ function PropertyCard({ property }: { property: FeaturedProperty }) {
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-mute">
+          <div className="w-full h-full flex items-center justify-center text-body">
             <Building2 className="w-8 h-8" strokeWidth={1.5} />
           </div>
         )}
@@ -54,11 +54,11 @@ function PropertyCard({ property }: { property: FeaturedProperty }) {
         </span>
       </div>
       <div className="bg-ink px-4 py-3.5">
-        <p className="text-white text-sm font-black truncate tracking-tight">{property.title}</p>
+        <p className="text-white text-sm font-bold truncate">{property.title}</p>
         {location && (
           <p className="text-white/80 text-xs mt-0.5 truncate">{location}</p>
         )}
-        <p className="text-white text-base font-black mt-1.5 tracking-tight">
+        <p className="text-white text-base font-bold mt-1.5">
           {formatCOP(property.price)}
         </p>
       </div>
@@ -73,10 +73,10 @@ export default function FeaturedProperties({ properties }: { properties: Feature
     <section id="featured" className="py-24 bg-canvas-softer">
       <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
         <Reveal className="max-w-2xl mb-14">
-          <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink tracking-tight leading-none">
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-ink leading-none">
             Así lucen las fichas
             <br />
-            <span className="text-mute">de nuestros agentes.</span>
+            <span className="text-body">de nuestros agentes.</span>
           </h2>
         </Reveal>
 

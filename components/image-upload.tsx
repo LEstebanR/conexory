@@ -123,7 +123,7 @@ export default function ImageUpload({
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong hover:border-ink hover:bg-canvas-soft/30 flex flex-col items-center justify-center gap-1.5 text-mute hover:text-ink transition-colors"
+        className="aspect-square rounded-xl border-2 border-dashed border-hairline-strong hover:border-ink hover:bg-canvas-soft/30 flex flex-col items-center justify-center gap-1.5 text-body hover:text-ink transition-colors"
       >
         <Plus className="w-6 h-6" strokeWidth={2} />
         <span className="text-xs font-semibold">Agregar</span>
@@ -159,7 +159,7 @@ export default function ImageUpload({
           </div>
           <div>
             <p className="text-sm font-semibold text-ink">Arrastra las fotos aquí</p>
-            <p className="text-xs text-mute mt-0.5">
+            <p className="text-xs text-body mt-0.5">
               PNG, JPG · Máx. {MAX_SIZE_MB} MB · Hasta {maxImages} fotos
             </p>
           </div>
@@ -184,7 +184,7 @@ export default function ImageUpload({
             <SortablePhotoGrid {...gridProps} onReorder={setItems} />
           </PhotoGridFallbackContext>
 
-          <p className="text-xs text-mute">
+          <p className="text-xs text-body">
             Arrastra las fotos para reordenar · La primera es la portada · {items.length}/{maxImages} fotos
           </p>
         </>

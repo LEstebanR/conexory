@@ -24,8 +24,8 @@ export default async function PropertiesIndexPage() {
 
       <section className="pt-12 pb-6 px-5">
         <div className="max-w-lg mx-auto">
-          <h1 className="text-2xl font-black text-ink tracking-tight leading-tight">Propiedades por ciudad</h1>
-          <p className="text-sm text-mute font-medium mt-1">
+          <h1 className="text-2xl font-bold text-ink leading-tight">Propiedades por ciudad</h1>
+          <p className="text-sm text-body font-medium mt-1">
             Explora las propiedades activas publicadas por agentes en Conexory.
           </p>
         </div>
@@ -34,7 +34,7 @@ export default async function PropertiesIndexPage() {
       <section className="flex-1">
         <div className="max-w-lg mx-auto w-full px-5 pb-10 space-y-2.5">
           {cities.length === 0 && (
-            <p className="text-sm text-mute">Todavía no hay suficientes propiedades publicadas por ciudad.</p>
+            <p className="text-sm text-body">Todavía no hay suficientes propiedades publicadas por ciudad.</p>
           )}
           {cities.map(({ slug, label, count }) => (
             <Link
@@ -45,7 +45,7 @@ export default async function PropertiesIndexPage() {
               <span className="flex items-center gap-2 min-w-0">
                 <MapPin className="w-4 h-4 text-mute flex-shrink-0" strokeWidth={2} />
                 <span className="text-sm font-bold text-ink truncate">{label}</span>
-                <span className="text-xs text-mute font-medium flex-shrink-0">{count}</span>
+                <span className="text-xs text-body font-medium flex-shrink-0">{count}</span>
               </span>
               <ArrowUpRight className="w-4 h-4 text-mute flex-shrink-0" strokeWidth={2} />
             </Link>

@@ -102,7 +102,7 @@ export default async function BlogPostPage({
             <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center">
               <Image src="/mark-white.png" alt="Conexory" width={18} height={18} className="w-4.5 h-4.5" />
             </div>
-            <span className="text-base font-black text-ink tracking-tight">Conexory</span>
+            <span className="text-base font-bold text-ink">Conexory</span>
           </Link>
           <Link href="/blog" className="flex items-center gap-1.5 text-sm font-medium text-body hover:text-ink transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -112,7 +112,7 @@ export default async function BlogPostPage({
       </header>
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-14">
-        <div className="flex items-center gap-3 mb-6 text-xs text-mute">
+        <div className="flex items-center gap-3 mb-6 text-xs text-body">
           <time dateTime={post.date}>{formatDate(post.date)}</time>
           <span>·</span>
           <span className="flex items-center gap-1">
@@ -121,7 +121,7 @@ export default async function BlogPostPage({
           </span>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-black text-ink tracking-tight leading-tight mb-4">
+        <h1 className="text-2xl sm:text-4xl font-bold text-ink leading-tight mb-4">
           {post.title}
         </h1>
 
@@ -133,7 +133,7 @@ export default async function BlogPostPage({
           className={[
             "prose prose-slate max-w-none",
             // headings
-            "prose-headings:font-black prose-headings:tracking-tight",
+            "prose-headings:font-bold",
             "prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5",
             "prose-h3:text-lg prose-h3:mt-10 prose-h3:mb-3",
             // paragraphs
@@ -160,10 +160,10 @@ export default async function BlogPostPage({
         />
 
         <div className="mt-12 rounded-2xl bg-ink p-8 text-center">
-          <h2 className="text-2xl font-black text-white tracking-tight">
+          <h2 className="text-2xl font-bold text-white">
             ¿Listo para compartir tus propiedades profesionalmente?
           </h2>
-          <p className="text-mute mt-2 mb-6">Crea tu cuenta gratis en Conexory.</p>
+          <p className="text-body mt-2 mb-6">Crea tu cuenta gratis en Conexory.</p>
           <Button variant="secondary" asChild>
             <Link href="/register">Crear cuenta gratis</Link>
           </Button>
@@ -171,7 +171,7 @@ export default async function BlogPostPage({
 
         {related.length > 0 && (
           <section className="mt-12 pt-8 border-t border-hairline">
-            <h2 className="text-sm font-black text-ink uppercase tracking-[0.15em] mb-5">
+            <h2 className="text-sm font-bold text-ink uppercase tracking-[0.15em] mb-5">
               También te puede interesar
             </h2>
             <div className="space-y-3">
@@ -181,7 +181,7 @@ export default async function BlogPostPage({
                   href={`/blog/${p.slug}`}
                   className="group block p-5 rounded-2xl border border-hairline hover:border-ink transition-colors"
                 >
-                  <h3 className="text-base font-black text-ink tracking-tight leading-snug mb-1">{p.title}</h3>
+                  <h3 className="text-base font-bold text-ink leading-snug mb-1">{p.title}</h3>
                   <p className="text-sm text-body leading-relaxed line-clamp-2">{p.description}</p>
                 </Link>
               ))}
@@ -202,7 +202,7 @@ export default async function BlogPostPage({
       </main>
 
       <footer className="border-t border-hairline py-8 text-center">
-        <p className="text-xs text-mute">© 2026 Conexory · Hecho en Colombia</p>
+        <p className="text-xs text-body">© 2026 Conexory · Hecho en Colombia</p>
       </footer>
     </div>
   )

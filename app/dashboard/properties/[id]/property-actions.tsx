@@ -191,7 +191,7 @@ export default function PropertyActions({
                 <AlertTriangle className="w-6 h-6 text-danger-600" strokeWidth={2} />
               </div>
               <div>
-                <Dialog.Title className="text-base font-black text-ink tracking-tight">
+                <Dialog.Title className="text-base font-bold text-ink">
                   ¿Eliminar esta propiedad?
                 </Dialog.Title>
                 <Dialog.Description className="text-sm text-body mt-1.5 leading-relaxed">

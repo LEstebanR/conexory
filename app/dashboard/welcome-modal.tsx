@@ -76,7 +76,7 @@ export default function WelcomeModal({
               <Sparkles className="w-6 h-6 text-white" strokeWidth={2} />
             </span>
 
-            <Dialog.Title className="text-2xl font-black text-ink tracking-tight text-balance">
+            <Dialog.Title className="text-2xl font-bold text-ink text-balance">
               ¡Bienvenido a Conexory, {firstName}!
             </Dialog.Title>
 

@@ -20,7 +20,7 @@ export default function ResetForm({ token }: { token: string }) {
   return (
     <>
       <div className="text-center mb-7">
-        <h1 className="text-2xl font-black text-ink tracking-tight mb-1.5">Nueva contraseña</h1>
+        <h1 className="text-2xl font-bold text-ink mb-1.5">Nueva contraseña</h1>
         <p className="text-body text-sm">Elige una contraseña segura de al menos 8 caracteres.</p>
       </div>
 
@@ -45,7 +45,7 @@ export default function ResetForm({ token }: { token: string }) {
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-body hover:text-ink transition-colors"
               aria-label={showPass ? "Ocultar" : "Mostrar"}
             >
               {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -92,7 +92,7 @@ export default function ResetForm({ token }: { token: string }) {
             <button
               type="button"
               onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-body hover:text-ink transition-colors"
               aria-label={showConfirm ? "Ocultar" : "Mostrar"}
             >
               {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

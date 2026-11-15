@@ -62,7 +62,7 @@ export default function RegisterPage() {
 
       <Link
         href="/"
-        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-mute hover:text-ink transition-colors"
+        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-body hover:text-ink transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="hidden sm:inline">Volver al inicio</span>
@@ -74,13 +74,13 @@ export default function RegisterPage() {
           <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
             <Image src="/mark-white.png" alt="Conexory" width={22} height={22} className="w-5.5 h-5.5" />
           </div>
-          <span className="text-xl font-bold text-ink tracking-tight">Conexory</span>
+          <span className="text-xl font-bold text-ink">Conexory</span>
         </Link>
 
         {/* Card */}
         <div className="bg-white border border-hairline rounded-3xl p-7 sm:p-9 shadow-xl shadow-black/5">
           <div className="text-center mb-7">
-            <h1 className="text-2xl font-black text-ink tracking-tight mb-1.5">Crea tu cuenta</h1>
+            <h1 className="text-2xl font-bold text-ink mb-1.5">Crea tu cuenta</h1>
             <p className="text-body text-sm">Gratis para empezar · Sin tarjeta de crédito</p>
           </div>
 
@@ -106,7 +106,7 @@ export default function RegisterPage() {
               <div className="w-full border-t border-hairline" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white px-3 text-xs text-mute font-semibold uppercase tracking-wider">
+              <span className="bg-white px-3 text-xs text-body font-semibold uppercase tracking-wider">
                 o con tu correo
               </span>
             </div>
@@ -167,7 +167,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-body hover:text-ink transition-colors"
                   aria-label={showPass ? "Ocultar" : "Mostrar"}
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -214,7 +214,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-body hover:text-ink transition-colors"
                   aria-label={showConfirm ? "Ocultar" : "Mostrar"}
                 >
                   {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

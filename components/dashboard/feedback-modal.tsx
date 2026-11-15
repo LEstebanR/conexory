@@ -34,7 +34,7 @@ export default function FeedbackModal({ userName }: { userName: string }) {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <button
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-body hover:bg-canvas-softer hover:text-ink transition-all duration-150"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-full text-body hover:bg-canvas-softer hover:text-ink transition-all duration-150"
         >
           <MessageSquareHeart className="w-4.5 h-4.5 flex-shrink-0" strokeWidth={1.75} />
           <span className="text-sm font-medium flex-1 text-left">Danos tu feedback</span>
@@ -45,7 +45,7 @@ export default function FeedbackModal({ userName }: { userName: string }) {
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm animate-fade-in" />
         <Dialog.Content className="fixed z-50 inset-0 flex flex-col items-center justify-center sm:block sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 w-full sm:w-[calc(100%-2rem)] sm:max-w-md bg-white rounded-none sm:rounded-2xl shadow-2xl shadow-black/10 p-7 animate-fade-in">
           <div className="w-full max-w-sm text-left">
-            <Dialog.Title className="text-lg font-black text-ink tracking-tight">
+            <Dialog.Title className="text-lg font-bold text-ink">
               Cuéntanos qué piensas
             </Dialog.Title>
             <Dialog.Description className="text-sm text-body mt-1 leading-relaxed">
@@ -55,7 +55,7 @@ export default function FeedbackModal({ userName }: { userName: string }) {
             <form ref={formRef} action={action} className="mt-5 space-y-4">
               <div>
                 <label htmlFor="feedback-name" className="block text-sm font-semibold text-ink mb-1.5">
-                  Nombre <span className="font-normal text-mute">(opcional)</span>
+                  Nombre <span className="font-normal text-body">(opcional)</span>
                 </label>
                 <input
                   id="feedback-name"

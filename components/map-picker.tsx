@@ -210,7 +210,7 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
                       {main}
                     </p>
                     {context && (
-                      <p className="text-xs text-mute mt-0.5 truncate">{context}</p>
+                      <p className="text-xs text-body mt-0.5 truncate">{context}</p>
                     )}
                   </button>
                 </li>
@@ -274,7 +274,7 @@ export default function MapPicker({ latitude, longitude, suggestedCity, onChange
           <button
             type="button"
             onClick={handleClear}
-            className="flex items-center gap-1 text-xs text-mute hover:text-ink transition-colors"
+            className="flex items-center gap-1 text-xs text-body hover:text-ink transition-colors"
           >
             <X className="w-3 h-3" />
             Quitar

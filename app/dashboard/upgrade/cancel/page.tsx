@@ -28,7 +28,7 @@ export default async function CancelPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-warning-100 mb-4">
             <AlertTriangle className="w-5 h-5 text-warning-600" strokeWidth={2} />
           </div>
-          <h1 className="text-2xl font-black text-ink tracking-tighter">
+          <h1 className="text-2xl font-bold text-ink">
             ¿Cancelar el plan Pro?
           </h1>
           <p className="text-sm text-body mt-1">

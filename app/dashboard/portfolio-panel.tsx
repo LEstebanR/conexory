@@ -22,7 +22,7 @@ export default function PortfolioPanel({ url, name }: { url: string; name: strin
 
   return (
     <div className="rounded-2xl bg-white border border-hairline p-5 space-y-3">
-      <p className="text-xs font-bold text-mute uppercase tracking-widest">Tu portafolio público</p>
+      <p className="text-xs font-bold text-body uppercase tracking-widest">Tu portafolio público</p>
 
       <div className="flex items-center gap-1.5 bg-canvas-softer border border-hairline rounded-xl px-4 py-2.5">
         <span className="flex-1 text-sm text-body font-mono truncate min-w-0">{displayUrl}</span>
@@ -30,7 +30,7 @@ export default function PortfolioPanel({ url, name }: { url: string; name: strin
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-hairline text-body hover:text-ink transition-colors"
+          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-canvas-soft hover:bg-hairline text-body hover:text-ink transition-colors"
           title="Ver portafolio"
         >
           <ExternalLink className="w-3.5 h-3.5" />
@@ -39,14 +39,14 @@ export default function PortfolioPanel({ url, name }: { url: string; name: strin
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
+          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
           title="Compartir por WhatsApp"
         >
           <WhatsAppIcon className="w-6 h-6" />
         </a>
         <button
           onClick={handleCopy}
-          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-hairline text-body hover:text-ink transition-colors"
+          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-canvas-soft hover:bg-hairline text-body hover:text-ink transition-colors"
           title="Copiar enlace"
         >
           {copied ? <Check className="w-3.5 h-3.5 text-ink" /> : <Copy className="w-3.5 h-3.5" />}

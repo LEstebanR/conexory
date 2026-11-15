@@ -43,10 +43,10 @@ export default function PricingTeaser() {
     <section id="pricing" className="py-24 bg-canvas-softer">
       <div className="max-w-4xl mx-auto px-5 sm:px-6 lg:px-8">
         <Reveal className="text-center mb-12">
-          <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink tracking-tight leading-none">
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-ink leading-none">
             {FREE_PROPERTY_LIMIT} propiedades gratis.
             <br />
-            <span className="text-mute">{PRO_PROPERTY_LIMIT} cuando tu cartera crezca.</span>
+            <span className="text-body">{PRO_PROPERTY_LIMIT} cuando tu cartera crezca.</span>
           </h2>
         </Reveal>
 
@@ -63,14 +63,14 @@ export default function PricingTeaser() {
               >
                 {/* Header */}
                 <div>
-                  <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${plan.dark ? "text-white/70" : "text-mute"}`}>
+                  <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${plan.dark ? "text-white/70" : "text-body"}`}>
                     {plan.name}
                   </p>
                   <div className="flex items-baseline gap-1.5">
-                    <span className={`text-4xl font-black tracking-tighter ${plan.dark ? "text-white" : "text-ink"}`}>
+                    <span className={`text-4xl font-bold ${plan.dark ? "text-white" : "text-ink"}`}>
                       {plan.price}
                     </span>
-                    <span className={`text-sm font-medium ${plan.dark ? "text-white/70" : "text-mute"}`}>
+                    <span className={`text-sm font-medium ${plan.dark ? "text-white/70" : "text-body"}`}>
                       {plan.cadence}
                     </span>
                   </div>

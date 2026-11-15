@@ -90,8 +90,8 @@ export default async function CityPropertiesPage({
 
       <section className="pt-12 pb-6 px-5">
         <div className="max-w-lg mx-auto">
-          <h1 className="text-2xl font-black text-ink tracking-tight leading-tight">{title}</h1>
-          <p className="text-sm text-mute font-medium mt-1">
+          <h1 className="text-2xl font-bold text-ink leading-tight">{title}</h1>
+          <p className="text-sm text-body font-medium mt-1">
             {facets.totalCount} {facets.totalCount === 1 ? "propiedad publicada" : "propiedades publicadas"}
           </p>
         </div>

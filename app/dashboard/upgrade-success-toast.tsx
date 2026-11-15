@@ -71,7 +71,7 @@ export default function UpgradeSuccessToast() {
               className="w-8 h-8 animate-spin mx-auto text-ink mb-4"
               strokeWidth={2}
             />
-            <h2 className="text-lg font-black text-ink tracking-tighter">
+            <h2 className="text-lg font-bold text-ink">
               Confirmando tu pago…
             </h2>
             <p className="text-sm text-body mt-1">
@@ -80,7 +80,7 @@ export default function UpgradeSuccessToast() {
           </>
         ) : (
           <>
-            <h2 className="text-lg font-black text-ink tracking-tighter">
+            <h2 className="text-lg font-bold text-ink">
               Tu pago se está procesando
             </h2>
             <p className="text-sm text-body mt-1 mb-5">

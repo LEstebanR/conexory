@@ -76,7 +76,7 @@ function RangeSlider({ label, bounds, value, onPreview, onCommit, format }: {
   return (
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold text-mute">{label}</label>
+        <label className="text-xs font-semibold text-body">{label}</label>
         <span className="text-xs font-bold text-ink tabular-nums">
           {format(current[0])} – {format(current[1])}
         </span>
@@ -96,7 +96,7 @@ function RangeSlider({ label, bounds, value, onPreview, onCommit, format }: {
 function MinSelect({ label, value, set }: { label: string; value: string; set: (v: string) => void }) {
   return (
     <div className="space-y-1">
-      <span className="text-[11px] text-mute font-medium block">{label}</span>
+      <span className="text-[11px] text-body font-medium block">{label}</span>
       <select value={value} onChange={(e) => set(e.target.value)}
         aria-label={`${label} mínimo`} className={cn(selectClass, "w-full pl-3 pr-7 text-[13px]")}>
         <option value="">Cualq.</option>
@@ -242,8 +242,8 @@ export default function AgentProperties({
     <div className="space-y-4">
       {showHeader && (
         <div className="flex items-baseline justify-between">
-          <h2 className="text-base font-black text-ink">Propiedades disponibles</h2>
-          <span className="text-sm font-bold text-mute">{facets.totalCount}</span>
+          <h2 className="text-base font-bold text-ink">Propiedades disponibles</h2>
+          <span className="text-sm font-bold text-body">{facets.totalCount}</span>
         </div>
       )}
 
@@ -286,7 +286,7 @@ export default function AgentProperties({
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-ink">Filtros</p>
                 {activeFilterCount > 0 && (
-                  <button type="button" onClick={clearAll} className="text-xs font-semibold text-mute hover:text-ink transition-colors">
+                  <button type="button" onClick={clearAll} className="text-xs font-semibold text-body hover:text-ink transition-colors">
                     Limpiar todo
                   </button>
                 )}
@@ -294,7 +294,7 @@ export default function AgentProperties({
 
               {facets.types.length > 1 && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-mute">Tipo</label>
+                  <label className="text-xs font-semibold text-body">Tipo</label>
                   <select
                     value={typeFilter}
                     onChange={(e) => updateParams({ type: e.target.value === "all" ? null : e.target.value })}
@@ -307,7 +307,7 @@ export default function AgentProperties({
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-mute">Transacción</label>
+                <label className="text-xs font-semibold text-body">Transacción</label>
                 <select
                   value={transactionFilter}
                   onChange={(e) => updateParams({ transaccion: e.target.value === "all" ? null : e.target.value })}
@@ -339,7 +339,7 @@ export default function AgentProperties({
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-mute">Mínimo</label>
+                <label className="text-xs font-semibold text-body">Mínimo</label>
                 <div className="grid grid-cols-3 gap-2">
                   <MinSelect label="Hab." value={minBeds} set={(v) => updateParams({ beds: v || null })} />
                   <MinSelect label="Baños" value={minBaths} set={(v) => updateParams({ baths: v || null })} />
@@ -388,7 +388,7 @@ export default function AgentProperties({
 
       {/* Results count */}
       {(currentQuery || activeFilterCount > 0) && (
-        <p className="text-xs text-mute">
+        <p className="text-xs text-body">
           {total === 0 ? "Sin resultados" : `${total} propiedad${total !== 1 ? "es" : ""} encontrada${total !== 1 ? "s" : ""}`}
         </p>
       )}
@@ -436,16 +436,16 @@ export default function AgentProperties({
                 </div>
 
                 <div className="p-4">
-                  <p className="text-sm font-black text-ink leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">{property.title}</p>
+                  <p className="text-sm font-bold text-ink leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">{property.title}</p>
                   {location && (
                     <div className="flex items-center gap-1 mt-1.5">
                       <MapPin className="w-3 h-3 text-mute flex-shrink-0" strokeWidth={2} />
-                      <span className="text-xs text-mute truncate">{location}</span>
+                      <span className="text-xs text-body truncate">{location}</span>
                     </div>
                   )}
-                  <p className="text-lg font-black text-ink tracking-tight mt-2.5">{formatCOPCompact(property.price)}</p>
+                  <p className="text-lg font-bold text-ink mt-2.5">{formatCOPCompact(property.price)}</p>
                   {hasStats && (
-                    <p className="text-xs text-mute mt-1">
+                    <p className="text-xs text-body mt-1">
                       {[
                         property.bedrooms != null && `${property.bedrooms} hab`,
                         property.bathrooms != null && `${property.bathrooms} baño${property.bathrooms !== 1 ? "s" : ""}`,
@@ -460,7 +460,7 @@ export default function AgentProperties({
         </div>
       ) : (
         <div className="py-10 text-center">
-          <p className="text-sm text-mute">No hay propiedades que coincidan con tu búsqueda.</p>
+          <p className="text-sm text-body">No hay propiedades que coincidan con tu búsqueda.</p>
         </div>
       )}
 
@@ -471,7 +471,7 @@ export default function AgentProperties({
             className="flex items-center gap-1 text-sm font-semibold text-ink disabled:text-mute disabled:cursor-not-allowed hover:text-body transition-colors">
             <ChevronLeft className="w-4 h-4" /> Anterior
           </button>
-          <span className="text-xs text-mute font-medium">{currentPage} / {totalPages}</span>
+          <span className="text-xs text-body font-medium">{currentPage} / {totalPages}</span>
           <button type="button" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}
             className="flex items-center gap-1 text-sm font-semibold text-ink disabled:text-mute disabled:cursor-not-allowed hover:text-body transition-colors">
             Siguiente <ChevronRight className="w-4 h-4" />
@@ -483,7 +483,7 @@ export default function AgentProperties({
           the loaded page, so it doesn't jump around as the user paginates */}
       {mapProperties.length > 0 && (
         <div className="pt-4">
-          <h2 className="text-base font-black text-ink mb-3">Ubicación de propiedades</h2>
+          <h2 className="text-base font-bold text-ink mb-3">Ubicación de propiedades</h2>
           <div className="relative isolate rounded-2xl overflow-hidden border border-hairline" style={{ height: 340 }}>
             <AgentMap properties={mapProperties} />
           </div>
