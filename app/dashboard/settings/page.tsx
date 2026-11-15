@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import SettingsForm from "./settings-form"
 import ReferralLinkCard from "./referral-link-card"
+import DeleteAccountCard from "./delete-account-card"
 import { toggleProfilePublished } from "./actions"
 import { getAppUrl } from "@/lib/urls"
 import { hasProAccess } from "@/lib/plans"
@@ -192,6 +193,8 @@ export default async function SettingsPage() {
 
           {/* Referrals */}
           {referralUrl && <ReferralLinkCard url={referralUrl} />}
+
+          <DeleteAccountCard email={user.email} />
         </div>
       </div>
     </div>

@@ -1,10 +1,14 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
 import { z } from "zod"
-import { del } from "@vercel/blob"
-import { getSession } from "@/lib/auth"
+import { del, list } from "@vercel/blob"
+import { auth, getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { cancelPreapproval } from "@/lib/mercadopago"
+import { reportError } from "@/lib/report-error"
 import { invalidatePublicListings } from "@/lib/public-cache"
 import { ensureAgentSlug } from "@/lib/agent-slug"
 import { HEX_COLOR_REGEX } from "@/lib/flyer-options"
@@ -140,4 +144,106 @@ export async function toggleProfilePublished(): Promise<void> {
 
   invalidatePublicListings()
   revalidatePath("/dashboard/settings")
+}
+
+export type DeleteAccountState = { error?: string }
+
+const BILLABLE_SUBSCRIPTION_STATUSES = ["active", "past_due", "incomplete"]
+
+const deleteAccountSchema = z.object({
+  confirmEmail: z.string().trim().toLowerCase().max(320),
+})
+
+function isBlobUrl(url: string | null | undefined): url is string {
+  return !!url && url.includes("blob.vercel-storage.com")
+}
+
+async function listFlyerBlobs(propertyIds: string[]): Promise<string[]> {
+  const listings = await Promise.all(
+    propertyIds.map((id) => list({ prefix: `flyer/${id}-` })),
+  )
+  return listings.flatMap(({ blobs }) => blobs.map((blob) => blob.url))
+}
+
+async function collectUserBlobUrls(userId: string): Promise<string[]> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { image: true, properties: { select: { id: true, images: true } } },
+  })
+  if (!user) return []
+
+  const urls = [
+    ...user.properties.flatMap((property) => property.images).filter(isBlobUrl),
+    ...(isBlobUrl(user.image) ? [user.image] : []),
+  ]
+  try {
+    urls.push(...(await listFlyerBlobs(user.properties.map((property) => property.id))))
+  } catch (error) {
+    await reportError("deleteAccount: listing flyer blobs failed", error, { userId })
+  }
+  return urls
+}
+
+export async function deleteAccount(
+  _prev: DeleteAccountState,
+  formData: FormData,
+): Promise<DeleteAccountState> {
+  const session = await getSession()
+  if (!session) return { error: "Sesión expirada." }
+  const userId = session.user.id
+
+  const parsed = deleteAccountSchema.safeParse({ confirmEmail: formData.get("confirmEmail") ?? "" })
+  if (!parsed.success || parsed.data.confirmEmail !== session.user.email.trim().toLowerCase()) {
+    return { error: "El email no coincide con el de tu cuenta." }
+  }
+
+  // Cancel billing first and abort on failure: deleting the account while
+  // Mercado Pago keeps charging would leave a paying customer with no account.
+  const subscription = await prisma.subscription.findUnique({
+    where: { userId },
+    select: { mpPreapprovalId: true, status: true },
+  })
+  const preapprovalId = subscription?.mpPreapprovalId
+  const mustCancel = !!preapprovalId && BILLABLE_SUBSCRIPTION_STATUSES.includes(subscription.status)
+  if (mustCancel) {
+    const result = await cancelPreapproval(preapprovalId)
+    if (!result.ok) {
+      await reportError("deleteAccount: Mercado Pago cancel failed", undefined, {
+        userId,
+        preapprovalId,
+        error: result.error,
+      })
+      return {
+        error: "No pudimos cancelar tu suscripción, así que no eliminamos tu cuenta. Inténtalo de nuevo o escríbenos.",
+      }
+    }
+  }
+
+  // URLs are collected before the delete (the cascade takes the rows with it)
+  // but blobs are removed after it: if the DB delete fails, the account must
+  // stay intact rather than survive with broken images.
+  const blobUrls = await collectUserBlobUrls(userId)
+
+  try {
+    await prisma.user.delete({ where: { id: userId } })
+  } catch (error) {
+    await reportError("deleteAccount: user delete failed", error, {
+      userId,
+      preapprovalCancelled: mustCancel,
+    })
+    return { error: "No pudimos eliminar tu cuenta. Inténtalo de nuevo o escríbenos." }
+  }
+
+  if (blobUrls.length > 0) {
+    // Orphaned blobs are cleanable later; the account is already gone, so a
+    // Blob failure must not surface as an error to the user.
+    await del(blobUrls).catch((error) =>
+      reportError("deleteAccount: Blob cleanup failed", error, { userId, blobCount: blobUrls.length }),
+    )
+  }
+
+  // The session row is already gone (cascade); this just clears the cookie.
+  await auth.api.signOut({ headers: await headers() }).catch(() => null)
+  invalidatePublicListings()
+  redirect("/?cuenta=eliminada")
 }

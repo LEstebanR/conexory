@@ -11,6 +11,7 @@ import FAQ from "@/components/faq"
 import PricingTeaser from "@/components/pricing-teaser"
 import SignupCTA from "@/components/signup-cta"
 import Footer from "@/components/footer"
+import AccountDeletedToast from "@/components/account-deleted-toast"
 import { reportError } from "@/lib/report-error"
 
 export const metadata: Metadata = {
@@ -85,6 +86,7 @@ export default async function Home() {
       <PricingTeaser />
       <SignupCTA />
       <Footer />
+      <AccountDeletedToast />
     </main>
   )
 }
