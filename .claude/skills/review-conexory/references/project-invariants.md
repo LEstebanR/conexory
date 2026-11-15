@@ -119,7 +119,7 @@ Files: `lib/mercadopago.ts`, `lib/subscription.ts`, `lib/orphan-subscriptions.ts
 - Unit tests with `bun test` next to the module (`foo.ts` → `foo.test.ts`). `lib/test-coverage-guard.test.ts` fails if a new module under `lib/**`, `app/**/actions.ts` or `app/**/route.ts(x)` has no sibling test and isn't in `UNTESTED_ALLOWLIST` with a reason. A new allowlist entry needs a real reason (static data, pure rendering), not "hard to test".
 - Coverage threshold: **80% per file** (`bunfig.toml`), enforced in CI. Run `bun run coverage`; CI pins Bun via `.bun-version`.
 - `mock.module()` is process-wide: mocking a module in one test file affects others. New mocks of shared modules (`lib/auth`, `lib/prisma`, `lib/mercadopago`) must not break other suites.
-- E2E (Playwright, `e2e/`) covers login, access control, property lifecycle and sharing. A change to those flows should update the matching spec.
+- E2E (Playwright, `e2e/`) covers login, access control, property lifecycle, sharing and the Pro subscription (stubbed Mercado Pago, `e2e/fake-mercadopago`). A change to those flows should update the matching spec.
 - Tests must assert behavior (result, DB call args, error message), not just "doesn't throw".
 
 ## Ops

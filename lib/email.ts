@@ -28,10 +28,24 @@ function resend() {
 
 type Message = { to: string; subject: string; react: ReactElement; headers?: Record<string, string> }
 
+// .test is a reserved TLD (RFC 2606) that can never receive mail; E2E users
+// live under it, so sending would only burn Resend quota and bounce.
+function isUndeliverable(to: string) {
+  return to.toLowerCase().endsWith(".test")
+}
+
+// The E2E dev server sets this so no test run can email a real inbox, whatever
+// address a spec uses. Ignored in production so a stray env var can't
+// silently stop real mail.
+function emailDeliveryDisabled() {
+  return process.env.NODE_ENV !== "production" && process.env.DISABLE_EMAIL_DELIVERY === "1"
+}
+
 // Resend reports failures in the returned { error } instead of throwing, so
 // without this check a failed reset or verification email leaves no trace.
 // The recipient stays out of the report.
 async function deliver(template: string, message: Message) {
+  if (emailDeliveryDisabled() || isUndeliverable(message.to)) return
   // Only SUPPORT_EMAIL receives mail on conexory.com: a reply to no-reply@
   // would bounce, so replies are routed to support.
   const { error } = await resend().emails.send({ from: FROM, replyTo: SUPPORT_EMAIL, ...message })
