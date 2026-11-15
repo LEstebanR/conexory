@@ -13,4 +13,6 @@ coverageThreshold = 0.80
 # lib/prisma.ts only wires the PrismaClient singleton (see UNTESTED_ALLOWLIST in
 # lib/test-coverage-guard.test.ts); it shows up here whenever a test loads a
 # module that imports it without mocking it, e.g. proxy.test.ts via spyOn.
-coveragePathIgnorePatterns = ["**/lib/mercadopago.ts", "**/lib/prisma.ts"]
+# lib/auth.ts is the better-auth config (also in UNTESTED_ALLOWLIST); it shows
+# up the same way through lib/require-admin.test.ts, which injects the session.
+coveragePathIgnorePatterns = ["**/lib/mercadopago.ts", "**/lib/prisma.ts", "**/lib/auth.ts"]
