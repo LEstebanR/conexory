@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Users, Building2, Zap, TrendingUp, Layers, ListChecks, Eye, Inbox } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { requireAdmin } from "@/lib/require-admin"
 import { daysAgo } from "@/lib/dates"
 import { startOfColombiaMonth, colombiaMonthName } from "@/lib/colombia-month"
 import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
@@ -101,6 +102,7 @@ function Card({
 }
 
 export default async function AdminPage() {
+  await requireAdmin()
   const week = daysAgo(7)
   const month = daysAgo(30)
   const calendarMonthStart = startOfColombiaMonth()
