@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { getSessionCookie } from "better-auth/cookies"
-import { publicListingSlug } from "@/lib/listing-seo"
+import { MISSING_LISTING_HEADER, publicListingSlug } from "@/lib/listing-seo"
 import {
   SIGNUP_SOURCE_COOKIE,
   SIGNUP_SOURCE_COOKIE_OPTIONS,
@@ -34,7 +34,9 @@ export async function proxy(request: NextRequest) {
     if (published === false) {
       const url = request.nextUrl.clone()
       url.pathname = "/__missing"
-      return NextResponse.rewrite(url)
+      const headers = new Headers(request.headers)
+      headers.set(MISSING_LISTING_HEADER, "1")
+      return NextResponse.rewrite(url, { request: { headers } })
     }
     return NextResponse.next()
   }
