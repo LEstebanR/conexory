@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
+import { describe, test, expect, mock, beforeEach, afterEach, spyOn } from "bun:test"
 import { renderToStaticMarkup } from "react-dom/server"
 import type { ReactElement } from "react"
 import { SUPPORT_EMAIL } from "./urls"
@@ -199,5 +199,35 @@ describe("lifecycle emails", () => {
     await sendWelcome("agent@example.com", "Luis")
     const html = renderToStaticMarkup(lastCall().react as ReactElement)
     expect(html).not.toContain("Dejar de recibir estos correos")
+  })
+})
+
+describe("delivery guards", () => {
+  const env = process.env as Record<string, string | undefined>
+  const original = { nodeEnv: env.NODE_ENV, disabled: env.DISABLE_EMAIL_DELIVERY }
+
+  afterEach(() => {
+    env.NODE_ENV = original.nodeEnv
+    env.DISABLE_EMAIL_DELIVERY = original.disabled
+  })
+
+  test("never sends to a reserved .test address", async () => {
+    await sendWelcome("agent@e2e.conexory.test", "Luis")
+    await sendVerificationEmail("AGENT@E2E.CONEXORY.TEST", "Luis", "https://conexory.com/v?t=a")
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
+  test("DISABLE_EMAIL_DELIVERY stops every send outside production", async () => {
+    env.NODE_ENV = "test"
+    env.DISABLE_EMAIL_DELIVERY = "1"
+    await sendWelcome("agent@example.com", "Luis")
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
+  test("DISABLE_EMAIL_DELIVERY is ignored in production", async () => {
+    env.NODE_ENV = "production"
+    env.DISABLE_EMAIL_DELIVERY = "1"
+    await sendWelcome("agent@example.com", "Luis")
+    expect(mockSend).toHaveBeenCalledTimes(1)
   })
 })
