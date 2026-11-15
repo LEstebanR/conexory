@@ -16,7 +16,7 @@ export const DEFAULT_ONBOARDING: OnboardingState = {
   firstPropertyShared: false,
 }
 
-// Rows may still hold flags from removed tours; only known keys are kept.
+// Unknown keys (e.g. flags from removed features) are ignored.
 export function parseOnboarding(value: unknown): OnboardingState {
   const result = { ...DEFAULT_ONBOARDING }
   if (value && typeof value === "object" && !Array.isArray(value)) {
