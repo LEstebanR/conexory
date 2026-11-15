@@ -3,7 +3,15 @@ import crypto from "crypto"
 const MERCADOPAGO_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN ?? ""
 const MERCADOPAGO_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET ?? ""
 
-const API_BASE = "https://api.mercadopago.com"
+const PRODUCTION_API_BASE = "https://api.mercadopago.com"
+
+// E2E points this at a local fake (e2e/fake-mercadopago) because Mercado
+// Pago's sandbox rejects tokenized preapprovals. Never honored in production,
+// so a stray env var can't reroute real payments.
+export function mercadoPagoApiBase(): string {
+  if (process.env.NODE_ENV === "production") return PRODUCTION_API_BASE
+  return process.env.MERCADOPAGO_API_BASE || PRODUCTION_API_BASE
+}
 
 export const PRO_AMOUNT_COP = 99_999
 const CURRENCY = "COP"
@@ -51,7 +59,7 @@ export async function createPreapproval({
 }): Promise<CreatePreapprovalResult> {
   if (!MERCADOPAGO_ACCESS_TOKEN) return { ok: false, error: "missing_access_token" }
 
-  const res = await fetch(`${API_BASE}/preapproval`, {
+  const res = await fetch(`${mercadoPagoApiBase()}/preapproval`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -104,7 +112,7 @@ export async function getCardToken(tokenId: string): Promise<CardTokenDetails> {
   if (!publicKey) return { ok: false, error: "missing_public_key" }
 
   const res = await fetch(
-    `${API_BASE}/v1/card_tokens/${tokenId}?public_key=${encodeURIComponent(publicKey)}`,
+    `${mercadoPagoApiBase()}/v1/card_tokens/${tokenId}?public_key=${encodeURIComponent(publicKey)}`,
     { cache: "no-store" },
   )
   const raw = await res.text()
@@ -131,7 +139,7 @@ export interface PreapprovalDetails {
 export async function getPreapproval(preapprovalId: string): Promise<PreapprovalDetails> {
   if (!MERCADOPAGO_ACCESS_TOKEN) return { ok: false, error: "missing_access_token" }
 
-  const res = await fetch(`${API_BASE}/preapproval/${preapprovalId}`, {
+  const res = await fetch(`${mercadoPagoApiBase()}/preapproval/${preapprovalId}`, {
     headers: { Authorization: `Bearer ${MERCADOPAGO_ACCESS_TOKEN}` },
     cache: "no-store",
   })
@@ -176,7 +184,7 @@ export interface PaymentDetails {
 export async function getPayment(paymentId: string): Promise<PaymentDetails> {
   if (!MERCADOPAGO_ACCESS_TOKEN) return { ok: false, error: "missing_access_token" }
 
-  const res = await fetch(`${API_BASE}/v1/payments/${paymentId}`, {
+  const res = await fetch(`${mercadoPagoApiBase()}/v1/payments/${paymentId}`, {
     headers: { Authorization: `Bearer ${MERCADOPAGO_ACCESS_TOKEN}` },
     cache: "no-store",
   })
@@ -217,7 +225,7 @@ export interface CancelPreapprovalResult {
 export async function cancelPreapproval(preapprovalId: string): Promise<CancelPreapprovalResult> {
   if (!MERCADOPAGO_ACCESS_TOKEN) return { ok: false, error: "missing_access_token" }
 
-  const res = await fetch(`${API_BASE}/preapproval/${preapprovalId}`, {
+  const res = await fetch(`${mercadoPagoApiBase()}/preapproval/${preapprovalId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -253,7 +261,7 @@ export async function updatePreapprovalCard(
 ): Promise<UpdatePreapprovalCardResult> {
   if (!MERCADOPAGO_ACCESS_TOKEN) return { ok: false, error: "missing_access_token" }
 
-  const res = await fetch(`${API_BASE}/preapproval/${preapprovalId}`, {
+  const res = await fetch(`${mercadoPagoApiBase()}/preapproval/${preapprovalId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -358,7 +366,7 @@ export async function searchLivePreapprovals(): Promise<SearchPreapprovalsResult
     for (let page = 0; page < SEARCH_MAX_PAGES; page++) {
       const offset = page * SEARCH_PAGE_SIZE
       const res = await fetch(
-        `${API_BASE}/preapproval/search?status=${status}&limit=${SEARCH_PAGE_SIZE}&offset=${offset}`,
+        `${mercadoPagoApiBase()}/preapproval/search?status=${status}&limit=${SEARCH_PAGE_SIZE}&offset=${offset}`,
         {
           headers: { Authorization: `Bearer ${MERCADOPAGO_ACCESS_TOKEN}` },
           cache: "no-store",

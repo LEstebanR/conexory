@@ -1,11 +1,16 @@
-import { describe, test, expect } from "bun:test"
+import { describe, test, expect, afterEach } from "bun:test"
 import crypto from "crypto"
 
 // MERCADOPAGO_WEBHOOK_SECRET is set by test-setup.ts (bunfig.toml preload)
 // before any test file — including this one — gets a chance to import the
 // real module.
-const { verifyMercadoPagoWebhook, makeExternalReference, referenceToUserId, searchLivePreapprovals } =
-  await import("./mercadopago")
+const {
+  verifyMercadoPagoWebhook,
+  makeExternalReference,
+  referenceToUserId,
+  searchLivePreapprovals,
+  mercadoPagoApiBase,
+} = await import("./mercadopago")
 
 function sign(dataId: string, xRequestId: string, ts: string, secret = "test_webhook_secret") {
   const manifest = `id:${dataId.toLowerCase()};request-id:${xRequestId};ts:${ts};`
@@ -174,3 +179,30 @@ describe("searchLivePreapprovals", () => {
 // Bun's mock.module is process-global (not file-scoped), so whichever file
 // registers a mock for "@/lib/mercadopago" first wins for every subsequent
 // import in the same test run — a real fake here would silently be shadowed.
+
+describe("mercadoPagoApiBase", () => {
+  const env = process.env as Record<string, string | undefined>
+  const original = { nodeEnv: env.NODE_ENV, apiBase: env.MERCADOPAGO_API_BASE }
+
+  afterEach(() => {
+    env.NODE_ENV = original.nodeEnv
+    env.MERCADOPAGO_API_BASE = original.apiBase
+  })
+
+  test("defaults to Mercado Pago's real API", () => {
+    delete env.MERCADOPAGO_API_BASE
+    expect(mercadoPagoApiBase()).toBe("https://api.mercadopago.com")
+  })
+
+  test("honors the override outside production", () => {
+    env.NODE_ENV = "test"
+    env.MERCADOPAGO_API_BASE = "http://localhost:4010"
+    expect(mercadoPagoApiBase()).toBe("http://localhost:4010")
+  })
+
+  test("ignores the override in production", () => {
+    env.NODE_ENV = "production"
+    env.MERCADOPAGO_API_BASE = "http://localhost:4010"
+    expect(mercadoPagoApiBase()).toBe("https://api.mercadopago.com")
+  })
+})
