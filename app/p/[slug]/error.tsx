@@ -19,7 +19,7 @@ export default function PropertyError({
           <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center shadow-sm">
             <Image src="/mark-white.png" alt="Conexory" width={18} height={18} className="w-4.5 h-4.5" />
           </div>
-          <span className="text-sm font-black text-ink tracking-tight">Conexory</span>
+          <span className="text-sm font-bold text-ink">Conexory</span>
         </Link>
       </header>
 
@@ -27,7 +27,7 @@ export default function PropertyError({
         <div className="w-20 h-20 rounded-3xl bg-canvas-soft flex items-center justify-center mb-6">
           <AlertTriangle className="w-9 h-9 text-mute" strokeWidth={1.5} />
         </div>
-        <h1 className="text-2xl font-black text-ink tracking-tight mb-3">
+        <h1 className="text-2xl font-bold text-ink mb-3">
           No pudimos cargar esta propiedad
         </h1>
         <p className="text-body text-sm leading-relaxed max-w-xs mb-8">
@@ -35,7 +35,7 @@ export default function PropertyError({
         </p>
         <button
           onClick={reset}
-          className="inline-flex items-center bg-ink hover:bg-elevated text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors"
+          className="inline-flex items-center bg-ink hover:bg-elevated text-white text-base font-medium px-6 py-3 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           Intentar de nuevo
@@ -46,8 +46,8 @@ export default function PropertyError({
       </main>
 
       <footer className="border-t border-hairline bg-white py-5 px-4 text-center">
-        <p className="text-xs text-mute">
-          Publicado con{" "}
+        <p className="text-xs text-body">
+          Ficha creada con{" "}
           <Link href={attributedHref("/", "property_page")} className="text-ink font-semibold hover:underline">
             Conexory
           </Link>
