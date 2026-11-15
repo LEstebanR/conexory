@@ -93,7 +93,6 @@ jobs:
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/conexory_e2e
       # Throwaway — signs sessions in the ephemeral Postgres container above.
       BETTER_AUTH_SECRET: e2e-ci-only-throwaway-secret-not-used-anywhere-else
-      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

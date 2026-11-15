@@ -304,3 +304,4 @@ chore: migrate recurring billing to Mercado Pago
 - Don't expose `userId` on public routes — the public view `/p/[slug]` must not leak agent data
 - Don't read `NEXT_PUBLIC_APP_URL` or hardcode the app's URL — use `getAppUrl()` from `lib/urls.ts`
 - Don't write comments unless they clarify something non-obvious; when needed, in English
+- Don't invoke the built-in `/code-review` skill (it spawns 5 subagents and is expensive) — every code review in this repo, of a diff, branch or PR, goes through `/review-conexory`

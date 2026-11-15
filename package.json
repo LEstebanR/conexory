@@ -11,6 +11,7 @@
     "test": "bun test --path-ignore-patterns='e2e/**'",
     "coverage": "bun test --coverage --path-ignore-patterns='e2e/**'",
     "test:e2e": "playwright test",
+    "dev:e2e": "bun e2e/dev-server.ts",
     "postinstall": "prisma generate",
     "prepare": "git config core.hooksPath .githooks"
   },

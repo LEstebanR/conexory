@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { ExternalLink } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { requireAdmin } from "@/lib/require-admin"
 import { hasProAccess } from "@/lib/plans"
 import { parseSignupSource, SIGNUP_SOURCE_LABELS } from "@/lib/attribution"
 import AdminNav from "../admin-nav"
@@ -18,6 +19,7 @@ export default async function AdminUsersPage({
 }: {
   searchParams: Promise<{ page?: string; q?: string }>
 }) {
+  await requireAdmin()
   const sp = await searchParams
   const page = Math.max(1, Number(sp.page) || 1)
   const q = sp.q?.trim() ?? ""

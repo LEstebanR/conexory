@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Users, Building2, Zap, TrendingUp, Layers, ListChecks, Eye, Inbox } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { requireAdmin } from "@/lib/require-admin"
 import { daysAgo } from "@/lib/dates"
 import { startOfColombiaMonth, colombiaMonthName } from "@/lib/colombia-month"
 import { FREE_PROPERTY_LIMIT } from "@/lib/plans"
@@ -101,6 +102,7 @@ function Card({
 }
 
 export default async function AdminPage() {
+  await requireAdmin()
   const week = daysAgo(7)
   const month = daysAgo(30)
   const calendarMonthStart = startOfColombiaMonth()
@@ -147,15 +149,14 @@ export default async function AdminPage() {
     return property ? [{ ...property, visits: v._count.propertyId }] : []
   })
 
-  // Filtered relation counts aren't directly comparable in a single query, so
-  // fetch active-property counts for free (non-admin) users and filter in memory.
-  const freeUsersWithCounts = await prisma.user.findMany({
-    where: { isPremium: false, role: { not: "admin" } },
-    select: { id: true, _count: { select: { properties: { where: { published: true } } } } },
+  // Only users at the limit come back from the DB, so this stays bounded as the
+  // free user base grows.
+  const freeUsersAtLimitGroups = await prisma.property.groupBy({
+    by: ["userId"],
+    where: { published: true, user: { isPremium: false, role: { not: "admin" } } },
+    having: { userId: { _count: { equals: FREE_PROPERTY_LIMIT } } },
   })
-  const freeUsersAtLimit = freeUsersWithCounts.filter(
-    (u) => u._count.properties === FREE_PROPERTY_LIMIT
-  ).length
+  const freeUsersAtLimit = freeUsersAtLimitGroups.length
 
   const unpublishedProperties = totalProperties - publishedProperties
   const sortedPropertyTypes = [...propertiesByType].sort((a, b) => b._count.id - a._count.id)
