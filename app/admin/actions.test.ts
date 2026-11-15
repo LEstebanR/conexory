@@ -22,22 +22,31 @@ const mockSubscriptionUpdate = mock((...args: [unknown]) => {
   void args
   return Promise.resolve({})
 })
+const mockFeedbackUpdateMany = mock((...args: [unknown]) => {
+  void args
+  return Promise.resolve({ count: 1 })
+})
 mock.module("@/lib/prisma", () => ({
   prisma: {
     user: { update: mockUserUpdate },
+    feedback: { updateMany: mockFeedbackUpdateMany },
     subscription: { findUnique: mockSubscriptionFindUnique, update: mockSubscriptionUpdate },
   },
 }))
 
+const mockRevalidatePath = mock((...args: [unknown]) => void args)
 mock.module("next/cache", () => ({
-  revalidatePath: mock((...args: [unknown]) => void args),
+  revalidatePath: mockRevalidatePath,
 }))
 
 // next/headers is mocked globally in test-setup.ts.
 
-const { toggleUserIsPremium, updatePremiumUntil, updateSubscriptionPeriodEnd } = await import(
-  "./actions"
-)
+const {
+  toggleUserIsPremium,
+  updatePremiumUntil,
+  updateSubscriptionPeriodEnd,
+  setFeedbackResolved,
+} = await import("./actions")
 
 const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 const pastDate = "2020-01-01"
@@ -48,6 +57,9 @@ beforeEach(() => {
   mockSubscriptionFindUnique.mockClear()
   mockSubscriptionFindUnique.mockImplementation(() => Promise.resolve({ userId: "u1" }))
   mockSubscriptionUpdate.mockClear()
+  mockFeedbackUpdateMany.mockClear()
+  mockRevalidatePath.mockClear()
+  mockFeedbackUpdateMany.mockImplementation(() => Promise.resolve({ count: 1 }))
 })
 
 describe("toggleUserIsPremium", () => {
@@ -145,5 +157,50 @@ describe("updateSubscriptionPeriodEnd", () => {
       where: { userId: "u1" },
       data: { currentPeriodEnd: new Date(futureDate) },
     })
+  })
+})
+
+describe("setFeedbackResolved", () => {
+  test("rejects a non-admin session", async () => {
+    mockGetSession.mockImplementation(() => Promise.resolve({ user: { role: "user" } }))
+    const result = await setFeedbackResolved("f1", true)
+    expect(result).toEqual({ success: false, error: "No autorizado" })
+    expect(mockFeedbackUpdateMany).not.toHaveBeenCalled()
+    expect(mockRevalidatePath).not.toHaveBeenCalled()
+  })
+
+  test("rejects an empty id", async () => {
+    const result = await setFeedbackResolved("", true)
+    expect(result).toEqual({ success: false, error: "Solicitud inválida" })
+    expect(mockFeedbackUpdateMany).not.toHaveBeenCalled()
+  })
+
+  test("marks feedback as resolved with the current date", async () => {
+    const result = await setFeedbackResolved("f1", true)
+    expect(result).toEqual({ success: true })
+    const call = mockFeedbackUpdateMany.mock.calls[0][0] as {
+      where: { id: string }
+      data: { resolvedAt: Date | null }
+    }
+    expect(call.where).toEqual({ id: "f1" })
+    expect(call.data.resolvedAt).toBeInstanceOf(Date)
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/feedback")
+  })
+
+  test("marks feedback as pending again", async () => {
+    const result = await setFeedbackResolved("f1", false)
+    expect(result).toEqual({ success: true })
+    expect(mockFeedbackUpdateMany).toHaveBeenCalledWith({
+      where: { id: "f1" },
+      data: { resolvedAt: null },
+    })
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/feedback")
+  })
+
+  test("reports feedback that no longer exists", async () => {
+    mockFeedbackUpdateMany.mockImplementation(() => Promise.resolve({ count: 0 }))
+    const result = await setFeedbackResolved("missing", true)
+    expect(result).toEqual({ success: false, error: "Este feedback ya no existe" })
+    expect(mockRevalidatePath).not.toHaveBeenCalled()
   })
 })

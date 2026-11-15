@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
-import { getSession } from "@/lib/auth"
+import { requireAdmin } from "@/lib/require-admin"
 import Sidebar from "@/components/dashboard/sidebar"
 
 export const metadata: Metadata = {
@@ -13,10 +12,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getSession()
-
-  if (!session) redirect("/login")
-  if (session.user.role !== "admin") redirect("/dashboard")
+  const session = await requireAdmin()
 
   const user = {
     name: session.user.name,
