@@ -19,9 +19,9 @@ const buttonVariants = cva(
         ghost: "text-body hover:bg-canvas-soft hover:text-ink",
         link: "text-ink underline underline-offset-4 hover:opacity-70 p-0 h-auto rounded-none",
         destructive:
-          "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]",
+          "bg-danger-600 text-white hover:bg-danger-700 active:scale-[0.98]",
         "destructive-soft":
-          "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 active:scale-[0.98]",
+          "bg-danger-50 text-danger-700 border border-danger-200 hover:bg-danger-100 active:scale-[0.98]",
         warning:
           "bg-warning-50 text-warning-700 border border-warning-200 hover:bg-warning-100 active:scale-[0.98]",
       },

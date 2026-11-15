@@ -559,7 +559,7 @@ export default function NewPropertyForm({ isPremium }: { isPremium: boolean }) {
 
         {/* Error */}
         {error && (
-          <p className="text-sm text-red-500 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <p className="text-sm text-danger-700 font-medium bg-danger-50 border border-danger-200 rounded-xl px-4 py-3">
             {error}
           </p>
         )}

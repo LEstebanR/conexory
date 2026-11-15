@@ -113,7 +113,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
                 <button
                   type="button"
                   onClick={() => setAvatarUrl("")}
-                  className="text-xs text-mute hover:text-red-600 transition-colors"
+                  className="text-xs text-mute hover:text-danger-600 transition-colors"
                 >
                   Eliminar foto
                 </button>

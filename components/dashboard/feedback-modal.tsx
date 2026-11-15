@@ -85,7 +85,7 @@ export default function FeedbackModal({ userName }: { userName: string }) {
               </div>
 
               {state?.error && (
-                <p className="text-sm text-red-600" role="alert">
+                <p className="text-sm text-danger-600" role="alert">
                   {state.error}
                 </p>
               )}

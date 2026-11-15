@@ -129,7 +129,7 @@ export default function LoginPage() {
                 className="h-12"
               />
               {state.errors?.email && (
-                <p className="text-xs font-medium text-red-500">{state.errors.email}</p>
+                <p className="text-xs font-medium text-danger-600">{state.errors.email}</p>
               )}
             </div>
 
@@ -156,7 +156,7 @@ export default function LoginPage() {
                 </button>
               </div>
               {state.errors?.password && (
-                <p className="text-xs font-medium text-red-500">{state.errors.password}</p>
+                <p className="text-xs font-medium text-danger-600">{state.errors.password}</p>
               )}
               <div className="flex justify-end">
                 <Link href="/forgot-password" className="text-xs text-ink font-semibold hover:opacity-70 transition-opacity">
@@ -166,7 +166,7 @@ export default function LoginPage() {
             </div>
 
             {state.error && (
-              <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+              <p className="text-sm text-danger-700 font-medium bg-danger-50 border border-danger-200 rounded-xl px-4 py-2.5">
                 {state.error}
               </p>
             )}

@@ -40,11 +40,8 @@ function UserAvatar({ name, image, size = 32 }: { name: string; image: string | 
 
   const colors = [
     "bg-ink",
-    "bg-brand-700",
-    "bg-brand-600",
-    "bg-brand-800",
-    "bg-brand-900",
     "bg-elevated",
+    "bg-body",
   ]
   const color = colors[name.charCodeAt(0) % colors.length]
   const px = `${size}px`
@@ -252,7 +249,7 @@ function SidebarContent({
         <button
           onClick={handleSignOut}
           disabled={signingOut}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-danger-50 hover:text-danger-600 transition-colors text-sm font-medium cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {signingOut ? (
             <Loader2 className="w-4 h-4 flex-shrink-0 animate-spin" strokeWidth={1.75} />

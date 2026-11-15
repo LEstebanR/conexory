@@ -49,7 +49,7 @@ export default function PortfolioPanel({ url, name }: { url: string; name: strin
           className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-hairline text-body hover:text-ink transition-colors"
           title="Copiar enlace"
         >
-          {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? <Check className="w-3.5 h-3.5 text-ink" /> : <Copy className="w-3.5 h-3.5" />}
         </button>
       </div>
     </div>

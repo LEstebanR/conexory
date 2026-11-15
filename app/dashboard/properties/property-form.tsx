@@ -2,7 +2,7 @@ import { PropertySchema, type PropertyInput } from "@/lib/validations/property"
 
 export function FieldError({ message }: { message?: string }) {
   if (!message) return null
-  return <p className="text-xs font-medium text-red-500 mt-1">{message}</p>
+  return <p className="text-xs font-medium text-danger-600 mt-1">{message}</p>
 }
 
 // Maps a Zod field path to the form section (SectionCard id) that contains it.

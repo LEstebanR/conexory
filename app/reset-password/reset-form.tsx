@@ -67,7 +67,7 @@ export default function ResetForm({ token }: { token: string }) {
             </div>
           )}
           {state.errors?.password && (
-            <p className="text-xs font-medium text-red-500">{state.errors.password}</p>
+            <p className="text-xs font-medium text-danger-600">{state.errors.password}</p>
           )}
         </div>
 
@@ -86,7 +86,7 @@ export default function ResetForm({ token }: { token: string }) {
               autoComplete="new-password"
               className={cn(
                 "h-12 pr-12",
-                !passwordsMatch && "border-red-400 focus:ring-red-400 focus:border-red-400"
+                !passwordsMatch && "border-danger-500 focus:ring-danger-500 focus:border-danger-500"
               )}
             />
             <button
@@ -99,15 +99,15 @@ export default function ResetForm({ token }: { token: string }) {
             </button>
           </div>
           {!passwordsMatch && (
-            <p className="text-xs text-red-500 font-medium">Las contraseñas no coinciden</p>
+            <p className="text-xs text-danger-600 font-medium">Las contraseñas no coinciden</p>
           )}
           {state.errors?.confirmPassword && (
-            <p className="text-xs font-medium text-red-500">{state.errors.confirmPassword}</p>
+            <p className="text-xs font-medium text-danger-600">{state.errors.confirmPassword}</p>
           )}
         </div>
 
         {state.error && (
-          <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+          <p className="text-sm text-danger-700 font-medium bg-danger-50 border border-danger-200 rounded-xl px-4 py-2.5">
             {state.error}
           </p>
         )}

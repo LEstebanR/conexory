@@ -294,7 +294,7 @@ export function CardTokenForm({
                 {status === "submitting" ? submittingLabel : submitLabel}
               </Button>
               {status === "error" && (
-                <p className="text-xs text-red-600 text-center">
+                <p className="text-xs text-danger-600 text-center">
                   No pudimos cargar el formulario de pago. Cierra y vuelve a intentar.
                 </p>
               )}
