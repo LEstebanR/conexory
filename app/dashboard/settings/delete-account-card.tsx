@@ -21,7 +21,7 @@ export default function DeleteAccountCard({ email }: { email: string }) {
         <Trash2 className="w-4 h-4 text-ink" strokeWidth={1.75} />
         <h2 className="text-base font-bold text-ink">Eliminar cuenta</h2>
       </div>
-      <p className="text-xs text-mute leading-relaxed mb-4">
+      <p className="text-xs text-body leading-relaxed mb-4">
         Se borran para siempre tu perfil, tus propiedades con sus fotos y tus estadísticas. Si tienes
         Pro, cancelamos la suscripción y no se te vuelve a cobrar. No se puede deshacer.
       </p>
@@ -42,7 +42,7 @@ export default function DeleteAccountCard({ email }: { email: string }) {
           placeholder={email}
         />
         {state.error && (
-          <p role="alert" className="text-xs text-red-600">
+          <p role="alert" className="text-xs text-danger-600">
             {state.error}
           </p>
         )}

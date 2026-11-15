@@ -28,10 +28,10 @@ function HeroStat({
       <span className="inline-flex w-8 h-8 rounded-lg bg-white/10 items-center justify-center mb-4">
         <Icon className="w-4 h-4 text-white" strokeWidth={2} />
       </span>
-      <p className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none tabular-nums">
+      <p className="text-3xl sm:text-5xl font-bold text-white leading-none tabular-nums">
         {value}
       </p>
-      <p className="text-xs sm:text-sm text-mute font-medium mt-2">{label}</p>
+      <p className="text-xs sm:text-sm text-body font-medium mt-2">{label}</p>
     </div>
   )
 }
@@ -39,10 +39,10 @@ function HeroStat({
 function MiniStat({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
     <div className="bg-white rounded-2xl border border-hairline p-6 h-full flex flex-col items-center justify-center text-center">
-      <p className="text-5xl sm:text-6xl font-black text-ink tracking-tighter tabular-nums leading-none">
+      <p className="text-5xl sm:text-6xl font-bold text-ink tabular-nums leading-none">
         {value}
       </p>
-      <p className="text-xs font-semibold text-mute uppercase tracking-wider mt-3">{label}</p>
+      <p className="text-xs font-semibold text-body uppercase tracking-wider mt-3">{label}</p>
       {hint && <p className="text-xs text-body mt-1">{hint}</p>}
     </div>
   )
@@ -73,7 +73,7 @@ function DistributionRow({
         />
       </div>
       <span className="text-sm font-bold text-ink tabular-nums w-[4.5rem] text-right flex-shrink-0">
-        {count} <span className="text-mute font-medium">· {pct}%</span>
+        {count} <span className="text-body font-medium">· {pct}%</span>
       </span>
     </div>
   )
@@ -164,8 +164,8 @@ export default async function AdminPage() {
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       <div className="mb-8">
-        <p className="text-sm font-medium text-mute mb-1">Admin</p>
-        <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter">Métricas</h1>
+        <p className="text-sm font-medium text-body mb-1">Admin</p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-ink">Métricas</h1>
       </div>
 
       <AdminNav />
@@ -203,7 +203,7 @@ export default async function AdminPage() {
           </Card>
           <Card title="Distribución por tipo" icon={Layers}>
             {sortedPropertyTypes.length === 0 ? (
-              <p className="text-sm text-mute">Sin datos todavía.</p>
+              <p className="text-sm text-body">Sin datos todavía.</p>
             ) : (
               sortedPropertyTypes.map((row) => (
                 <DistributionRow
@@ -245,7 +245,7 @@ export default async function AdminPage() {
               </span>
               <div>
                 <p className="text-sm font-semibold text-ink">Sin visitas este mes</p>
-                <p className="text-xs text-mute mt-0.5">Cuando las propiedades reciban visitas en el mes, el top aparecerá aquí.</p>
+                <p className="text-xs text-body mt-0.5">Cuando las propiedades reciban visitas en el mes, el top aparecerá aquí.</p>
               </div>
             </div>
           ) : (
@@ -267,7 +267,7 @@ export default async function AdminPage() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-ink truncate">{p.title}</p>
-                  <p className="text-xs text-mute truncate">{p.city}</p>
+                  <p className="text-xs text-body truncate">{p.city}</p>
                 </div>
                 <span className="flex items-center gap-1.5 text-sm font-bold text-ink tabular-nums flex-shrink-0">
                   <Eye className="w-3.5 h-3.5 text-mute" strokeWidth={1.75} />

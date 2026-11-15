@@ -50,7 +50,7 @@ export default function VerifyEmailGate({ email }: { email: string }) {
           <MailCheck className="w-6 h-6 text-warning-600" strokeWidth={2} />
         </div>
 
-        <h1 className="text-lg font-black text-ink tracking-tight mt-4">
+        <h1 className="text-lg font-bold text-ink mt-4">
           Verifica tu correo
         </h1>
         <p className="text-sm text-body mt-2 leading-relaxed">
@@ -76,7 +76,7 @@ export default function VerifyEmailGate({ email }: { email: string }) {
         <button
           onClick={handleSignOut}
           disabled={signingOut}
-          className="text-sm font-medium text-mute hover:text-ink transition-colors mt-4 disabled:opacity-60"
+          className="text-sm font-medium text-body hover:text-ink transition-colors mt-4 disabled:opacity-60"
         >
           {signingOut ? "Cerrando sesión…" : "¿Correo equivocado? Cerrar sesión"}
         </button>

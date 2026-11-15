@@ -97,7 +97,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
         </div>
         <div className="min-w-0">
           <p className="text-sm font-bold text-ink truncate">{name}</p>
-          <p className="text-xs text-mute truncate">{email}</p>
+          <p className="text-xs text-body truncate">{email}</p>
           <div className="flex items-center gap-3 mt-1">
             <button
               type="button"
@@ -113,7 +113,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
                 <button
                   type="button"
                   onClick={() => setAvatarUrl("")}
-                  className="text-xs text-mute hover:text-red-600 transition-colors"
+                  className="text-xs text-body hover:text-danger-600 transition-colors"
                 >
                   Eliminar foto
                 </button>
@@ -146,7 +146,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
       <div className="space-y-1.5">
         <label htmlFor="location" className="block text-sm font-semibold text-ink">
           Ciudad de trabajo
-          <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>
+          <span className="ml-1.5 text-xs font-normal text-body">Opcional</span>
         </label>
         <Input
           id="location"
@@ -162,7 +162,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
       <div className="space-y-1.5">
         <label htmlFor="bio" className="block text-sm font-semibold text-ink">
           Descripción breve
-          <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>
+          <span className="ml-1.5 text-xs font-normal text-body">Opcional</span>
         </label>
         <textarea
           id="bio"
@@ -175,7 +175,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
         />
         {showEnglishProfile && (
           <div className="pt-3 mt-3 border-t border-hairline">
-            <label htmlFor="bioEn" className="block text-sm font-semibold text-ink">Descripción breve en inglés <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span></label>
+            <label htmlFor="bioEn" className="block text-sm font-semibold text-ink">Descripción breve en inglés <span className="ml-1.5 text-xs font-normal text-body">Opcional</span></label>
             <textarea id="bioEn" name="bioEn" defaultValue={bioEn} placeholder="Tell your clients about yourself and your experience…" maxLength={300} rows={3} className="w-full mt-1.5 rounded-xl border border-hairline bg-white px-3 py-2.5 text-sm text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-ink resize-none" />
           </div>
         )}
@@ -185,7 +185,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
       <div className="space-y-1.5">
         <label htmlFor="phone" className="block text-sm font-semibold text-ink">
           Teléfono de contacto
-          <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>
+          <span className="ml-1.5 text-xs font-normal text-body">Opcional</span>
         </label>
         <Input
           id="phone"
@@ -197,7 +197,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
           maxLength={10}
           className="h-11"
         />
-        <p className="text-xs text-mute mt-1.5">
+        <p className="text-xs text-body mt-1.5">
           Solo el número local, sin +57 ni espacios. Ej: 3001234567
         </p>
         <label className="flex items-center gap-2.5 cursor-pointer mt-2 select-none">
@@ -227,7 +227,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
 
       {/* Social networks */}
       <div className="space-y-3 pt-2 border-t border-hairline">
-        <p className="text-sm font-semibold text-ink pt-2">Redes sociales <span className="ml-1 text-xs font-normal text-mute">Opcional · tu usuario o el link de tu perfil</span></p>
+        <p className="text-sm font-semibold text-ink pt-2">Redes sociales <span className="ml-1 text-xs font-normal text-body">Opcional · tu usuario o el link de tu perfil</span></p>
         {([
           { id: "instagram", name: "instagram", label: "Instagram", placeholder: "tu_usuario", value: instagram },
           { id: "tiktok",    name: "tiktok",    label: "TikTok",    placeholder: "tu_usuario", value: tiktok },
@@ -238,7 +238,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
           <div key={field.id} className="flex items-center gap-3">
             <label htmlFor={field.id} className="w-24 text-xs font-medium text-body flex-shrink-0">{field.label}</label>
             <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-mute font-medium select-none">@</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-body font-medium select-none">@</span>
               <Input
                 id={field.id}
                 name={field.name}
@@ -256,7 +256,7 @@ export default function SettingsForm({ name, email, image, location, bio, bioEn,
       <div className="space-y-1.5 pt-2 border-t border-hairline">
         <label htmlFor="brandColorPicker" className="block text-sm font-semibold text-ink pt-2">
           Color de marca
-          <span className="ml-1.5 text-xs font-normal text-mute">Reemplaza el negro en tus flyers descargables</span>
+          <span className="ml-1.5 text-xs font-normal text-body">Reemplaza el negro en tus flyers descargables</span>
         </label>
         <ColorInput id="brandColorPicker" value={accentColor} onChange={setAccentColor} />
       </div>

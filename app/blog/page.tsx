@@ -37,12 +37,12 @@ export default function BlogPage() {
             Blog
           </p>
           <h1
-            className="text-4xl sm:text-6xl font-black text-ink tracking-tighter leading-[1.05] animate-fade-up text-balance"
+            className="text-4xl sm:text-6xl font-bold text-ink leading-[1.05] animate-fade-up text-balance"
             style={{ animationDelay: "80ms" }}
           >
             Consejos para
             <br />
-            <span className="text-mute">asesores inmobiliarios.</span>
+            <span className="text-body">asesores inmobiliarios.</span>
           </h1>
           <p
             className="text-lg text-body leading-relaxed mt-6 max-w-xl mx-auto animate-fade-up"
@@ -55,7 +55,7 @@ export default function BlogPage() {
 
       <section className="flex-1 max-w-3xl mx-auto w-full px-5 sm:px-6 lg:px-8 py-10">
         {posts.length === 0 ? (
-          <p className="text-mute text-center py-20">No hay artículos todavía.</p>
+          <p className="text-body text-center py-20">No hay artículos todavía.</p>
         ) : (
           <div className="space-y-4">
             {posts.map((post, i) => (
@@ -64,7 +64,7 @@ export default function BlogPage() {
                   href={`/blog/${post.slug}`}
                   className="group block p-6 sm:p-7 rounded-2xl border border-hairline hover:border-ink transition-colors"
                 >
-                  <div className="flex items-center gap-3 mb-3 text-xs text-mute">
+                  <div className="flex items-center gap-3 mb-3 text-xs text-body">
                     <time dateTime={post.date}>{formatDate(post.date)}</time>
                     <span>·</span>
                     <span className="flex items-center gap-1">
@@ -73,7 +73,7 @@ export default function BlogPage() {
                     </span>
                   </div>
                   <div className="flex items-start justify-between gap-4">
-                    <h2 className="text-xl font-black text-ink tracking-tight leading-snug mb-2">
+                    <h2 className="text-xl font-bold text-ink leading-snug mb-2">
                       {post.title}
                     </h2>
                     <ArrowUpRight className="w-5 h-5 text-mute group-hover:text-ink transition-colors flex-shrink-0 mt-1" />

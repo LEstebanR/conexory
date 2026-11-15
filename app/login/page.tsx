@@ -56,7 +56,7 @@ export default function LoginPage() {
 
       <Link
         href="/"
-        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-mute hover:text-ink transition-colors"
+        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-body hover:text-ink transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="hidden sm:inline">Volver al inicio</span>
@@ -68,7 +68,7 @@ export default function LoginPage() {
           <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
             <Image src="/mark-white.png" alt="Conexory" width={22} height={22} className="w-5.5 h-5.5" />
           </div>
-          <span className="text-xl font-bold text-ink tracking-tight">Conexory</span>
+          <span className="text-xl font-bold text-ink">Conexory</span>
         </Link>
 
         {/* Card */}
@@ -80,7 +80,7 @@ export default function LoginPage() {
           )}
 
           <div className="text-center mb-7">
-            <h1 className="text-2xl font-black text-ink tracking-tight mb-1.5">
+            <h1 className="text-2xl font-bold text-ink mb-1.5">
               Bienvenido de vuelta
             </h1>
             <p className="text-body text-sm">Ingresa a tu cuenta de Conexory</p>
@@ -108,7 +108,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-hairline" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white px-3 text-xs text-mute font-semibold uppercase tracking-wider">
+              <span className="bg-white px-3 text-xs text-body font-semibold uppercase tracking-wider">
                 o con tu correo
               </span>
             </div>
@@ -129,7 +129,7 @@ export default function LoginPage() {
                 className="h-12"
               />
               {state.errors?.email && (
-                <p className="text-xs font-medium text-red-500">{state.errors.email}</p>
+                <p className="text-xs font-medium text-danger-600">{state.errors.email}</p>
               )}
             </div>
 
@@ -149,14 +149,14 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-body hover:text-ink transition-colors"
                   aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               {state.errors?.password && (
-                <p className="text-xs font-medium text-red-500">{state.errors.password}</p>
+                <p className="text-xs font-medium text-danger-600">{state.errors.password}</p>
               )}
               <div className="flex justify-end">
                 <Link href="/forgot-password" className="text-xs text-ink font-semibold hover:opacity-70 transition-opacity">
@@ -166,7 +166,7 @@ export default function LoginPage() {
             </div>
 
             {state.error && (
-              <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+              <p className="text-sm text-danger-700 font-medium bg-danger-50 border border-danger-200 rounded-xl px-4 py-2.5">
                 {state.error}
               </p>
             )}

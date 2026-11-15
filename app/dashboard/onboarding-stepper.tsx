@@ -68,7 +68,7 @@ export default function OnboardingStepper({
                 "relative z-10 inline-flex w-10 h-10 rounded-full items-center justify-center text-sm font-bold transition-colors",
                 isDone || isCurrent
                   ? "bg-ink text-white"
-                  : "bg-canvas border border-hairline-strong text-mute",
+                  : "bg-canvas border border-hairline-strong text-body",
               )}
             >
               {isDone ? <Check className="w-4 h-4" strokeWidth={2.5} /> : s.n}
@@ -79,7 +79,7 @@ export default function OnboardingStepper({
                 "relative z-10 mt-2 text-xs sm:text-sm font-semibold leading-tight text-center text-balance px-1 transition-colors",
                 isCurrent && "text-ink",
                 isDone && "text-body",
-                isLocked && "text-mute",
+                isLocked && "text-body",
               )}
             >
               {s.label}

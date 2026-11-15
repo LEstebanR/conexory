@@ -330,7 +330,7 @@ export default function SharePanel({
 
         {/* Template chips */}
         <div className="space-y-1.5">
-          <span className="text-xs text-mute font-medium">Tipo:</span>
+          <span className="text-xs text-body font-medium">Tipo:</span>
           <div className="flex flex-wrap gap-2">
             {SHARE_MESSAGE_KINDS.map((kind) => (
               <button
@@ -351,7 +351,7 @@ export default function SharePanel({
 
         {/* Info toggles */}
         <div className="space-y-1.5">
-          <span className="text-xs text-mute font-medium">Incluir:</span>
+          <span className="text-xs text-body font-medium">Incluir:</span>
           <div className="flex flex-wrap gap-2">
             {availableInfo.map((info) => (
               <button
@@ -361,7 +361,7 @@ export default function SharePanel({
                 className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:pointer-events-none ${
                   include.includes(info)
                     ? "bg-ink text-white"
-                    : "bg-canvas-soft text-mute hover:bg-surface-pressed hover:text-ink"
+                    : "bg-canvas-soft text-body hover:bg-surface-pressed hover:text-ink"
                 }`}
               >
                 {SHARE_INFO_LABELS[info]}
@@ -409,11 +409,11 @@ export default function SharePanel({
           )}
         </div>
         {isPremium ? (
-          <p className="text-xs text-mute leading-relaxed -mt-1">
+          <p className="text-xs text-body leading-relaxed -mt-1">
             El enlace de la propiedad se añade automáticamente al final según el botón que uses.
           </p>
         ) : (
-          <p className="text-xs text-mute leading-relaxed -mt-1">
+          <p className="text-xs text-body leading-relaxed -mt-1">
             <Link href="/dashboard/upgrade" className="font-semibold text-ink hover:opacity-70 transition-opacity">Activa Pro</Link>
             {" "}para generar mensajes personalizados con IA. El enlace de la propiedad se añade automáticamente al final.
           </p>
@@ -435,7 +435,7 @@ export default function SharePanel({
       <div className="space-y-3">
         <div>
           <p className="text-xs font-bold text-ink uppercase tracking-widest mb-0.5">Link público</p>
-          <p className="text-xs text-mute leading-relaxed">Elige el idioma y si quieres mostrar tus datos de contacto.</p>
+          <p className="text-xs text-body leading-relaxed">Elige el idioma y si quieres mostrar tus datos de contacto.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -454,19 +454,19 @@ export default function SharePanel({
         {published && includeContact && !showContact && (
           <div className="flex items-start gap-2 bg-canvas-softer border border-hairline rounded-xl px-3.5 py-2.5">
             <AlertCircle className="w-3.5 h-3.5 text-mute flex-shrink-0 mt-px" />
-            <p className="text-xs text-mute leading-relaxed">Activa la tarjeta de contacto de esta propiedad para que tus datos aparezcan en el enlace.</p>
+            <p className="text-xs text-body leading-relaxed">Activa la tarjeta de contacto de esta propiedad para que tus datos aparezcan en el enlace.</p>
           </div>
         )}
 
         <div className={`flex items-center gap-1.5 bg-canvas-softer border border-hairline rounded-xl px-4 py-2.5 ${!published || (includeContact && !showContact) ? "opacity-40 pointer-events-none" : ""}`}>
           <span className="flex-1 text-sm text-body font-mono truncate min-w-0">{selectedUrl}</span>
-          <a href={selectedUrl} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors" title="Ver">
+          <a href={selectedUrl} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors" title="Ver">
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
-          <a href={waUrl} target="_blank" rel="noopener noreferrer" onClick={handleWhatsApp} className={`flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity ${!canShare ? "opacity-40 pointer-events-none" : ""}`} title="Compartir por WhatsApp">
+          <a href={waUrl} target="_blank" rel="noopener noreferrer" onClick={handleWhatsApp} className={`flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity ${!canShare ? "opacity-40 pointer-events-none" : ""}`} title="Compartir por WhatsApp">
             <WhatsAppIcon className="w-6 h-6" />
           </a>
-          <button onClick={handleCopy} className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors" title="Copiar enlace">
+          <button onClick={handleCopy} className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-canvas-soft hover:bg-surface-pressed text-ink transition-colors" title="Copiar enlace">
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
@@ -480,7 +480,7 @@ export default function SharePanel({
           <p className="text-xs font-bold text-ink uppercase tracking-widest mb-0.5">
             Flyer
           </p>
-          <p className="text-xs text-mute leading-relaxed">
+          <p className="text-xs text-body leading-relaxed">
             Imagen lista para descargar y compartir en WhatsApp o Instagram.
           </p>
         </div>

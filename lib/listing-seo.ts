@@ -1,5 +1,9 @@
 const LEASE_TYPES = new Set(["rent", "rent_furnished"])
 
+// Set by the proxy when it rewrites a missing listing to the root 404, so that
+// page can show the listing-specific message while keeping a real 404 status.
+export const MISSING_LISTING_HEADER = "x-missing-listing"
+
 export function publicListingSlug(pathname: string): string | null {
   const match = /^\/p\/([^/]+)\/?$/.exec(pathname)
   if (!match) return null

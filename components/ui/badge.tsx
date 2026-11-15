@@ -9,10 +9,10 @@ const badgeVariants = cva(
       variant: {
         default: "bg-canvas-soft text-ink",
         solid: "bg-ink text-white",
-        success: "bg-green-50 text-green-700 border border-green-200",
+        success: "bg-canvas-soft text-ink border border-hairline",
         warning:
           "bg-warning-50 text-warning-700 border border-warning-200",
-        error: "bg-red-50 text-red-700 border border-red-200",
+        error: "bg-danger-50 text-danger-700 border border-danger-200",
         neutral: "bg-canvas-soft text-body",
         blue: "bg-canvas-soft text-ink",
       },

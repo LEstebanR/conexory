@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import AgentProperties from "@/app/agente/[slug]/agent-properties"
 import { getAppUrl } from "@/lib/urls"
+import { serializeJsonLd } from "@/lib/json-ld"
 import { pageMetadata } from "@/lib/page-metadata"
 import { buildCityTitle, buildCityDescription } from "@/lib/city-seo"
 import {
@@ -83,14 +84,14 @@ export default async function CityPropertiesPage({
     <div className="min-h-screen bg-canvas flex flex-col">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbSchema) }}
       />
       <Navbar />
 
       <section className="pt-12 pb-6 px-5">
         <div className="max-w-lg mx-auto">
-          <h1 className="text-2xl font-black text-ink tracking-tight leading-tight">{title}</h1>
-          <p className="text-sm text-mute font-medium mt-1">
+          <h1 className="text-2xl font-bold text-ink leading-tight">{title}</h1>
+          <p className="text-sm text-body font-medium mt-1">
             {facets.totalCount} {facets.totalCount === 1 ? "propiedad publicada" : "propiedades publicadas"}
           </p>
         </div>

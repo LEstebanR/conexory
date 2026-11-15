@@ -87,7 +87,7 @@ function RangeSlider({
   return (
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold text-mute">{label}</label>
+        <label className="text-xs font-semibold text-body">{label}</label>
         <span className="text-xs font-bold text-ink tabular-nums">
           {format(current[0])} – {format(current[1])}
         </span>
@@ -157,7 +157,7 @@ function Row({
             "absolute top-1 left-1 w-6 h-6 rounded-full flex items-center justify-center transition-colors disabled:cursor-not-allowed",
             item.pinned
               ? "bg-ink text-white"
-              : "bg-white/90 text-mute border border-hairline-strong backdrop-blur-sm hover:text-ink disabled:opacity-50"
+              : "bg-white/90 text-body border border-hairline-strong backdrop-blur-sm hover:text-ink disabled:opacity-50"
           )}
         >
           {pinning ? (
@@ -188,14 +188,14 @@ function Row({
               </span>
             )}
           </div>
-          <p className={cn("flex-shrink-0 text-base sm:text-lg font-black tracking-tighter leading-none", inactive ? "text-mute" : "text-ink")}>
+          <p className={cn("flex-shrink-0 text-base sm:text-lg font-bold leading-none", inactive ? "text-body" : "text-ink")}>
             {item.price}
           </p>
         </div>
-        <h3 className={cn("font-bold tracking-tight truncate", inactive ? "text-body" : "text-ink")}>
+        <h3 className={cn("font-bold truncate", inactive ? "text-body" : "text-ink")}>
           {item.title}
         </h3>
-        <div className="flex items-center gap-3 mt-1 text-xs text-mute">
+        <div className="flex items-center gap-3 mt-1 text-xs text-body">
           {item.location && (
             <span className="flex items-center gap-1 min-w-0">
               <MapPin className="w-3 h-3 flex-shrink-0" />
@@ -218,7 +218,7 @@ function Row({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3 mt-1 text-xs text-mute">
+        <div className="flex items-center gap-3 mt-1 text-xs text-body">
           <span className="flex items-center gap-1">
             <Eye className="w-3 h-3" /> {item.visits} {item.visits === 1 ? "visita" : "visitas"}
           </span>
@@ -254,7 +254,7 @@ function MinSelect({
 }) {
   return (
     <div className="space-y-1">
-      <span className="text-[11px] text-mute font-medium block">{label}</span>
+      <span className="text-[11px] text-body font-medium block">{label}</span>
       <select
         value={value}
         onChange={(e) => set(e.target.value)}
@@ -404,11 +404,11 @@ export default function PropertiesList({ items }: { items: PropertyItem[] }) {
               "relative px-3 py-2.5 text-sm font-semibold transition-colors -mb-px flex-shrink-0",
               filter === tab.key
                 ? "text-ink border-b-2 border-ink"
-                : "text-mute hover:text-ink border-b-2 border-transparent"
+                : "text-body hover:text-ink border-b-2 border-transparent"
             )}
           >
             {tab.label}
-            <span className="ml-1.5 text-xs font-bold text-mute">{counts[tab.key]}</span>
+            <span className="ml-1.5 text-xs font-bold text-body">{counts[tab.key]}</span>
           </button>
         ))}
       </div>
@@ -456,7 +456,7 @@ export default function PropertiesList({ items }: { items: PropertyItem[] }) {
                   <button
                     type="button"
                     onClick={clearAll}
-                    className="text-xs font-semibold text-mute hover:text-ink transition-colors"
+                    className="text-xs font-semibold text-body hover:text-ink transition-colors"
                   >
                     Limpiar todo
                   </button>
@@ -465,7 +465,7 @@ export default function PropertiesList({ items }: { items: PropertyItem[] }) {
 
               {types.length > 1 && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-mute">Tipo</label>
+                  <label className="text-xs font-semibold text-body">Tipo</label>
                   <select
                     value={typeFilter}
                     onChange={(e) => setTypeFilter(e.target.value)}
@@ -500,7 +500,7 @@ export default function PropertiesList({ items }: { items: PropertyItem[] }) {
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-mute">Mínimo</label>
+                <label className="text-xs font-semibold text-body">Mínimo</label>
                 <div className="grid grid-cols-3 gap-2">
                   <MinSelect label="Hab." value={minBeds} set={setMinBeds} />
                   <MinSelect label="Baños" value={minBaths} set={setMinBaths} />
@@ -545,7 +545,7 @@ export default function PropertiesList({ items }: { items: PropertyItem[] }) {
 
       {/* List */}
       {filtered.length === 0 ? (
-        <p className="text-sm text-mute py-12 text-center">
+        <p className="text-sm text-body py-12 text-center">
           No se encontraron propiedades con estos filtros.
         </p>
       ) : (

@@ -24,6 +24,8 @@ import SocialLinkButton from "./social-link-button"
 import ContactBar from "./contact-bar"
 import TrackVisit from "./track-visit"
 import { socialProfileUrl } from "@/lib/social"
+import { serializeJsonLd } from "@/lib/json-ld"
+import { cn } from "@/lib/utils"
 
 
 // ── Social icon SVGs (same as agent page) ─────────────────────────────────
@@ -378,10 +380,15 @@ export default async function PublicPropertyPage({
     <div className={`min-h-screen bg-canvas flex flex-col${showContactCard ? " pb-[76px] xl:pb-0" : ""}`}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
-      <div className="flex-1 w-full xl:max-w-6xl xl:mx-auto xl:px-6 xl:grid xl:grid-cols-[minmax(0,42rem)_18rem] xl:justify-center xl:gap-12">
+      <div
+        className={cn(
+          "flex-1 w-full",
+          showContactCard && "xl:max-w-6xl xl:mx-auto xl:px-6 xl:grid xl:grid-cols-[minmax(0,42rem)_18rem] xl:justify-center xl:gap-12"
+        )}
+      >
         <div className="min-w-0">
           {property.images.length > 0 && (
             <div className="w-full sm:max-w-2xl sm:mx-auto sm:px-4 sm:pt-5 xl:px-0">
@@ -448,13 +455,13 @@ export default async function PublicPropertyPage({
             {stats.length > 0 && (
               <div className="flex divide-x divide-hairline border-y border-hairline -mx-4 sm:mx-0 xl:mx-0 sm:rounded-2xl sm:border">
                 {stats.map(({ icon: Icon, value, unit, label }) => (
-                  <div key={label} className="flex-1 flex flex-col items-center py-4 px-0.5 gap-1 min-w-0">
+                  <div key={label} className="flex-1 flex flex-col items-center py-4 px-1 gap-1 min-w-fit">
                     <Icon className="w-4 h-4 text-body" strokeWidth={1.75} />
-                    <p className="text-lg font-bold text-ink leading-none whitespace-nowrap">
+                    <p className="text-base sm:text-lg font-bold text-ink leading-none whitespace-nowrap">
                       {value.toLocaleString("es-CO")}
-                      {unit && <span className="text-sm font-medium"> {unit}</span>}
+                      {unit && <span className="text-xs sm:text-sm font-medium"> {unit}</span>}
                     </p>
-                    <p className="text-xs text-body text-center leading-tight">{label}</p>
+                    <p className="text-[11px] sm:text-xs text-body text-center leading-tight">{label}</p>
                   </div>
                 ))}
               </div>

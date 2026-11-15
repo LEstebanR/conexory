@@ -72,8 +72,8 @@ export default async function AdminReferralsPage({
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       <div className="mb-8">
-        <p className="text-sm font-medium text-mute mb-1">Admin</p>
-        <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter">Referidos</h1>
+        <p className="text-sm font-medium text-body mb-1">Admin</p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-ink">Referidos</h1>
       </div>
 
       <AdminNav />
@@ -91,7 +91,7 @@ export default async function AdminReferralsPage({
       <div className="bg-white rounded-2xl border border-hairline overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-hairline text-left text-xs font-bold text-mute uppercase tracking-wider">
+            <tr className="border-b border-hairline text-left text-xs font-bold text-body uppercase tracking-wider">
               <th className="px-5 py-3">Referido</th>
               <th className="px-5 py-3">Referido por</th>
               <th className="px-5 py-3">Plan</th>
@@ -110,7 +110,7 @@ export default async function AdminReferralsPage({
                       <p className="text-sm font-semibold text-ink">
                         {q ? "Sin resultados" : "Todavía no hay referidos"}
                       </p>
-                      <p className="text-xs text-mute mt-0.5">
+                      <p className="text-xs text-body mt-0.5">
                         {q
                           ? "Prueba con otro nombre o email."
                           : "Cuando un usuario se registre con un link de referido, aparecerá aquí."}
@@ -124,18 +124,18 @@ export default async function AdminReferralsPage({
                 <tr key={r.id}>
                   <td className="px-5 py-3">
                     <p className="font-semibold text-ink">{r.name}</p>
-                    <p className="text-xs text-mute">{r.email}</p>
+                    <p className="text-xs text-body">{r.email}</p>
                   </td>
                   <td className="px-5 py-3">
                     <p className="font-semibold text-ink">{r.referredBy?.name}</p>
-                    <p className="text-xs text-mute">{r.referredBy?.email}</p>
+                    <p className="text-xs text-body">{r.referredBy?.email}</p>
                   </td>
                   <td className="px-5 py-3">
                     <span
                       className={
                         hasProAccess(r)
-                          ? "text-xs font-black uppercase tracking-wider bg-ink text-white px-2 py-0.5 rounded-full"
-                          : "text-xs font-bold uppercase tracking-wider bg-canvas-soft text-mute px-2 py-0.5 rounded-full"
+                          ? "text-xs font-bold uppercase tracking-wider bg-ink text-white px-2 py-0.5 rounded-full"
+                          : "text-xs font-bold uppercase tracking-wider bg-canvas-soft text-body px-2 py-0.5 rounded-full"
                       }
                     >
                       {hasProAccess(r) ? "Pro" : "Free"}
@@ -159,7 +159,7 @@ export default async function AdminReferralsPage({
               Anterior
             </Link>
           )}
-          <span className="text-sm text-mute px-2">
+          <span className="text-sm text-body px-2">
             Página {page} de {totalPages}
           </span>
           {page < totalPages && (

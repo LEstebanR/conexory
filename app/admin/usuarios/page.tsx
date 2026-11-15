@@ -68,8 +68,8 @@ export default async function AdminUsersPage({
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       <div className="mb-8">
-        <p className="text-sm font-medium text-mute mb-1">Admin</p>
-        <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter">Usuarios</h1>
+        <p className="text-sm font-medium text-body mb-1">Admin</p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-ink">Usuarios</h1>
       </div>
 
       <AdminNav />
@@ -87,7 +87,7 @@ export default async function AdminUsersPage({
       <div className="bg-white rounded-2xl border border-hairline overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-hairline text-left text-xs font-bold text-mute uppercase tracking-wider">
+            <tr className="border-b border-hairline text-left text-xs font-bold text-body uppercase tracking-wider">
               <th className="px-5 py-3">Nombre</th>
               <th className="px-5 py-3">Email</th>
               <th className="px-5 py-3">Plan</th>
@@ -99,7 +99,7 @@ export default async function AdminUsersPage({
           <tbody className="divide-y divide-hairline">
             {users.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-8 text-center text-mute">
+                <td colSpan={6} className="px-5 py-8 text-center text-body">
                   Sin resultados.
                 </td>
               </tr>
@@ -113,7 +113,7 @@ export default async function AdminUsersPage({
                         <Link
                           href={`/agente/${u.agentSlug}`}
                           target="_blank"
-                          className="text-mute hover:text-ink transition-colors"
+                          className="text-body hover:text-ink transition-colors"
                         >
                           <ExternalLink className="w-3 h-3" />
                         </Link>
@@ -125,8 +125,8 @@ export default async function AdminUsersPage({
                     <span
                       className={
                         hasProAccess(u)
-                          ? "text-xs font-black uppercase tracking-wider bg-ink text-white px-2 py-0.5 rounded-full"
-                          : "text-xs font-bold uppercase tracking-wider bg-canvas-soft text-mute px-2 py-0.5 rounded-full"
+                          ? "text-xs font-bold uppercase tracking-wider bg-ink text-white px-2 py-0.5 rounded-full"
+                          : "text-xs font-bold uppercase tracking-wider bg-canvas-soft text-body px-2 py-0.5 rounded-full"
                       }
                     >
                       {hasProAccess(u) ? "Pro" : "Free"}
@@ -169,7 +169,7 @@ export default async function AdminUsersPage({
               Anterior
             </Link>
           )}
-          <span className="text-sm text-mute px-2">
+          <span className="text-sm text-body px-2">
             Página {page} de {totalPages}
           </span>
           {page < totalPages && (
@@ -187,7 +187,7 @@ export default async function AdminUsersPage({
 }
 
 function SignupSourceBadge({ value }: { value: string | null }) {
-  if (!value) return <span className="text-mute">—</span>
+  if (!value) return <span className="text-body">—</span>
   const source = parseSignupSource(value)
   return (
     <span className="text-xs font-bold uppercase tracking-wider bg-canvas-soft text-body px-2 py-0.5 rounded-full">

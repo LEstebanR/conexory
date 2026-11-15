@@ -102,8 +102,8 @@ export default async function AdminFeedbackPage({
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-5xl w-full mx-auto">
       <div className="mb-8">
-        <p className="text-sm font-medium text-mute mb-1">Admin</p>
-        <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter">Feedback</h1>
+        <p className="text-sm font-medium text-body mb-1">Admin</p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-ink">Feedback</h1>
         <p className="text-sm text-body mt-2">
           Feedback pendiente: {pendingCount}
         </p>
@@ -140,7 +140,7 @@ export default async function AdminFeedbackPage({
           </span>
           <div>
             <p className="text-sm font-semibold text-ink">{empty.title}</p>
-            <p className="text-xs text-mute mt-0.5">{empty.body}</p>
+            <p className="text-xs text-body mt-0.5">{empty.body}</p>
           </div>
         </div>
       ) : (
@@ -165,16 +165,16 @@ export default async function AdminFeedbackPage({
                     >
                       {f.name || f.user.name}
                     </p>
-                    <p className="text-xs text-mute truncate">{f.user.email}</p>
+                    <p className="text-xs text-body truncate">{f.user.email}</p>
                   </div>
-                  <span className="text-xs text-mute flex-shrink-0 whitespace-nowrap">
+                  <span className="text-xs text-body flex-shrink-0 whitespace-nowrap">
                     {formatDate(f.createdAt)}
                   </span>
                 </div>
                 <p
                   className={cn(
                     "text-sm leading-relaxed whitespace-pre-wrap break-words",
-                    resolved ? "text-mute" : "text-body"
+                    resolved ? "text-body" : "text-body"
                   )}
                 >
                   {f.message}
@@ -204,7 +204,7 @@ export default async function AdminFeedbackPage({
               Anterior
             </Link>
           )}
-          <span className="text-sm text-mute px-2">
+          <span className="text-sm text-body px-2">
             Página {page} de {totalPages}
           </span>
           {page < totalPages && (

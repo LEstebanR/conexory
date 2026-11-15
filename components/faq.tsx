@@ -6,10 +6,10 @@ export default function FAQ() {
     <section id="faq" className="py-24 bg-white">
       <div className="max-w-3xl mx-auto px-5 sm:px-6 lg:px-8">
         <Reveal className="mb-16">
-          <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink tracking-tight leading-none">
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-ink leading-none">
             Lo que nos preguntan
             <br />
-            <span className="text-mute">los asesores antes de empezar.</span>
+            <span className="text-body">los asesores antes de empezar.</span>
           </h2>
         </Reveal>
 

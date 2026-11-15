@@ -48,12 +48,12 @@ export default function ContactoPage() {
             Contacto
           </p>
           <h1
-            className="text-4xl sm:text-6xl font-black text-ink tracking-tighter leading-[1.05] animate-fade-up text-balance"
+            className="text-4xl sm:text-6xl font-bold text-ink leading-[1.05] animate-fade-up text-balance"
             style={{ animationDelay: "80ms" }}
           >
             Estamos aquí
             <br />
-            <span className="text-mute">para ayudarte.</span>
+            <span className="text-body">para ayudarte.</span>
           </h1>
           <p
             className="text-lg text-body leading-relaxed mt-6 max-w-xl mx-auto animate-fade-up"
@@ -76,7 +76,7 @@ export default function ContactoPage() {
                 </div>
                 <p className="font-bold text-ink mb-1">{c.title}</p>
                 <p className="text-sm text-ink font-medium">{c.value}</p>
-                <p className="text-xs text-mute mt-2">{c.note}</p>
+                <p className="text-xs text-body mt-2">{c.note}</p>
               </>
             )
             return (
@@ -102,7 +102,7 @@ export default function ContactoPage() {
       {/* FAQ */}
       <section className="max-w-3xl mx-auto w-full px-5 sm:px-6 lg:px-8 pb-24">
         <Reveal>
-          <h2 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-ink mb-8">
             Preguntas frecuentes
           </h2>
         </Reveal>

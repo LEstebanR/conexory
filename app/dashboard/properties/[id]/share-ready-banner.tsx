@@ -40,11 +40,11 @@ export default function ShareReadyBanner({
         type="button"
         onClick={dismiss}
         aria-label="Cerrar"
-        className="absolute top-3 right-3 p-1.5 rounded-full text-mute hover:bg-surface-pressed hover:text-ink transition-colors"
+        className="absolute top-3 right-3 p-1.5 rounded-full text-body hover:bg-surface-pressed hover:text-ink transition-colors"
       >
         <X className="w-4 h-4" />
       </button>
-      <p className="text-lg font-black text-ink tracking-tight pr-8">
+      <p className="text-lg font-bold text-ink pr-8">
         ¡Tu ficha está lista! Compártela por WhatsApp
       </p>
       <p className="text-sm text-body mt-1 mb-5">

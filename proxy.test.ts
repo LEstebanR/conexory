@@ -61,6 +61,7 @@ describe("proxy on a public listing", () => {
     getPublicProperty = spyOn(publicPages, "getPublicProperty").mockResolvedValue({ published: false } as never)
     const response = await proxy(listing())
     expect(new URL(response.headers.get("x-middleware-rewrite") ?? "").pathname).toBe("/__missing")
+    expect(response.headers.get("x-middleware-request-x-missing-listing")).toBe("1")
   })
 
   test("lets the page decide when the lookup fails", async () => {

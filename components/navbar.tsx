@@ -29,7 +29,7 @@ export default function Navbar() {
                 className="w-5 h-5"
               />
             </div>
-            <span className="text-lg font-bold text-ink tracking-tight">
+            <span className="text-lg font-bold text-ink">
               Conexory
             </span>
           </Link>
@@ -56,7 +56,7 @@ export default function Navbar() {
           </div>
 
           <button
-            className="md:hidden p-2 rounded-lg text-ink hover:bg-canvas-soft transition-colors"
+            className="md:hidden p-2 rounded-full text-ink hover:bg-canvas-soft transition-colors"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Abrir menú"
           >
@@ -74,7 +74,7 @@ export default function Navbar() {
             <a
               key={link.label}
               href={link.href}
-              className="block px-3 py-3 text-base font-medium text-ink hover:bg-canvas-soft rounded-lg transition-colors"
+              className="block px-3 py-3 text-base font-medium text-ink hover:bg-canvas-soft rounded-full transition-colors"
               onClick={() => setIsOpen(false)}
             >
               {link.label}

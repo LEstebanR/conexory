@@ -35,7 +35,7 @@ export default async function ResetPasswordPage({
 
       <Link
         href="/login"
-        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-mute hover:text-ink transition-colors"
+        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-body hover:text-ink transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="hidden sm:inline">Volver al inicio de sesión</span>
@@ -46,13 +46,13 @@ export default async function ResetPasswordPage({
           <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
             <Image src="/mark-white.png" alt="Conexory" width={22} height={22} className="w-5.5 h-5.5" />
           </div>
-          <span className="text-xl font-bold text-ink tracking-tight">Conexory</span>
+          <span className="text-xl font-bold text-ink">Conexory</span>
         </Link>
 
         <div className="bg-white border border-hairline rounded-3xl p-7 sm:p-9 shadow-xl shadow-black/5">
           {isInvalid ? (
             <div className="text-center py-4">
-              <h1 className="text-2xl font-black text-ink tracking-tight mb-2">Enlace inválido</h1>
+              <h1 className="text-2xl font-bold text-ink mb-2">Enlace inválido</h1>
               <p className="text-body text-sm mb-6">
                 Este enlace es inválido o ha expirado. Solicita uno nuevo desde la página de recuperación.
               </p>

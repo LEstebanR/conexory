@@ -44,7 +44,7 @@ export default function Hero() {
       <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8 grid lg:grid-cols-[1.2fr_0.8fr] gap-16 lg:gap-12 items-center">
         <div>
           <h1
-            className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.05] text-ink animate-fade-up text-balance"
+            className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] text-ink animate-fade-up text-balance"
             style={{ animationDelay: "80ms" }}
           >
             Publica y comparte propiedades en{" "}
@@ -86,7 +86,7 @@ export default function Hero() {
             </Button>
           </div>
           <p
-            className="text-sm text-mute mt-5 animate-fade-up"
+            className="text-sm text-body mt-5 animate-fade-up"
             style={{ animationDelay: "300ms" }}
           >
             Gratis para siempre · Sin tarjeta de crédito · 100% desde el celular

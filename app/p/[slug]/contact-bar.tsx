@@ -29,8 +29,9 @@ export default function ContactBar({
           href: whatsappHref(phone, whatsappMessage),
           event: "whatsapp_click",
           label: "WhatsApp",
-          icon: <WhatsAppIcon className="h-5 w-5 shrink-0" />,
+          icon: <WhatsAppIcon className="h-11 w-11" />,
           external: true,
+          iconOnly: true,
         }
       : phone
         ? {
@@ -39,6 +40,7 @@ export default function ContactBar({
             label: english ? "Call" : "Llamar",
             icon: <Phone className="h-4 w-4" strokeWidth={2} />,
             external: false,
+            iconOnly: false,
           }
         : {
             href: `mailto:${email}`,
@@ -46,6 +48,7 @@ export default function ContactBar({
             label: english ? "Email" : "Correo",
             icon: <Mail className="h-4 w-4" strokeWidth={2} />,
             external: false,
+            iconOnly: false,
           }
 
   return (
@@ -68,10 +71,15 @@ export default function ContactBar({
           href={action.href}
           {...(action.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           onClick={() => trackPropertyEvent(propertyId, action.event)}
-          className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-white hover:bg-elevated transition-colors"
+          aria-label={action.iconOnly ? action.label : undefined}
+          className={
+            action.iconOnly
+              ? "mr-2 shrink-0 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+              : "flex h-11 shrink-0 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-white hover:bg-elevated transition-colors"
+          }
         >
           {action.icon}
-          {action.label}
+          {!action.iconOnly && action.label}
         </a>
       </div>
     </div>

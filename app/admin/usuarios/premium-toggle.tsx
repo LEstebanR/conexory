@@ -125,7 +125,7 @@ export default function PremiumToggle({
             type="button"
             onClick={openEdit}
             disabled={loading}
-            className="inline-flex items-center gap-1 text-[10px] text-mute font-medium whitespace-nowrap hover:text-ink transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-[10px] text-body font-medium whitespace-nowrap hover:text-ink transition-colors disabled:opacity-50"
           >
             <CalendarClock className="w-3 h-3" />
             {hasSubscription
@@ -149,7 +149,7 @@ export default function PremiumToggle({
                 <AlertTriangle className="w-6 h-6 text-ink" strokeWidth={2} />
               </div>
               <div className="w-full">
-                <Dialog.Title className="text-base font-black text-ink tracking-tight">
+                <Dialog.Title className="text-base font-bold text-ink">
                   {activating ? `¿Pasar a ${userName} a Pro?` : `¿Pasar a ${userName} a Free?`}
                 </Dialog.Title>
                 <Dialog.Description className="text-sm text-body mt-1.5 leading-relaxed">
@@ -201,7 +201,7 @@ export default function PremiumToggle({
                 <CalendarClock className="w-6 h-6 text-ink" strokeWidth={2} />
               </div>
               <div className="w-full">
-                <Dialog.Title className="text-base font-black text-ink tracking-tight">
+                <Dialog.Title className="text-base font-bold text-ink">
                   Editar fecha de {userName}
                 </Dialog.Title>
                 <Dialog.Description className="text-sm text-body mt-1.5 leading-relaxed">

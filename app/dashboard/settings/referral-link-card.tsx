@@ -18,7 +18,7 @@ export default function ReferralLinkCard({ url }: { url: string }) {
         <Users className="w-4 h-4 text-ink" strokeWidth={1.75} />
         <h2 className="text-base font-bold text-ink">Refiere y gana</h2>
       </div>
-      <p className="text-xs text-mute leading-relaxed mb-4">
+      <p className="text-xs text-body leading-relaxed mb-4">
         Comparte tu link. Cuando alguien se registre con él y pase a Pro, recibes un mes de Pro gratis.
       </p>
 
@@ -29,7 +29,7 @@ export default function ReferralLinkCard({ url }: { url: string }) {
         <button
           type="button"
           onClick={handleCopy}
-          className="flex-shrink-0 text-mute hover:text-ink transition-colors"
+          className="flex-shrink-0 text-body hover:text-ink transition-colors"
           aria-label="Copiar link de referido"
         >
           {copied ? <Check className="w-3.5 h-3.5 text-ink" /> : <Copy className="w-3.5 h-3.5" />}

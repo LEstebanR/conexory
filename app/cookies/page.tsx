@@ -72,7 +72,7 @@ export default function CookiesPage() {
                 "Cookie de preferencias de consentimiento: recuerda si ya aceptaste esta política.",
               ]}
             />
-            <p className="text-xs text-mute mt-3">
+            <p className="text-xs text-body mt-3">
               No pueden desactivarse. Son necesarias para operar el servicio.
             </p>
           </div>
@@ -93,7 +93,7 @@ export default function CookiesPage() {
                 "Origen de tu registro: si llegaste desde una ficha o un perfil publicado con Conexory. Se guarda hasta 30 días.",
               ]}
             />
-            <p className="text-xs text-mute mt-3">
+            <p className="text-xs text-body mt-3">
               Puedes desactivarlas desde la configuración de tu navegador.
             </p>
           </div>

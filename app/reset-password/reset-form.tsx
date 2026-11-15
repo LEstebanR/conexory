@@ -20,7 +20,7 @@ export default function ResetForm({ token }: { token: string }) {
   return (
     <>
       <div className="text-center mb-7">
-        <h1 className="text-2xl font-black text-ink tracking-tight mb-1.5">Nueva contraseña</h1>
+        <h1 className="text-2xl font-bold text-ink mb-1.5">Nueva contraseña</h1>
         <p className="text-body text-sm">Elige una contraseña segura de al menos 8 caracteres.</p>
       </div>
 
@@ -45,7 +45,7 @@ export default function ResetForm({ token }: { token: string }) {
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-body hover:text-ink transition-colors"
               aria-label={showPass ? "Ocultar" : "Mostrar"}
             >
               {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -67,7 +67,7 @@ export default function ResetForm({ token }: { token: string }) {
             </div>
           )}
           {state.errors?.password && (
-            <p className="text-xs font-medium text-red-500">{state.errors.password}</p>
+            <p className="text-xs font-medium text-danger-600">{state.errors.password}</p>
           )}
         </div>
 
@@ -86,28 +86,28 @@ export default function ResetForm({ token }: { token: string }) {
               autoComplete="new-password"
               className={cn(
                 "h-12 pr-12",
-                !passwordsMatch && "border-red-400 focus:ring-red-400 focus:border-red-400"
+                !passwordsMatch && "border-danger-500 focus:ring-danger-500 focus:border-danger-500"
               )}
             />
             <button
               type="button"
               onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-mute hover:text-ink transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-body hover:text-ink transition-colors"
               aria-label={showConfirm ? "Ocultar" : "Mostrar"}
             >
               {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
           {!passwordsMatch && (
-            <p className="text-xs text-red-500 font-medium">Las contraseñas no coinciden</p>
+            <p className="text-xs text-danger-600 font-medium">Las contraseñas no coinciden</p>
           )}
           {state.errors?.confirmPassword && (
-            <p className="text-xs font-medium text-red-500">{state.errors.confirmPassword}</p>
+            <p className="text-xs font-medium text-danger-600">{state.errors.confirmPassword}</p>
           )}
         </div>
 
         {state.error && (
-          <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+          <p className="text-sm text-danger-700 font-medium bg-danger-50 border border-danger-200 rounded-xl px-4 py-2.5">
             {state.error}
           </p>
         )}

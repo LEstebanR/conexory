@@ -154,12 +154,12 @@ export default function PreciosPage() {
             Precios
           </p>
           <h1
-            className="text-4xl sm:text-6xl font-black text-ink tracking-tighter leading-[1.05] animate-fade-up text-balance"
+            className="text-4xl sm:text-6xl font-bold text-ink leading-[1.05] animate-fade-up text-balance"
             style={{ animationDelay: "80ms" }}
           >
             Empieza gratis.
             <br />
-            <span className="text-mute">Crece sin límites.</span>
+            <span className="text-body">Crece sin límites.</span>
           </h1>
           <p
             className="text-lg text-body leading-relaxed mt-6 max-w-xl mx-auto animate-fade-up"
@@ -183,21 +183,21 @@ export default function PreciosPage() {
                 }`}
               >
                 {plan.featured && (
-                  <span className="absolute top-6 right-6 bg-white text-ink text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
+                  <span className="absolute top-6 right-6 bg-white text-ink text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                     Más popular
                   </span>
                 )}
                 <div className="mb-8">
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-mute">
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-body">
                     {plan.name}
                   </p>
-                  <p className={`text-5xl font-black tracking-tighter ${plan.dark ? "text-white" : "text-ink"}`}>
+                  <p className={`text-5xl font-bold ${plan.dark ? "text-white" : "text-ink"}`}>
                     {plan.price}
                     {plan.priceSuffix && (
-                      <span className="text-xl font-semibold text-mute">{plan.priceSuffix}</span>
+                      <span className="text-xl font-semibold text-body">{plan.priceSuffix}</span>
                     )}
                   </p>
-                  <p className="text-sm text-mute mt-2">{plan.cadence}</p>
+                  <p className="text-sm text-body mt-2">{plan.cadence}</p>
                 </div>
 
                 <ul className="space-y-3.5 mb-8 flex-1">
@@ -220,14 +220,14 @@ export default function PreciosPage() {
 
                 {plan.name === "Pro" && (
                   <div className="mb-8 border-t border-white/10 pt-6">
-                    <p className="mb-4 text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
+                    <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">
                       Por qué Pro
                     </p>
                     <div className="space-y-4">
                       {PRO_VALUE_POINTS.map((point, pointIndex) => (
                         <div key={point.title} className="flex gap-3">
                           <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white text-ink">
-                            {pointIndex === 0 ? <Sparkles className="h-3 w-3" strokeWidth={2.5} /> : <span className="text-[10px] font-black">0{pointIndex + 1}</span>}
+                            {pointIndex === 0 ? <Sparkles className="h-3 w-3" strokeWidth={2.5} /> : <span className="text-[10px] font-bold">0{pointIndex + 1}</span>}
                           </span>
                           <div>
                             <p className="text-sm font-bold text-white">{point.title}</p>
@@ -257,7 +257,7 @@ export default function PreciosPage() {
       <section className="bg-canvas-softer py-24">
         <div className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8">
           <Reveal className="mb-12 text-center">
-            <h2 className="text-3xl sm:text-4xl font-black text-ink tracking-tighter leading-none">
+            <h2 className="text-3xl sm:text-4xl font-bold text-ink leading-none">
               Compara los planes
             </h2>
             <p className="text-body mt-3">Elige el que mejor se adapta a tu ritmo de trabajo.</p>
@@ -274,10 +274,10 @@ export default function PreciosPage() {
                     key={name}
                     className={`p-5 text-center ${i === 1 ? "bg-ink" : ""}`}
                   >
-                    <p className={`text-xs font-bold uppercase tracking-widest ${i === 1 ? "text-white/50" : "text-mute"}`}>
+                    <p className={`text-xs font-bold uppercase tracking-widest ${i === 1 ? "text-white/50" : "text-body"}`}>
                       {name}
                     </p>
-                    <p className={`text-xl font-black mt-1 tracking-tight ${i === 1 ? "text-white" : "text-ink"}`}>
+                    <p className={`text-xl font-bold mt-1 ${i === 1 ? "text-white" : "text-ink"}`}>
                       {i === 0 ? "$0" : i === 1 ? "$99.999" : "—"}
                     </p>
                     {i === 1 && (
@@ -293,7 +293,7 @@ export default function PreciosPage() {
                   {/* Group header */}
                   <div className="grid grid-cols-4 bg-canvas-softer border-b border-hairline">
                     <div className="col-span-4 px-5 py-2.5">
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-mute">
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-body">
                         {section.group}
                       </p>
                     </div>
@@ -358,7 +358,7 @@ export default function PreciosPage() {
             </div>
           </Reveal>
 
-          <p className="text-center text-sm text-mute mt-8">
+          <p className="text-center text-sm text-body mt-8">
             Todos los planes incluyen link público, preview enriquecida al compartir y soporte en español.
           </p>
         </div>

@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
 
       <Link
         href="/login"
-        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-mute hover:text-ink transition-colors"
+        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-body hover:text-ink transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="hidden sm:inline">Volver al inicio de sesión</span>
@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
           <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center">
             <Image src="/mark-white.png" alt="Conexory" width={22} height={22} className="w-5.5 h-5.5" />
           </div>
-          <span className="text-xl font-bold text-ink tracking-tight">Conexory</span>
+          <span className="text-xl font-bold text-ink">Conexory</span>
         </Link>
 
         <div className="bg-white border border-hairline rounded-3xl p-7 sm:p-9 shadow-xl shadow-black/5">
@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
               <div className="w-12 h-12 rounded-full bg-canvas-soft flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-6 h-6 text-ink" />
               </div>
-              <h1 className="text-2xl font-black text-ink tracking-tight mb-2">Revisa tu correo</h1>
+              <h1 className="text-2xl font-bold text-ink mb-2">Revisa tu correo</h1>
               <p className="text-body text-sm mb-6">
                 Si ese correo está registrado, recibirás un enlace para restablecer tu contraseña en los próximos minutos.
               </p>
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <>
               <div className="text-center mb-7">
-                <h1 className="text-2xl font-black text-ink tracking-tight mb-1.5">
+                <h1 className="text-2xl font-bold text-ink mb-1.5">
                   ¿Olvidaste tu contraseña?
                 </h1>
                 <p className="text-body text-sm">
@@ -83,12 +83,12 @@ export default function ForgotPasswordPage() {
                     className="h-12"
                   />
                   {state.errors?.email && (
-                    <p className="text-xs font-medium text-red-500">{state.errors.email}</p>
+                    <p className="text-xs font-medium text-danger-600">{state.errors.email}</p>
                   )}
                 </div>
 
                 {state.error && (
-                  <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+                  <p className="text-sm text-danger-700 font-medium bg-danger-50 border border-danger-200 rounded-xl px-4 py-2.5">
                     {state.error}
                   </p>
                 )}
@@ -104,7 +104,7 @@ export default function ForgotPasswordPage() {
                   )}
                 </Button>
               </form>
-              <p className="text-xs text-mute text-center mt-5">
+              <p className="text-xs text-body text-center mt-5">
                 ¿Problemas para acceder?{" "}
                 <a href={`mailto:${SUPPORT_EMAIL}`} className="text-ink font-semibold hover:opacity-70 transition-opacity">
                   Escríbenos

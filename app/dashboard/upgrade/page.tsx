@@ -70,7 +70,7 @@ export default async function UpgradePage() {
                 <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2} />
               )}
             </div>
-            <h1 className="text-2xl font-black text-ink tracking-tighter">
+            <h1 className="text-2xl font-bold text-ink">
               {isPastDue ? "No pudimos procesar tu pago" : isCanceling ? "Suscripción cancelada" : "Plan Pro activo"}
             </h1>
             <p className="text-sm text-body mt-1">
@@ -142,14 +142,14 @@ export default async function UpgradePage() {
               <>
                 <Link
                   href="/dashboard/upgrade/cancel"
-                  className="text-xs text-mute hover:text-ink transition-colors"
+                  className="text-xs text-body hover:text-ink transition-colors"
                 >
                   Cancelar suscripción
                 </Link>
                 <span className="text-hairline-strong">·</span>
               </>
             )}
-            <a href={PLAN_SUPPORT_MAILTO} className="text-xs text-mute hover:text-ink transition-colors">
+            <a href={PLAN_SUPPORT_MAILTO} className="text-xs text-body hover:text-ink transition-colors">
               ¿Problemas con tu plan? Escríbenos
             </a>
           </div>
@@ -165,7 +165,7 @@ export default async function UpgradePage() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-ink mb-4">
             <Zap className="w-5 h-5 text-white" strokeWidth={2} />
           </div>
-          <h1 className="text-2xl font-black text-ink tracking-tighter">
+          <h1 className="text-2xl font-bold text-ink">
             Pasa a Pro
           </h1>
           <p className="text-sm text-body mt-1">
@@ -176,7 +176,7 @@ export default async function UpgradePage() {
         <div className="rounded-3xl bg-ink text-white p-7">
           <div className="mb-6 pb-6 border-b border-white/10">
             <div className="flex items-baseline gap-1">
-              <span className="text-5xl font-black tracking-tighter">$99.999</span>
+              <span className="text-5xl font-bold">$99.999</span>
               <span className="text-base font-medium text-white/50">/mes</span>
             </div>
             <p className="text-xs text-white/40 mt-1">COP · facturación mensual</p>
@@ -194,14 +194,14 @@ export default async function UpgradePage() {
             </ul>
 
             <div className="mb-7 border-t border-white/10 pt-6">
-              <p className="mb-4 text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
+              <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">
                 Lo que cambia con Pro
               </p>
               <div className="space-y-4">
                 {PRO_VALUE_POINTS.map((point, pointIndex) => (
                   <div key={point.title} className="flex gap-3">
                     <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white text-ink">
-                      {pointIndex === 0 ? <Sparkles className="h-3 w-3" strokeWidth={2.5} /> : <span className="text-[10px] font-black">0{pointIndex + 1}</span>}
+                      {pointIndex === 0 ? <Sparkles className="h-3 w-3" strokeWidth={2.5} /> : <span className="text-[10px] font-bold">0{pointIndex + 1}</span>}
                     </span>
                     <div>
                       <p className="text-sm font-bold text-white">{point.title}</p>
@@ -222,7 +222,7 @@ export default async function UpgradePage() {
           <UpgradeErrorToast />
         </Suspense>
 
-        <div className="flex items-center justify-center gap-2 mt-4 text-xs text-mute">
+        <div className="flex items-center justify-center gap-2 mt-4 text-xs text-body">
           <ShieldCheck className="w-3.5 h-3.5" strokeWidth={1.75} />
           Pago seguro con Mercado Pago ·{" "}
           <a href={PLAN_SUPPORT_MAILTO} className="hover:text-ink transition-colors">

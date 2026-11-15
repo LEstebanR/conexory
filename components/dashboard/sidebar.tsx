@@ -40,11 +40,8 @@ function UserAvatar({ name, image, size = 32 }: { name: string; image: string | 
 
   const colors = [
     "bg-ink",
-    "bg-brand-700",
-    "bg-brand-600",
-    "bg-brand-800",
-    "bg-brand-900",
     "bg-elevated",
+    "bg-body",
   ]
   const color = colors[name.charCodeAt(0) % colors.length]
   const px = `${size}px`
@@ -117,10 +114,10 @@ function NavLink({
 
   if (soon) {
     return (
-      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-mute cursor-default select-none">
+      <div className="flex items-center gap-3 px-3 py-2.5 rounded-full text-body cursor-default select-none">
         <Icon className="w-4.5 h-4.5 flex-shrink-0" strokeWidth={1.75} />
         <span className="text-sm font-medium flex-1">{label}</span>
-        <span className="text-[9px] font-bold text-mute uppercase tracking-wider">Pronto</span>
+        <span className="text-[9px] font-bold text-body uppercase tracking-wider">Pronto</span>
       </div>
     )
   }
@@ -131,7 +128,7 @@ function NavLink({
       href={href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150",
+        "flex items-center gap-3 px-3 py-2.5 rounded-full transition-all duration-150",
         isActive
           ? "bg-canvas-soft text-ink"
           : "text-body hover:bg-canvas-softer hover:text-ink"
@@ -183,10 +180,10 @@ function SidebarContent({
           <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center">
             <Image src="/mark-white.png" alt="Conexory" width={20} height={20} className="w-5 h-5" />
           </div>
-          <span className="text-base font-bold text-ink tracking-tight">Conexory</span>
+          <span className="text-base font-bold text-ink">Conexory</span>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="p-1.5 rounded-lg text-mute hover:bg-canvas-soft lg:hidden">
+          <button onClick={onClose} className="p-1.5 rounded-full text-body hover:bg-canvas-soft lg:hidden">
             <X className="w-5 h-5" />
           </button>
         )}
@@ -200,12 +197,12 @@ function SidebarContent({
             <div className="flex items-center gap-1.5">
               <p className="text-sm font-bold text-ink truncate">{user.name}</p>
               {hasProAccess(user) && (
-                <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-wider bg-ink text-white px-1.5 py-0.5 rounded-full leading-none">
+                <span className="flex-shrink-0 text-[9px] font-bold uppercase tracking-wider bg-ink text-white px-1.5 py-0.5 rounded-full leading-none">
                   Pro
                 </span>
               )}
             </div>
-            <p className="text-xs text-mute truncate">{user.email}</p>
+            <p className="text-xs text-body truncate">{user.email}</p>
           </div>
         </div>
       </div>
@@ -225,7 +222,7 @@ function SidebarContent({
           <button
             type="button"
             data-whats-new
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-body hover:bg-canvas-softer hover:text-ink transition-all duration-150"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-full text-body hover:bg-canvas-softer hover:text-ink transition-all duration-150"
           >
             <Sparkles className="w-4.5 h-4.5 flex-shrink-0" strokeWidth={1.75} />
             <span className="text-sm font-medium flex-1 text-left">Novedades</span>
@@ -252,7 +249,7 @@ function SidebarContent({
         <button
           onClick={handleSignOut}
           disabled={signingOut}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-body hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-full text-body hover:bg-danger-50 hover:text-danger-600 transition-colors text-sm font-medium cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {signingOut ? (
             <Loader2 className="w-4 h-4 flex-shrink-0 animate-spin" strokeWidth={1.75} />
@@ -263,7 +260,7 @@ function SidebarContent({
         </button>
         <a
           href={`mailto:${SUPPORT_EMAIL}`}
-          className="block text-center text-[11px] text-mute hover:text-ink transition-colors mt-2 pt-2 border-t border-hairline"
+          className="block text-center text-[11px] text-body hover:text-ink transition-colors mt-2 pt-2 border-t border-hairline"
         >
           ¿Necesitas ayuda? {SUPPORT_EMAIL}
         </a>
@@ -296,12 +293,12 @@ export default function Sidebar({ user }: { user: User }) {
           <div className="w-7 h-7 rounded-lg bg-ink flex items-center justify-center">
             <Image src="/mark-white.png" alt="Conexory" width={18} height={18} className="w-4.5 h-4.5" />
           </div>
-          <span className="text-base font-bold text-ink tracking-tight">Conexory</span>
+          <span className="text-base font-bold text-ink">Conexory</span>
         </div>
 
         <button
           onClick={() => setMobileOpen(true)}
-          className="ml-auto p-2 rounded-xl text-body hover:bg-canvas-soft transition-colors"
+          className="ml-auto p-2 rounded-full text-body hover:bg-canvas-soft transition-colors"
           aria-label="Abrir menú"
         >
           <Menu className="w-5 h-5" />

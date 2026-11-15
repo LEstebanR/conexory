@@ -66,7 +66,7 @@ export default function Footer() {
                   className="w-5 h-5"
                 />
               </div>
-              <span className="text-lg font-bold text-white tracking-tight">
+              <span className="text-lg font-bold text-white">
                 Conexory
               </span>
             </Link>

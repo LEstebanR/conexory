@@ -68,7 +68,7 @@ function FieldLabel({
   return (
     <label htmlFor={htmlFor} className="block text-sm font-semibold text-ink">
       {children}
-      {optional && <span className="ml-1.5 text-xs font-normal text-mute">Opcional</span>}
+      {optional && <span className="ml-1.5 text-xs font-normal text-body">Opcional</span>}
     </label>
   )
 }
@@ -183,12 +183,12 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
       <div className="flex items-center gap-3 mb-8">
         <Link
           href={`/dashboard/properties/${initial.id}`}
-          className="p-2 rounded-xl text-mute hover:bg-canvas-soft hover:text-ink transition-colors flex-shrink-0"
+          className="p-2 rounded-full text-body hover:bg-canvas-soft hover:text-ink transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-ink tracking-tight">Editar propiedad</h1>
+          <h1 className="text-2xl font-bold text-ink">Editar propiedad</h1>
           <p className="text-sm text-body">Los cambios se reflejan en el link público al instante</p>
         </div>
       </div>
@@ -228,12 +228,12 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
             <div className="relative flex-shrink-0 mt-0.5">
               <input type="checkbox" className="sr-only" checked={englishAvailable} onChange={(e) => setEnglishAvailable(e.target.checked)} />
               <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${englishAvailable ? "bg-ink border-ink" : "bg-white border-hairline-strong group-hover:border-ink"}`}>
-                {englishAvailable && <span className="text-white text-xs font-black">✓</span>}
+                {englishAvailable && <span className="text-white text-xs font-bold">✓</span>}
               </div>
             </div>
             <div>
               <p className="text-sm font-semibold text-ink">También disponible en inglés</p>
-              <p className="text-xs text-mute leading-relaxed mt-0.5">Crearemos un segundo link con toda la ficha traducida. Necesitas título y descripción en ambos idiomas.</p>
+              <p className="text-xs text-body leading-relaxed mt-0.5">Crearemos un segundo link con toda la ficha traducida. Necesitas título y descripción en ambos idiomas.</p>
             </div>
           </label>
           {englishAvailable && (
@@ -247,13 +247,13 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               <div className="space-y-1.5">
                 <FieldLabel htmlFor="property-title-en">Título en inglés</FieldLabel>
                 <Input id="property-title-en" placeholder="E.g. Modern apartment with park view" value={titleEn} onChange={(e) => { setTitleEn(e.target.value); clearError("titleEn") }} className="h-11" maxLength={120} />
-                <p className="text-xs text-mute text-right">{titleEn.length}/120</p>
+                <p className="text-xs text-body text-right">{titleEn.length}/120</p>
                 <FieldError message={fieldErrors.titleEn} />
               </div>
               <div className="space-y-1.5">
                 <FieldLabel htmlFor="property-description-en">Descripción en inglés</FieldLabel>
                 <textarea id="property-description-en" placeholder="Describe the property, finishes, location and nearby points of interest..." value={descriptionEn} onChange={(e) => { setDescriptionEn(e.target.value); clearError("descriptionEn") }} rows={5} maxLength={1000} className="w-full rounded-xl border border-hairline-strong px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors" />
-                <p className="text-xs text-mute text-right">{descriptionEn.length}/1000</p>
+                <p className="text-xs text-body text-right">{descriptionEn.length}/1000</p>
                 <FieldError message={fieldErrors.descriptionEn} />
               </div>
             </div>
@@ -300,7 +300,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               className="h-11"
               inputMode="url"
             />
-            <p className="text-xs text-mute">
+            <p className="text-xs text-body">
               Pega el enlace del video y aparecerá en el carrusel de la propiedad.
             </p>
             <FieldError message={fieldErrors.videoUrl} />
@@ -318,14 +318,14 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               className="h-11"
               maxLength={120}
             />
-            <p className="text-xs text-mute text-right">{title.length}/120</p>
+            <p className="text-xs text-body text-right">{title.length}/120</p>
             <FieldError message={fieldErrors.title} />
           </div>
 
           <div className="space-y-1.5">
             <FieldLabel htmlFor="property-price">Precio</FieldLabel>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-mute select-none">$</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-body select-none">$</span>
               <input
                 id="property-price"
                 type="text"
@@ -422,14 +422,14 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
               maxLength={1000}
               className="w-full rounded-xl border border-hairline-strong px-4 py-3 text-sm text-ink placeholder:text-mute resize-none focus:outline-none focus:ring-2 focus:ring-ink/30 focus:border-ink transition-colors"
             />
-            <p className="text-xs text-mute text-right">{description.length}/1000</p>
+            <p className="text-xs text-body text-right">{description.length}/1000</p>
             <FieldError message={fieldErrors.description} />
           </div>
         </SectionCard>
 
         {/* Location on map */}
         <SectionCard title="Ubicación en mapa">
-          <p className="text-xs text-mute -mt-1">
+          <p className="text-xs text-body -mt-1">
             Opcional. Permite mostrar la ubicación exacta en la ficha pública.
           </p>
           <MapPicker
@@ -462,7 +462,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
             </div>
             <div>
               <p className="text-sm font-semibold text-ink">Mostrar mis datos de contacto</p>
-              <p className="text-xs text-mute leading-relaxed mt-0.5">
+              <p className="text-xs text-body leading-relaxed mt-0.5">
                 Tu nombre, teléfono y correo aparecerán al final del link público. Útil para compartir en redes como Instagram.
               </p>
             </div>
@@ -470,7 +470,7 @@ export default function EditForm({ initial, isPremium }: { initial: InitialData;
         </SectionCard>
 
         {error && (
-          <p className="text-sm text-red-500 font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <p className="text-sm text-danger-700 font-medium bg-danger-50 border border-danger-200 rounded-xl px-4 py-3">
             {error}
           </p>
         )}

@@ -54,7 +54,7 @@ export function PhotoTile({
         </div>
       )}
       {item.error && (
-        <div className="absolute inset-0 bg-red-500/50 flex flex-col items-center justify-center gap-1 pointer-events-none">
+        <div className="absolute inset-0 bg-danger-500/50 flex flex-col items-center justify-center gap-1 pointer-events-none">
           <AlertCircle className="w-5 h-5 text-white" />
           <span className="text-[10px] text-white font-bold">Error</span>
         </div>
@@ -64,7 +64,7 @@ export function PhotoTile({
         type="button"
         onClick={() => onRemove(item.id)}
         aria-label="Eliminar foto"
-        className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-sm"
+        className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-danger-600 text-white flex items-center justify-center transition-colors shadow-sm"
       >
         <X className="w-4 h-4" strokeWidth={2.5} />
       </button>

@@ -190,17 +190,17 @@ export default async function AgentProfilePage({
                 className="w-[100px] h-[100px] rounded-full object-cover shadow-md"
               />
             ) : (
-              <div className="w-[100px] h-[100px] rounded-full bg-ink flex items-center justify-center text-white text-2xl font-black select-none shadow-md">
+              <div className="w-[100px] h-[100px] rounded-full bg-ink flex items-center justify-center text-white text-2xl font-bold select-none shadow-md">
                 {initials}
               </div>
             )}
           </div>
 
           {/* Identity */}
-          <h1 className="text-2xl font-black text-ink tracking-tight leading-tight">
+          <h1 className="text-2xl font-bold text-ink leading-tight">
             {agent.name}
           </h1>
-          <p className="text-sm text-mute font-medium mt-1">Asesor inmobiliario</p>
+          <p className="text-sm text-body font-medium mt-1">Asesor inmobiliario</p>
 
           {agent.location && (
             <div className="flex items-center justify-center gap-1 mt-2.5">
@@ -218,13 +218,13 @@ export default async function AgentProfilePage({
 
           {/* Quick stats — only if meaningful */}
           {facets.totalCount > 0 && (
-            <div className="flex items-center gap-1.5 mt-4 text-xs text-mute font-medium">
-              <span className="font-black text-ink text-sm">{facets.totalCount}</span>
+            <div className="flex items-center gap-1.5 mt-4 text-xs text-body font-medium">
+              <span className="font-bold text-ink text-sm">{facets.totalCount}</span>
               {facets.totalCount === 1 ? "propiedad" : "propiedades"}
               {facets.uniqueCityCount > 1 && (
                 <>
                   <span className="text-hairline-strong mx-0.5">·</span>
-                  <span className="font-black text-ink text-sm">{facets.uniqueCityCount}</span>
+                  <span className="font-bold text-ink text-sm">{facets.uniqueCityCount}</span>
                   ciudades
                 </>
               )}
@@ -318,8 +318,8 @@ export default async function AgentProfilePage({
             <Image src="/mark-white.png" alt="Conexory" width={20} height={20} className="w-5 h-5" />
           </div>
           <div className="leading-tight">
-            <p className="text-[11px] text-mute font-medium">Publicado con</p>
-            <p className="inline-flex items-center gap-0.5 text-sm font-black text-ink tracking-tight">
+            <p className="text-[11px] text-body font-medium">Publicado con</p>
+            <p className="inline-flex items-center gap-0.5 text-sm font-bold text-ink">
               Conexory
               <ArrowUpRight className="w-3.5 h-3.5 text-mute transition-all group-hover:text-ink group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </p>

@@ -239,7 +239,7 @@ export function CardTokenForm({
         <div className="fixed inset-0 z-50 flex sm:items-center sm:justify-center">
           <Dialog.Content className="relative flex flex-col w-full h-[100dvh] sm:h-auto sm:w-[calc(100%-2rem)] sm:max-w-md sm:max-h-[90vh] bg-white sm:rounded-2xl shadow-2xl shadow-black/10 animate-fade-in text-left overflow-hidden">
             <div className="flex items-center justify-between px-6 pt-6 sm:px-7 sm:pt-7 pb-4">
-              <Dialog.Title className="text-lg font-black text-ink tracking-tight">
+              <Dialog.Title className="text-lg font-bold text-ink">
                 {modalTitle}
               </Dialog.Title>
               <Dialog.Close asChild>
@@ -294,7 +294,7 @@ export function CardTokenForm({
                 {status === "submitting" ? submittingLabel : submitLabel}
               </Button>
               {status === "error" && (
-                <p className="text-xs text-red-600 text-center">
+                <p className="text-xs text-danger-600 text-center">
                   No pudimos cargar el formulario de pago. Cierra y vuelve a intentar.
                 </p>
               )}
