@@ -86,7 +86,8 @@ Files: `lib/mercadopago.ts`, `lib/subscription.ts`, `lib/orphan-subscriptions.ts
 
 ## Design system (monochrome, `DESIGN.md`)
 
-- Tokens: `ink`, `body`, `mute`, `canvas`, `canvas-soft`, `canvas-softer`, `surface-pressed`, `hairline`, `hairline-strong`, `elevated`, `warning-*`. `brand-*` is a legacy gray ramp; new code prefers semantic tokens.
+- Tokens: `ink`, `body`, `mute`, `canvas`, `canvas-soft`, `canvas-softer`, `surface-pressed`, `hairline`, `hairline-strong`, `elevated`, `warning-*`, `danger-*`. `brand-*` is a legacy gray ramp; new code prefers semantic tokens.
+- `danger-*` (red) is only for errors and destructive actions, never decoration; success stays monochrome. Text on `bg-danger-50` must be `text-danger-700` (`-600` there is 4.41:1, below AA); invalid-input borders use `border-danger-500` (≥ 3:1). Hardcoded `red-*` is 🟠.
 - **No accent colors.** Hardcoded `amber-*`, `blue-*`, `green-*`, `violet-*`, `slate-*`, hex colors, etc. are 🟡/🟠. Exception: WhatsApp green `#25D366` only in product (app / public view contact), **never** on marketing pages (landing, precios, blog), where WhatsApp buttons are black.
 - Primary CTAs are black (`bg-ink`, the default `Button`). Interactive elements are pills (`rounded-full`); cards `rounded-2xl`.
 - Use `Button` from `components/ui/button.tsx` (extend `buttonVariants` with cva if a variant is missing). Raw `<button className="...">` for an action is 🟡. Exception: selection chips/toggle groups.
