@@ -88,13 +88,13 @@ If a branch for this issue already exists (Step 0), reuse it instead of creating
 
 Implement following `AGENTS.md`'s conventions: Server Components by default, Zod on every new Server Action, the Prisma singleton (`lib/prisma.ts`), Tailwind's semantic tokens (never `tailwind.config.js`), `getAppUrl()` for any absolute URL. If the change touches `prisma/schema.prisma`, use the `/db` skill to generate the migration — never `prisma db push`.
 
-For UI changes, validate the real flow in `bun dev` before considering the step done (global `CLAUDE.md` rule). Run it on port **3000**: better-auth rejects any other origin than `BETTER_AUTH_URL` (`Invalid origin`), so sign-in/sign-up/sign-out silently fail on another port. Before creating test accounts or data, confirm with the user that the local `.env` points at the dev database, and delete what you created when you're done.
+For UI changes, validate the real flow in `bun dev` before considering the step done (global `CLAUDE.md` rule). Run it on port **3000**: better-auth rejects any other origin than `BETTER_AUTH_URL` (`Invalid origin`), so sign-in/sign-up/sign-out silently fail on another port. If 3000 is busy, tell the user which process holds it and wait; don't move to another port, even with `BETTER_AUTH_URL` overridden. Before creating test accounts or data, confirm with the user that the local `.env` points at the dev database, and delete what you created when you're done.
 
 If a real deviation from the approved plan comes up (something not accounted for, a scope change), tell the user — don't silently treat it as part of the original plan.
 
 ### Step 6 — Pre-PR code review
 
-Run `/review-conexory` over the local diff. It's the only review skill for this repo: it covers generic correctness as well as the project's invariants, so don't add `/code-review` or a separate manual pass on top. Add `--deep` when Step 2 marked the change as multi-file or with real design decisions.
+Run `/review-conexory` over the local diff. It's the only review skill for this repo: it covers generic correctness as well as the project's invariants, so don't add `/code-review` or a separate manual pass on top. Never pass `--deep`: its parallel subagents are expensive and a single pass is enough.
 
 Resolve blocking findings before continuing (with the same criterion of announcing before applying non-trivial changes). Minor suggestions, decide with the user: now or leave for later.
 
