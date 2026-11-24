@@ -16,8 +16,12 @@ should_migrate() {
   fi
 
   BASE="${VERCEL_GIT_PREVIOUS_SHA:-}"
-  if [ -z "$BASE" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
-    echo "No previous deployment commit to compare against: running migrations."
+  if [ -z "$BASE" ]; then
+    echo "No previous deployment of this branch: running migrations."
+    return 0
+  fi
+  if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+    echo "Previous deployment commit $BASE not in the clone: running migrations."
     return 0
   fi
 
