@@ -1,4 +1,5 @@
-import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
+import { afterAll, describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
+import * as mercadopago from "@/lib/mercadopago"
 
 type Session = { user: { id: string; isPremium: boolean } } | null
 
@@ -28,9 +29,10 @@ const mockCancelPreapproval = mock((...args: [string]) => {
   void args
   return Promise.resolve({ ok: true })
 })
-mock.module("@/lib/mercadopago", () => ({
-  cancelPreapproval: mockCancelPreapproval,
-}))
+// spyOn instead of mock.module: a module mock is process-wide and would leak
+// into lib/mercadopago.test.ts when it runs later.
+const mockCancelPreapprovalSpy = spyOn(mercadopago, "cancelPreapproval").mockImplementation(mockCancelPreapproval)
+afterAll(() => mockCancelPreapprovalSpy.mockRestore())
 
 mock.module("next/cache", () => ({
   revalidatePath: mock((...args: [unknown]) => void args),

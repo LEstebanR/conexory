@@ -1,4 +1,5 @@
 import { spyOn, afterAll, describe, test, expect, mock } from "bun:test"
+import * as agentSlug from "@/lib/agent-slug"
 import * as analytics from "@/lib/analytics"
 import { APIError } from "better-auth/api"
 
@@ -27,9 +28,10 @@ const mockGenerateAgentSlug = mock((...args: [string, unknown]) => {
   void args
   return Promise.resolve("luis-ramirez")
 })
-mock.module("@/lib/agent-slug", () => ({
-  generateAgentSlug: mockGenerateAgentSlug,
-}))
+// spyOn instead of mock.module: a module mock is process-wide and would leak
+// into lib/agent-slug.test.ts when it runs later.
+const mockGenerateAgentSlugSpy = spyOn(agentSlug, "generateAgentSlug").mockImplementation(mockGenerateAgentSlug)
+afterAll(() => mockGenerateAgentSlugSpy.mockRestore())
 
 // spyOn instead of mock.module: a module mock is process-wide and would hand
 // this fake to lib/analytics.test.ts if it runs later.

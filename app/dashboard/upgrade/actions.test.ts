@@ -1,4 +1,7 @@
-import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
+import { afterAll, describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
+import * as mercadopago from "@/lib/mercadopago"
+import * as subscription from "@/lib/subscription"
+import * as urls from "@/lib/urls"
 
 type Session = { user: { id: string; email: string; isPremium: boolean } } | null
 
@@ -16,13 +19,13 @@ const mockStartSubscription = mock((...args: [unknown]) => {
   void args
   return Promise.resolve<StartSubscriptionResult>({ ok: true })
 })
-mock.module("@/lib/subscription", () => ({
-  startSubscription: mockStartSubscription,
-}))
 
-mock.module("@/lib/urls", () => ({
-  getAppUrl: () => "https://conexory.com",
-}))
+// spyOn instead of mock.module for modules with their own test file: a module
+// mock is process-wide and would leak into those tests when they run later.
+const spies: { mockRestore: () => void }[] = [
+  spyOn(subscription, "startSubscription").mockImplementation(mockStartSubscription),
+  spyOn(urls, "getAppUrl").mockImplementation(() => "https://conexory.com"),
+]
 
 mock.module("next/cache", () => ({
   revalidatePath: mock((...args: [unknown]) => void args),
@@ -49,17 +52,11 @@ const mockGetCardToken = mock((...args: [string]) => {
   void args
   return Promise.resolve<CardTokenDetails>({ ok: true, cardLastFour: "1234" })
 })
-// Spread the real module so unrelated exports (createPreapproval, getPayment,
-// verifyMercadoPagoWebhook, etc.) stay real for any other test file that
-// imports "@/lib/mercadopago" after this one — mock.module replaces it
-// process-wide, not per file (see lib/subscription.test.ts for the same
-// pattern).
-const realMercadoPago = await import("@/lib/mercadopago")
-mock.module("@/lib/mercadopago", () => ({
-  ...realMercadoPago,
-  updatePreapprovalCard: mockUpdatePreapprovalCard,
-  getCardToken: mockGetCardToken,
-}))
+spies.push(
+  spyOn(mercadopago, "updatePreapprovalCard").mockImplementation(mockUpdatePreapprovalCard),
+  spyOn(mercadopago, "getCardToken").mockImplementation(mockGetCardToken),
+)
+afterAll(() => spies.forEach((spy) => spy.mockRestore()))
 
 // next/headers is mocked globally in test-setup.ts.
 
