@@ -21,7 +21,7 @@ Project: `conexory` (team `lestebanrs-projects`, user `lestebanr`). The `vercel`
 - **Production** → Neon branch `production`
 - **Preview** + **Development** → Neon branch `development`
 
-This is critical because `build` runs `prisma migrate deploy`: so preview deploys apply migrations against **dev**, never against production. When changing these vars, Vercel used to store a single value across several environments — removing one scope deletes the whole value, so each environment has to be re-added separately (`vercel env add NAME <env>`).
+This is critical because the Vercel build (`scripts/vercel-build.sh`) runs `prisma migrate deploy`: so preview deploys apply migrations against **dev** (only when `prisma/migrations` changed), never against production. When changing these vars, Vercel used to store a single value across several environments — removing one scope deletes the whole value, so each environment has to be re-added separately (`vercel env add NAME <env>`).
 
 Local `.env` points at the `development` branch (both `DATABASE_URL` and `DIRECT_URL` — both must match environments, since migrations use `DIRECT_URL`).
 

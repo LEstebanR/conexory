@@ -37,7 +37,7 @@ Flags:
 
 ## Hard rules
 
-- **Never run `bun build` / `bun run build`**: the `build` script runs `prisma migrate deploy` against whatever `DATABASE_URL` points to. A review must never touch a database.
+- **Never run `bun build` / `bun run build`**: it no longer migrates (migrations run only on Vercel, via `scripts/vercel-build.sh`), but `next build` prerenders routes that query whatever `DATABASE_URL` points to. A review must never touch a database; the Vercel preview build validates the build.
 - Don't start `bun dev`, don't `curl` the app, don't run e2e (needs Postgres). Runtime verification is the user's; list it under "Para probar manualmente".
 - Don't commit, push, or comment on GitHub without explicit approval in that moment.
 - Report only what you verified (Phase 4). A short report with real findings beats a long one with guesses.
