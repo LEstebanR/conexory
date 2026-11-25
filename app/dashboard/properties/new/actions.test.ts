@@ -1,5 +1,6 @@
 import { mockRevalidateTag } from "@/test-setup"
 import { afterAll, describe, test, expect, mock, spyOn } from "bun:test"
+import * as onboardingServer from "@/lib/onboarding-server"
 import * as analytics from "@/lib/analytics"
 import * as lifecycle from "@/lib/lifecycle"
 
@@ -38,9 +39,10 @@ mock.module("@/lib/prisma", () => ({
 const mockConsoleError = spyOn(console, "error").mockImplementation(() => {})
 
 const mockSetOnboardingFlag = mock(() => Promise.resolve(true))
-mock.module("@/lib/onboarding-server", () => ({
-  setOnboardingFlag: mockSetOnboardingFlag,
-}))
+// spyOn instead of mock.module: a module mock is process-wide and would leak
+// into lib/onboarding-server.test.ts when it runs later.
+const mockSetOnboardingFlagSpy = spyOn(onboardingServer, "setOnboardingFlag").mockImplementation(mockSetOnboardingFlag)
+afterAll(() => mockSetOnboardingFlagSpy.mockRestore())
 
 // spyOn instead of mock.module: a module mock is process-wide and would hand
 // this fake to lib/analytics.test.ts if it runs later.

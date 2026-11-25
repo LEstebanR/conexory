@@ -1,6 +1,7 @@
 import { mockRevalidateTag } from "@/test-setup"
 import { afterAll, describe, test, expect, mock, spyOn } from "bun:test"
 import * as analytics from "@/lib/analytics"
+import * as mercadopago from "@/lib/mercadopago"
 
 const mockUserUpdate = mock(
   (...args: [{ where: { id: string }; data: { isPremium: boolean } }]) => {
@@ -88,16 +89,14 @@ const mockCancelPreapproval = mock((...args: [string]) => {
   return Promise.resolve({ ok: true })
 })
 
-// Spread the real module so unrelated exports (verifyMercadoPagoWebhook,
-// makeExternalReference) stay real for any other test file that imports
-// "@/lib/mercadopago" after this one — mock.module replaces it process-wide.
-const realMercadoPago = await import("@/lib/mercadopago")
-mock.module("@/lib/mercadopago", () => ({
-  ...realMercadoPago,
-  createPreapproval: mockCreatePreapproval,
-  getCardToken: mockGetCardToken,
-  cancelPreapproval: mockCancelPreapproval,
-}))
+// spyOn instead of mock.module: a module mock is process-wide and would leak
+// into lib/mercadopago.test.ts when it runs later.
+const mercadoPagoSpies: { mockRestore: () => void }[] = [
+  spyOn(mercadopago, "createPreapproval").mockImplementation(mockCreatePreapproval),
+  spyOn(mercadopago, "getCardToken").mockImplementation(mockGetCardToken),
+  spyOn(mercadopago, "cancelPreapproval").mockImplementation(mockCancelPreapproval),
+]
+afterAll(() => mercadoPagoSpies.forEach((spy) => spy.mockRestore()))
 
 const { downgradeToFree, startSubscription } = await import("./subscription")
 

@@ -1,4 +1,5 @@
-import { describe, test, expect, mock, beforeEach } from "bun:test"
+import { spyOn, afterAll, describe, test, expect, mock, beforeEach } from "bun:test"
+import * as onboardingServer from "@/lib/onboarding-server"
 
 type Session = { user: { id: string } } | null
 
@@ -28,11 +29,12 @@ mock.module("@/lib/prisma", () => ({
 
 const mockSetOnboardingFlag = mock((...args: [unknown, unknown]) => {
   void args
-  return Promise.resolve()
+  return Promise.resolve(true)
 })
-mock.module("@/lib/onboarding-server", () => ({
-  setOnboardingFlag: mockSetOnboardingFlag,
-}))
+// spyOn instead of mock.module: a module mock is process-wide and would leak
+// into lib/onboarding-server.test.ts when it runs later.
+const mockSetOnboardingFlagSpy = spyOn(onboardingServer, "setOnboardingFlag").mockImplementation(mockSetOnboardingFlag)
+afterAll(() => mockSetOnboardingFlagSpy.mockRestore())
 
 // next/headers is mocked globally in test-setup.ts.
 

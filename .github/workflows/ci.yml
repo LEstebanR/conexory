@@ -53,7 +53,19 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run test
+      - run: bun run test --reporter=junit --reporter-outfile="$RUNNER_TEMP/test-order.xml"
+      # bun:test runs every file in one process, so a leaked mock.module() only
+      # breaks a later file. Re-running in reverse of Bun's own file order and in
+      # a random order catches tests that depend on which file runs first.
+      - name: Test in reverse file order
+        run: |
+          set -f
+          files=$(grep -oE '<testsuite name="[^"]+\.test\.tsx?"' "$RUNNER_TEMP/test-order.xml" \
+            | sed -E 's/^<testsuite name="/.\//; s/"$//' | sed -n '1!G;h;$p')
+          test -n "$files"
+          bun test $files
+      - name: Test in random order (reproduce with the printed --seed)
+        run: bun run test --randomize
 
   coverage:
     name: Coverage

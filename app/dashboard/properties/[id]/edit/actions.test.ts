@@ -56,6 +56,7 @@ beforeEach(() => {
   )
   mockPropertyFindUnique.mockImplementation(() => Promise.resolve(null))
   mockPropertyUpdate.mockClear()
+  mockPropertyUpdate.mockImplementation(() => Promise.resolve({}))
   mockConsoleError.mockClear()
 })
 
