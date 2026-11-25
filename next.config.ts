@@ -45,6 +45,16 @@ const nextConfig: NextConfig = {
     "kysely",
     "@vercel/blob",
   ],
+  // The trace pulls in every Prisma runtime (one Wasm engine per database,
+  // inlined as base64), but the generated client only loads runtime/client.js
+  // plus its own query_compiler_bg.wasm.
+  outputFileTracingExcludes: {
+    "**": [
+      "node_modules/@prisma/client/runtime/{query_engine_bg,query_compiler_bg}.*",
+      "node_modules/@prisma/client/runtime/{binary,library,edge,edge-esm,react-native}.*",
+      "node_modules/@prisma/client/runtime/wasm-*",
+    ],
+  },
   turbopack: {
     ignoreIssue: [
       { path: "**/@better-auth/kysely-adapter/**" },
