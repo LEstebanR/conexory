@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { posthogRewrites, trailingSlashRedirects } from "./lib/posthog";
+import { UNUSED_PRISMA_RUNTIME_GLOBS } from "./scripts/prisma-trace.mjs";
 
 const nextConfig: NextConfig = {
   // Inlined into the browser bundle so client errors carry the same
@@ -45,15 +46,8 @@ const nextConfig: NextConfig = {
     "kysely",
     "@vercel/blob",
   ],
-  // The trace pulls in every Prisma runtime (one Wasm engine per database,
-  // inlined as base64), but the generated client only loads runtime/client.js
-  // plus its own query_compiler_bg.wasm.
   outputFileTracingExcludes: {
-    "**": [
-      "node_modules/@prisma/client/runtime/{query_engine_bg,query_compiler_bg}.*",
-      "node_modules/@prisma/client/runtime/{binary,library,edge,edge-esm,react-native}.*",
-      "node_modules/@prisma/client/runtime/wasm-*",
-    ],
+    "**": UNUSED_PRISMA_RUNTIME_GLOBS,
   },
   turbopack: {
     ignoreIssue: [

@@ -39,3 +39,4 @@ if should_migrate; then
 fi
 
 next build
+node scripts/prisma-trace.mjs
