@@ -7,7 +7,7 @@ import {
   removeStaleNativeEngines,
   restorePrismaRuntimes,
   stashPrismaRuntimes,
-} from "./prune-prisma-runtimes.mjs"
+} from "./prisma-runtimes.mjs"
 
 describe("isUnusedPrismaRuntime", () => {
   test("flags the engines and runtimes the generated client never loads", () => {
