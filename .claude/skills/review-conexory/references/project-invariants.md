@@ -64,7 +64,7 @@ Files: `lib/mercadopago.ts`, `lib/subscription.ts`, `lib/orphan-subscriptions.ts
 
 - Always the singleton from `lib/prisma.ts`; `new PrismaClient()` anywhere else is 🟠.
 - `price` is `Decimal(15,2)`: `.toNumber()` before arithmetic/serialization. Passing a `Decimal` or `Date` to a Client Component or into `cachePublicQuery` breaks (it's JSON-serialized).
-- **Schema change ⇒ migration in the same PR** (`prisma/migrations/<timestamp>_<name>/migration.sql`). Never `db push`. Missing migration is 🔴 (`prisma migrate deploy` runs on every Vercel build; Preview → dev DB, Production → prod DB).
+- **Schema change ⇒ migration in the same PR** (`prisma/migrations/<timestamp>_<name>/migration.sql`). Never `db push`. Missing migration is 🔴 (`scripts/vercel-build.sh` runs `prisma migrate deploy` before `next build`: Production → prod DB on every deploy, Preview → dev DB only when `prisma/migrations` changed). Migrations must be expand/contract-safe: the previous deployment keeps serving on the new schema, and Instant Rollback doesn't revert it — see `AGENTS.md` → Migrations.
 - Review the migration SQL as production code:
   - Adding a `NOT NULL` column without a default to a table with rows fails on deploy (🔴).
   - Dropping/renaming columns loses data; a rename shows up as DROP + ADD in Prisma (🔴 unless intended and data is migrated).

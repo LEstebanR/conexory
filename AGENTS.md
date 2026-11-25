@@ -136,8 +136,32 @@ prisma/schema.prisma                # Database schema
 
 The database is under **Prisma Migrations** control (with a baselined `0_init` migration). For any schema change, generate a migration (`bunx prisma migrate dev`) and commit it — **never use `prisma db push`**, it would break the history.
 
-- `prisma migrate deploy` runs automatically on every Vercel build (it's in the `build` script), so pending migrations get applied on their own on every deploy.
+- Vercel builds with `scripts/vercel-build.sh` (`buildCommand` in `vercel.json`), which runs `prisma migrate deploy` **before** `next build`. The package `build` script is just `next build`: a local build never migrates.
+  - **Production** always migrates (against the production database).
+  - **Previews** migrate the dev database only when `prisma/migrations` changed since the branch's last deployment (`VERCEL_GIT_PREVIOUS_SHA`); with no previous SHA they migrate. This avoids every preview build running migrations concurrently against the shared dev database.
+  - `CHECKPOINT_DISABLE=1` is set in the build to skip Prisma's telemetry call.
 - That's why Vercel's *Preview/Development* environments point at a separate **dev database** (not production): so a preview deploy applies the migration to dev, never to prod. Only *Production* uses the real database. When touching `DATABASE_URL`/`DIRECT_URL` in Vercel, respect that scoping.
+- **Never run migrations against the production database by hand.** They only run through a production deploy.
+
+#### Expand/contract: every migration must be compatible with the code already in production
+
+The migration is applied during the build, so for a while the **previous** deployment keeps serving traffic against the **new** schema (until the new one is promoted; forever if `next build` fails afterwards). A migration must therefore never break the code that's currently live:
+
+1. **Expand** (PR 1): only additive changes — new tables, nullable columns or columns with a default, new indexes. Deploy the code that writes/reads the new shape.
+2. **Contract** (later PR, once nothing live uses the old shape): drop or rename columns, add `NOT NULL`, remove tables.
+
+A rename is never one step: add the new column → write to both / backfill → switch reads → drop the old column in a later deploy.
+
+#### If a migration fails
+
+- `prisma migrate deploy` fails → the build fails → the deployment is never promoted; the previous deployment keeps serving traffic. Prisma records the migration as failed in `_prisma_migrations` and **blocks every later deploy** until it's resolved. Don't assume the failed script was fully rolled back: check which of its statements were applied.
+- Fix: read the build log, inspect the schema, then resolve the failed migration (`prisma migrate resolve --rolled-back <name>` if nothing remains applied, `--applied <name>` if it was completed by hand) and ship a corrected migration in a new PR. Against production, the owner does this deliberately — an agent never does.
+- If `next build` fails **after** the migration succeeded, the schema is already migrated and the old code is serving on it — that's exactly the case expand/contract makes safe. Fix the build and redeploy.
+
+#### Rollback
+
+- Vercel **Instant Rollback** only swaps the code: it **doesn't revert the schema**. It's safe as long as the migration was expand-only (the old code ignores the new columns/tables).
+- To revert a schema change, write a **new migration** that undoes it (roll forward). Never edit or delete a migration that's already applied, and never touch `_prisma_migrations` by hand.
 
 ---
 
@@ -239,7 +263,7 @@ See `.env.example` for the full list. The critical ones:
 
 ```bash
 bun dev          # Start the dev server
-bun build        # prisma generate + prisma migrate deploy + next build
+bun run build    # next build (no migrations; on Vercel, scripts/vercel-build.sh migrates first)
 bun lint         # ESLint
 bunx prisma migrate dev   # New migration
 bunx prisma studio        # Database GUI
