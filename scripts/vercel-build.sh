@@ -39,4 +39,5 @@ if should_migrate; then
 fi
 
 node scripts/prune-prisma-runtimes.mjs
+trap 'node scripts/prune-prisma-runtimes.mjs --restore' EXIT
 next build

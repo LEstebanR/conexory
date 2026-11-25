@@ -1,8 +1,12 @@
 import { describe, expect, test } from "bun:test"
-import { mkdtempSync, readdirSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { isUnusedPrismaRuntime, prunePrismaRuntimes } from "./prune-prisma-runtimes.mjs"
+import {
+  isUnusedPrismaRuntime,
+  restorePrismaRuntimes,
+  stashPrismaRuntimes,
+} from "./prune-prisma-runtimes.mjs"
 
 describe("isUnusedPrismaRuntime", () => {
   test("flags the engines and runtimes the generated client never loads", () => {
@@ -27,14 +31,20 @@ describe("isUnusedPrismaRuntime", () => {
   })
 })
 
-describe("prunePrismaRuntimes", () => {
-  test("deletes only the unused runtimes", () => {
-    const dir = mkdtempSync(join(tmpdir(), "prisma-runtime-"))
-    for (const file of ["client.js", "index-browser.js", "library.js", "edge.js"]) {
-      writeFileSync(join(dir, file), "")
-    }
+describe("stashPrismaRuntimes / restorePrismaRuntimes", () => {
+  test("moves only the unused runtimes aside and puts them back", () => {
+    const root = mkdtempSync(join(tmpdir(), "prisma-runtime-"))
+    const runtimeDir = join(root, "runtime")
+    const stashDir = join(root, "stash")
+    const files = ["client.js", "edge.js", "index-browser.js", "library.js"]
+    mkdirSync(runtimeDir)
+    for (const file of files) writeFileSync(join(runtimeDir, file), "")
 
-    expect(prunePrismaRuntimes(dir)).toBe(2)
-    expect(readdirSync(dir).sort()).toEqual(["client.js", "index-browser.js"])
+    expect(stashPrismaRuntimes(runtimeDir, stashDir)).toBe(2)
+    expect(readdirSync(runtimeDir).sort()).toEqual(["client.js", "index-browser.js"])
+    expect(readdirSync(stashDir).sort()).toEqual(["edge.js", "library.js"])
+
+    expect(restorePrismaRuntimes(runtimeDir, stashDir)).toBe(2)
+    expect(readdirSync(runtimeDir).sort()).toEqual(files)
   })
 })
