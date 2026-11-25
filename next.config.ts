@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 import { posthogRewrites, trailingSlashRedirects } from "./lib/posthog";
-import { UNUSED_PRISMA_RUNTIME_GLOBS } from "./scripts/prisma-trace.mjs";
 
 const nextConfig: NextConfig = {
   // Inlined into the browser bundle so client errors carry the same
@@ -46,9 +45,6 @@ const nextConfig: NextConfig = {
     "kysely",
     "@vercel/blob",
   ],
-  outputFileTracingExcludes: {
-    "**": UNUSED_PRISMA_RUNTIME_GLOBS,
-  },
   turbopack: {
     ignoreIssue: [
       { path: "**/@better-auth/kysely-adapter/**" },

@@ -38,5 +38,5 @@ if should_migrate; then
   prisma migrate deploy
 fi
 
+node scripts/prune-prisma-runtimes.mjs
 next build
-node scripts/prisma-trace.mjs
