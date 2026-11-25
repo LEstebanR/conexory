@@ -4,6 +4,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import {
   isUnusedPrismaRuntime,
+  removeStaleNativeEngines,
   restorePrismaRuntimes,
   stashPrismaRuntimes,
 } from "./prune-prisma-runtimes.mjs"
@@ -46,5 +47,17 @@ describe("stashPrismaRuntimes / restorePrismaRuntimes", () => {
 
     expect(restorePrismaRuntimes(runtimeDir, stashDir)).toBe(2)
     expect(readdirSync(runtimeDir).sort()).toEqual(files)
+  })
+})
+
+describe("removeStaleNativeEngines", () => {
+  test("deletes native engines left over in the generated client", () => {
+    const dir = mkdtempSync(join(tmpdir(), "prisma-client-"))
+    for (const file of ["index.js", "query_compiler_bg.wasm", "libquery_engine-rhel.so.node"]) {
+      writeFileSync(join(dir, file), "")
+    }
+
+    expect(removeStaleNativeEngines(dir)).toBe(1)
+    expect(readdirSync(dir).sort()).toEqual(["index.js", "query_compiler_bg.wasm"])
   })
 })
