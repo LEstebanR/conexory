@@ -50,7 +50,23 @@ describe("stashPrismaRuntimes / restorePrismaRuntimes", () => {
   })
 })
 
+describe("restorePrismaRuntimes", () => {
+  test("does nothing when nothing was moved aside", () => {
+    const root = mkdtempSync(join(tmpdir(), "prisma-runtime-"))
+    const runtimeDir = join(root, "runtime")
+    mkdirSync(runtimeDir)
+    writeFileSync(join(runtimeDir, "client.js"), "")
+
+    expect(restorePrismaRuntimes(runtimeDir, join(root, "missing-stash"))).toBe(0)
+    expect(readdirSync(runtimeDir)).toEqual(["client.js"])
+  })
+})
+
 describe("removeStaleNativeEngines", () => {
+  test("does nothing when the generated client folder doesn't exist", () => {
+    expect(removeStaleNativeEngines(join(tmpdir(), "no-such-prisma-client"))).toBe(0)
+  })
+
   test("deletes native engines left over in the generated client", () => {
     const dir = mkdtempSync(join(tmpdir(), "prisma-client-"))
     for (const file of ["index.js", "query_compiler_bg.wasm", "libquery_engine-rhel.so.node"]) {

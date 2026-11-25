@@ -5,7 +5,7 @@
 // ignores it for the proxy trace. So they're moved aside for `next build` and
 // put back afterwards: `prisma generate` copies its engine from this folder and
 // Vercel caches node_modules after the build.
-import { mkdirSync, readdirSync, renameSync, rmSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, renameSync, rmSync } from "node:fs"
 import { join } from "node:path"
 
 const UNUSED_RUNTIME_PREFIXES = [
@@ -34,11 +34,13 @@ export function stashPrismaRuntimes(runtimeDir, stashDir) {
 // native-engine days still carries libquery_engine-*.node, and the whole
 // folder gets traced. Nothing loads it with engineType = "client".
 export function removeStaleNativeEngines(clientDir) {
+  if (!existsSync(clientDir)) return 0
   const stale = readdirSync(clientDir).filter((file) => file.endsWith(".node"))
   for (const file of stale) rmSync(join(clientDir, file))
   return stale.length
 }
 
 export function restorePrismaRuntimes(runtimeDir, stashDir) {
+  if (!existsSync(stashDir)) return 0
   return stashPrismaRuntimes(stashDir, runtimeDir)
 }

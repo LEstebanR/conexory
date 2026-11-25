@@ -38,6 +38,6 @@ if should_migrate; then
   prisma migrate deploy
 fi
 
+trap 'node scripts/prune-prisma-runtimes.mjs --restore || exit 1' EXIT
 node scripts/prune-prisma-runtimes.mjs
-trap 'node scripts/prune-prisma-runtimes.mjs --restore' EXIT
 next build
