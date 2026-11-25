@@ -31,6 +31,18 @@ The local `.env` must point at the `development` branch in **both** vars (`DATAB
    ```
    This: creates `prisma/migrations/{timestamp}_description/migration.sql`, applies it to the dev branch, and regenerates the client. Name in `snake_case`, descriptive (`add_user_phone`, `add_property_status`).
 
+   **Non-interactive terminal (agents):** `migrate dev` aborts with "environment is non-interactive". Fallback, after Step 0 confirmed the connection is **dev**:
+   ```bash
+   D=prisma/migrations/$(date -u +%Y%m%d%H%M%S)_description_in_snake_case
+   mkdir -p $D && bunx prisma migrate diff \
+     --from-schema-datasource prisma/schema.prisma \
+     --to-schema-datamodel prisma/schema.prisma \
+     --script > $D/migration.sql          # read-only: diffs the dev DB against the edited schema
+   # append any data backfill (UPDATE ...) to the same migration.sql
+   bunx prisma migrate deploy             # applies it to dev; re-run the drift check below, it must exit 0
+   bunx prisma generate
+   ```
+
 3. Review the generated SQL (`prisma/migrations/.../migration.sql`) before committing — confirm the `ALTER`/`CREATE` is what you expected and there's no accidental `DROP` that would lose data.
 
 4. **Commit the migration together with the `schema.prisma` change** in the same PR (use `/create-pr`). Never merge a schema change without its migration.
