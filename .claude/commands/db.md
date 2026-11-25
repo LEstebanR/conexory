@@ -35,7 +35,7 @@ The local `.env` must point at the `development` branch in **both** vars (`DATAB
 
 4. **Commit the migration together with the `schema.prisma` change** in the same PR (use `/create-pr`). Never merge a schema change without its migration.
 
-> On every Vercel deploy, `prisma migrate deploy` runs automatically (it's in `build`), so the migration applies itself: to **dev** on preview deploys and to **prod** on the production deploy. Don't apply it to prod by hand.
+> On Vercel, `scripts/vercel-build.sh` runs `prisma migrate deploy` before `next build`, so the migration applies itself: to **prod** on every production deploy, and to **dev** on preview deploys whose `prisma/migrations` changed since the branch's previous deployment. Don't apply it to prod by hand. Expand/contract, failure handling and rollback: `AGENTS.md` → Migrations.
 
 ---
 

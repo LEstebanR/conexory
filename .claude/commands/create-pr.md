@@ -89,7 +89,7 @@ bun run coverage                # CI's Coverage job fails below the threshold in
 ```
 
 - If `bun install --frozen-lockfile` fails because the lockfile is out of date: run `bun install` (no flag), commit the updated `bun.lock`, and repeat.
-- Don't run `bun build` just to validate: it now includes `prisma migrate deploy`, which touches the database. CI does **not** run build.
+- Don't run `bun build` just to validate: it no longer migrates, but `next build` prerenders routes that query the database and needs a full `.env`. CI does **not** run build; the Vercel preview build validates it.
 - CI's E2E job (Playwright against a database) isn't reproduced locally; if the PR changes what `e2e/helpers` seeds (e.g. onboarding flags), check those helpers by hand.
 
 Report the result of each check before continuing.

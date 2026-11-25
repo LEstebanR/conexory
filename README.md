@@ -130,7 +130,7 @@ Para Google OAuth, agregar como URI de redirección autorizada `http://localhost
 | Comando | Qué hace |
 | --- | --- |
 | `bun dev` | Servidor de desarrollo (corre `prisma generate` antes) |
-| `bun run build` | `prisma migrate deploy` + `next build`. Es lo que corre Vercel en cada deploy |
+| `bun run build` | `next build` (sin migraciones). Vercel usa `scripts/vercel-build.sh`, que migra antes del build |
 | `bun run start` | Sirve el build de producción |
 | `bun typecheck` | `tsc --noEmit` |
 | `bun lint` | ESLint (también corre en el hook `pre-push`) |
@@ -167,7 +167,7 @@ Todas las variables que necesita la app están en [`.env.example`](./.env.exampl
 
 - **Producción:** https://conexory.com, en Vercel. Solo el entorno *Production* apunta a la base de datos real.
 - **Previews:** cada PR tiene su preview en Vercel. *Preview* y *Development* apuntan a una base de datos de dev aparte, así que una migración en un preview nunca toca producción.
-- **Migraciones:** `bun run build` corre `prisma migrate deploy` antes de `next build`, así que las migraciones pendientes se aplican solas en cada deploy.
+- **Migraciones:** en Vercel, `scripts/vercel-build.sh` corre `prisma migrate deploy` antes de `next build`: producción migra siempre y los previews solo cuando cambió `prisma/migrations`. Estrategia expand/contract, fallos y rollback en `AGENTS.md`.
 - **Billing:** Mercado Pago manda los webhooks a `/api/webhooks/mercadopago`. El cron `/api/cron/billing` corre todos los días a las 09:00 UTC (`vercel.json`) y se autentica con `CRON_SECRET`.
 - **CI:** [GitHub Actions](.github/workflows/ci.yml) corre typecheck, lint, test, cobertura y E2E (contra un Postgres efímero) en cada PR. [`branch-name.yml`](.github/workflows/branch-name.yml) valida el nombre de la rama.
 
