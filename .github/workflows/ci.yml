@@ -53,7 +53,9 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run test --reporter=junit --reporter-outfile="$RUNNER_TEMP/test-order.xml"
+      # shell: bash adds pipefail, so tee doesn't mask a failing run.
+      - shell: bash
+        run: bun run test --reporter=junit --reporter-outfile="$RUNNER_TEMP/test-order.xml" 2>&1 | tee "$RUNNER_TEMP/test-run.log"
       # bun:test runs every file in one process, so a leaked mock.module() only
       # breaks a later file. Re-running in reverse of Bun's own file order and in
       # a random order catches tests that depend on which file runs first.
@@ -62,7 +64,12 @@ jobs:
           set -f
           files=$(grep -oE '<testsuite name="[^"]+\.test\.tsx?"' "$RUNNER_TEMP/test-order.xml" \
             | sed -E 's/^<testsuite name="/.\//; s/"$//' | sed -n '1!G;h;$p')
-          test -n "$files"
+          expected=$(grep -oE 'across [0-9]+ files?' "$RUNNER_TEMP/test-run.log" | grep -oE '[0-9]+')
+          actual=$(printf '%s\n' $files | grep -c .)
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::Reverse run would cover $actual files, but the first run covered $expected"
+            exit 1
+          fi
           bun test $files
       - name: Test in random order (reproduce with the printed --seed)
         run: bun run test --randomize

@@ -58,7 +58,7 @@ Files: `lib/mercadopago.ts`, `lib/subscription.ts`, `lib/orphan-subscriptions.ts
 - State transitions: `isPremium`, `premiumUntil`, `Subscription` status and downgrade (`downgradeToFree`) must stay consistent. A downgrade must not delete data; check what happens to properties above the Free limit.
 - Every outcome that the user should know about sends its email (`lib/email.ts`): confirmation, payment failed, renewal reminder, cancelled.
 - Never log full card data, tokens or access tokens. `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY` is public on purpose; `MERCADOPAGO_ACCESS_TOKEN`/`MERCADOPAGO_WEBHOOK_SECRET` must never reach the client.
-- Testing gotcha: `bun:test` `mock.module()` is process-wide, which is why `lib/mercadopago.ts` is excluded from coverage. Tests of webhook/cron mock it; check new branches are covered there.
+- Testing gotcha: `lib/mercadopago.ts` is excluded from coverage because its HTTP calls have no unit tests yet. Tests of webhook/cron replace its functions with `spyOn`; check new branches are covered there.
 
 ## Prisma & data
 
@@ -119,7 +119,7 @@ Files: `lib/mercadopago.ts`, `lib/subscription.ts`, `lib/orphan-subscriptions.ts
 
 - Unit tests with `bun test` next to the module (`foo.ts` → `foo.test.ts`). `lib/test-coverage-guard.test.ts` fails if a new module under `lib/**`, `app/**/actions.ts` or `app/**/route.ts(x)` has no sibling test and isn't in `UNTESTED_ALLOWLIST` with a reason. A new allowlist entry needs a real reason (static data, pure rendering), not "hard to test".
 - Coverage threshold: **80% per file** (`bunfig.toml`), enforced in CI. Run `bun run coverage`; CI pins Bun via `.bun-version`.
-- `mock.module()` is process-wide: mocking a module in one test file affects others. New mocks of shared modules (`lib/auth`, `lib/prisma`, `lib/mercadopago`) must not break other suites.
+- `mock.module()` is process-wide: mocking a module in one test file affects every file that runs later. **Never `mock.module()` a project module (`@/...`) that has its own test file** — use `spyOn(namespace, "fn")` and `mockRestore()` in `afterAll` (see #216); a new one is 🟠. `mock.module()` is only for modules without their own test (`@/lib/prisma`, `@/lib/auth`, `@/lib/flyer`) and external packages. CI reruns the suite in reverse file order and with `--randomize`, so order-dependent tests fail there.
 - E2E (Playwright, `e2e/`) covers login, access control, property lifecycle, sharing and the Pro subscription (stubbed Mercado Pago, `e2e/fake-mercadopago`). A change to those flows should update the matching spec.
 - Tests must assert behavior (result, DB call args, error message), not just "doesn't throw".
 
