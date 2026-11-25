@@ -1,4 +1,7 @@
-import { describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
+import { afterAll, describe, test, expect, mock, beforeEach, spyOn } from "bun:test"
+import * as email from "@/lib/email"
+import * as mercadopago from "@/lib/mercadopago"
+import * as subscription from "@/lib/subscription"
 
 process.env.CRON_SECRET = "test-cron-secret"
 
@@ -55,24 +58,12 @@ const mockCancelPreapproval = mock((...args: [string]) => {
   void args
   return Promise.resolve({ ok: true })
 })
-// Spread the real module so unrelated exports stay real — mock.module()
-// replaces "@/lib/mercadopago" process-wide, not just for this file.
-const realMercadoPago = await import("@/lib/mercadopago")
-mock.module("@/lib/mercadopago", () => ({
-  ...realMercadoPago,
-  searchLivePreapprovals: mockSearchLivePreapprovals,
-  cancelPreapproval: mockCancelPreapproval,
-}))
-
 const mockConsoleError = spyOn(console, "error").mockImplementation(() => {})
 
 const mockDowngradeToFree = mock((...args: [string]) => {
   void args
   return Promise.resolve()
 })
-mock.module("@/lib/subscription", () => ({
-  downgradeToFree: mockDowngradeToFree,
-}))
 
 const mockSendRenewalReminder = mock((...args: [unknown, unknown, unknown, unknown]) => {
   void args
@@ -82,15 +73,16 @@ const mockSendSubscriptionCancelled = mock((...args: [unknown, unknown]) => {
   void args
   return Promise.resolve()
 })
-// Spread the real module so unrelated exports (sendSubscriptionConfirmation,
-// sendPaymentFailed, needed by the Wompi webhook's tests) stay real —
-// mock.module() replaces "@/lib/email" process-wide, not just for this file.
-const realEmail = await import("@/lib/email")
-mock.module("@/lib/email", () => ({
-  ...realEmail,
-  sendRenewalReminder: mockSendRenewalReminder,
-  sendSubscriptionCancelled: mockSendSubscriptionCancelled,
-}))
+// spyOn instead of mock.module for modules with their own test file: a module
+// mock is process-wide and would leak into those tests when they run later.
+const spies: { mockRestore: () => void }[] = [
+  spyOn(mercadopago, "searchLivePreapprovals").mockImplementation(mockSearchLivePreapprovals),
+  spyOn(mercadopago, "cancelPreapproval").mockImplementation(mockCancelPreapproval),
+  spyOn(subscription, "downgradeToFree").mockImplementation(mockDowngradeToFree),
+  spyOn(email, "sendRenewalReminder").mockImplementation(mockSendRenewalReminder),
+  spyOn(email, "sendSubscriptionCancelled").mockImplementation(mockSendSubscriptionCancelled),
+]
+afterAll(() => spies.forEach((spy) => spy.mockRestore()))
 
 const { GET } = await import("./route")
 

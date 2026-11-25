@@ -269,6 +269,8 @@ bunx prisma migrate dev   # New migration
 bunx prisma studio        # Database GUI
 ```
 
+If CI's `Test in random order` step fails, reproduce it locally with `bun run test --randomize --seed=<n>` (the seed is printed in the step's log).
+
 ---
 
 ## Work tracking: Linear + GitHub Issues

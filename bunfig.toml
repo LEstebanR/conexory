@@ -5,11 +5,9 @@ preload = ["./test-setup.ts"]
 # threshold measures quality across the files that have tests.
 coverageThreshold = 0.80
 # createPreapproval/getPreapproval/getPayment/cancelPreapproval (the real
-# Mercado Pago HTTP calls) can't be unit tested alongside the mocks of the
-# same module in lib/subscription.test.ts and the webhook route tests —
-# bun:test's mock.module() replaces modules process-wide, not per file (see
-# LES-263, the same issue that applied to lib/wompi.ts before this migration).
-# Excluded here rather than left permanently failing the threshold.
+# Mercado Pago HTTP calls) have no unit tests yet. They used to be untestable
+# because other test files replaced the module with mock.module(); those now
+# use spyOn (#216), so tests can be added and this exclusion removed.
 # lib/prisma.ts only wires the PrismaClient singleton (see UNTESTED_ALLOWLIST in
 # lib/test-coverage-guard.test.ts); it shows up here whenever a test loads a
 # module that imports it without mocking it, e.g. proxy.test.ts via spyOn.

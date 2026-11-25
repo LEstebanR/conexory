@@ -1,5 +1,7 @@
 import { afterAll, describe, test, expect, mock, spyOn } from "bun:test"
 import * as analytics from "@/lib/analytics"
+import * as email from "@/lib/email"
+import * as mercadopago from "@/lib/mercadopago"
 
 const userId = "cljabc123"
 
@@ -32,18 +34,6 @@ const mockCancelPreapproval = mock((...args: [string]) => {
   void args
   return Promise.resolve({ ok: true })
 })
-
-// Spread the real module so unrelated exports (makeExternalReference) stay
-// real for any other test file that imports "@/lib/mercadopago" after this
-// one — mock.module() replaces it process-wide, not just for this file.
-const realMercadoPago = await import("@/lib/mercadopago")
-mock.module("@/lib/mercadopago", () => ({
-  ...realMercadoPago,
-  verifyMercadoPagoWebhook: mockVerifyMercadoPagoWebhook,
-  getPayment: mockGetPayment,
-  getPreapproval: mockGetPreapproval,
-  cancelPreapproval: mockCancelPreapproval,
-}))
 
 const mockPaymentEventCreate = mock((...args: [{ data: Record<string, unknown> }]) => {
   void args
@@ -119,15 +109,17 @@ const mockSendPaymentFailed = mock((...args: [string, string]) => {
   void args
   return Promise.resolve()
 })
-// Spread the real module so unrelated exports (sendRenewalReminder,
-// sendSubscriptionCancelled, needed by the billing cron's tests) stay real —
-// mock.module() replaces "@/lib/email" process-wide, not just for this file.
-const realEmail = await import("@/lib/email")
-mock.module("@/lib/email", () => ({
-  ...realEmail,
-  sendSubscriptionConfirmation: mockSendSubscriptionConfirmation,
-  sendPaymentFailed: mockSendPaymentFailed,
-}))
+// spyOn instead of mock.module for modules with their own test file: a module
+// mock is process-wide and would leak into those tests when they run later.
+const spies: { mockRestore: () => void }[] = [
+  spyOn(mercadopago, "verifyMercadoPagoWebhook").mockImplementation(mockVerifyMercadoPagoWebhook),
+  spyOn(mercadopago, "getPayment").mockImplementation(mockGetPayment),
+  spyOn(mercadopago, "getPreapproval").mockImplementation(mockGetPreapproval),
+  spyOn(mercadopago, "cancelPreapproval").mockImplementation(mockCancelPreapproval),
+  spyOn(email, "sendSubscriptionConfirmation").mockImplementation(mockSendSubscriptionConfirmation),
+  spyOn(email, "sendPaymentFailed").mockImplementation(mockSendPaymentFailed),
+]
+afterAll(() => spies.forEach((spy) => spy.mockRestore()))
 
 const { POST } = await import("./route")
 

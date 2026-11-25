@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, setSystemTime, spyOn, test } from "bun:test"
 import { IncrementalCache } from "next/dist/server/lib/incremental-cache"
+import { tagsManifest } from "next/dist/server/lib/incremental-cache/tags-manifest.external"
 import { nodeFs } from "next/dist/server/lib/node-fs-methods"
 import { mockRevalidateTag } from "@/test-setup"
 
@@ -53,6 +54,9 @@ beforeEach(() => {
 afterEach(() => {
   cacheGlobal.__incrementalCache = previousCache
   setSystemTime()
+  // Tag invalidations live in a module-level map shared by every cache
+  // instance; one stamped in the future would mark later tests' entries stale.
+  tagsManifest.clear()
 })
 
 describe("featured properties cache", () => {

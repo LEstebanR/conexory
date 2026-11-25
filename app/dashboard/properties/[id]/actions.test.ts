@@ -1,5 +1,7 @@
 import { mockRevalidateTag } from "@/test-setup"
 import { spyOn, afterAll, describe, test, expect, mock, beforeEach } from "bun:test"
+import * as onboardingServer from "@/lib/onboarding-server"
+import * as shareMessage from "@/lib/share-message"
 import * as analytics from "@/lib/analytics"
 import * as lifecycle from "@/lib/lifecycle"
 
@@ -80,9 +82,10 @@ const mockSetOnboardingFlag = mock((...args: [unknown, unknown]) => {
   void args
   return Promise.resolve(true)
 })
-mock.module("@/lib/onboarding-server", () => ({
-  setOnboardingFlag: mockSetOnboardingFlag,
-}))
+// spyOn instead of mock.module: a module mock is process-wide and would leak
+// into lib/onboarding-server.test.ts when it runs later.
+const mockSetOnboardingFlagSpy = spyOn(onboardingServer, "setOnboardingFlag").mockImplementation(mockSetOnboardingFlag)
+afterAll(() => mockSetOnboardingFlagSpy.mockRestore())
 
 // spyOn instead of mock.module: a module mock is process-wide and would hand
 // this fake to lib/analytics.test.ts if it runs later.
@@ -95,9 +98,12 @@ const mockGenerateShareMessageWithAI = mock((...args: [unknown, unknown, unknown
   void args
   return Promise.resolve<string | null>("Hola, te comparto esta propiedad")
 })
-mock.module("@/lib/share-message", () => ({
-  generateShareMessage: mockGenerateShareMessageWithAI,
-}))
+// spyOn instead of mock.module: a module mock is process-wide and would leak
+// into lib/share-message.test.ts when it runs later.
+const mockGenerateShareMessageSpy = spyOn(shareMessage, "generateShareMessage").mockImplementation(
+  mockGenerateShareMessageWithAI,
+)
+afterAll(() => mockGenerateShareMessageSpy.mockRestore())
 
 // next/headers is mocked globally in test-setup.ts.
 
@@ -119,6 +125,7 @@ beforeEach(() => {
   mockPropertyCount.mockImplementation(() => Promise.resolve(0))
   mockPropertyFindUnique.mockImplementation(() => Promise.resolve(null))
   mockPropertyUpdate.mockClear()
+  mockPropertyUpdateMany.mockClear()
   mockPropertyUpdateMany.mockImplementation(() => Promise.resolve({ count: 1 }))
   mockPropertyDelete.mockClear()
   mockUserFindUnique.mockImplementation(() =>
