@@ -259,6 +259,10 @@ See `.env.example` for the full list. The critical ones:
 
 ---
 
+## Test account (development)
+
+To log in and test flows locally (browser, e2e, manual checks), use the dev test account whose credentials live in `.env` as `DEV_TEST_EMAIL` / `DEV_TEST_PASSWORD` (gitignored, copied into every worktree). Read them from there — **never write the actual values into tracked files**, this repo is public. It only exists in the dev database, never use it against production.
+
 ## Development commands
 
 ```bash
