@@ -169,8 +169,8 @@ function Row({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2 mb-1">
-          <div className="flex items-center flex-wrap gap-1.5 min-w-0 flex-1">
+        <div className="flex flex-wrap items-start gap-x-2 gap-y-1 mb-1">
+          <div className="flex items-center flex-wrap gap-1.5 min-w-0">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-canvas-soft text-ink">
               <span className={cn("w-1.5 h-1.5 rounded-full", inactive ? "bg-mute" : "bg-ink")} />
               {item.typeLabel}
@@ -188,7 +188,7 @@ function Row({
               </span>
             )}
           </div>
-          <p className={cn("flex-shrink-0 text-base sm:text-lg font-bold leading-none", inactive ? "text-body" : "text-ink")}>
+          <p className={cn("ml-auto flex-shrink-0 text-base sm:text-lg font-bold leading-none", inactive ? "text-body" : "text-ink")}>
             {item.price}
           </p>
         </div>
